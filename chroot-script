@@ -46,7 +46,7 @@ fi
 
 # sarge specific stuff
 if [ "$RELEASE" = 'sarge' ] ; then
-   sed -i "s/ROOT=probe/ROOT=$TARGET/" /etc/mkinitrd/mkinitrd.conf
+   sed -i "s#ROOT=probe#ROOT=$TARGET#" /etc/mkinitrd/mkinitrd.conf
 fi
 
 if [ -n "$KERNEL" ] ; then
