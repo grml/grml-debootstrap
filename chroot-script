@@ -17,12 +17,6 @@ if [ -n "MIRROR_LIST" ] ; then
    echo $MIRROR_LIST > /etc/apt/sources.list
 fi
 
-if [ -n "$RECONFIGURE" ] ; then
-   for package in $RECONFIGURE ; do
-       dpkg --list $package && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
-   done
-fi
-
 # install additional packages
 if [ "$PACKAGES" = 'yes' ] ; then
    if ! [ -r /etc/debootstrap/packages ] ; then
@@ -32,6 +26,12 @@ if [ "$PACKAGES" = 'yes' ] ; then
      apt-get update
      apt-get install $(cat /etc/debootstrap/packages)
    fi
+fi
+
+if [ -n "$RECONFIGURE" ] ; then
+   for package in $RECONFIGURE ; do
+       dpkg --list $package && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
+   done
 fi
 
 # set password of user root
