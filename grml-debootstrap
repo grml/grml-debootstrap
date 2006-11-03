@@ -73,6 +73,13 @@ einfo "Unmount $MNTPOINT"
 umount $MNTPOINT
 eend $?
 
+if [ "$FSCK" = 'yes' ] ; then
+   [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
+   einfo "Checking filesystem on $TARGET using $FSCKTOOL"
+   $FSCKTOOL $TARGET
+   eend $?
+fi
+
 einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
 
 ## END OF FILE #################################################################
