@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 12:27:17 CET 2006 [mika]
+# Latest change: Fre Nov 03 14:23:32 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -12,14 +12,18 @@
 # target partition (where should Debian be installed to)
 TARGET=''
 
-# where should the bootmanager installed to?
-BOOT=''
-
 # which bootmanager do you want to use? [grub|lilo]
 BOOTMGR='grub'
 
 # if using grub, where do you want to install grub to?
-GROOT='hd0,0'
+# usage example:
+# GROOT='hd0,0'
+GROOT=''
+
+# if using lilo, where do you want to install lilo to?
+# usage example:
+# BOOT='/dev/hda1'
+BOOT=''
 
 ################################################################################
 
