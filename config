@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 17:14:33 CET 2006 [mika]
+# Latest change: Fre Nov 03 22:05:19 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -31,6 +31,7 @@ MBR=''
 KERNEL='linux-image-686'
 
 # name of debootstrap executable
+# supported values: debootstrap cdebootstrap
 DEBOOTSTRAP='debootstrap'
 
 # install packages defined in /etc/debootstrap/packages?
@@ -71,6 +72,9 @@ FSCK='yes'
 
 # which packages do you want do dpkg-reconfigure?
 RECONFIGURE='locales console-data'
+
+# use /etc/debootstrap/locale.gen for configuration of locales?
+LOCALES='yes'
 
 # use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime
 TIMEZONE='Europe/Vienna'

@@ -29,6 +29,7 @@ install: build
 
 	# Add here commands to install the package into debian/grml-debootstrap.
 	install -m 644 config           debian/grml-debootstrap/etc/debootstrap/
+	install -m 644 locale.gen       debian/grml-debootstrap/etc/debootstrap/
 	install -m 644 packages         debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 chroot-script    debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/

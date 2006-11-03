@@ -104,6 +104,9 @@ einfo "Preparing chroot system"
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
 
+  # setup default locales
+  [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
+
   # copy any existing existing files to chroot
   [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
   [ -d /etc/debootstrap/etc   ] && cp -a /etc/debootstrap/etc/*   $MNTPOINT/etc/

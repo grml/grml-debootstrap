@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 21:57:11 CET 2006 [mika]
+# Latest change: Fre Nov 03 22:27:09 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -17,7 +17,7 @@ if [ -n "$CHROOTMIRROR" ] ; then
    echo "$CHROOTMIRROR" > /etc/apt/sources.list
 fi
 
-if ! [ -n /etc/kernel-img.conf ] ; then
+if ! [ -r /etc/kernel-img.conf ] ; then
    echo "Setting up /etc/kernel-img.conf"
    cat > /etc/kernel-img.conf << EOF
 # Kernel Image management overrides
@@ -141,6 +141,9 @@ if [ -n "$GROOT" ] ; then
       rm /etc/mtab
    fi
 fi
+
+# make sure we don't have any running processes left
+[ -x /etc/init.d/ssh ] && /etc/init.d/ssh stop
 
 # unmount all filesystems in chroot, make sure nothing is left...
 umount -a    1>/dev/null 2>/dev/null || true
