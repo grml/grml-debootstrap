@@ -4,10 +4,10 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 12:27:20 CET 2006 [mika]
+# Latest change: Fre Nov 03 13:22:25 CET 2006 [mika]
 ################################################################################
 
-set -e
+set -e # exit on any error
 
 . /etc/debootstrap/config || exit 1
 
@@ -30,7 +30,7 @@ fi
 
 if [ -n "$RECONFIGURE" ] ; then
    for package in $RECONFIGURE ; do
-       dpkg --list $package && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
+       dpkg --list $package 1>/dev/null 2>/dev/null && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
    done
 fi
 
@@ -62,7 +62,8 @@ if [ -n "$TIMEZONE" ] ; then
    ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 fi
 
-if ! [ -f /etc/fstab ] ; then
+# set up /etc/fstab if file is UNCONFIGURED
+if grep -q UNCONFIGURED /etc/fstab ; then
    echo "Setting up /etc/fstab"
 cat >> /etc/fstab << EOF
 sysfs          /sys         sysfs   auto                       0   0
@@ -95,33 +96,34 @@ fi
 
 if [ "$BOOTMGR" = 'grub' ] ; then
    echo "Installing grub"
-   if ! [ -f /boot/grub/menu.lst ] ; then
-      # setup grub
-      mkdir /boot/grub
-      cat >> /boot/grub/menu.lst << EOF
-# Boot automatically after 30 secs.
-timeout 30
-
-# By default, boot the first entry.
-default 0
-
-# Fallback to the second entry.
-fallback 1
-
-title           Debian Etch, kernel $KERNELVER (on $ARGET)
-root            (hd0,0)
-kernel          $KERNELIMG root=$TARGET ro
-$GRUBINITRD
-
-# For booting Windows
-# title Windows
-# rootnoverify (hd0,0)
-# makeactive
-# chainloader  +1
-EOF
-   fi
+#   if ! [ -f /boot/grub/menu.lst ] ; then
+#      # setup grub
+#      mkdir /boot/grub
+#      cat >> /boot/grub/menu.lst << EOF
+## Boot automatically after 30 secs.
+#timeout 30
+#
+## By default, boot the first entry.
+#default 0
+#
+## Fallback to the second entry.
+#fallback 1
+#
+#title           Debian Etch, kernel $KERNELVER (on $ARGET)
+#root            (hd0,0)
+#kernel          $KERNELIMG root=$TARGET ro
+#$GRUBINITRD
+#
+## For booting Windows
+## title Windows
+## rootnoverify (hd0,0)
+## makeactive
+## chainloader  +1
+#EOF
+#   fi
 
    # copy stage-files to /boot/grub/
+   [ -d /boot/grub/ ] || mkdir /boot/grub
    cp -i /usr/lib/grub/i386-pc/* /boot/grub/
 
    # otherwise grub fails with 'Could not find device for /boot/boot: not found or not a block device'
@@ -129,7 +131,8 @@ EOF
    cp /proc/mounts /etc/mtab
 
    # finally install grub
-   grub-install $BOOT
+   # grub-install $BOOT
+   update-grub -y
 
    # restore mtab again
    mv /etc/mtab.old /etc/mtab
