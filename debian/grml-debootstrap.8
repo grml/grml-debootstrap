@@ -3,29 +3,51 @@
 grml-debootstrap \- wrapper around debootstrap for installing plain Debian via grml
 .SH SYNOPSIS
 .B grml-debootstrap
-.RI [ options ] " files" ...
+.RI [ options ]
 .SH DESCRIPTION
 This manual page documents briefly the
 .B grml-debootstrap
 command.
 .PP
-\fBgrml-debootstrap\fP is a program that...
+\fBgrml-debootstrap\fP is a wrapper suite around deboostrap
+for installing a plain Debian system via grml very fast and easy.
+
+All you have to do is adjust a few variables in configuration
+file /etc/debootstrap/config and invoke grml-debootstrap without
+any further options then.
+
+A plain and base Debian system will be installed on the given
+device then. Customization of this process is possible as well.
 .SH OPTIONS
-These programs follow the usual GNU command line syntax, with long
-options starting with two dashes (`-').
-A summary of options is included below.
-For a complete description, see the Info files.
+grml-debootstrap supports the following options:
 .TP
 .B \-h, \-\-help
 Show summary of options.
 .TP
 .B \-v, \-\-version
 Show version of program.
+.SH FILES
+.TP
+.B /etc/debootstrap/config
+Main configuration file. You have to adjust it according to your needs
+before you are able to run grml-debootstrap.
+.SH CUSTOMIZATION
+
+You can control execution of grml-debootstrap via adjusting
+/etc/debootstrap/config for some main stuff.  The packages which should be
+installed in the new Debian system can be defined via the file
+/etc/debootstrap/packages.  If you want to put existing files to the new
+Debian system you can place them into the (by default non-existing)
+directories boot, etc, share, usr and var in /etc/debootstrap/. Every
+existing directory will be copied to the new Debian system then.
+
+.SH BUGS
+Probably. Please send bugreports to Michael Prokop <mika@grml.org>.
 .SH SEE ALSO
 .BR debootstrap (8),
 .BR cdebootstrap (1).
 .SH AUTHOR
 grml-debootstrap was written by Michael Prokop <mika@grml.org>.
 .PP
-This manual page was written by Michael Prokop <mika@grml.org>,
-for the Debian project (but may be used by others).
+This manual page was written by Michael Prokop <mika@grml.org>
+for the grml project (but may be used by others).

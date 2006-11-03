@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.2
+XS-Vcs-hg: http://hg.grml.org/grml-debootstrap
 
 Package: grml-debootstrap
 Architecture: any
