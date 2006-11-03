@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 23:39:35 CET 2006 [mika]
+# Latest change: Fre Nov 03 23:42:36 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -46,7 +46,7 @@ fi
 
 # sarge specific stuff
 if [ "$RELEASE" = 'sarge' ] ; then
-   sed -i "s/ROOT=probe/ROOT=$TARGET" /etc/mkinitrd/mkinitrd.conf
+   sed -i "s/ROOT=probe/ROOT=$TARGET/" /etc/mkinitrd/mkinitrd.conf
 fi
 
 if [ -n "$KERNEL" ] ; then
