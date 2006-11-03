@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 11:37:19 CET 2006 [mika]
+# Latest change: Fre Nov 03 12:13:15 CET 2006 [mika]
 ################################################################################
 
 set -e
@@ -24,7 +24,7 @@ if [ "$PACKAGES" = 'yes' ] ; then
      exit 1
    else
      apt-get update
-     apt-get install $(cat /etc/debootstrap/packages)
+     apt-get -y install $(cat /etc/debootstrap/packages)
    fi
 fi
 
@@ -39,14 +39,17 @@ echo "Activating shadow passwords."
 shadowconfig on
 echo "Setting password for user root:"
 passwd
+echo ""
 
 if ! [ -f /etc/hosts ] ; then
+   echo "Setting up /etc/hosts"
    echo "127.0.0.1       localhost  $HOSTNAME" > /etc/hosts
 fi
 
 if ! [ -f /etc/network/interfaces ] ; then
+   echo "Setting up /etc/network/interfaces"
    cat >> /etc/network/interfaces << EOF
-iface lo inet loopback 
+iface lo inet loopback
 iface eth0 inet dhcp
 auto lo
 auto eth0
@@ -55,36 +58,40 @@ fi
 
 # adjust timezone
 if [ -n "$TIMEZONE" ] ; then
+   echo "Adjusting /etc/localtime"
    ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 fi
 
 if ! [ -f /etc/fstab ] ; then
+   echo "Setting up /etc/fstab"
 cat >> /etc/fstab << EOF
 sysfs          /sys         sysfs   auto                       0   0
 proc           /proc        proc    defaults                   0   0
 $TARGET      /            auto    defaults,errors=remount-ro 0   1
-# /dev/sda2      none         swap    sw                         0   0 
+# /dev/sda2      none         swap    sw                         0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
 EOF
 fi
 
 # create default devices
-echo "Creating generic devices in /dev - this might take a while..."
-cd /dev && MAKEDEV generic
-
-# generate initrd
-if [ -n "$INITRD" ] ; then
-   echo "Generating initrd."
-   update-initramfs -c -t -k $KERNEL
-   if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
-      GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
-      LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
-   fi
+if ! [ -r /dev/hda20 ] ; then
+   echo "Creating generic devices in /dev - this might take a while..."
+   cd /dev && MAKEDEV generic
 fi
 
 # assume the first available kernel as our main kernel
 KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
 KERNELVER=${KERNELIMG#/boot/vmlinuz-}
+
+# generate initrd
+if [ -n "$INITRD" ] ; then
+   echo "Generating initrd."
+   update-initramfs -c -t -k $KERNELVER
+   if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
+      GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
+      LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
+   fi
+fi
 
 if [ "$BOOTMGR" = 'grub' ] ; then
    echo "Installing grub"
@@ -117,8 +124,15 @@ EOF
    # copy stage-files to /boot/grub/
    cp -i /usr/lib/grub/i386-pc/* /boot/grub/
 
+   # otherwise grub fails with 'Could not find device for /boot/boot: not found or not a block device'
+   cp /etc/mtab /etc/mtab.old
+   cp /proc/mounts /etc/mtab
+
    # finally install grub
    grub-install $BOOT
+
+   # restore mtab again
+   mv /etc/mtab.old /etc/mtab
 fi
 
 if [ "$BOOTMGR" = 'lilo' ] ; then
