@@ -69,6 +69,7 @@ fi
 echo "Activating shadow passwords."
 shadowconfig on
 echo "Setting password for user root:"
+# TODO: typing the wrong password will exit chroot script
 passwd
 echo ""
 
@@ -132,7 +133,7 @@ KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 # generate initrd
 if [ -n "$INITRD" ] ; then
    if [ "$RELEASE" = 'sarge' ] ; then
-      einfo "Release sarge detected, will not create an initrd."
+      echo "Release sarge detected, will not create an initrd."
       return 0
    fi
    echo "Generating initrd."
