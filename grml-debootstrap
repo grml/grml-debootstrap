@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 17:49:46 CET 2006 [mika]
+# Latest change: Fre Nov 03 17:59:33 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -45,6 +45,22 @@ if [ -z "$TARGET" ] ; then
    exit 1
 fi
 
+einfo "$0 - Please recheck configuration before execution:"
+echo "
+target partition: $TARGET
+mount-point:      $MNTPOINT
+install grub to:  $MBR / $GROOT [if empty it will not be installed]
+
+Notice: continuing will delete all data from $TARGET
+"
+einfo "Is this ok? [y/N]"
+
+read a
+if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
+   eerror "Exiting as requested." ; eend 1
+   exit 1
+fi
+
 if [ -n "$MKFS" ] ; then
    einfo "Running $MKFS on $TARGET"
    $MKFS $TARGET
@@ -59,9 +75,11 @@ fi
 
 # now mount the new partition
 if grep -q $TARGET /proc/mounts ; then
-   eerror "$TARGEt already mounted, exiting."
+   eerror "$TARGET already mounted, exiting."
 else
+  [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
   einfo "Mounting $TARGET to $MNTPOINT"
+  [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
   mount -o rw,suid,dev $TARGET $MNTPOINT
   eend $?
 fi

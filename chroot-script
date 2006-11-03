@@ -113,7 +113,7 @@ if [ -n "$GROOT" ] ; then
    update-grub -y
 
    if [ -z "$MBR" ] ; then
-      echo "Notice: \$MBR not set, not install grub therefore."
+      echo "Notice: \$MBR not set, will not install grub therefor."
    else
       cp /proc/mounts /etc/mtab
       grub-install "$MBR"
