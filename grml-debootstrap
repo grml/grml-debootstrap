@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 16:07:18 CET 2006 [mika]
+# Latest change: Fre Nov 03 17:31:47 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -13,7 +13,25 @@ set -e # exit on any error
 . /etc/grml/lsb-functions
 . /etc/grml/script-functions
 
+VERSION='0.1'
+
+case $* in
+   -h*|--h*)
+     einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
+     einfo "Configure via /etc/debootstrap/config and invoke $0 afterwards."
+     eend 0
+     exit 0
+   ;;
+   -v|--v*)
+     einfo "$0 version $VERSION"
+     einfo "Send bug reports to Michael Prokop <mika@grml.org>."
+     eend 0
+     exit 0
+   ;;
+esac
+
 check4progs debootstrap || exit 1
+check4root || exit 1
 
 if [ -r /etc/debootstrap/config ] ; then
    . /etc/debootstrap/config
