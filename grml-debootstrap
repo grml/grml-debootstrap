@@ -120,7 +120,8 @@ chroot $MNTPOINT /bin/chroot-script
 eend $?
 
 # einfo "Removing chroot-script"
-# rm -f $MNTPOINT/bin/chroot-script
+# rm -f  $MNTPOINT/bin/chroot-script
+# rm -rf $MNTPOINT/etc/debootstrap/
 # eend $?
 
 einfo "Unmount $MNTPOINT"
