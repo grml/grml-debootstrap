@@ -3,19 +3,27 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 15:23:37 CET 2006 [mika]
+# Latest change: Fre Nov 03 17:14:33 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
 # Important: you definitely have to adjust the following variables!
 ################################################################################
 # target partition (where should Debian be installed to)
+# usage example:
+# TARGET='/dev/hda1'
 TARGET=''
 
 # where do you want to install grub to?
+# notice: hd0,0 is *first* partition on *first* disk (/dev/sda1 + /dev/hda1)
 # usage example:
 # GROOT='hd0,0'
 GROOT=''
+
+# partition for use with grub-install
+# usage example:
+# MBR='/dev/hda'
+MBR=''
 
 ################################################################################
 

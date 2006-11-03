@@ -1,0 +1,7 @@
+TODO list for grml-debootstrap
+------------------------------
+
+* test cdebootstrap instead of debootstrap
+* test all possibilities of customization
+* support tarballs for customization
+* test sarge + sid as $RELEASE
