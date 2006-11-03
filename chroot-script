@@ -148,7 +148,12 @@ if [ -n "$GROOT" ] ; then
 
    # copy stage-files to /boot/grub/
    [ -d /boot/grub/ ] || mkdir /boot/grub
-   cp /usr/lib/grub/i386-pc/* /boot/grub/
+   if [ -d /usr/lib/grub/i386-pc/ ] ; then
+      cp /usr/lib/grub/i386-pc/* /boot/grub/
+   else
+      # sarge ships grub files in another directory
+      cp /lib/grub/i386-pc/* /boot/grub/
+   fi
 
    # finally install grub
    update-grub -y
