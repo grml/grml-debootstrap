@@ -15,6 +15,12 @@ TARGET=''
 # where should the bootmanager installed to?
 BOOT=''
 
+# which bootmanager do you want to use? [grub|lilo]
+BOOTMGR='grub'
+
+# if using grub, where do you want to install grub to?
+GROOT='hd0,0'
+
 ################################################################################
 
 # kernel version
@@ -56,8 +62,5 @@ TIMEZONE='Europe/Vienna'
 
 # generate initrd?
 INITRD='yes'
-
-# which bootmanager do you want to use? [grub|lilo]
-BOOTMGR='grub'
 
 ## END OF FILE #################################################################

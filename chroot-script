@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 14:02:25 CET 2006 [mika]
+# Latest change: Fre Nov 03 14:19:42 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -65,11 +65,11 @@ fi
 # set up /etc/fstab if file is UNCONFIGURED
 if grep -q UNCONFIGURED /etc/fstab ; then
    echo "Setting up /etc/fstab"
-cat >> /etc/fstab << EOF
+cat > /etc/fstab << EOF
+$TARGET      /            auto    defaults,errors=remount-ro 0   1
 sysfs          /sys         sysfs   auto                       0   0
 proc           /proc        proc    defaults                   0   0
-$TARGET      /            auto    defaults,errors=remount-ro 0   1
-# /dev/sda2      none         swap    sw                         0   0
+# /dev/sda2    none         swap    sw                         0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
 EOF
 fi
@@ -132,6 +132,8 @@ if [ "$BOOTMGR" = 'grub' ] ; then
 
    # finally install grub
    # grub-install $BOOT
+   update-grub -y
+   [ -n "$GROOT" ] && sed -i "s/^# groot=(hd.*/groot=(${GROOT})" /boot/grub/menu.lst
    update-grub -y
 
    # restore mtab again
