@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 17:59:33 CET 2006 [mika]
+# Latest change: Fre Nov 03 18:05:56 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -33,6 +33,7 @@ esac
 check4progs debootstrap || exit 1
 check4root || exit 1
 
+# without config file it won't work
 if [ -r /etc/debootstrap/config ] ; then
    . /etc/debootstrap/config
 else
@@ -40,20 +41,22 @@ else
    exit 1
 fi
 
+# make sure at least $TARGET is set [the partition for the new system]
 if [ -z "$TARGET" ] ; then
    eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
    exit 1
 fi
 
+# user should recheck his configuration
 einfo "$0 - Please recheck configuration before execution:"
 echo "
-target partition: $TARGET
-mount-point:      $MNTPOINT
-install grub to:  $MBR / $GROOT [if empty it will not be installed]
+   Target partition: $TARGET
+   Mount-point:      $MNTPOINT
+   Install grub to:  $MBR / $GROOT [if empty it will not be installed]
 
-Notice: continuing will delete all data from $TARGET
+   Important! Continuing will delete all data from ${TARGET}!
 "
-einfo "Is this ok? [y/N]"
+einfon "Is this ok for you? [y/N] "
 
 read a
 if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
