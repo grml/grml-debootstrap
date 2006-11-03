@@ -35,7 +35,9 @@ if [ -n "$RECONFIGURE" ] ; then
 fi
 
 # set password of user root
-# shadowconfig
+echo "Activating shadow passwords."
+shadowconfig on
+echo "Setting password for user root:"
 passwd
 
 if ! [ -f /etc/hosts ] ; then
