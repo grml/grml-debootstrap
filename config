@@ -23,6 +23,9 @@ KERNEL='linux-image-686'
 # name of debootstrap executable
 DEBOOTSTRAP='debootstrap'
 
+# install packages defined in /etc/debootstrap/packages?
+PACKAGES='yes'
+
 # place of config files for debootstrap
 CONFFILES='/etc/debootstrap/'
 

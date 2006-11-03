@@ -4,16 +4,18 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 00:54:39 CET 2006 [mika]
+# Latest change: Fre Nov 03 11:15:56 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
-set -eu # exit on any error
+set -e # exit on any error
 
 . /etc/grml/lsb-functions
 . /etc/grml/script-functions
 
 check4progs debootstrap || exit 1
+
+set -u # make sure we don't have empty variables
 
 if [ -r /etc/debootstrap/config ] ; then
    . /etc/debootstrap/config
@@ -45,10 +47,11 @@ eend $?
 einfo "Preparing chroot system"
   cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
-  mkdir $MNTPOINT/etc/deboostrap/
+  mkdir $MNTPOINT/etc/debootstrap/
 
-  # make sure we have our config file for later use via chroot-script
+  # make sure we have our files for later use via chroot-script
   cp /etc/debootstrap/config $MNTPOINT/etc/debootstrap/
+  cp /etc/debootstrap/packages $MNTPOINT/etc/debootstrap/packages
 
   # copy any existing existing files to chroot
   [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/

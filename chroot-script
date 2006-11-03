@@ -4,26 +4,38 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 01:19:41 CET 2006 [mika]
+# Latest change: Fre Nov 03 11:17:14 CET 2006 [mika]
 ################################################################################
 
 set -e
 
 . /etc/debootstrap/config || exit 1
 
-mount -t proc   none /proc
+[ -r /proc/1 ] || mount -t proc   none /proc
 
 if [ -n "$RECONFIGURE" ] ; then
    for package in $RECONFIGURE ; do
-       dpkg-reconfigure $package
+       dpkg --list $package && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
    done
 fi
 
+# install additional packages
+if [ "$PACKAGES" = 'yes' ] ; then
+   if ! [ -r /etc/debootstrap/packages ] ; then
+     echo "Error: /etc/debootstrap/packages not found, exiting."
+     exit 1
+   else
+     apt-get update
+     apt-get install $(cat /etc/debootstrap/packages)
+   fi
+fi
+
 # set password of user root
+# shadowconfig
 passwd
 
 if ! [ -f /etc/hosts ] ; then
-   echo "127.0.0.1       localhost  $HOSTNAME" > $MNTPOINT/etc/hosts
+   echo "127.0.0.1       localhost  $HOSTNAME" > /etc/hosts
 fi
 
 if ! [ -f /etc/network/interfaces ] ; then
@@ -51,10 +63,12 @@ EOF
 fi
 
 # create default devices
+echo "Creating generic devices in /dev - this might take a while..."
 cd /dev && MAKEDEV generic
 
 # generate initrd
 if [ -n "$INITRD" ] ; then
+   echo "Generating initrd."
    update-initramfs -c -t -k $KERNEL
    if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
       GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
@@ -67,6 +81,7 @@ KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
 KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
 if [ "$BOOTMGR" = 'grub' ] ; then
+   echo "Installing grub"
    if ! [ -f /boot/grub/menu.lst ] ; then
       # setup grub
       mkdir /boot/grub
@@ -101,6 +116,7 @@ EOF
 fi
 
 if [ "$BOOTMGR" = 'lilo' ] ; then
+   echo "Installing lilo"
 # /usr/share/doc/lilo/examples/conf.sample
 cat > /etc/lilo.conf << EOF
 # This allows booting from any partition on disks with more than 1024 cylinders.
@@ -133,6 +149,7 @@ fi
 umount -a
 
 # finally exit the chroot
+echo "Finished chroot installation, exiting."
 exit 0
 
 ## END OF FILE #################################################################
