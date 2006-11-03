@@ -34,7 +34,7 @@ if [ "$PACKAGES" = 'yes' ] ; then
      exit 1
    else
      apt-get update
-     apt-get -y install $(cat /etc/debootstrap/packages)
+     apt-get --force-yes -y $(cat /etc/debootstrap/packages)
    fi
 fi
 
