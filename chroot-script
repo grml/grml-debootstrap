@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 21:45:09 CET 2006 [mika]
+# Latest change: Fre Nov 03 21:57:11 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -17,9 +17,15 @@ if [ -n "$CHROOTMIRROR" ] ; then
    echo "$CHROOTMIRROR" > /etc/apt/sources.list
 fi
 
-# if ! [ -n /etc/kernel-img.conf ] ; then
-#   echo "do_initrd = Yes" > /etc/kernel-img.conf
-# fi
+if ! [ -n /etc/kernel-img.conf ] ; then
+   echo "Setting up /etc/kernel-img.conf"
+   cat > /etc/kernel-img.conf << EOF
+# Kernel Image management overrides
+# See kernel-img.conf(5) for details
+do_initrd = Yes
+do_symlinks = Yes
+EOF
+fi
 
 # install additional packages
 if [ "$PACKAGES" = 'yes' ] ; then
@@ -85,6 +91,12 @@ fi
 # set up /etc/fstab if file is UNCONFIGURED (debootstrap)
 if grep -q UNCONFIGURED /etc/fstab ; then
    createfstab
+fi
+
+# set up hostname
+if [ -n "$HOSTNAME" ] ; then
+   echo "Setting hostname to ${HOSTNAME}."
+   echo "$HOSTNAME" > /etc/hostname
 fi
 
 # create default devices
