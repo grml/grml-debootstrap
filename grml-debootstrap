@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 11:24:15 CET 2006 [mika]
+# Latest change: Fre Nov 03 13:50:30 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -63,7 +63,7 @@ einfo "Preparing chroot system"
   [ -d /etc/debootstrap/share ] && cp -a /etc/debootstrap/share/* $MNTPOINT/share/
   [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
   [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
-eend $?
+eend 0
 
 einfo "Executing chroot-script now"
 chroot $MNTPOINT /bin/chroot-script
