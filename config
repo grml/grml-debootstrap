@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 11:38:42 CET 2006 [mika]
+# Latest change: Fre Nov 03 12:27:17 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -32,14 +32,12 @@ CONFFILES='/etc/debootstrap/'
 # mount point where chroot actions should take place
 MNTPOINT='/mnt/test'
 
-# mirror (download packages from)
+# set mirror where debootstrap should download packages from
 MIRROR='ftp://ftp.tugraz.at/mirror/debian'
 
-# entries for /etc/apt/sources.list (if empty the default is taken)
-MIRROR_LIST="
-deb     http://ftp.tu-graz.ac.at/mirror/debian        unstable        main contrib non-free
-deb     http://ftp.de.debian.org/debian        unstable        main contrib non-free
-"
+# specify entry which should be used for /etc/apt/sources.list,
+# if empty then any existing /etc/apt/sources.list will be taken
+CHROOTMIRROR='deb ftp://ftp.tugraz.at/mirror/debian unstable main contrib non-free'
 
 # release (which Debian version should be installed)
 RELEASE='etch'
