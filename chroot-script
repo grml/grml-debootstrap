@@ -76,10 +76,15 @@ function createfstab(){
    echo "Setting up /etc/fstab"
 cat > /etc/fstab << EOF
 $TARGET      /            auto    defaults,errors=remount-ro 0   1
-sysfs          /sys         sysfs   auto                       0   0
+/sys           /sys         sysfs   rw,nosuid,nodev,noexec     0   0
 proc           /proc        proc    defaults                   0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
-# /dev/sda2    none         swap    sw                         0   0
+# some other examples:
+# /dev/sda2       none         swap    sw                   0   0
+# /dev/hda1       /Grml        ext3    dev,suid,user,noauto 0  2
+# //1.2.3.4/pub   /smb/pub     smbfs   defaults,user,noauto,uid=grml,gid=grml 0 0
+# linux:/pub      /beer        nfs     defaults             0  0
+# tmpfs           /tmp         tmpfs   size=300M            0  0
 EOF
 }
 
