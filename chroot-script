@@ -27,6 +27,12 @@ do_symlinks = Yes
 EOF
 fi
 
+# create default devices
+if ! [ -r /dev/hda20 ] ; then
+   echo "Creating generic devices in /dev - this might take a while..."
+   cd /dev && MAKEDEV generic
+fi
+
 # install additional packages
 if [ "$PACKAGES" = 'yes' ] ; then
    if ! [ -r /etc/debootstrap/packages ] ; then
@@ -36,6 +42,11 @@ if [ "$PACKAGES" = 'yes' ] ; then
      apt-get update
      apt-get --force-yes -y install $(cat /etc/debootstrap/packages)
    fi
+fi
+
+# sarge specific stuff
+if [ "$RELEASE" = 'sarge' ] ; then
+   sed -i "s/ROOT=probe/ROOT=$TARGET" /etc/mkinitrd/mkinitrd.conf
 fi
 
 if [ -n "$KERNEL" ] ; then
@@ -112,12 +123,6 @@ fi
 if [ -n "$HOSTNAME" ] ; then
    echo "Setting hostname to ${HOSTNAME}."
    echo "$HOSTNAME" > /etc/hostname
-fi
-
-# create default devices
-if ! [ -r /dev/hda20 ] ; then
-   echo "Creating generic devices in /dev - this might take a while..."
-   cd /dev && MAKEDEV generic
 fi
 
 # assume the first available kernel as our main kernel
