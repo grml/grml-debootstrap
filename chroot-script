@@ -134,13 +134,13 @@ KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 if [ -n "$INITRD" ] ; then
    if [ "$RELEASE" = 'sarge' ] ; then
       echo "Release sarge detected, will not create an initrd."
-      return 0
-   fi
-   echo "Generating initrd."
-   update-initramfs -c -t -k $KERNELVER
-   if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
-      GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
-      LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
+   else
+      echo "Generating initrd."
+      update-initramfs -c -t -k $KERNELVER
+      if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
+         GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
+         LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
+      fi
    fi
 fi
 
