@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 17:15:42 CET 2006 [mika]
+# Latest change: Fre Nov 03 21:45:09 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -66,16 +66,25 @@ if [ -n "$TIMEZONE" ] ; then
    ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 fi
 
-# set up /etc/fstab if file is UNCONFIGURED
-if grep -q UNCONFIGURED /etc/fstab ; then
+function createfstab(){
    echo "Setting up /etc/fstab"
 cat > /etc/fstab << EOF
 $TARGET      /            auto    defaults,errors=remount-ro 0   1
 sysfs          /sys         sysfs   auto                       0   0
 proc           /proc        proc    defaults                   0   0
-# /dev/sda2    none         swap    sw                         0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
+# /dev/sda2    none         swap    sw                         0   0
 EOF
+}
+
+# set up /etc/fstab if file is not present (cdebootstrap)
+if [ ! -f /etc/fstab  ] ; then
+   createfstab
+fi
+
+# set up /etc/fstab if file is UNCONFIGURED (debootstrap)
+if grep -q UNCONFIGURED /etc/fstab ; then
+   createfstab
 fi
 
 # create default devices

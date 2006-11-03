@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 18:05:56 CET 2006 [mika]
+# Latest change: Fre Nov 03 21:35:09 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -101,6 +101,9 @@ einfo "Preparing chroot system"
   cp /etc/debootstrap/config $MNTPOINT/etc/debootstrap/
   cp /etc/debootstrap/packages $MNTPOINT/etc/debootstrap/packages
 
+  # make sure we can access network [relevant for cdebootstrap]
+  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
+
   # copy any existing existing files to chroot
   [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
   [ -d /etc/debootstrap/etc   ] && cp -a /etc/debootstrap/etc/*   $MNTPOINT/etc/
@@ -112,6 +115,10 @@ eend 0
 einfo "Executing chroot-script now"
 chroot $MNTPOINT /bin/chroot-script
 eend $?
+
+# einfo "Removing chroot-script"
+# rm -f $MNTPOINT/bin/chroot-script
+# eend $?
 
 einfo "Unmount $MNTPOINT"
 umount $MNTPOINT
