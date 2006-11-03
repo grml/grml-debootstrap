@@ -1,3 +1,3 @@
 locales console-data
-linux-headers-2.6-686 linux-image-2.6-686 initrd-tools grub mdadm lvm
+linux-headers-2.6-686 linux-image-2.6-686 initrd-tools grub mdadm lvm2
 bzip2 dhcp3-client file less lsof most pciutils resolvconf screen ssh strace sysfsutils usbutils vim w3m zsh
