@@ -1,3 +1,9 @@
+grml-debootstrap (0.2) unstable; urgency=low
+
+  * Add 'debootstrap | cdebootstrap' to depends.
+
+ -- Michael Prokop <mika@grml.org>  Fri,  3 Nov 2006 19:05:19 +0100
+
 grml-debootstrap (0.1) unstable; urgency=low
 
   * Initial release.
