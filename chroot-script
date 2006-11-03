@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 13:22:25 CET 2006 [mika]
+# Latest change: Fre Nov 03 14:02:25 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -169,10 +169,10 @@ EOF
 fi
 
 # unmount all filesystems in chroot, make sure nothing is left...
-umount -a
-umount /proc
-umount /proc
-umount -a
+umount -a     || true
+umount /proc  || true
+umount /proc  || true
+umount -a     || true
 
 # finally exit the chroot
 echo "Finished chroot installation, exiting."
