@@ -1,0 +1,3 @@
+locales console-data
+vim most zsh screen less initrd-tools file grub usbutils pciutils bzip2 sysfsutils dhcp3-client resolvconf strace lsof w3m
+linux-headers-2.6-686 linux-image-2.6-686

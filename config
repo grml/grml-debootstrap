@@ -1,0 +1,56 @@
+# Filename:      /etc/debootstrap/config
+# Purpose:       configuration file for grml-debootstrap
+# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Fre Nov 03 00:23:46 CET 2006 [mika]
+################################################################################
+
+################################################################################
+# Important: you definitely have to adjust the following variables!
+################################################################################
+# target partition (where should Debian be installed to)
+TARGET=''
+
+# where should the bootmanager installed to?
+BOOT=''
+
+################################################################################
+
+# kernel version
+KERNEL='linux-image-686'
+
+# name of debootstrap executable
+DEBOOTSTRAP='debootstrap'
+
+# place of config files for debootstrap
+CONFFILES='/etc/debootstrap/'
+
+# mount point where chroot actions should take place
+MNTPOINT='/mnt/test'
+
+# mirror (download packages from)
+MIRROR='ftp://ftp.tugraz.at/mirror/debian'
+
+# release (which Debian version should be installed)
+RELEASE='etch'
+
+# hostname of new system
+HOSTNAME='grml'
+
+# executable which should be run on $TARGET
+MKFS='mkfs.ext3'
+
+# which packages do you want do dpkg-reconfigure?
+RECONFIGURE='locales console-data'
+
+# use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime
+TIMEZONE='Europe/Vienna'
+
+# generate initrd?
+INITRD='yes'
+
+# which bootmanager do you want to use? [grub|lilo]
+BOOTMGR='grub'
+
+## END OF FILE #################################################################

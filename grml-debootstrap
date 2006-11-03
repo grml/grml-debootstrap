@@ -1,0 +1,71 @@
+#!/bin/sh
+# Filename:      grml-bootstrap
+# Purpose:       wrapper around debootstrap for installing plain Debian via grml
+# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Fre Nov 03 00:54:39 CET 2006 [mika]
+################################################################################
+# http://www.debian.org/releases/stable/i386/apcs04.html.en
+
+set -eu # exit on any error
+
+. /etc/grml/lsb-functions
+. /etc/grml/script-functions
+
+check4progs debootstrap || exit 1
+
+if [ -r /etc/debootstrap/config ] ; then
+   . /etc/debootstrap/config
+else
+   echo "/etc/debootstrap/config could not be read, exiting."
+   exit 1
+fi
+
+if [ -z "$TARGET" ] ; then
+   eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
+   exit 1
+fi
+
+# make an ext3 filesystem on /dev/sda1
+einfo "Running $MKFS on $TARGET"
+$MKFS $TARGET
+eend $?
+
+# now mount the new partition
+einfo "Mounting $TARGET to $MNTPOINT"
+mount -o rw,suid,dev $TARGET $MNTPOINT
+eend $?
+
+# get main packages from a debian-mirror
+einfo "Running $DEBOOTSTRAP for release $RELEASE using mirror $MIRROR"
+$DEBOOTSTRAP $RELEASE $MNTPOINT $MIRROR
+eend $?
+
+einfo "Preparing chroot system"
+  cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
+  chmod 755 $MNTPOINT/bin/chroot-script
+  mkdir $MNTPOINT/etc/deboostrap/
+
+  # make sure we have our config file for later use via chroot-script
+  cp /etc/debootstrap/config $MNTPOINT/etc/debootstrap/
+
+  # copy any existing existing files to chroot
+  [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
+  [ -d /etc/debootstrap/etc   ] && cp -a /etc/debootstrap/etc/*   $MNTPOINT/etc/
+  [ -d /etc/debootstrap/share ] && cp -a /etc/debootstrap/share/* $MNTPOINT/share/
+  [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
+  [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
+eend $?
+
+einfo "Executing chroot-script now"
+chroot $MNTPOINT /bin/chroot-script
+eend $?
+
+einfo "Unmount $MNTPOINT"
+umount $MNTPOINT
+eend $?
+
+einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
+
+## END OF FILE #################################################################

@@ -1,0 +1,138 @@
+#!/bin/sh
+# Filename:      /etc/debootstrap/chroot-script
+# Purpose:       script executed in chroot when installing Debian via grml-debootstrap
+# Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Fre Nov 03 01:19:41 CET 2006 [mika]
+################################################################################
+
+set -e
+
+. /etc/debootstrap/config || exit 1
+
+mount -t proc   none /proc
+
+if [ -n "$RECONFIGURE" ] ; then
+   for package in $RECONFIGURE ; do
+       dpkg-reconfigure $package
+   done
+fi
+
+# set password of user root
+passwd
+
+if ! [ -f /etc/hosts ] ; then
+   echo "127.0.0.1       localhost  $HOSTNAME" > $MNTPOINT/etc/hosts
+fi
+
+if ! [ -f /etc/network/interfaces ] ; then
+   cat >> /etc/network/interfaces << EOF
+iface lo inet loopback 
+iface eth0 inet dhcp
+auto lo
+auto eth0
+EOF
+fi
+
+# adjust timezone
+if [ -n "$TIMEZONE" ] ; then
+   ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+fi
+
+if ! [ -f /etc/fstab ] ; then
+cat >> /etc/fstab << EOF
+sysfs          /sys         sysfs   auto                       0   0
+proc           /proc        proc    defaults                   0   0
+$TARGET      /            auto    defaults,errors=remount-ro 0   1
+# /dev/sda2      none         swap    sw                         0   0 
+/dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
+EOF
+fi
+
+# create default devices
+cd /dev && MAKEDEV generic
+
+# generate initrd
+if [ -n "$INITRD" ] ; then
+   update-initramfs -c -t -k $KERNEL
+   if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
+      GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
+      LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
+   fi
+fi
+
+# assume the first available kernel as our main kernel
+KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
+KERNELVER=${KERNELIMG#/boot/vmlinuz-}
+
+if [ "$BOOTMGR" = 'grub' ] ; then
+   if ! [ -f /boot/grub/menu.lst ] ; then
+      # setup grub
+      mkdir /boot/grub
+      cat >> /boot/grub/menu.lst << EOF
+# Boot automatically after 30 secs.
+timeout 30
+
+# By default, boot the first entry.
+default 0
+
+# Fallback to the second entry.
+fallback 1
+
+title           Debian Etch, kernel $KERNELVER (on $ARGET)
+root            (hd0,0)
+kernel          $KERNELIMG root=$TARGET ro
+$GRUBINITRD
+
+# For booting Windows
+# title Windows
+# rootnoverify (hd0,0)
+# makeactive
+# chainloader  +1
+EOF
+   fi
+
+   # copy stage-files to /boot/grub/
+   cp -i /usr/lib/grub/i386-pc/* /boot/grub/
+
+   # finally install grub
+   grub-install $BOOT
+fi
+
+if [ "$BOOTMGR" = 'lilo' ] ; then
+# /usr/share/doc/lilo/examples/conf.sample
+cat > /etc/lilo.conf << EOF
+# This allows booting from any partition on disks with more than 1024 cylinders.
+lba32
+
+# Specifies the boot device
+boot=$BOOT
+
+# Specifies the device that should be mounted as root.
+root=$TARGET
+
+# use Debian on software raid:
+# raid-extra-boot=mbr-only
+
+install=text
+# prompt
+timeout=1
+map=/boot/map
+vga=normal
+
+image=/boot/vmlinuz-2.6.17-grml
+        label="$KERNELVER"
+        #append="...."
+        read-only
+        $LILOINITRD
+EOF
+fi
+
+# unmount all filesystems in chroot
+umount -a
+
+# finally exit the chroot
+exit 0
+
+## END OF FILE #################################################################

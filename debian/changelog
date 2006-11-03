@@ -1,0 +1,6 @@
+grml-debootstrap (0.1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Michael Prokop <mika@grml.org>  Fri,  3 Nov 2006 01:10:52 +0100
+
