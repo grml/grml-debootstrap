@@ -29,10 +29,17 @@ if [ -z "$TARGET" ] ; then
    exit 1
 fi
 
-# make an ext3 filesystem on /dev/sda1
-einfo "Running $MKFS on $TARGET"
-$MKFS $TARGET
-eend $?
+if [ -n "$MKFS" ] ; then
+   einfo "Running $MKFS on $TARGET"
+   $MKFS $TARGET
+   eend $?
+fi
+
+if [ -n "$TUNE2FS" ] ; then
+   einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
+   TUNE2FS $TARGET
+   eend $?
+fi
 
 # now mount the new partition
 if grep -q $TARGET /proc/mounts ; then
