@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 14:19:42 CET 2006 [mika]
+# Latest change: Fre Nov 03 14:36:06 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -124,7 +124,7 @@ if [ "$BOOTMGR" = 'grub' ] ; then
 
    # copy stage-files to /boot/grub/
    [ -d /boot/grub/ ] || mkdir /boot/grub
-   cp -i /usr/lib/grub/i386-pc/* /boot/grub/
+   cp /usr/lib/grub/i386-pc/* /boot/grub/
 
    # otherwise grub fails with 'Could not find device for /boot/boot: not found or not a block device'
    cp /etc/mtab /etc/mtab.old
@@ -171,10 +171,10 @@ EOF
 fi
 
 # unmount all filesystems in chroot, make sure nothing is left...
-umount -a     || true
-umount /proc  || true
-umount /proc  || true
-umount -a     || true
+umount -a    1>/dev/null 2>/dev/null || true
+umount /proc 1>/dev/null 2>/dev/null || true
+umount /proc 1>/dev/null 2>/dev/null || true
+umount -a    1>/dev/null 2>/dev/null || true
 
 # finally exit the chroot
 echo "Finished chroot installation, exiting."
