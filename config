@@ -26,6 +26,17 @@ GROOT=''
 MBR=''
 
 ################################################################################
+# Now the variables you might want to adjust, but need not to...
+
+# specify entry which should be used for /etc/apt/sources.list,
+# if empty then any existing /etc/apt/sources.list will be taken
+CHROOTMIRROR='deb ftp://ftp.tugraz.at/mirror/debian unstable main contrib non-free'
+
+# release (which Debian version should be installed)
+RELEASE='etch'
+
+# hostname of new system
+HOSTNAME='grml'
 
 # kernel version
 KERNEL='linux-image-686'
@@ -45,16 +56,6 @@ MNTPOINT='/mnt/test'
 
 # set mirror where debootstrap should download packages from
 MIRROR='ftp://ftp.tugraz.at/mirror/debian'
-
-# specify entry which should be used for /etc/apt/sources.list,
-# if empty then any existing /etc/apt/sources.list will be taken
-CHROOTMIRROR='deb ftp://ftp.tugraz.at/mirror/debian unstable main contrib non-free'
-
-# release (which Debian version should be installed)
-RELEASE='etch'
-
-# hostname of new system
-HOSTNAME='grml'
 
 # executable which should be run on $TARGET
 # unset it if you do not want to use it
@@ -79,7 +80,7 @@ LOCALES='yes'
 # use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime
 TIMEZONE='Europe/Vienna'
 
-# generate initrd?
+# generate initrd via update-initramfs?
 INITRD='yes'
 
 ## END OF FILE #################################################################
