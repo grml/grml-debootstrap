@@ -9,8 +9,9 @@ This manual page documents briefly the
 .B grml-debootstrap
 command.
 .PP
-\fBgrml-debootstrap\fP is a wrapper suite around deboostrap
-for installing a plain Debian system via grml very fast and easy.
+\fBgrml-debootstrap\fP is a wrapper suite around debootstrap
+(and cdebootstrap if you want) for installing a plain Debian
+system via grml very fast and easy.
 
 All you have to do is adjust a few variables in configuration
 file /etc/debootstrap/config and invoke grml-debootstrap without
@@ -41,6 +42,19 @@ Debian system you can place them into the (by default non-existing)
 directories boot, etc, share, usr and var in /etc/debootstrap/. Every
 existing directory will be copied to the new Debian system then.
 
+.SH SUPPORTED RELEASES
+.TP
+Current status:
+
+  +----------------+-------------+--------------+
+  | Release / Tool | debootstrap | cdebootstrap |
+  +----------------+-------------+--------------+
+  | Sarge          |  untested   |  untested    |
+  +----------------+-------------+--------------+
+  | Etch           |  works      |  works       |
+  +----------------+-------------+--------------+
+  | Sid            |  untested   |  untested    |
+  +----------------+-------------+--------------+
 .SH BUGS
 Probably. Please send bugreports to Michael Prokop <mika@grml.org>.
 .SH SEE ALSO
