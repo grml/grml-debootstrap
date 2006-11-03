@@ -12,18 +12,10 @@
 # target partition (where should Debian be installed to)
 TARGET=''
 
-# which bootmanager do you want to use? [grub|lilo]
-BOOTMGR='grub'
-
-# if using grub, where do you want to install grub to?
+# where do you want to install grub to?
 # usage example:
 # GROOT='hd0,0'
 GROOT=''
-
-# if using lilo, where do you want to install lilo to?
-# usage example:
-# BOOT='/dev/hda1'
-BOOT=''
 
 ################################################################################
 

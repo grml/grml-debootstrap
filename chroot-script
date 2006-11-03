@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 14:36:06 CET 2006 [mika]
+# Latest change: Fre Nov 03 14:47:54 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -94,7 +94,7 @@ if [ -n "$INITRD" ] ; then
    fi
 fi
 
-if [ "$BOOTMGR" = 'grub' ] ; then
+if [ -n "$GROOT" ] ; then
    echo "Installing grub"
 #   if ! [ -f /boot/grub/menu.lst ] ; then
 #      # setup grub
@@ -127,47 +127,17 @@ if [ "$BOOTMGR" = 'grub' ] ; then
    cp /usr/lib/grub/i386-pc/* /boot/grub/
 
    # otherwise grub fails with 'Could not find device for /boot/boot: not found or not a block device'
-   cp /etc/mtab /etc/mtab.old
-   cp /proc/mounts /etc/mtab
+   # cp /etc/mtab /etc/mtab.old
+   # cp /proc/mounts /etc/mtab
 
    # finally install grub
    # grub-install $BOOT
    update-grub -y
-   [ -n "$GROOT" ] && sed -i "s/^# groot=(hd.*/groot=(${GROOT})" /boot/grub/menu.lst
+   sed -i "s/groot=.*/groot=(${GROOT})" /boot/grub/menu.lst
    update-grub -y
 
    # restore mtab again
-   mv /etc/mtab.old /etc/mtab
-fi
-
-if [ "$BOOTMGR" = 'lilo' ] ; then
-   echo "Installing lilo"
-# /usr/share/doc/lilo/examples/conf.sample
-cat > /etc/lilo.conf << EOF
-# This allows booting from any partition on disks with more than 1024 cylinders.
-lba32
-
-# Specifies the boot device
-boot=$BOOT
-
-# Specifies the device that should be mounted as root.
-root=$TARGET
-
-# use Debian on software raid:
-# raid-extra-boot=mbr-only
-
-install=text
-# prompt
-timeout=1
-map=/boot/map
-vga=normal
-
-image=/boot/vmlinuz-2.6.17-grml
-        label="$KERNELVER"
-        #append="...."
-        read-only
-        $LILOINITRD
-EOF
+   # mv /etc/mtab.old /etc/mtab
 fi
 
 # unmount all filesystems in chroot, make sure nothing is left...
