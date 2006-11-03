@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 11:15:56 CET 2006 [mika]
+# Latest change: Fre Nov 03 11:24:15 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -35,9 +35,13 @@ $MKFS $TARGET
 eend $?
 
 # now mount the new partition
-einfo "Mounting $TARGET to $MNTPOINT"
-mount -o rw,suid,dev $TARGET $MNTPOINT
-eend $?
+if grep -q $TARGET /proc/mounts ; then
+   eerror "$TARGEt already mounted, exiting."
+else
+  einfo "Mounting $TARGET to $MNTPOINT"
+  mount -o rw,suid,dev $TARGET $MNTPOINT
+  eend $?
+fi
 
 # get main packages from a debian-mirror
 einfo "Running $DEBOOTSTRAP for release $RELEASE using mirror $MIRROR"
