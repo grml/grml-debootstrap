@@ -38,6 +38,16 @@ if [ "$PACKAGES" = 'yes' ] ; then
    fi
 fi
 
+if [ -n "$KERNEL" ] ; then
+   apt-get update
+   if [ "$RELEASE" = 'sarge' ] ; then
+      KERNELPACKAGES="kernel-image-$KERNEL"
+   else
+      KERNELPACKAGES="linux-image-$KERNEL"
+   fi
+   apt-get --force-yes -y install $KERNELPACKAGES
+fi
+
 if [ -n "$RECONFIGURE" ] ; then
    for package in $RECONFIGURE ; do
        dpkg --list $package 1>/dev/null 2>/dev/null && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."

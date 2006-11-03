@@ -38,8 +38,8 @@ RELEASE='etch'
 # hostname of new system
 HOSTNAME='grml'
 
-# kernel version
-KERNEL='linux-image-686'
+# kernel version which should be installed
+KERNEL='2.6-686'
 
 # name of debootstrap executable
 # supported values: debootstrap cdebootstrap
