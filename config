@@ -81,6 +81,7 @@ LOCALES='yes'
 TIMEZONE='Europe/Vienna'
 
 # generate initrd via update-initramfs?
+# notice: won't do anything when release is sarge as update-initramfs does not exist there
 INITRD='yes'
 
 ## END OF FILE #################################################################
