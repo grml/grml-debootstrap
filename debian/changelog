@@ -1,13 +1,14 @@
 grml-debootstrap (0.2) unstable; urgency=low
 
-  * Support Sarge as RELEASE as well.
-  * Add 'debootstrap | cdebootstrap' to depends.
+  * Support Sarge and Sid as "$RELEASE"s as well.
+  * Added 'debootstrap | cdebootstrap' and grml-etc-core to
+    depends.
   * Added support for:
-    - cdebootstrap
+    - cdebootstrap [broken for sarge as $RELEASE, see #390510]
     - setting hostname via /etc/hostname
     - /etc/kernel-img.conf
     - support setting locales through /etc/debootstrap/locale.gen
-  * Added ssh, mdadm and lvm to default package list.
+  * Added ssh, mdadm and lvm2 to default package list.
   * Rewrote kernel package version handling (removed from package
     list to be able to support sarge as well).
 
