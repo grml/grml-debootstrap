@@ -17,3 +17,8 @@ Description: wrapper around debootstrap for installing plain Debian via grml
  file /etc/debootstrap/config and invoke grml-debootstrap then.
  A plain and base Debian system will be installed on the given
  device then. Customization of this process is possible as well.
+ .
+ Supported releases:
+   * Sarge
+   * Etch
+   * Sid (work in progress...)

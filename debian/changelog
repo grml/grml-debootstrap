@@ -1,5 +1,6 @@
 grml-debootstrap (0.2) unstable; urgency=low
 
+  * Support Sarge as RELEASE as well.
   * Add 'debootstrap | cdebootstrap' to depends.
   * Added support for:
     - cdebootstrap
