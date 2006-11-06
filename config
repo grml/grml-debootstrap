@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 13:45:50 CET 2006 [mika]
+# Latest change: Mon Nov 06 15:40:40 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -14,8 +14,9 @@
 # TARGET='/dev/hda1'
 TARGET=''
 
-# where do you want to install grub to?
-# notice: hd0,0 is *first* partition on *first* disk (/dev/sda1 + /dev/hda1)
+# where do you want to install grub to? use grub syntax for specifying
+# notice: hd0,0 is first partition on first disk
+#         hd0   is MBR of first disk
 # usage example:
 # GROOT='hd0,0'
 GROOT=''
@@ -24,13 +25,11 @@ GROOT=''
 # Now the variables you might want to adjust, but need not to...
 
 # set mirror where debootstrap should download packages from
-# MIRROR='ftp://ftp.debian.at/debian'
-MIRROR='ftp://ftp.tugraz.at/mirror/debian'
+MIRROR='ftp://ftp.debian.de/debian'
 
 # specify entry which should be used for /etc/apt/sources.list,
 # if empty then any existing /etc/apt/sources.list will be taken
-# CHROOTMIRROR='ftp://ftp.debian.at/debian'
-CHROOTMIRROR='ftp://ftp.tugraz.at/mirror/debian'
+CHROOTMIRROR='ftp://ftp.debian.de/debian'
 
 # release (which Debian version should be installed)
 RELEASE='etch'
