@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 15:40:40 CET 2006 [mika]
+# Latest change: Mon Nov 06 15:56:03 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -16,6 +16,14 @@ TARGET=''
 
 # where do you want to install grub to? use grub syntax for specifying
 # notice: hd0,0 is first partition on first disk
+#         hd0   is MBR of first disk
+# usage example:
+# GRUB='hd0'
+GRUB=''
+
+# specify root device for usage in grub (corresponds with $TARGET)
+# notice: if you install Debian to /dev/hda1 use hd0,0
+#         hd0,0 is first partition on first disk
 #         hd0   is MBR of first disk
 # usage example:
 # GROOT='hd0,0'

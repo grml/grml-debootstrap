@@ -145,8 +145,10 @@ if [ -n "$INITRD" ] ; then
    fi
 fi
 
-if [ -n "$GROOT" ] ; then
-   echo "Installing grub"
+if [ -z "$GROOT" ] ; then
+   echo "Warning: $GROOT is not defined, can not adjust grub configuration therefor."
+else
+   echo "Adjusting grub configuration for use on ${GROOT}."
 
    # copy stage-files to /boot/grub/
    [ -d /boot/grub/ ] || mkdir /boot/grub
