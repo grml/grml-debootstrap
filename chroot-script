@@ -69,9 +69,10 @@ fi
 echo "Activating shadow passwords."
 shadowconfig on
 echo "Setting password for user root:"
-# TODO: typing the wrong password will exit chroot script
+set +e # do not exit if passwd returns error due to missmatching passwords
 passwd
 echo ""
+set -e # restore default behaviour again
 
 if ! [ -f /etc/hosts ] ; then
    echo "Setting up /etc/hosts"
