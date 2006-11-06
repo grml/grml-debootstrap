@@ -7,6 +7,7 @@ TODO list for grml-debootstrap
 * support bootoption debian2hd for installation through bootoption
 * support *full* automatic installation where not a single keypress is necessary
 * should we support mkinitrd for initrd creation in sarge?
+* normalize usage of TARGET, GROOT and MBR in config file
 
 Test matrix
 -----------
