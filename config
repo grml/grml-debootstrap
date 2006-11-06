@@ -28,8 +28,13 @@ MBR=''
 ################################################################################
 # Now the variables you might want to adjust, but need not to...
 
+# set mirror where debootstrap should download packages from
+# MIRROR='ftp://ftp.debian.at/debian'
+MIRROR='ftp://ftp.tugraz.at/mirror/debian'
+
 # specify entry which should be used for /etc/apt/sources.list,
 # if empty then any existing /etc/apt/sources.list will be taken
+# CHROOTMIRROR='ftp://ftp.debian.at/debian'
 CHROOTMIRROR='ftp://ftp.tugraz.at/mirror/debian'
 
 # release (which Debian version should be installed)
@@ -53,9 +58,6 @@ CONFFILES='/etc/debootstrap/'
 
 # mount point where chroot actions should take place
 MNTPOINT='/mnt/test'
-
-# set mirror where debootstrap should download packages from
-MIRROR='ftp://ftp.tugraz.at/mirror/debian'
 
 # executable which should be run on $TARGET
 # unset it if you do not want to use it
