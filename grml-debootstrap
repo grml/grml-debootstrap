@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 03 21:35:09 CET 2006 [mika]
+# Latest change: Mon Nov 06 12:31:46 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -127,6 +127,14 @@ eend $?
 einfo "Unmount $MNTPOINT"
 umount $MNTPOINT
 eend $?
+
+if [ -z "$MBR" ] ; then
+   echo "Notice: \$MBR not set, will not install grub therefor."
+else
+   einfo "Installing grub on ${MBR}:"
+   grub-install --root-directory="$MNTPOINT" "(${MBR})"
+   eend $?
+fi
 
 if [ "$FSCK" = 'yes' ] ; then
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"

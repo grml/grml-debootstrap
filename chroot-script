@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 11:52:24 CET 2006 [mika]
+# Latest change: Mon Nov 06 12:31:50 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -160,17 +160,10 @@ if [ -n "$GROOT" ] ; then
    # finally install grub
    update-grub -y
    sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
+   sed -i "s/^# kopt=root=.*/# kopt=root=${TARGET} ro/g" /boot/grub/menu.lst
    # not sure why savedefault does not work for me; any ideas?
    sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
    update-grub -y
-
-   if [ -z "$MBR" ] ; then
-      echo "Notice: \$MBR not set, will not install grub therefor."
-   else
-      cp /proc/mounts /etc/mtab
-      grub-install "$MBR"
-      rm /etc/mtab
-   fi
 fi
 
 # make sure we don't have any running processes left
