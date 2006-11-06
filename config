@@ -3,28 +3,31 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 15:56:03 CET 2006 [mika]
+# Latest change: Mon Nov 06 22:31:08 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
 # Important: you definitely have to adjust the following variables!
 ################################################################################
-# target partition (where should Debian be installed to)
+## The most important question: target partition for new Debian system
+# Where should Debian be installed to?
 # usage example:
 # TARGET='/dev/hda1'
 TARGET=''
 
-# where do you want to install grub to? use grub syntax for specifying
-# notice: hd0,0 is first partition on first disk
-#         hd0   is MBR of first disk
+## Do you want to install grub? Then adjust the variables GRUB and GROOT.
+## If you do not set the variables grub will not be installed.
+# Where do you want to install grub to? Use grub syntax for specifying
+# hints:  hd0,0 is the first partition on the first disk
+#         hd0   is the MBR of the first disk
 # usage example:
 # GRUB='hd0'
 GRUB=''
 
 # specify root device for usage in grub (corresponds with $TARGET)
-# notice: if you install Debian to /dev/hda1 use hd0,0
-#         hd0,0 is first partition on first disk
-#         hd0   is MBR of first disk
+# notice: if you install Debian for example to /dev/hda1 use hd0,0
+#         hd0,0 is the first partition on the first disk
+#         hd0   is the MBR of the first disk
 # usage example:
 # GROOT='hd0,0'
 GROOT=''
@@ -40,6 +43,7 @@ MIRROR='ftp://ftp.debian.de/debian'
 CHROOTMIRROR='ftp://ftp.debian.de/debian'
 
 # release (which Debian version should be installed)
+# supported values: sarge etch sid
 RELEASE='etch'
 
 # hostname of new system
