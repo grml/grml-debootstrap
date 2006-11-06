@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 12:51:22 CET 2006 [mika]
+# Latest change: Mon Nov 06 13:45:41 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -52,7 +52,7 @@ einfo "$0 - Please recheck configuration before execution:"
 echo "
    Target partition: $TARGET
    Mount-point:      $MNTPOINT
-   Install grub to:  $MBR / $GROOT [if empty it will not be installed]
+   Install grub to:  $GROOT     [if empty grub will not be installed]
 
    Important! Continuing will delete all data from ${TARGET}!
 "
@@ -124,11 +124,11 @@ eend $?
 # rm -rf $MNTPOINT/etc/debootstrap/
 # eend $?
 
-if [ -z "$MBR" ] ; then
-   echo "Notice: \$MBR not set, will not install grub therefor."
+if [ -z "$GROOT" ] ; then
+   echo "Notice: \$GROOT not set, will not install grub therefor."
 else
-   einfo "Installing grub on ${MBR}:"
-   grub-install --root-directory="$MNTPOINT" "(${MBR})"
+   einfo "Installing grub on ${GROOT} / ${TARGET}:"
+   grub-install --root-directory="$MNTPOINT" "(${GROOT})"
    eend $?
 fi
 
