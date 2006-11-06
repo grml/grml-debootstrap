@@ -21,4 +21,4 @@ Description: wrapper around debootstrap for installing plain Debian via grml
  Supported releases:
    * Sarge
    * Etch
-   * Sid (work in progress...)
+   * Sid
