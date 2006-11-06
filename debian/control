@@ -18,7 +18,7 @@ Description: wrapper around debootstrap for installing plain Debian via grml
  A plain and base Debian system will be installed on the given
  device then. Customization of this process is possible as well.
  .
- Supported releases:
-   * Sarge
-   * Etch
-   * Sid
+ Supported Debian GNU/Linux releases:
+   * Sarge (3.1)
+   * Etch  (4.0)
+   * Sid   (4.0 unstable)

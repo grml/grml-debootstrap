@@ -1,7 +1,6 @@
 TODO list for grml-debootstrap
 ------------------------------
 
-* fix the "Could not find devices for /boot: Not found or not a block device." problem in sarge
 * support tarballs for customization
 * support automatic installation of grml core packages
 * support bootoption debian2hd for installation through bootoption
