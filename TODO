@@ -7,16 +7,3 @@ TODO list for grml-debootstrap
 * support bootoption debian2hd for installation through bootoption
 * support *full* automatic installation where not a single keypress is necessary
 * should we support mkinitrd for initrd creation in sarge?
-
-Test matrix
------------
-
-+----------------+-------------+-----------------+
-| Release / Tool | debootstrap | cdebootstrap    |
-+----------------+-------------+-----------------+
-| Sarge          |  works      | broken: #390510 |
-+----------------+-------------+-----------------+
-| Etch           |  works      |  works          |
-+----------------+-------------+-----------------+
-| Sid            |  untested   |  untested       |
-+----------------+-------------+-----------------+
