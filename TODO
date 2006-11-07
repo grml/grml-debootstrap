@@ -2,7 +2,9 @@ TODO list for grml-debootstrap
 ------------------------------
 
 * support tarballs for customization
-* support automatic installation of grml core packages
-* support bootoption debian2hd for installation through bootoption
+* support automatic installation of grml packages:
+  * grml-etc-core
+  * grml-x + xserver-xorg
 * support *full* automatic installation where not a single keypress is necessary
+  -> support bootoption debian2hd for installation through bootoption on live-cd
 * should we support mkinitrd for initrd creation in sarge?
