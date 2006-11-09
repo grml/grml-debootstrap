@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 15:57:52 CET 2006 [mika]
+# Latest change: Fre Nov 10 00:50:55 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -47,6 +47,20 @@ if [ -z "$TARGET" ] ; then
    exit 1
 fi
 
+function bailout(){
+  # make sure $TARGET is not mounted when exiting grml-debootstrap
+  if [ -n "$TARGET" ] ; then
+     if grep -q $TARGET /proc/mounts ; then
+        echo "Unmounting $TARGET"
+        umount "$TARGET"
+     fi
+  fi
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  exit "$EXIT"
+}
+
+trap bailout 1 2 3 15
+
 # user should recheck his configuration
 einfo "$0 - Please recheck configuration before execution:"
 echo "
@@ -88,8 +102,12 @@ else
 fi
 
 # get main packages from a debian-mirror
-einfo "Running $DEBOOTSTRAP for release $RELEASE using mirror $MIRROR"
-$DEBOOTSTRAP $RELEASE $MNTPOINT $MIRROR
+if [ -n "$ARCH" ] ; then
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+fi
+einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
+$DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
 eend $?
 
 einfo "Preparing chroot system"

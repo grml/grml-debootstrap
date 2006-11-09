@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 22:31:08 CET 2006 [mika]
+# Latest change: Fre Nov 10 00:52:27 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
@@ -45,6 +45,11 @@ CHROOTMIRROR='ftp://ftp.debian.de/debian'
 # release (which Debian version should be installed)
 # supported values: sarge etch sid
 RELEASE='etch'
+
+# architecture (not yet officially supported by grml-debootstrap, work in progress)
+# if unset the default (i386) will be taken
+# notice: installing an amd64 system requires a 64bit kernel
+# ARCH='amd64'
 
 # hostname of new system
 HOSTNAME='grml'

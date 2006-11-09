@@ -1,3 +1,10 @@
+grml-debootstrap (0.3) unstable; urgency=low
+
+  * Initial support for $ARCH.
+  * Added function for clean exit (using trap).
+
+ -- Michael Prokop <mika@grml.org>  Fri, 10 Nov 2006 00:51:09 +0100
+
 grml-debootstrap (0.2) unstable; urgency=low
 
   * Support Sarge and Sid as "$RELEASE"s as well.
