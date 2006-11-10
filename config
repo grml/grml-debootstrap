@@ -49,12 +49,15 @@ RELEASE='etch'
 # architecture (not yet officially supported by grml-debootstrap, work in progress)
 # if unset the default (i386) will be taken
 # notice: installing an amd64 system requires a 64bit kernel
+#         do not forget to adjust $KERNEL for selected architecture as well
 # ARCH='amd64'
 
 # hostname of new system
 HOSTNAME='grml'
 
 # kernel version which should be installed
+# do not forget to adjust according to architecture, for example
+# use 2.6-686 for i386 and 2.6-amd64 for amd64
 KERNEL='2.6-686'
 
 # name of debootstrap executable
