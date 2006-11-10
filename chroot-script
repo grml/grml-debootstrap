@@ -146,7 +146,7 @@ if [ -n "$INITRD" ] ; then
 fi
 
 if [ -z "$GROOT" ] ; then
-   echo "Warning: $GROOT is not defined, can not adjust grub configuration therefor."
+   echo "Warning: \$GROOT is not defined, can not adjust grub configuration therefor."
 else
    echo "Adjusting grub configuration for use on ${GROOT}."
 
