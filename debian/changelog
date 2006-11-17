@@ -1,3 +1,9 @@
+grml-debootstrap (0.4) unstable; urgency=low
+
+  * Support installation into directory.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 17 Nov 2006 23:00:38 +0100
+
 grml-debootstrap (0.3) unstable; urgency=low
 
   * Initial support for $ARCH.

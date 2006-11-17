@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 10 00:50:55 CET 2006 [mika]
+# Latest change: Fre Nov 17 23:00:30 CET 2006 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -61,6 +61,24 @@ function bailout(){
 
 trap bailout 1 2 3 15
 
+PARTITION=''
+DIRECTORY=''
+
+case $TARGET in
+  /dev/*)
+    PARTITION=1
+       ;;
+       *)
+       # assume we are installing into a directory, don't run mkfs and grub related stuff therefore
+    DIRECTORY=1
+    MNTPOINT="$TARGET"
+    MKFS=''
+    TUNE2FS=''
+    GRUB=''
+    GROOT=''
+       ;;
+esac
+
 # user should recheck his configuration
 einfo "$0 - Please recheck configuration before execution:"
 echo "
@@ -90,15 +108,20 @@ if [ -n "$TUNE2FS" ] ; then
    eend $?
 fi
 
-# now mount the new partition
-if grep -q $TARGET /proc/mounts ; then
-   eerror "$TARGET already mounted, exiting."
+
+# now mount the new partition or if it's a directory do nothing at all
+if [ -n "$DIRECTORY" ] ; then
+   einfo "Running grml-debootstrap on a directory, nothing to mount."
 else
-  [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
-  einfo "Mounting $TARGET to $MNTPOINT"
-  [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
-  mount -o rw,suid,dev $TARGET $MNTPOINT
-  eend $?
+   if grep -q $TARGET /proc/mounts ; then
+      eerror "$TARGET already mounted, exiting."
+   else
+     [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
+     [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
+     einfo "Mounting $TARGET to $MNTPOINT"
+     mount -o rw,suid,dev $TARGET $MNTPOINT
+     eend $?
+   fi
 fi
 
 # get main packages from a debian-mirror
@@ -150,9 +173,11 @@ else
    eend $?
 fi
 
-einfo "Unmount $MNTPOINT"
-umount $MNTPOINT
-eend $?
+if [ -n "$PARTITION" ] ; then
+   einfo "Unmount $MNTPOINT"
+   umount $MNTPOINT
+   eend $?
+fi
 
 if [ "$FSCK" = 'yes' ] ; then
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"

@@ -3,16 +3,24 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 10 00:52:27 CET 2006 [mika]
+# Latest change: Fre Nov 17 22:58:32 CET 2006 [mika]
 ################################################################################
 
 ################################################################################
 # Important: you definitely have to adjust the following variables!
 ################################################################################
-## The most important question: target partition for new Debian system
-# Where should Debian be installed to?
-# usage example:
+## The most important question: target of the new Debian system
+## Where should Debian be installed to?
+#
+# Usually you want to use a partition. If you specify a string *without* /dev/
+# in the beginning, grml-debootstrap assumes you want to install Debian into a
+# directory. If so then MKFS, TUNE2FS, GRUB, GROOT and FSCK won't apply, no
+# matter of the configuration variables. Make sure the TARGET-directory is on a
+# partition with present dev and exec mount options.
+#
+# usage examples:
 # TARGET='/dev/hda1'
+# TARGET='/mnt/grml'
 TARGET=''
 
 ## Do you want to install grub? Then adjust the variables GRUB and GROOT.
