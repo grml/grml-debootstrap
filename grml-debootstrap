@@ -87,6 +87,7 @@ echo "
    case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
    [ -n "$GRUB" ] && echo "   Install grub to:  $GROOT / $GRUB"
    case "$MNTPOINT" in "$TARGET") ;; *) echo "  Important! Continuing will delete all data from ${TARGET}!" ;; esac
+   echo
 einfon "Is this ok for you? [y/N] "
 
 read a
