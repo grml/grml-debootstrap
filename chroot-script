@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Nov 06 15:33:28 CET 2006 [mika]
+# Latest change: Sam Nov 18 10:32:33 CET 2006 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -15,6 +15,10 @@ set -e # exit on any error
 
 if [ -n "$CHROOTMIRROR" ] ; then
    echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
+fi
+
+if [ -n "$GRMLREPOS" ] ; then
+   echo 'deb     http://grml.org/repos/ ./' >> /etc/apt/sources.list
 fi
 
 if ! [ -r /etc/kernel-img.conf ] ; then
@@ -40,7 +44,7 @@ if [ "$PACKAGES" = 'yes' ] ; then
      exit 1
    else
      apt-get update
-     apt-get --force-yes -y install $(cat /etc/debootstrap/packages)
+     apt-get --force-yes -y install $(cat /etc/debootstrap/packages) $GRMLPACKAGES
    fi
 fi
 
