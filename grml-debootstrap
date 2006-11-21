@@ -18,7 +18,7 @@ VERSION='0.2'
 case $* in
    -h*|--h*)
      einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
-     einfo "Configure via /etc/debootstrap/config and invoke $0 afterwards."
+     einfo "Adjust /etc/debootstrap/config and invoke $0 afterwards."
      eend 0
      exit 0
    ;;
