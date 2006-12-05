@@ -51,12 +51,12 @@ MIRROR='ftp://ftp.debian.de/debian'
 CHROOTMIRROR='ftp://ftp.debian.de/debian'
 
 # add grml repository to /etc/apt/sources.list
-# if empty then the repository won't be added
-GRMLREPOS='yes'
+# if empty then the repository won't be added (notice: in testing phase)
+# GRMLREPOS='yes'
 
 # install packages from grml-pool? requires activated $GRMLREPOS from above
-# if empty nothing will be added
-GRMLPACKAGES='grml-etc-core'
+# if empty nothing will be added (notice: in testing phase)
+# GRMLPACKAGES='grml-etc-core'
 
 # release (which Debian version should be installed)
 # supported values: sarge etch sid
