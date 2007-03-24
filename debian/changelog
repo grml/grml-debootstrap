@@ -1,3 +1,9 @@
+grml-debootstrap (0.5) unstable; urgency=low
+
+  * Changed Architecture from any to all.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 24 Mar 2007 16:58:53 +0100
+
 grml-debootstrap (0.4) unstable; urgency=low
 
   * Support installation into directory.

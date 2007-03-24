@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 XS-Vcs-hg: http://hg.grml.org/grml-debootstrap
 
 Package: grml-debootstrap
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap | cdebootstrap, grml-etc-core
 Description: wrapper around debootstrap for installing plain Debian via grml
  This package provides a wrapper suite around deboostrap and
