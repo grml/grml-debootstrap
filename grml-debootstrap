@@ -60,6 +60,8 @@ bailout(){
   # make sure $TARGET is not mounted when exiting grml-debootstrap
   if [ -n "$TARGET" ] ; then
      if grep -q $TARGET /proc/mounts ; then
+        [ -x "$TARGET"/etc/init.d/ssh   ] && "$TARGET"/etc/init.d/ssh stop
+        [ -x "$TARGET"/etc/init.d/mdadm ] && "$TARGET"/etc/init.d/mdadm stop
         echo "Unmounting $TARGET"
         umount "$TARGET"
      fi
