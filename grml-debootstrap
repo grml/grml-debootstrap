@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 09 15:34:02 CEST 2007 [mika]
+# Latest change: Mon Apr 09 23:23:18 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -60,8 +60,11 @@ bailout(){
   # make sure $TARGET is not mounted when exiting grml-debootstrap
   if [ -n "$TARGET" ] ; then
      if grep -q $TARGET /proc/mounts ; then
+        # make sure nothing is left inside chroot so we can unmount it
         [ -x "$TARGET"/etc/init.d/ssh   ] && "$TARGET"/etc/init.d/ssh stop
         [ -x "$TARGET"/etc/init.d/mdadm ] && "$TARGET"/etc/init.d/mdadm stop
+	chroot "$TARGET" umount /sys  1>/dev/null 2>&1
+	chroot "$TARGET" umount /proc 1>/dev/null 2>&1
         echo "Unmounting $TARGET"
         umount "$TARGET"
      fi
@@ -83,10 +86,8 @@ stage() {
      return 1
   fi
   # main function
-  if [ -f "$STAGES/$1" ] ; then
-     if grep -q done "$STAGES/$1" ; then
-        ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-     fi
+  if grep -q done "$STAGES/$1" 2>/dev/null ; then
+     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
   else
      echo "$2" > "$STAGES/$1"
   fi

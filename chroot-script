@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 09 15:33:33 CEST 2007 [mika]
+# Latest change: Mon Apr 09 23:27:30 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -29,10 +29,8 @@ stage() {
      return 1
   fi
   # main function
-  if [ -f "$STAGES/$1" ] ; then
-     if grep -q done "$STAGES/$1" ; then
-        ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-     fi
+  if grep -q done "$STAGES/$1" 2>/dev/null ; then
+     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
   else
      echo "$2" > "$STAGES/$1"
   fi
