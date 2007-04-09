@@ -9,4 +9,3 @@ TODO list for grml-debootstrap
 * support *full* automatic installation where not a single keypress is necessary
   -> support bootoption debian2hd for installation through bootoption on live-cd
 * support for LVM + SW-RAID [should work through installation into directory, needs testing though]
-* should we support mkinitrd for initrd creation in sarge?
