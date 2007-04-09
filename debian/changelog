@@ -1,3 +1,12 @@
+grml-debootstrap (0.6) unstable; urgency=low
+
+  * Export LANG=C and LC_ALL=C as we don't have the locales inside
+    the chroot when running grml-debootstrap. (Just a cosmetic
+    change as there aren't any errors but warning messages from
+    dpkg.)
+
+ -- Michael Prokop <mika@grml.org>  Mon,  9 Apr 2007 14:35:21 +0200
+
 grml-debootstrap (0.5) unstable; urgency=low
 
   * Changed Architecture from any to all.

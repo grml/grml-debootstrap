@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Fre Nov 17 23:44:49 CET 2006 [mika]
+# Latest change: Mon Apr 09 14:35:18 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/apcs04.html.en
 
@@ -13,7 +13,11 @@ set -e # exit on any error
 . /etc/grml/lsb-functions
 . /etc/grml/script-functions
 
-VERSION='0.2'
+# inside the chroot system the locales might not be available, so use minimum:
+export LANG=C
+export LC_ALL=C
+
+VERSION='0.6'
 
 case $* in
    -h*|--h*)
@@ -67,9 +71,9 @@ DIRECTORY=''
 case $TARGET in
   /dev/*)
     PARTITION=1
-       ;;
-       *)
-       # assume we are installing into a directory, don't run mkfs and grub related stuff therefore
+    ;;
+  *)
+    # assume we are installing into a directory, don't run mkfs and grub related stuff therefore
     DIRECTORY=1
     MNTPOINT="$TARGET"
     MKFS=''
@@ -77,7 +81,7 @@ case $TARGET in
     FSCK=''
     GRUB=''
     GROOT=''
-       ;;
+    ;;
 esac
 
 # user should recheck his configuration
@@ -157,7 +161,7 @@ einfo "Preparing chroot system"
 eend 0
 
 einfo "Executing chroot-script now"
-chroot $MNTPOINT /bin/chroot-script
+chroot "$MNTPOINT" /bin/chroot-script
 eend $?
 
 # einfo "Removing chroot-script"
