@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 09 14:41:57 CEST 2007 [mika]
+# Latest change: Mon Apr 09 15:22:07 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -45,13 +45,18 @@ else
    exit 1
 fi
 
+if [ -z "$STAGES" ] ; then
+   STAGES='/etc/debootstrap/stages'
+   [ -d "$STAGES" ] || mkdir -p "$STAGES"
+fi
+
 # make sure at least $TARGET is set [the partition for the new system]
 if [ -z "$TARGET" ] ; then
    eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
    exit 1
 fi
 
-function bailout(){
+bailout(){
   # make sure $TARGET is not mounted when exiting grml-debootstrap
   if [ -n "$TARGET" ] ; then
      if grep -q $TARGET /proc/mounts ; then
@@ -61,6 +66,28 @@ function bailout(){
   fi
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   exit "$EXIT"
+}
+
+stage() {
+  # error handling
+  if [ -z "$1" ] ; then
+     eerror 'Error: stage() requires at least one argument.'
+     eend 1
+     return 1
+  fi
+  if [ -z "$STAGES" ] ; then
+     eerror 'Error: $STAGES not set.'
+     eend 1
+     return 1
+  fi
+  # main function
+  if [ -f "$STAGES/$1" ] ; then
+     if grep -q done "$STAGES/$1" ; then
+        ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     fi
+  else
+     echo "$2" > "$STAGES/$1"
+  fi
 }
 
 trap bailout 1 2 3 15
@@ -101,15 +128,20 @@ if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
 fi
 
 if [ -n "$MKFS" ] ; then
+   stage mkfs
    einfo "Running $MKFS on $TARGET"
    $MKFS $TARGET
    eend $?
+   stage mkfs done
 fi
 
+
 if [ -n "$TUNE2FS" ] ; then
+   stage tune2fs
    einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
    $TUNE2FS $TARGET
    eend $?
+   stage tune2fs done
 fi
 
 
@@ -138,10 +170,13 @@ else
    ARCHINFO=" (${ARCH})"
 fi
 
+stage debootstrap
 einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
 $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
+stage debootstrap done
 eend $?
 
+stage preparechroot
 einfo "Preparing chroot system"
   cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
@@ -164,10 +199,13 @@ einfo "Preparing chroot system"
   [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
   [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
 eend 0
+stage preparechroot done
 
+stage chrootscript
 einfo "Executing chroot-script now"
 chroot "$MNTPOINT" /bin/chroot-script
 eend $?
+stage chrootscript done
 
 # einfo "Removing chroot-script"
 # rm -f  $MNTPOINT/bin/chroot-script
@@ -177,9 +215,11 @@ eend $?
 if [ -z "$GRUB" -o -z "$GROOT" ] ; then
    echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
 else
+   stage grubinstall
    einfo "Installing grub on ${GRUB}:"
    grub-install --root-directory="$MNTPOINT" "(${GRUB})"
    eend $?
+   stage grubinstall done
 fi
 
 if [ -n "$PARTITION" ] ; then
@@ -189,12 +229,15 @@ if [ -n "$PARTITION" ] ; then
 fi
 
 if [ "$FSCK" = 'yes' ] ; then
+   stage fscktool
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
    einfo "Checking filesystem on $TARGET using $FSCKTOOL"
    $FSCKTOOL $TARGET
    eend $?
+   stage fscktool done
 fi
 
+einfo "All stages have been executed, to rerun grml-debootstrap please manually remove ${STAGES}."
 einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
 
 ## END OF FILE #################################################################

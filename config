@@ -80,6 +80,10 @@ KERNEL='2.6-686'
 # supported values: debootstrap cdebootstrap
 DEBOOTSTRAP='debootstrap'
 
+# The single steps/stages of grml-deboostrap are stored inside /etc/debootstrap/stages
+# by default. Use another directory instead?
+# STAGES='/etc/debootstrap/stages'
+
 # install packages defined in /etc/debootstrap/packages?
 PACKAGES='yes'
 

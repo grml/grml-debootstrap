@@ -2,7 +2,6 @@ TODO list for grml-debootstrap
 ------------------------------
 
 * support tarballs for customization
-* support stages / cancel operation [http://bts.grml.org/grml/issue151]
 * support automatic installation of grml packages:
   * grml-etc-core
   * grml-x + xserver-xorg

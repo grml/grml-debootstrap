@@ -6,6 +6,7 @@ grml-debootstrap (0.6) unstable; urgency=low
     dpkg.)
   * Always assume architecture of the running system (overwriting
     via $ARCH is still supported of course).
+  * Support stages. [Closes: issue151]
 
  -- Michael Prokop <mika@grml.org>  Mon,  9 Apr 2007 14:35:21 +0200
 
