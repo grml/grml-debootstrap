@@ -23,7 +23,7 @@ fi
 # helper functions {{{
 stage() {
   if grep -q done "$STAGES/$1" 2>/dev/null ; then
-     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     echo "Notice: stage $1 has been executed already, skipping execution therefore.">&2
      return 1
   else
      echo "$2" > "$STAGES/$1"
