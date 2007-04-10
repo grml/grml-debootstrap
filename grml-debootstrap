@@ -4,21 +4,25 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 09 23:23:18 CEST 2007 [mika]
+# Latest change: Die Apr 10 10:51:26 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
 set -e # exit on any error
 
-. /etc/grml/lsb-functions
-. /etc/grml/script-functions
-
-# inside the chroot system the locales might not be available, so use minimum:
-export LANG=C
-export LC_ALL=C
-
 VERSION='0.6'
 
+# source core functions {{{
+. /etc/grml/lsb-functions
+. /etc/grml/script-functions
+# }}}
+
+# make sure we have what we need {{{
+check4progs debootstrap || exit 1
+check4root || exit 1
+# }}}
+
+# cmdline handling {{{
 case $* in
    -h*|--h*)
      einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
@@ -33,67 +37,27 @@ case $* in
      exit 0
    ;;
 esac
+# }}}
 
-check4progs debootstrap || exit 1
-check4root || exit 1
-
-# without config file it won't work
+# without config file it won't work {{{
 if [ -r /etc/debootstrap/config ] ; then
    . /etc/debootstrap/config
 else
-   echo "/etc/debootstrap/config could not be read, exiting."
+   eerror "/etc/debootstrap/config could not be read, exiting." ; eend 1
    exit 1
 fi
+# }}}
+
+# set/check variables {{{
+
+# inside the chroot system the locales might not be available, so use minimum:
+export LANG=C
+export LC_ALL=C
 
 if [ -z "$STAGES" ] ; then
    STAGES='/etc/debootstrap/stages'
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
-
-# make sure at least $TARGET is set [the partition for the new system]
-if [ -z "$TARGET" ] ; then
-   eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
-   exit 1
-fi
-
-bailout(){
-  # make sure $TARGET is not mounted when exiting grml-debootstrap
-  if [ -n "$TARGET" ] ; then
-     if grep -q $TARGET /proc/mounts ; then
-        # make sure nothing is left inside chroot so we can unmount it
-        [ -x "$TARGET"/etc/init.d/ssh   ] && "$TARGET"/etc/init.d/ssh stop
-        [ -x "$TARGET"/etc/init.d/mdadm ] && "$TARGET"/etc/init.d/mdadm stop
-	chroot "$TARGET" umount /sys  1>/dev/null 2>&1
-	chroot "$TARGET" umount /proc 1>/dev/null 2>&1
-        echo "Unmounting $TARGET"
-        umount "$TARGET"
-     fi
-  fi
-  [ -n "$1" ] && EXIT="$1" || EXIT="1"
-  exit "$EXIT"
-}
-
-stage() {
-  # error handling
-  if [ -z "$1" ] ; then
-     eerror 'Error: stage() requires at least one argument.'
-     eend 1
-     return 1
-  fi
-  if [ -z "$STAGES" ] ; then
-     eerror 'Error: $STAGES not set.'
-     eend 1
-     return 1
-  fi
-  # main function
-  if grep -q done "$STAGES/$1" 2>/dev/null ; then
-     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-  else
-     echo "$2" > "$STAGES/$1"
-  fi
-}
-
-trap bailout 1 2 3 15
 
 PARTITION=''
 DIRECTORY=''
@@ -114,7 +78,55 @@ case $TARGET in
     ;;
 esac
 
-# user should recheck his configuration
+if [ -n "$ARCH" ] ; then
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+else
+   ARCH="$(dpkg --print-architecture)"
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+fi
+
+# make sure at least $TARGET is set [the partition for the new system]
+if [ -z "$TARGET" ] ; then
+   eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
+   exit 1
+fi
+# }}}
+
+# helper functions {{{
+# we want to exit smoothly and clean:
+bailout(){
+  # make sure $TARGET is not mounted when exiting grml-debootstrap
+  if [ -n "$TARGET" ] ; then
+     if grep -q $TARGET /proc/mounts ; then
+        # make sure nothing is left inside chroot so we can unmount it
+        [ -x "$TARGET"/etc/init.d/ssh   ] && "$TARGET"/etc/init.d/ssh stop
+        [ -x "$TARGET"/etc/init.d/mdadm ] && "$TARGET"/etc/init.d/mdadm stop
+        chroot "$TARGET" umount /sys  1>/dev/null 2>&1
+        chroot "$TARGET" umount /proc 1>/dev/null 2>&1
+        echo "Unmounting $TARGET"
+        umount "$TARGET"
+     fi
+  fi
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  exit "$EXIT"
+}
+trap bailout 1 2 3 15
+
+# we want to execute all the functions only once, simple check for it:
+stage() {
+  if grep -q done "$STAGES/$1" 2>/dev/null ; then
+     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     return 1
+  else
+     echo "$2" > "$STAGES/$1"
+     return 0
+  fi
+}
+# }}}
+
+# user should recheck his configuration {{{
 einfo "$0 - Please recheck configuration before execution:"
 echo "
    Target:           $TARGET"
@@ -129,58 +141,57 @@ if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
    eerror "Exiting as requested." ; eend 1
    exit 1
 fi
+# }}}
 
-if [ -n "$MKFS" ] ; then
-   stage mkfs
-   einfo "Running $MKFS on $TARGET"
-   $MKFS $TARGET
-   eend $?
-   stage mkfs done
-fi
-
-
-if [ -n "$TUNE2FS" ] ; then
-   stage tune2fs
-   einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
-   $TUNE2FS $TARGET
-   eend $?
-   stage tune2fs done
-fi
-
-
-# now mount the new partition or if it's a directory do nothing at all
-if [ -n "$DIRECTORY" ] ; then
-   einfo "Running grml-debootstrap on a directory, nothing to mount."
-else
-   if grep -q $TARGET /proc/mounts ; then
-      eerror "$TARGET already mounted, exiting."
-   else
-     [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
-     [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
-     einfo "Mounting $TARGET to $MNTPOINT"
-     mount -o rw,suid,dev $TARGET $MNTPOINT
+# create filesystem {{{
+mkfs() {
+  if [ -n "$MKFS" ] ; then
+     einfo "Running $MKFS on $TARGET"
+     $MKFS $TARGET
      eend $?
-   fi
-fi
+  fi
+}
+# }}}
 
-# get main packages from a debian-mirror
-if [ -n "$ARCH" ] ; then
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
-else
-   ARCH="$(dpkg --print-architecture)"
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
-fi
+# modify filesystem settings {{{
+tunefs() {
+  if [ -n "$TUNE2FS" ] ; then
+     einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
+     $TUNE2FS $TARGET
+     eend $?
+  fi
+}
+# }}}
 
-stage debootstrap
-einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
-$DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
-stage debootstrap done
-eend $?
+# mount the new partition or if it's a directory do nothing at all {{{
+mount_target() {
+  if [ -n "$DIRECTORY" ] ; then
+     einfo "Running grml-debootstrap on a directory, nothing to mount."
+  else
+     if grep -q $TARGET /proc/mounts ; then
+        eerror "$TARGET already mounted, exiting."
+     else
+       [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
+       [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
+       einfo "Mounting $TARGET to $MNTPOINT"
+       mount -o rw,suid,dev $TARGET $MNTPOINT
+       eend $?
+     fi
+  fi
+}
+# }}}
 
-stage preparechroot
-einfo "Preparing chroot system"
+# install main chroot {{{
+debootstrap_system() {
+  einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
+  $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
+  eend $?
+}
+# }}}
+
+# prepare chroot via chroot-script {{{
+preparechroot() {
+  einfo "Preparing chroot system"
   cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
   mkdir $MNTPOINT/etc/debootstrap/
@@ -201,48 +212,68 @@ einfo "Preparing chroot system"
   [ -d /etc/debootstrap/share ] && cp -a /etc/debootstrap/share/* $MNTPOINT/share/
   [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
   [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
-eend 0
-stage preparechroot done
+  eend 0
+}
+# }}}
 
-stage chrootscript
-einfo "Executing chroot-script now"
-chroot "$MNTPOINT" /bin/chroot-script
-eend $?
-stage chrootscript done
+# execute chroot-script {{{
+chrootscript() {
+  einfo "Executing chroot-script now"
+  chroot "$MNTPOINT" /bin/chroot-script
+  eend $?
+}
+# }}}
 
-# einfo "Removing chroot-script"
-# rm -f  $MNTPOINT/bin/chroot-script
-# rm -rf $MNTPOINT/etc/debootstrap/
-# eend $?
+# install booloader grub {{{
+grub_install() {
+  if [ -z "$GRUB" -o -z "$GROOT" ] ; then
+     echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
+  else
+     einfo "Installing grub on ${GRUB}:"
+     grub-install --root-directory="$MNTPOINT" "(${GRUB})"
+     eend $?
+  fi
+}
+# }}}
 
-if [ -z "$GRUB" -o -z "$GROOT" ] ; then
-   echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
-else
-   stage grubinstall
-   einfo "Installing grub on ${GRUB}:"
-   grub-install --root-directory="$MNTPOINT" "(${GRUB})"
-   eend $?
-   stage grubinstall done
-fi
+# unmount $MNTPOINRT {{{
+umount_chroot() {
+  if [ -n "$PARTITION" ] ; then
+     einfo "Unmount $MNTPOINT"
+     umount $MNTPOINT
+     eend $?
+  fi
+}
+# }}}
 
-if [ -n "$PARTITION" ] ; then
-   einfo "Unmount $MNTPOINT"
-   umount $MNTPOINT
-   eend $?
-fi
+# execute filesystem check {{{
+fscktool() {
+  if [ "$FSCK" = 'yes' ] ; then
+     [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
+     einfo "Checking filesystem on $TARGET using $FSCKTOOL"
+     $FSCKTOOL $TARGET
+     eend $?
+  fi
+}
+# }}}
 
-if [ "$FSCK" = 'yes' ] ; then
-   stage fscktool
-   [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
-   einfo "Checking filesystem on $TARGET using $FSCKTOOL"
-   $FSCKTOOL $TARGET
-   eend $?
-   stage fscktool done
-fi
+# now execute all the functions {{{
+  stage mkfs               && mkfs               && stage mkfs done
+  stage tunefs             && tunefs             && stage tunefs done
+  stage mount_target       && mount_target       && stage mount_target done
+  stage debootstrap_system && debootstrap_system && stage debootstrap_system done
+  stage preparechroot      && preparechroot      && stage preparechroot done
+  stage chrootscript       && chrootscript       && stage chrootscript done
+  stage grub_install       && grub_install       && stage grub_install done
+  stage umount_chroot      && umount_chroot      && stage umount_chroot done
+  stage fscktool           && fscktool           && stage fscktool done
+# }}}
 
-# finally remove stages on main system so grml-deboostrap can be reexecuted
+# finally remove stages on main system so grml-deboostrap can be reexecuted {{{
   rm -rf "$STAGES"
+# }}}
 
-einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
+  einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
 
 ## END OF FILE #################################################################
+# vim: ai tw=80 expandtab foldmethod=marker

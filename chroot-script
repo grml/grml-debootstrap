@@ -4,152 +4,166 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 09 23:27:30 CEST 2007 [mika]
+# Latest change: Die Apr 10 11:11:02 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
 
 . /etc/debootstrap/config || exit 1
 
+[ -r /proc/1 ] || mount -t proc   none /proc
+
+# variable checks {{{
 if [ -z "$STAGES" ] ; then
    STAGES='/etc/debootstrap/stages'
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
+# }}}
 
+# helper functions {{{
 stage() {
-  # error handling
-  if [ -z "$1" ] ; then
-     eerror 'Error: stage() requires at least one argument.'
-     eend 1
-     return 1
-  fi
-  if [ -z "$STAGES" ] ; then
-     eerror 'Error: $STAGES not set.'
-     eend 1
-     return 1
-  fi
-  # main function
   if grep -q done "$STAGES/$1" 2>/dev/null ; then
      ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     return 1
   else
      echo "$2" > "$STAGES/$1"
+     return 0
   fi
 }
+# }}}
 
-[ -r /proc/1 ] || mount -t proc   none /proc
+# define chroot mirror {{{
+chrootmirror() {
+  if [ -n "$CHROOTMIRROR" ] ; then
+     echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
+  fi
+}
+# }}}
 
-if [ -n "$CHROOTMIRROR" ] ; then
-   stage chrootmirror
-   echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
-   stage chrootmirror done
-fi
+# set up grml repository {{{
+grmlrepos() {
+  if [ -n "$GRMLREPOS" ] ; then
+     echo 'deb     http://grml.org/repos/ ./' >> /etc/apt/sources.list
+  fi
+}
+# }}}
 
-if [ -n "$GRMLREPOS" ] ; then
-   stage grmlrepos
-   echo 'deb     http://grml.org/repos/ ./' >> /etc/apt/sources.list
-   stage grmlrepos done
-fi
-
-if ! [ -r /etc/kernel-img.conf ] ; then
-   stage kernelimg.conf
-   echo "Setting up /etc/kernel-img.conf"
-   cat > /etc/kernel-img.conf << EOF
+# set up kernel-img.conf {{{
+kernelimg_conf() {
+  if ! [ -r /etc/kernel-img.conf ] ; then
+     echo "Setting up /etc/kernel-img.conf"
+     cat > /etc/kernel-img.conf << EOF
 # Kernel Image management overrides
 # See kernel-img.conf(5) for details
 do_initrd = Yes
 do_symlinks = Yes
 EOF
-   stage kernelimg.conf done
-fi
+  fi
+}
+# }}}
 
-# create default devices
-if ! [ -r /dev/hda20 ] ; then
-   stage makedev
-   echo "Creating generic devices in /dev - this might take a while..."
-   cd /dev && MAKEDEV generic
-   stage makedev done
-fi
+# create default devices {{{
+makedev() {
+  if ! [ -r /dev/hda20 ] ; then
+     echo "Creating generic devices in /dev - this might take a while..."
+     cd /dev && MAKEDEV generic
+  fi
+}
+# }}}
 
-# install additional packages
-if [ "$PACKAGES" = 'yes' ] ; then
-   stage packages
-   if ! [ -r /etc/debootstrap/packages ] ; then
-     echo "Error: /etc/debootstrap/packages not found, exiting."
-     exit 1
-   else
+# install additional packages {{{
+packages() {
+  if [ "$PACKAGES" = 'yes' ] ; then
+     if ! [ -r /etc/debootstrap/packages ] ; then
+       echo "Error: /etc/debootstrap/packages not found, exiting."
+       exit 1
+     else
+       apt-get update
+       apt-get --force-yes -y install $(cat /etc/debootstrap/packages) $GRMLPACKAGES
+     fi
+  fi
+}
+# }}}
+
+# sarge specific stuff: mkinitrd {{{
+mkinitrd() {
+  if [ "$RELEASE" = 'sarge' ] ; then
+     sed -i "s#ROOT=probe#ROOT=$TARGET#" /etc/mkinitrd/mkinitrd.conf
+  fi
+}
+# }}}
+
+# install kernel packages {{{
+kernel() {
+  if [ -n "$KERNEL" ] ; then
      apt-get update
-     apt-get --force-yes -y install $(cat /etc/debootstrap/packages) $GRMLPACKAGES
-   fi
-   stage packages done
-fi
+     if [ "$RELEASE" = 'sarge' ] ; then
+        KERNELPACKAGES="kernel-image-$KERNEL kernel-headers-$KERNEL"
+     else
+        KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL"
+     fi
+     apt-get --force-yes -y install $KERNELPACKAGES
+  fi
+}
+# }}}
 
-# sarge specific stuff
-if [ "$RELEASE" = 'sarge' ] ; then
-   stage mkinitrd
-   sed -i "s#ROOT=probe#ROOT=$TARGET#" /etc/mkinitrd/mkinitrd.conf
-   stage mkinitrd done
-fi
+# reconfigure packages {{{
+reconfigure() {
+  if [ -n "$RECONFIGURE" ] ; then
+     for package in $RECONFIGURE ; do
+         dpkg --list $package 1>/dev/null 2>/dev/null && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
+     done
+  fi
+}
+# }}}
 
-if [ -n "$KERNEL" ] ; then
-   stage kernel
-   apt-get update
-   if [ "$RELEASE" = 'sarge' ] ; then
-      KERNELPACKAGES="kernel-image-$KERNEL kernel-headers-$KERNEL"
-   else
-      KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL"
-   fi
-   apt-get --force-yes -y install $KERNELPACKAGES
-   stage kernel done
-fi
+# set password of user root {{{
+passwords() {
+  echo "Activating shadow passwords."
+  shadowconfig on
+  echo "Setting password for user root:"
+  set +e # do not exit if passwd returns error due to missmatching passwords
+  passwd
+  echo ""
+  set -e # restore default behaviour again
+}
+# }}}
 
-if [ -n "$RECONFIGURE" ] ; then
-   stage reconfigure
-   for package in $RECONFIGURE ; do
-       dpkg --list $package 1>/dev/null 2>/dev/null && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
-   done
-   stage reconfigure done
-fi
+# set up /etc/hosts {{{
+hosts() {
+  if ! [ -f /etc/hosts ] ; then
+     echo "Setting up /etc/hosts"
+     echo "127.0.0.1       localhost  $HOSTNAME" > /etc/hosts
+  fi
+}
+# }}}
 
-# set password of user root
-stage passwords
-echo "Activating shadow passwords."
-shadowconfig on
-echo "Setting password for user root:"
-set +e # do not exit if passwd returns error due to missmatching passwords
-passwd
-echo ""
-set -e # restore default behaviour again
-stage passwords done
-
-if ! [ -f /etc/hosts ] ; then
-   stage hosts
-   echo "Setting up /etc/hosts"
-   echo "127.0.0.1       localhost  $HOSTNAME" > /etc/hosts
-   stage hosts done
-fi
-
-if ! [ -f /etc/network/interfaces ] ; then
-   stage interfaces
-   echo "Setting up /etc/network/interfaces"
-   cat >> /etc/network/interfaces << EOF
+# set up /etc/network/interfaces {{{
+interfaces() {
+  if ! [ -f /etc/network/interfaces ] ; then
+     echo "Setting up /etc/network/interfaces"
+     cat >> /etc/network/interfaces << EOF
 iface lo inet loopback
 iface eth0 inet dhcp
 auto lo
 auto eth0
 EOF
-   stage interfaces done
-fi
+  fi
+}
+# }}}
 
-# adjust timezone
-if [ -n "$TIMEZONE" ] ; then
-   stage timezone
-   echo "Adjusting /etc/localtime"
-   ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
-   stage timezone done
-fi
+# adjust timezone {{{
+timezone() {
+  if [ -n "$TIMEZONE" ] ; then
+     echo "Adjusting /etc/localtime"
+     ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+  fi
+}
+# }}}
 
+# helper function for fstab() {{{
 createfstab(){
-   echo "Setting up /etc/fstab"
+     echo "Setting up /etc/fstab"
 cat > /etc/fstab << EOF
 $TARGET      /            auto    defaults,errors=remount-ro 0   1
 /sys           /sys         sysfs   rw,nosuid,nodev,noexec     0   0
@@ -163,87 +177,122 @@ proc           /proc        proc    defaults                   0   0
 # tmpfs           /tmp         tmpfs   size=300M            0  0
 EOF
 }
+# }}}
 
-# set up /etc/fstab if file is not present (cdebootstrap)
-if [ ! -f /etc/fstab  ] ; then
-   stage fstab
-   createfstab
-   stage fstab done
-fi
+# generate /etc/fstab {{{
+fstab() {
+  # set up /etc/fstab if file is not present (cdebootstrap)
+  if [ ! -f /etc/fstab  ] ; then
+     createfstab
+  fi
 
-# set up /etc/fstab if file is UNCONFIGURED (debootstrap)
-if grep -q UNCONFIGURED /etc/fstab ; then
-   stage fstab
-   createfstab
-   stage fstab done
-fi
+  # set up /etc/fstab if file is UNCONFIGURED (debootstrap)
+  if grep -q UNCONFIGURED /etc/fstab ; then
+     createfstab
+  fi
+}
+# }}}
 
-# set up hostname
-if [ -n "$HOSTNAME" ] ; then
-   stage hostname
-   echo "Setting hostname to ${HOSTNAME}."
-   echo "$HOSTNAME" > /etc/hostname
-   stage hostname done
-fi
+# set up hostname {{{
+hostname() {
+  if [ -n "$HOSTNAME" ] ; then
+     echo "Setting hostname to ${HOSTNAME}."
+     echo "$HOSTNAME" > /etc/hostname
+  fi
+}
+# }}}
 
-# assume the first available kernel as our main kernel
-KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
-KERNELVER=${KERNELIMG#/boot/vmlinuz-}
+# generate initrd/initramfs {{{
+initrd() {
+  # assume the first available kernel as our main kernel
+  KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
+  KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
-# generate initrd
-if [ -n "$INITRD" ] ; then
-   stage initrd
-   if [ "$RELEASE" = 'sarge' ] ; then
-      echo "Release sarge detected, will not create an initrd."
-   else
-      echo "Generating initrd."
-      update-initramfs -c -t -k $KERNELVER
-      if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
-         GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
-         LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
-      fi
-   fi
-   stage initrd done
-fi
+  # generate initrd
+  if [ -n "$INITRD" ] ; then
+     if [ "$RELEASE" = 'sarge' ] ; then
+        echo "Release sarge detected, will not create an initrd."
+     else
+        echo "Generating initrd."
+        update-initramfs -c -t -k $KERNELVER
+        if [ -f "/boot/initrd.img-$KERNELVER" ] ; then
+           GRUBINITRD="initrd          /boot/initrd.img-$KERNELVER"
+           LILOINITRD="        initrd=/boot/initrd.img-$KERNELVER"
+        fi
+     fi
+  fi
+}
+# }}}
 
-if [ -z "$GROOT" ] ; then
-   echo "Warning: \$GROOT is not defined, will not adjust grub configuration therefore."
-else
-   stage grub
-   echo "Adjusting grub configuration for use on ${GROOT}."
+# grub configuration/installation {{{
+grub() {
+  if [ -z "$GROOT" ] ; then
+     echo "Warning: \$GROOT is not defined, will not adjust grub configuration therefore."
+  else
+     echo "Adjusting grub configuration for use on ${GROOT}."
 
-   # copy stage-files to /boot/grub/
-   [ -d /boot/grub/ ] || mkdir /boot/grub
-   if [ -d /usr/lib/grub/i386-pc/ ] ; then
-      cp /usr/lib/grub/i386-pc/* /boot/grub/
-   else
-      # sarge ships grub files in another directory
-      cp /lib/grub/i386-pc/* /boot/grub/
-   fi
+     # copy stage-files to /boot/grub/
+     [ -d /boot/grub/ ] || mkdir /boot/grub
+     # i386 specific:
+     [ -d /usr/lib/grub/i386-pc ]   && cp /usr/lib/grub/i386-pc/* /boot/grub/
+     # amd64 specific:
+     [ -d /usr/lib/grub/x86_64-pc ] && cp /usr/lib/grub/x86_64-pc/* /boot/grub/
+     # sarge ships grub files in another directory
+     [ "$RELEASE" = 'sarge' ]       && cp /lib/grub/i386-pc/* /boot/grub/
 
-   # finally install grub
-   update-grub -y
-   sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
-   sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro|g" /boot/grub/menu.lst
-   # not sure why savedefault does not work for me; any ideas?
-   sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
-   update-grub -y
-   stage grub done
-fi
+     # finally install grub
+     update-grub -y
+     sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
+     sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro|g" /boot/grub/menu.lst
+     # not sure why savedefault does not work for me; any ideas?
+     sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
+     update-grub -y
+  fi
+}
+# }}}
 
-# make sure we don't have any running processes left
-for service in ssh mdadm mdadm-raid ; do
-    [ -x "/etc/init.d/$service" ] && "/etc/init.d/$service" stop
-done
+# make sure we don't have any running processes left {{{
+services() {
+  for service in ssh mdadm mdadm-raid ; do
+      [ -x "/etc/init.d/$service" ] && "/etc/init.d/$service" stop
+  done
+}
+# }}}
 
-# unmount all filesystems in chroot, make sure nothing is left...
-umount -a    1>/dev/null 2>/dev/null || true
-umount /proc 1>/dev/null 2>/dev/null || true
-umount /proc 1>/dev/null 2>/dev/null || true
-umount -a    1>/dev/null 2>/dev/null || true
+# unmount all filesystems in chroot, make sure nothing is left {{{
+finalize() {
+  umount -a    1>/dev/null 2>/dev/null || true
+  umount /proc 1>/dev/null 2>/dev/null || true
+  umount /proc 1>/dev/null 2>/dev/null || true
+  umount -a    1>/dev/null 2>/dev/null || true
+}
+# }}}
 
-# finally exit the chroot
-echo "Finished chroot installation, exiting."
-exit 0
+# execute the functions {{{
+  stage chrootmirror   && chrootmirror   && stage chrootmirror done
+  stage grmlrepos      && grmlrepos      && stage grmlrepos done
+  stage kernelimg_conf && kernelimg_conf && stage kernelimg_conf done
+  stage makedev        && makedev        && stage makedev done
+  stage packages       && packages       && stage packages done
+  stage mkinitrd       && mkinitrd       && stage mkinitrd done
+  stage kernel         && kernel         && stage kernel done
+  stage reconfigure    && reconfigure    && stage reconfigure done
+  stage passwords      && passwords      && stage passwords done
+  stage hosts          && hosts          && stage hosts done
+  stage interfaces     && interfaces     && stage interfaces done
+  stage timezone       && timezone       && stage timezone done
+  stage fstab          && fstab          && stage fstab done
+  stage hostname       && hostname       && stage hostname done
+  stage initrd         && initrd         && stage initrd done
+  stage grub           && grub           && stage grub done
+  stage services       && services       && stage services done
+  stage finalize       && finalize       && stage finalize done
+# }}}
+
+# finally exit the chroot {{{
+  echo "Finished chroot installation, exiting."
+  exit 0
+# }}}
 
 ## END OF FILE #################################################################
+# vim: ai tw=80 expandtab foldmethod=marker
