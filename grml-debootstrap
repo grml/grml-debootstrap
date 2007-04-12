@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Don Apr 12 11:42:02 CEST 2007 [mika]
+# Latest change: Don Apr 12 11:44:54 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -265,15 +265,15 @@ fscktool() {
 # }}}
 
 # now execute all the functions {{{
-  stage mkfs               && mkfs               && stage mkfs done
-  stage tunefs             && tunefs             && stage tunefs done
-  stage mount_target       && mount_target       && stage mount_target done
-  stage debootstrap_system && debootstrap_system && stage debootstrap_system done
-  stage preparechroot      && preparechroot      && stage preparechroot done
-  stage chrootscript       && chrootscript       && stage chrootscript done
-  stage grub_install       && grub_install       && stage grub_install done
-  stage umount_chroot      && umount_chroot      && stage umount_chroot done
-  stage fscktool           && fscktool           && stage fscktool done
+  stage mkfs               && mkfs               && stage mkfs done               || bailout
+  stage tunefs             && tunefs             && stage tunefs done             || bailout
+  stage mount_target       && mount_target       && stage mount_target done       || bailout
+  stage debootstrap_system && debootstrap_system && stage debootstrap_system done || bailout
+  stage preparechroot      && preparechroot      && stage preparechroot done      || bailout
+  stage chrootscript       && chrootscript       && stage chrootscript done       || bailout
+  stage grub_install       && grub_install       && stage grub_install done       || bailout
+  stage umount_chroot      && umount_chroot      && stage umount_chroot done      || bailout
+  stage fscktool           && fscktool           && stage fscktool done           || bailout
 # }}}
 
 # stages {{{
