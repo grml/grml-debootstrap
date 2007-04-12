@@ -8,7 +8,7 @@ XS-Vcs-hg: http://hg.grml.org/grml-debootstrap
 
 Package: grml-debootstrap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap | cdebootstrap, grml-etc-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16), grml-etc-core
 Description: wrapper around debootstrap for installing plain Debian via grml
  This package provides a wrapper suite around deboostrap and
  cdebootstrap for installing a plain Debian system via grml.
@@ -16,9 +16,11 @@ Description: wrapper around debootstrap for installing plain Debian via grml
  All you have to do is adjust a few variables in configuration
  file /etc/debootstrap/config and invoke grml-debootstrap then.
  A plain and base Debian system will be installed on the given
- device then. Customization of this process is possible as well.
+ device (or directory) then. Customization of this process is
+ possible as well.
  .
  Supported Debian GNU/Linux releases:
-   * Sarge (3.1)
-   * Etch  (4.0)
-   * Sid   (4.0 unstable)
+   * Sarge (3.1) [old-stable]
+   * Etch  (4.0) [stable]
+   * Lenny (4.0) [testing]
+   * Sid   (4.0 unstable) [unstable]

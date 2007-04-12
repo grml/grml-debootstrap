@@ -18,7 +18,8 @@ file /etc/debootstrap/config and invoke grml-debootstrap without
 any further options then.
 
 A plain and base Debian system will be installed on the given
-device then. Customization of this process is possible as well.
+device (or directory) then. Customization of this process is
+possible as well.
 .SH OPTIONS
 grml-debootstrap supports the following options:
 .TP
@@ -32,6 +33,27 @@ Show version of program.
 .B /etc/debootstrap/config
 Main configuration file. You have to adjust it according to your needs
 before you are able to run grml-debootstrap.
+.TP
+.B /etc/debootstrap/chroot-script
+The script executed within the new Debian system as soon as the main system
+has been installed via [c]debootstrap.
+.TP
+.B /etc/debootstrap/locale.gen
+Defines the default locales used for generating locales via locale-gen.
+.TP
+.B /etc/debootstrap/packages
+Defines the software packages which should be installed in the new
+Debian system by default.
+.TP
+.B /etc/debootstrap/stages/
+The default directory for storing information about executed stages. Every
+single function of grml-debootstrap will write 'done' to the stages directory
+into a file named as the function itself if it has been executed sucessfully.
+You can adjust the location of the directory via configuration variable STAGES
+via /etc/debootstrap/config.  Please notice that you have to remove the stages
+directory on your own if you want to re-execute grml-deboostrap after running it
+successfully once. This should avoid recurrent execution by error of
+grml-debootstrap (which might delete present data).
 .SH CUSTOMIZATION
 
 You can control execution of grml-debootstrap via adjusting
@@ -49,12 +71,20 @@ Current status:
   +----------------+-------------+-----------------+
   | Release / Tool | debootstrap | cdebootstrap    |
   +----------------+-------------+-----------------+
+  | Sarge          |  works [1]  |  works [1]      |
+  +----------------+-------------+-----------------+
   | Etch           |  works      |  works          |
   +----------------+-------------+-----------------+
-  | Lenny          |       not yet tested          |
+  | Lenny          |  works      |  works          |
   +----------------+-------------+-----------------+
   | Sid            |  works      |  works          |
   +----------------+-------------+-----------------+
+
+[1] Please notice that Sarge is the current old-stable within Debian.
+grml-debootstrap can handle the release but you really should not
+use Sarge anymore unless you really know what you are doing. Choose
+Etch instead.
+
 .SH BUGS
 Probably. Please send bugreports to Michael Prokop <mika@grml.org>.
 .SH SEE ALSO

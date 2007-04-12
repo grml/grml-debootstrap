@@ -1,5 +1,7 @@
 grml-debootstrap (0.6) unstable; urgency=low
 
+  * Support Debian release with codename 'lenny'. Depend on
+    debootstrap/cdebootstrap versions supporting lenny therefore.
   * Split all the code into separate functions.
   * Export LANG=C and LC_ALL=C as we don't have the locales inside
     the chroot when running grml-debootstrap. (Just a cosmetic
@@ -7,6 +9,8 @@ grml-debootstrap (0.6) unstable; urgency=low
     dpkg.)
   * Always assume architecture of the running system (overwriting
     via $ARCH is still supported of course).
+  * Write variables from grml-debootstrap to /etc/debootstrap/variables
+    and provide it to chroot-script.
   * Support stages. [Closes: issue151]
 
  -- Michael Prokop <mika@grml.org>  Mon,  9 Apr 2007 14:35:21 +0200

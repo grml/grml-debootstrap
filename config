@@ -47,7 +47,7 @@ GROOT=''
 MIRROR='ftp://ftp.debian.de/debian'
 
 # specify entry which should be used for /etc/apt/sources.list,
-# if empty then any existing /etc/apt/sources.list will be taken
+# if empty then existing /etc/apt/sources.list will be taken
 CHROOTMIRROR='ftp://ftp.debian.de/debian'
 
 # add grml repository to /etc/apt/sources.list
