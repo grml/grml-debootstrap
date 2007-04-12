@@ -4,12 +4,13 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Apr 10 11:48:13 CEST 2007 [mika]
+# Latest change: Don Apr 12 11:55:23 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
 
-. /etc/debootstrap/config || exit 1
+. /etc/debootstrap/config    || exit 1
+. /etc/debootstrap/variables || exit 1
 
 [ -r /proc/1 ] || mount -t proc   none /proc
 
@@ -95,6 +96,15 @@ mkinitrd() {
 
 # install kernel packages {{{
 kernel() {
+  # do not override $KERNEL if set via config file
+  if [ -z "$KERNEL" ] ; then
+     if [ "$ARCH" = 'i386' ] ; then
+        KERNEL='2.6-686'
+     elif [ "$ARCH" = 'amd64' ] ; then
+        KERNEL='2.6-amd64'
+     fi
+  fi
+
   if [ -n "$KERNEL" ] ; then
      apt-get update
      if [ "$RELEASE" = 'sarge' ] ; then

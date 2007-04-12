@@ -59,7 +59,7 @@ CHROOTMIRROR='ftp://ftp.debian.de/debian'
 # GRMLPACKAGES='grml-etc-core'
 
 # release (which Debian version should be installed)
-# supported values: sarge etch sid
+# supported values: sarge etch lenny sid
 RELEASE='etch'
 
 # architecture
@@ -74,7 +74,7 @@ HOSTNAME='grml'
 # kernel version which should be installed
 # do not forget to adjust according to architecture, for example
 # use 2.6-686 for i386 and 2.6-amd64 for amd64
-KERNEL='2.6-686'
+# KERNEL='2.6-686'
 
 # name of debootstrap executable
 # supported values: debootstrap cdebootstrap
