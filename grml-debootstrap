@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Apr 10 10:51:26 CEST 2007 [mika]
+# Latest change: Don Apr 12 11:39:22 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -57,6 +57,11 @@ export LC_ALL=C
 if [ -z "$STAGES" ] ; then
    STAGES='/etc/debootstrap/stages'
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
+fi
+
+if grep -q done $STAGES/grml-debootstrap ; then
+   eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
+   eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
 fi
 
 PARTITION=''
@@ -269,11 +274,11 @@ fscktool() {
   stage fscktool           && fscktool           && stage fscktool done
 # }}}
 
-# finally remove stages on main system so grml-deboostrap can be reexecuted {{{
-  rm -rf "$STAGES"
+# stages {{{
+  echo done > $STAGES/grml-debootstrap
 # }}}
 
   einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
 
 ## END OF FILE #################################################################
-# vim: ai tw=80 expandtab foldmethod=marker
+# vim: ai tw=100 expandtab foldmethod=marker
