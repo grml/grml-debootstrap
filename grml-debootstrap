@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Don Apr 12 11:39:22 CEST 2007 [mika]
+# Latest change: Don Apr 12 11:42:02 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -59,9 +59,11 @@ if [ -z "$STAGES" ] ; then
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
 
-if grep -q done $STAGES/grml-debootstrap ; then
-   eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
-   eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
+if [ -r $STAGES/grml-debootstrap ] ; then
+   if grep -q done $STAGES/grml-debootstrap ; then
+      eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
+      eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
+   fi
 fi
 
 PARTITION=''
