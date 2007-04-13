@@ -1,6 +1,7 @@
 TODO list for grml-debootstrap
 ------------------------------
 
+* support overriding of configuration variables via commandline
 * support tarballs for customization
 * support automatic installation of grml packages:
   * grml-etc-core
