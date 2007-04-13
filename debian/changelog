@@ -1,3 +1,9 @@
+grml-debootstrap (0.7) unstable; urgency=low
+
+  * Updated TODO file.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 13 Apr 2007 17:57:29 +0200
+
 grml-debootstrap (0.6) unstable; urgency=low
 
   * Support Debian release with codename 'lenny'. Depend on
