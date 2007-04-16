@@ -130,7 +130,9 @@ kernel() {
 reconfigure() {
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
-         dpkg --list $package 1>/dev/null 2>/dev/null && dpkg-reconfigure $package || echo "Warning: $package does not exist, can not reconfigure it."
+         dpkg --list $package 1>/dev/null 2>/dev/null && \
+         DEBIAN_FRONTEND=$DEBIAN_FRONTEND dpkg-reconfigure $package || \
+         echo "Warning: $package does not exist, can not reconfigure it."
      done
   fi
 }
