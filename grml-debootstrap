@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 13:21:01 CEST 2007 [mika]
+# Latest change: Mon Apr 16 13:53:27 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -22,23 +22,6 @@ check4progs debootstrap || exit 1
 check4root || exit 1
 # }}}
 
-# cmdline handling {{{
-case $* in
-   -h*|--h*)
-     einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
-     einfo "Adjust /etc/debootstrap/config and invoke $0 afterwards."
-     eend 0
-     exit 0
-   ;;
-   -v|--v*)
-     einfo "$0 version $VERSION"
-     einfo "Send bug reports to Michael Prokop <mika@grml.org>."
-     eend 0
-     exit 0
-   ;;
-esac
-# }}}
-
 # without config file it won't work {{{
 if [ -r /etc/debootstrap/config ] ; then
    . /etc/debootstrap/config
@@ -46,6 +29,52 @@ else
    eerror "/etc/debootstrap/config could not be read, exiting." ; eend 1
    exit 1
 fi
+# }}}
+
+# cmdline handling {{{
+usage() {
+  einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
+  einfo "Adjust /etc/debootstrap/config and invoke $0 afterwards."
+}
+
+while [ "$#" -gt "0" ] ; do
+    case $1 in
+        -v|--version)
+            einfo "$0 version $VERSION"
+            einfo "Send bug reports to Michael Prokop <mika@grml.org>."
+            eend 0
+            exit 0
+            ;;
+        -t|--target)
+            shift
+            TARGET=$1
+            ;;
+        --grub)
+            shift
+            GRUB=$1
+            ;;
+        --groot)
+            shift
+            GROOT=$1
+            ;;
+        -m|--mirror)
+            shift
+            MIRROR=$1
+            CHROOTMIRROR=$1
+            ;;
+        -h|--help)
+            usage ; eend 0
+            eend 0
+            exit 0
+            ;;
+        *)
+            eerror "Syntax error."
+            usage ; eend 1
+            exit 1
+            ;;
+    esac
+    shift
+done
 # }}}
 
 # set/check variables {{{
@@ -95,9 +124,12 @@ else
 fi
 
 # provide variables to chroot system
-echo "
-ARCH=$ARCH
-" > /etc/debootstrap/variables
+[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     > /etc/debootstrap/variables
+[ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> /etc/debootstrap/variables
+[ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
+[ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
+[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
+[ -n "$CHROOTMIRROR" ] && echo "CHROOTMIRROR=$CHROOTMIRROR" >> /etc/debootstrap/variables
 
 # make sure at least $TARGET is set [the partition for the new system]
 if [ -z "$TARGET" ] ; then
@@ -115,8 +147,11 @@ bailout(){
         # make sure nothing is left inside chroot so we can unmount it
         [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
         [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /sys
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc
+        # ugly, but make sure we really don't leav anything
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /sys  1>/dev/null 2>&1
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a    1>/dev/null 2>&1
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
      fi
   fi
@@ -143,7 +178,8 @@ einfo "$0 - Please recheck configuration before execution:"
 echo "
    Target:           $TARGET"
    case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
-   [ -n "$GRUB" ] && echo "   Install grub to:  $GROOT / $GRUB"
+   [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
+   [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
    case "$MNTPOINT" in "$TARGET") ;; *) echo "  Important! Continuing will delete all data from ${TARGET}!" ;; esac
    echo
 einfon "Is this ok for you? [y/N] "
@@ -217,9 +253,9 @@ preparechroot() {
   mkdir $MNTPOINT/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
-  cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
-  cp /etc/debootstrap/variables $MNTPOINT/etc/debootstrap/variables
+  cp /etc/debootstrap/config          $MNTPOINT/etc/debootstrap/
+  cp /etc/debootstrap/packages        $MNTPOINT/etc/debootstrap/packages
+  cp /etc/debootstrap/variables       $MNTPOINT/etc/debootstrap/variables
 
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
