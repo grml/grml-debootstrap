@@ -1,6 +1,7 @@
 grml-debootstrap (0.7) unstable; urgency=low
 
   * Change logic of function execution.
+  * Improved error handling in several functions.
   * Use aptitude instead of apt-get in chroot-script, but
     only if it's available.
   * Added additional check to grub code for running sed on
