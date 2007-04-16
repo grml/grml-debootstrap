@@ -4,13 +4,13 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 19:10:16 CEST 2007 [mika]
+# Latest change: Mon Apr 16 19:35:55 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
 set -e # exit on any error
 
-VERSION='0.8'
+VERSION='0.7'
 
 # source core functions {{{
 . /etc/grml/lsb-functions
