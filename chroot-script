@@ -16,10 +16,10 @@ set -e # exit on any error
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTINSTALL='aptitude -y'
+   APTINSTALL='aptitude -y install '
    APTUPDATE='aptitude update'
 else
-   APTINSTALL='apt-get --force-yes -y'
+   APTINSTALL='apt-get --force-yes -y install'
    APTUPDATE='apt-get update'
 fi
 
