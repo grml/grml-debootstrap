@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 13:53:27 CEST 2007 [mika]
+# Latest change: Mon Apr 16 14:14:54 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -56,6 +56,14 @@ while [ "$#" -gt "0" ] ; do
         --groot)
             shift
             GROOT=$1
+            ;;
+        --release)
+            shift
+            RELEASE=$1
+            ;;
+        -p|--mntpoint)
+            shift
+            MNTPOINT=$1
             ;;
         -m|--mirror)
             shift

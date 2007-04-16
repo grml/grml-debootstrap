@@ -1,5 +1,6 @@
 grml-debootstrap (0.7) unstable; urgency=low
 
+  * Support setting some variables via cmdline.
   * Change logic of function execution.
   * Improved error handling in several functions.
   * Use aptitude instead of apt-get in chroot-script, but

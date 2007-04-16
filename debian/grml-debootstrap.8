@@ -13,9 +13,9 @@ command.
 (and cdebootstrap if you want) for installing a plain Debian
 system via grml very fast and easy.
 
-All you have to do is adjust a few variables in configuration
-file /etc/debootstrap/config and invoke grml-debootstrap without
-any further options then.
+All you have to do is adjust a few variables in configuration file
+/etc/debootstrap/config (or specify some variables via commandline) and invoke
+grml-debootstrap without any further options then.
 
 A plain and base Debian system will be installed on the given
 device (or directory) then. Customization of this process is
@@ -24,10 +24,54 @@ possible as well.
 grml-debootstrap supports the following options:
 .TP
 .B \-h, \-\-help
-Show summary of options.
+Show summary of options and exit.
 .TP
 .B \-v, \-\-version
-Show version of program.
+Show version of program and exit.
+.TP
+.B \-\-grub <device>
+Where do you want to install grub to? Use grub syntax for specifying.
+Do not forget to set groot as well. Leave empty to avoid installation of grub.
+.TP
+.B \-\-groot <device>
+Specify root device for usage in grub (corresponds with $TARGET).
+Again, use grub syntax for specifying.
+Corresponding with configuration variable GROOT.
+.TP
+.B \-m, \-\-mirror <URL>
+Specify mirror which should be used for apt-get/aptitude. Notice that
+specifying the mirror also sets the chrootmirror to the given value.
+Corresponding with configuration variables MIRROR and CHROOTMIRROR.
+.TP
+.B \-p, \-\-mntpoint </mntpoint>
+Specify mountpoint that should be used for mounting the target system.
+Corresponding with configuration variable MNTPOINT.
+.TP
+.B \-r, \-\-release <releasename>
+Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+Corresponding with configuration variable RELEASE.
+.TP
+.B \-t, \-\-target <target>
+Target partition (/dev/...) or directory (anything else without /dev at the
+beginning).
+.SH USAGE EXAMPLES
+.TP
+.B grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0
+Install default Debian release (stable/etch) on /dev/hda1 and install bootmanager
+Grub in MBR (master boot record) of /dev/hda and use /dev/hda1 as system partition.
+.TP
+.B grml-debootstrap --target /dev/hda6 --grub hd0 --groot hd0,5 --release sid
+Install Debian unstable/sid on /dev/hda6, install bootmanager
+Grub in MBR (master boot record) of /dev/hda and use /dev/hda6 as system partition.
+.TP
+.B grml-debootstrap --target /data/chroot
+Install default Debian release (stable/etch) in directory /data/chroot (without
+any bootloader).
+.TP
+.B grml-debootstrap --target /dev/sda3 --grub hd0 --groot hd0,2 --mirror ftp://ftp.tugraz.at/mirror/debian
+Install default Debian release (stable/etch) on /dev/sda3 and install bootmanager
+Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
+Use specifed mirror instead of the default (ftp://ftp.debian.de/debian) one.
 .SH FILES
 .TP
 .B /etc/debootstrap/config
@@ -57,12 +101,13 @@ grml-debootstrap (which might delete present data).
 .SH CUSTOMIZATION
 
 You can control execution of grml-debootstrap via adjusting
-/etc/debootstrap/config for some main stuff.  The packages which should be
-installed in the new Debian system can be defined via the file
-/etc/debootstrap/packages.  If you want to put existing files to the new
-Debian system you can place them into the (by default non-existing)
-directories boot, etc, share, usr and var in /etc/debootstrap/. Every
-existing directory will be copied to the new Debian system then.
+/etc/debootstrap/config for some main stuff or via setting some selected
+variables via commandline.  The packages which should be installed in the new
+Debian system can be defined via the file /etc/debootstrap/packages.  If you
+want to put existing files to the new Debian system you can place them into the
+(by default non-existing) directories boot, etc, share, usr and var in
+/etc/debootstrap/. Every existing directory will be copied to the new Debian
+system then.
 
 .SH SUPPORTED RELEASES
 .TP
