@@ -131,7 +131,7 @@ Debian system by default.
 
 The default directory for storing information about executed stages. Every
 single function of grml-debootstrap will write 'done' to the stages directory
-into a file named as the function itself if it has been executed sucessfully.
+into a file named as the function itself if it has been executed successfully.
 You can adjust the location of the directory via configuration variable STAGES
 via /etc/debootstrap/config.  Please notice that you have to remove the stages
 directory on your own if you want to re-execute grml-deboostrap after running it
@@ -149,6 +149,54 @@ want to put existing files to the new Debian system you can place them into the
 (by default non-existing) directories boot, etc, share, usr and var in
 /etc/debootstrap/. Every existing directory will be copied to the new Debian
 system then.
+
+Automatic installation
+----------------------
+
+If environment variable AUTOINSTALL is set grml-debootstrap can be executed in a
+full automatic mode. While this mode isn't really useful for interactive
+execution (just configure /etc/debootstrap/configure or specify the relevant
+variables on the commandline instead) it is meant for use via bootoption
+debian2hd. The bootoption debian2hd (more precise: the kernelname on bootprompt)
+supports the following bootoptions (they correspond with the commandline options
+mentioned above):
+
+  target=...
+
+The target partition/directory of the new Debian system. Usage example:
+target=/dev/hda1
+
+  grub=...
+
+Where do you want to install grub to? Use grub syntax for specifying.
+Usage example: grub=hd0
+
+  groot=...
+
+Specify root device for usage in grub (corresponds with $TARGET).
+Again, use grub syntax for specifying. Usage example: groot=hd0,0
+
+  release=...
+
+Specify release of new Debian system. Defaults to Debian stable.
+Supported relases: sarge, etch, lenny and sid. Usage example: release=sid
+
+  mirror=...
+
+Specify mirror which should be used for apt-get/aptitude instead
+of the default one (ftp://ftp.debian.de/debian).
+Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
+
+  password=...
+
+Set passwort of user root without prompting for it but set it to the given
+argument. Usage example: password=AiTh5ahn
+
+[NOTE]
+Automatic installation within booting process is done in grml-autoconfig via
+setting environment variable AUTOINSTALL and creation of
+/usr/bin/grml-debootstrap_noninteractive with the available and relevant
+bootoptions for grml-debootstrap.
 
 Supported Releases
 ------------------
