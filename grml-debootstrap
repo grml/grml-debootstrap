@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Don Apr 12 11:55:21 CEST 2007 [mika]
+# Latest change: Mon Apr 16 13:11:33 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -122,6 +122,7 @@ bailout(){
      fi
   fi
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
   exit "$EXIT"
 }
 trap bailout 1 2 3 15
@@ -274,7 +275,7 @@ fscktool() {
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
          chrootscript grub_install umount_chroot fscktool ; do
     if stage $i ; then
-       $i && stage $i done || bailout
+       $i && stage $i done || bailout 2 "i"
     fi
 done
 # }}}
