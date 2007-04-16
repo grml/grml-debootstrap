@@ -61,6 +61,12 @@ Corresponding with configuration variables MIRROR and CHROOTMIRROR.
 Specify mountpoint that should be used for mounting the target system.
 Corresponding with configuration variable MNTPOINT.
 
+  --password <password>
+
+Use specified password as password for user root. Use with caution, as your
+commandline might be visible in the process list and the shell history.
+It's meant for automatic installation only.
+
   -r, --release <releasename>
 
 Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.

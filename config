@@ -3,7 +3,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 14:17:19 CEST 2007 [mika]
+# Latest change: Mon Apr 16 18:45:19 CEST 2007 [mika]
 ################################################################################
 
 ################################################################################
@@ -75,6 +75,10 @@ HOSTNAME='grml'
 # do not forget to adjust according to architecture, for example
 # use 2.6-686 for i386 and 2.6-amd64 for amd64
 # KERNEL='2.6-686'
+
+# set password of user root without prompting, please use with caution
+# only, because you usually don't want to share your password(s) ;-)
+# ROOTPASSWORD=''
 
 # name of debootstrap executable
 # supported values: debootstrap cdebootstrap

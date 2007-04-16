@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 15:42:34 CEST 2007 [mika]
+# Latest change: Mon Apr 16 19:10:16 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -33,14 +33,32 @@ fi
 
 # cmdline handling {{{
 usage() {
-  einfo "$0 - wrapper around debootstrap for installing plain Debian via grml"
-  einfo "Adjust /etc/debootstrap/config and invoke $0 afterwards."
+  einfo "$0 - version $VERSION"
+  echo  "   A wrapper around debootstrap for installing plain Debian via grml"
+  echo
+  einfo "Usage: $0 [options]"
+  echo  "   Adjust /etc/debootstrap/config and invoke $0 afterwards or use the cmdline option:"
+  echo
+  einfo "Valid options:"
+  echo  "
+    -h|--help              Print this usage information and exit.
+    -v|--version           Show summary of options and exit.
+
+    -t|--target <target>   Target partition (/dev/...) or directory.
+    -r|--release <release> Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+    -m|--mirror <URL>      Specify mirror which should be used for apt-get/aptitude.
+    -p|--mntpoint <mnt>    Specify mountpoint that should be used for mounting the target system.
+    --groot <device>       Specify root device for usage in grub (corresponds with \$TARGET).
+    --grub <device>        Where do you want to install grub to? Use grub syntax for specifying.
+    --password <pwd>       Use specified password as password for user root. Use with caution.
+
+"
 }
 
 while [ "$#" -gt "0" ] ; do
     case $1 in
         -v|--version)
-            einfo "$0 version $VERSION"
+            einfo "$0 - version $VERSION"
             einfo "Send bug reports to Michael Prokop <mika@grml.org>."
             eend 0
             exit 0
@@ -64,6 +82,10 @@ while [ "$#" -gt "0" ] ; do
         -p|--mntpoint)
             shift
             MNTPOINT=$1
+            ;;
+        --password)
+            shift
+            ROOTPASSWORD=$1
             ;;
         -m|--mirror)
             shift
@@ -132,12 +154,15 @@ else
 fi
 
 # provide variables to chroot system
-[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     > /etc/debootstrap/variables
+touch /etc/debootstrap/variables
+chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
+[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     >  /etc/debootstrap/variables
 [ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> /etc/debootstrap/variables
 [ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
 [ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
-[ -n "$CHROOTMIRROR" ] && echo "CHROOTMIRROR=$CHROOTMIRROR" >> /etc/debootstrap/variables
+[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
+[ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> /etc/debootstrap/variables
 
 # make sure at least $TARGET is set [the partition for the new system]
 if [ -z "$TARGET" ] ; then
@@ -182,20 +207,38 @@ stage() {
 # }}}
 
 # user should recheck his configuration {{{
-einfo "$0 - Please recheck configuration before execution:"
-echo "
-   Target:           $TARGET"
-   case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
-   [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
-   [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
-   case "$MNTPOINT" in "$TARGET") ;; *) echo "  Important! Continuing will delete all data from ${TARGET}!" ;; esac
-   echo
-einfon "Is this ok for you? [y/N] "
+# support full automatic installation:
+checkforrun() {
+   dialog --timeout 10 --title "$0" \
+          --yesno "Do you want to stop at this stage?
 
-read a
-if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
-   eerror "Exiting as requested." ; eend 1
-   exit 1
+Notice: you are running grml-debootstrap in non-interactive mode.
+grml-debootstrap will install Debian ${RELEASE} on ${TARGET}.
+Last chance to quit. Timeout of 10 seconds running....
+
+Do you want to stop now?" 0 0 2>/dev/null
+}
+
+if [ -n "$AUTOINSTALL" ] ; then
+   if checkforrun ; then
+      eerror "Exiting as requested" ; eend 0
+      exit 1
+   fi
+else # if not running automatic installation display configuration and prompt for execution:
+   einfo "$0 - Please recheck configuration before execution:"
+   echo "
+      Target:           $TARGET"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
+      [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
+      [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "  Important! Continuing will delete all data from ${TARGET}!" ;; esac
+      echo
+   einfon "Is this ok for you? [y/N] "
+   read a
+   if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
+      eerror "Exiting as requested." ; eend 1
+      exit 1
+   fi
 fi
 # }}}
 
