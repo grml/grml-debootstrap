@@ -1,6 +1,7 @@
 grml-debootstrap (0.7) unstable; urgency=low
 
   * Support setting some variables via cmdline.
+  * Support full automatic installation via debian2hd.
   * Change logic of function execution and improved error handling
     in some functions.
   * Use aptitude instead of apt-get in chroot-script, but
