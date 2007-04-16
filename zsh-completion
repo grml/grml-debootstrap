@@ -1,5 +1,12 @@
+# Filename:      /etc/zsh/completion.d/_grml-debootstrap
+# Purpose:       zsh completion for grml-debootstrap
+# Authors:       grml-team (grml.org), (c) Frank Terbeck <ft@grml.org>, (c) Michael Prokop <mika@grml.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2.
+# Latest change: Mon Apr 16 23:02:57 CEST 2007 [mika]
+################################################################################
+
 #compdef grml-debootstrap
-# vim:ft=zsh
 
 _arguments -s                                                                                   \
   '(-h --help)'{-h,--help}'[this help text]:'                                                   \
@@ -12,3 +19,5 @@ _arguments -s                                                                   
   '--groot[root device for usage in grub]:grub syntax'                                          \
   '--password[specify password for root user]'
 
+## END OF FILE #################################################################
+# vim:ft=zsh

@@ -27,7 +27,7 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k 
-	dh_installdirs etc/debootstrap usr/sbin etc/zsh/completion.d
+	dh_installdirs etc/debootstrap usr/sbin # etc/zsh/completion.d
 
 	# Add here commands to install the package into debian/grml-debootstrap.
 	install -m 644 config           debian/grml-debootstrap/etc/debootstrap/
@@ -35,7 +35,7 @@ install: build
 	install -m 644 packages         debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 chroot-script    debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/
-	install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/grml-debootstrap
+	# install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/grml-debootstrap
 
 # Build architecture-independent files here.
 binary-indep: build install
