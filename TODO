@@ -6,7 +6,7 @@ TODO list for grml-debootstrap
   * grml-etc-core
   * grml-x + xserver-xorg [configuration of X]
 * support selection between DESKTOP/WORKSTATION and SERVER (provide default packages selection)
-* support *full* automatic installation where not a single keypress is necessary
+* support *full* automatic installation where not a single keypress is necessary (in progress)
   -> support bootoption debian2hd for installation through bootoption on live-cd
 * support for LVM + SW-RAID [should work through installation into directory, needs testing though]
 * support rpmstrap (bootstrap a basic RPM-based system)

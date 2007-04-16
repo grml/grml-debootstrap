@@ -1,10 +1,12 @@
 grml-debootstrap (0.7) unstable; urgency=low
 
   * Support setting some variables via cmdline.
-  * Change logic of function execution.
-  * Improved error handling in several functions.
+  * Change logic of function execution and improved error handling
+    in some functions.
   * Use aptitude instead of apt-get in chroot-script, but
     only if it's available.
+  * Use DEBIAN_FRONTEND='noninteractive' so we avoid unnecessary
+    questions when installing. (Thanks, formorer!)
   * Added additional check to grub code for running sed on
     /boot/grub/menu.lst.
   * Updated TODO file.
