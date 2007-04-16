@@ -117,7 +117,7 @@ bailout(){
         [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /sys
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc
-        echo "Unmounting $MNTPOINT" ; umount "$MNTPOINT"
+        einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
      fi
   fi
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
@@ -195,9 +195,17 @@ mount_target() {
 
 # install main chroot {{{
 debootstrap_system() {
-  einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
-  $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
-  eend $?
+  if ! grep -q $MNTPOINT /proc/mounts ; then
+          mount_target
+  fi
+  if grep -q $MNTPOINT /proc/mounts ; then
+     einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
+     $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
+     eend $?
+  else
+     eerror "Error: $MNTPOINT not mounted, can not continue."
+     eend 1
+  fi
 }
 # }}}
 
