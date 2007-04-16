@@ -12,6 +12,7 @@ grml-debootstrap (0.7) unstable; urgency=low
     /boot/grub/menu.lst.
   * Updated TODO file.
   * Use asciidoc for manpage generation.
+  * Added zsh-completion (thanks, ft!).
 
  -- Michael Prokop <mika@grml.org>  Fri, 13 Apr 2007 17:57:29 +0200
 

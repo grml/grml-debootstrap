@@ -35,6 +35,7 @@ install: build
 	install -m 644 packages         debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 chroot-script    debian/grml-debootstrap/etc/debootstrap/
 	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/
+	install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/grml-debootstrap
 
 # Build architecture-independent files here.
 binary-indep: build install
