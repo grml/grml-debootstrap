@@ -6,7 +6,7 @@ doc_html: html-stamp
 
 html-stamp: grml-debootstrap.txt
 	sed -i 's/^include::releasetable-man.txt\[\]/include::releasetable.txt\[\]/' grml-debootstrap.txt
-	asciidoc -b xhtml11 grml-debootstrap.txt
+	asciidoc -b xhtml11 -a icons grml-debootstrap.txt
 	touch html-stamp
 
 doc_man: man-stamp
@@ -25,6 +25,7 @@ man-stamp: grml-debootstrap.txt
 
 online: all
 	scp grml-debootstrap.html grml:/var/www/grml/grml-debootstrap/index.html
+	scp images/icons/* grml:/var/www/grml/grml-debootstrap/images/icons/
 
 clean:
 	rm -rf grml-debootstrap.html grml-debootstrap.xml grml-debootstrap.8 html-stamp man-stamp

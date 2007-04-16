@@ -146,10 +146,15 @@ Supported Releases
 
 include::releasetable.txt[]
 
+[NOTE]
+.A Sarge-Release
+=====================================================================
 [1] Please notice that Sarge is the current old-stable within Debian.
 grml-debootstrap can handle the release but you really should not
 use Sarge anymore unless you really know what you are doing. Choose
 Etch instead.
+=====================================================================
+
 
 Bugs
 ----
