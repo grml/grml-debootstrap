@@ -1,5 +1,9 @@
 grml-debootstrap (0.7) unstable; urgency=low
 
+  * Use aptitude instead of apt-get in chroot-script, but
+    only if it's available.
+  * Added additional check to grub code for running sed on
+    /boot/grub/menu.lst.
   * Updated TODO file.
 
  -- Michael Prokop <mika@grml.org>  Fri, 13 Apr 2007 17:57:29 +0200

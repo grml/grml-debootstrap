@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Don Apr 12 11:55:23 CEST 2007 [mika]
+# Latest change: Mon Apr 16 12:21:19 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -13,6 +13,15 @@ set -e # exit on any error
 . /etc/debootstrap/variables || exit 1
 
 [ -r /proc/1 ] || mount -t proc   none /proc
+
+# use aptitude only if it's available
+if [ -x /usr/bin/aptitude ] ; then
+   APTINSTALL='aptitude -y'
+   APTUPDATE='aptitude update'
+else
+   APTINSTALL='apt-get --force-yes -y'
+   APTUPDATE='apt-get update'
+fi
 
 # variable checks {{{
 if [ -z "$STAGES" ] ; then
@@ -79,8 +88,8 @@ packages() {
        echo "Error: /etc/debootstrap/packages not found, exiting."
        exit 1
      else
-       apt-get update
-       apt-get --force-yes -y install $(cat /etc/debootstrap/packages) $GRMLPACKAGES
+       $APTUPDATE
+       $APT $(cat /etc/debootstrap/packages) $GRMLPACKAGES
      fi
   fi
 }
@@ -106,13 +115,13 @@ kernel() {
   fi
 
   if [ -n "$KERNEL" ] ; then
-     apt-get update
+     $APTUPDATE
      if [ "$RELEASE" = 'sarge' ] ; then
         KERNELPACKAGES="kernel-image-$KERNEL kernel-headers-$KERNEL"
      else
         KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL"
      fi
-     apt-get --force-yes -y install $KERNELPACKAGES
+      $APTINSTALL $KERNELPACKAGES
   fi
 }
 # }}}
@@ -252,11 +261,13 @@ grub() {
 
      # finally install grub
      update-grub -y
-     sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
-     sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro|g" /boot/grub/menu.lst
-     # not sure why savedefault does not work for me; any ideas?
-     sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
-     update-grub -y
+     if [ -f /boot/grub/menu.lst ] ; then
+        sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
+        sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro|g" /boot/grub/menu.lst
+        # not sure why savedefault does not work for me; any ideas?
+        sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
+        update-grub -y
+     fi
   fi
 }
 # }}}
