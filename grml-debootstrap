@@ -232,9 +232,17 @@ preparechroot() {
 
 # execute chroot-script {{{
 chrootscript() {
-  einfo "Executing chroot-script now"
-  chroot "$MNTPOINT" /bin/chroot-script
-  eend $?
+  if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
+     mount_target
+  fi
+  if [ -x "$MNTPOINT/bin/chroot-script" ] ; then
+     einfo "Executing chroot-script now"
+     chroot "$MNTPOINT" /bin/chroot-script
+     eend $?
+  else
+     eerror "Fatal: $MNTPOINT/bin/chroot-script could not be found."
+     eend 1
+  fi
 }
 # }}}
 
