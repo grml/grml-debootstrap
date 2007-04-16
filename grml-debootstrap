@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 19:35:55 CEST 2007 [mika]
+# Latest change: Mon Apr 16 20:31:21 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -161,7 +161,7 @@ chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
 [ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
 [ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
-[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
+[ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> /etc/debootstrap/variables
 [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> /etc/debootstrap/variables
 
 # make sure at least $TARGET is set [the partition for the new system]
