@@ -13,12 +13,14 @@ build: build-stamp
 
 build-stamp:
 	dh_testdir
+	make
 	touch $@
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
+	make clean
 	dh_clean 
 
 install: build
@@ -44,7 +46,7 @@ binary-arch: build install
 	dh_testroot
 	dh_installchangelogs 
 	dh_installdocs TODO
-	dh_installman debian/grml-debootstrap.8
+	dh_installman grml-debootstrap.8
 	dh_link
 	dh_strip
 	dh_compress

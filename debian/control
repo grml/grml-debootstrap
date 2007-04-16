@@ -2,7 +2,7 @@ Source: grml-debootstrap
 Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
-Build-Depends: debhelper (>= 5)
+Build-Depends: debhelper (>= 5), asciidoc, xsltproc, docbook-xsl
 Standards-Version: 3.7.2
 XS-Vcs-hg: http://hg.grml.org/grml-debootstrap
 
