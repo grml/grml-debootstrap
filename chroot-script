@@ -16,10 +16,10 @@ set -e # exit on any error
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTINSTALL='DEBIAN_FRONTEND=$DEBIAN_FRONTEND aptitude -y install '
+   APTINSTALL='aptitude -y install '
    APTUPDATE='aptitude update'
 else
-   APTINSTALL='DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get --force-yes -y install'
+   APTINSTALL='apt-get --force-yes -y install'
    APTUPDATE='apt-get update'
 fi
 
@@ -89,7 +89,7 @@ packages() {
        exit 1
      else
        $APTUPDATE
-       $APTINSTALL $(cat /etc/debootstrap/packages) $GRMLPACKAGES
+       DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(cat /etc/debootstrap/packages) $GRMLPACKAGES
      fi
   fi
 }
@@ -121,7 +121,7 @@ kernel() {
      else
         KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL"
      fi
-      $APTINSTALL $KERNELPACKAGES
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
 }
 # }}}
