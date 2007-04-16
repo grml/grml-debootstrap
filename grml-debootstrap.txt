@@ -1,0 +1,179 @@
+grml-debootstrap(8)
+===================
+
+Name
+----
+grml-debootstrap - wrapper around debootstrap for installing plain Debian via grml
+
+Synopsis
+--------
+grml-debootstrap [ options ]
+
+Introduction
+------------
+
+grml-debootstrap is a wrapper suite around debootstrap
+(and cdebootstrap if you want) for installing a plain Debian
+system via grml very fast and easy.
+
+All you have to do is adjust a few variables in configuration file
+/etc/debootstrap/config (or specify some variables via commandline) and invoke
+grml-debootstrap without any further options then.
+
+A plain and base Debian system will be installed on the given
+device (or directory) then. Customization of this process is
+possible as well.
+
+
+*******************************************************************************
+Important! The grml team does not take responsibility for loss of any data!
+*******************************************************************************
+
+Options and environment variables
+---------------------------------
+
+  -h, --help
+
+Show summary of options and exit.
+
+  -v, --version
+
+Show version of program and exit.
+
+  --grub <device>
+
+Where do you want to install grub to? Use grub syntax for specifying.
+Do not forget to set groot as well. Leave empty to avoid installation of grub.
+
+  --groot <device>
+
+Specify root device for usage in grub (corresponds with $TARGET).
+Again, use grub syntax for specifying.
+Corresponding with configuration variable GROOT.
+
+  -m, --mirror <URL>
+
+Specify mirror which should be used for apt-get/aptitude. Notice that
+specifying the mirror also sets the chrootmirror to the given value.
+Corresponding with configuration variables MIRROR and CHROOTMIRROR.
+
+  -p, --mntpoint </mntpoint>
+
+Specify mountpoint that should be used for mounting the target system.
+Corresponding with configuration variable MNTPOINT.
+
+  -r, --release <releasename>
+
+Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+Corresponding with configuration variable RELEASE.
+
+  -t, --target <target>
+
+Target partition (/dev/...) or directory (anything else without /dev at the
+beginning).
+
+Usage examples
+---------------
+
+  grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0
+
+Install default Debian release (stable/etch) on /dev/hda1 and install bootmanager
+Grub in MBR (master boot record) of /dev/hda and use /dev/hda1 as system partition.
+
+  grml-debootstrap --target /dev/hda6 --grub hd0 --groot hd0,5 --release sid
+
+Install Debian unstable/sid on /dev/hda6, install bootmanager
+Grub in MBR (master boot record) of /dev/hda and use /dev/hda6 as system partition.
+
+  grml-debootstrap --target /data/chroot
+
+Install default Debian release (stable/etch) in directory /data/chroot (without
+any bootloader).
+
+  grml-debootstrap --target /dev/sda3 --grub hd0 --groot hd0,2 --mirror ftp://ftp.tugraz.at/mirror/debian
+
+Install default Debian release (stable/etch) on /dev/sda3 and install bootmanager
+Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
+Use specifed mirror instead of the default (ftp://ftp.debian.de/debian) one.
+
+Files
+-----
+
+  /etc/debootstrap/config
+
+Main configuration file. You have to adjust it according to your needs
+before you are able to run grml-debootstrap.
+
+  /etc/debootstrap/chroot-script
+
+The script executed within the new Debian system as soon as the main system
+has been installed via [c]debootstrap.
+
+  /etc/debootstrap/locale.gen
+
+Defines the default locales used for generating locales via locale-gen.
+
+  /etc/debootstrap/packages
+
+Defines the software packages which should be installed in the new
+Debian system by default.
+
+  /etc/debootstrap/stages/
+
+The default directory for storing information about executed stages. Every
+single function of grml-debootstrap will write 'done' to the stages directory
+into a file named as the function itself if it has been executed sucessfully.
+You can adjust the location of the directory via configuration variable STAGES
+via /etc/debootstrap/config.  Please notice that you have to remove the stages
+directory on your own if you want to re-execute grml-deboostrap after running it
+successfully once. This should avoid recurrent execution by error of
+grml-debootstrap (which might delete present data).
+
+Customization
+-------------
+
+You can control execution of grml-debootstrap via adjusting
+/etc/debootstrap/config for some main stuff or via setting some selected
+variables via commandline.  The packages which should be installed in the new
+Debian system can be defined via the file /etc/debootstrap/packages.  If you
+want to put existing files to the new Debian system you can place them into the
+(by default non-existing) directories boot, etc, share, usr and var in
+/etc/debootstrap/. Every existing directory will be copied to the new Debian
+system then.
+
+Supported Releases
+------------------
+
+.Current status
+[grid="all"]
+'---------.-----------------.---------------
+Release / Tool  debootstrap   cdebootstrap
+--------------------------------------------
+Sarge           works[1]      works[1]
+Etch            works         works
+Lenny           works         works
+Sid             works         works
+--------------------------------------------
+
+[1] Please notice that Sarge is the current old-stable within Debian.
+grml-debootstrap can handle the release but you really should not
+use Sarge anymore unless you really know what you are doing. Choose
+Etch instead.
+
+Bugs
+----
+
+Probably. Please send bugreports to Michael Prokop <mika@grml.org>.
+
+See also
+--------
+
+debootstrap (8), cdebootstrap (1).
+
+Bugs
+----
+Please report feedback, link:http://grml.org/bugs/[bugreports] and wishes link:http://grml.org/contact/[to us]!
+
+Author
+------
+Michael Prokop <mika@grml.org>
