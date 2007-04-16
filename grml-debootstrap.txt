@@ -158,7 +158,6 @@ use Sarge anymore unless you really know what you are doing. Choose
 Etch instead.
 =====================================================================
 
-
 Bugs
 ----
 
@@ -168,10 +167,6 @@ See also
 --------
 
 debootstrap (8), cdebootstrap (1).
-
-Bugs
-----
-Please report feedback, link:http://grml.org/bugs/[bugreports] and wishes link:http://grml.org/contact/[to us]!
 
 Author
 ------
