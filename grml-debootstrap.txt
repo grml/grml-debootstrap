@@ -9,6 +9,8 @@ Synopsis
 --------
 grml-debootstrap [ options ]
 
+image:images/screenshot.png[Screenshot]
+
 Introduction
 ------------
 
@@ -24,10 +26,7 @@ A plain and base Debian system will be installed on the given
 device (or directory) then. Customization of this process is
 possible as well.
 
-
-*******************************************************************************
-Important! The grml team does not take responsibility for loss of any data!
-*******************************************************************************
+CAUTION: The grml team does not take responsibility for loss of any data!
 
 Options and environment variables
 ---------------------------------
@@ -71,6 +70,10 @@ Corresponding with configuration variable RELEASE.
 
 Target partition (/dev/...) or directory (anything else without /dev at the
 beginning).
+
+WARNING: the commandline parsing of grml-debootstrap does not validate the provided
+arguments for the commandline options. Please be careful and check docs and
+/etc/debootstrap/config for further information.
 
 Usage examples
 ---------------

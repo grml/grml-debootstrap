@@ -25,7 +25,8 @@ man-stamp: grml-debootstrap.txt
 
 online: all
 	scp grml-debootstrap.html grml:/var/www/grml/grml-debootstrap/index.html
-	scp images/icons/* grml:/var/www/grml/grml-debootstrap/images/icons/
+	scp images/icons/*        grml:/var/www/grml/grml-debootstrap/images/icons/
+	scp images/*              grml:/var/www/grml/grml-debootstrap/images/
 
 clean:
 	rm -rf grml-debootstrap.html grml-debootstrap.xml grml-debootstrap.8 html-stamp man-stamp
