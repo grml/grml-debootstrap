@@ -1,0 +1,11 @@
+.Current status
+[grid="all"]
+'---------.-----------------.---------------
+Release / Tool  debootstrap   cdebootstrap
+--------------------------------------------
+Sarge           works[1]      works[1]
+Etch            works         works
+Lenny           works         works
+Sid             works         works
+--------------------------------------------
+

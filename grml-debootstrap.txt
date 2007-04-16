@@ -144,16 +144,7 @@ system then.
 Supported Releases
 ------------------
 
-.Current status
-[grid="all"]
-'---------.-----------------.---------------
-Release / Tool  debootstrap   cdebootstrap
---------------------------------------------
-Sarge           works[1]      works[1]
-Etch            works         works
-Lenny           works         works
-Sid             works         works
---------------------------------------------
+include::releasetable.txt[]
 
 [1] Please notice that Sarge is the current old-stable within Debian.
 grml-debootstrap can handle the release but you really should not

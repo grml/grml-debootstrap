@@ -5,12 +5,14 @@ doc: doc_man doc_html
 doc_html: html-stamp
 
 html-stamp: grml-debootstrap.txt
+	sed -i 's/^include::releasetable-man.txt\[\]/include::releasetable.txt\[\]/' grml-debootstrap.txt
 	asciidoc -b xhtml11 grml-debootstrap.txt
 	touch html-stamp
 
 doc_man: man-stamp
 
 man-stamp: grml-debootstrap.txt
+	sed -i 's/^include::releasetable.txt\[\]/include::releasetable-man.txt\[\]/' grml-debootstrap.txt
 	asciidoc -d manpage -b docbook grml-debootstrap.txt
 	sed -i 's/<emphasis role="strong">/<emphasis role="bold">/' grml-debootstrap.xml
 	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-debootstrap.xml
