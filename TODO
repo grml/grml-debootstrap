@@ -10,3 +10,5 @@ TODO list for grml-debootstrap
 * support rpmstrap (bootstrap a basic RPM-based system)
 * support automatic installation of Gentoo
 * provide zsh-completion for grml-debootstrap's cmdline variables
+* support installation on usb-pen (like grml2usb for Debian)
+  -> http://blog.256bit.org/archives/172-Debian-in-der-Hosentasche.html#extended
