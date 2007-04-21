@@ -336,7 +336,7 @@ grub() {
      $UPDATEGRUB -y
      if [ -f /boot/grub/menu.lst ] ; then
         sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
-        sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro|g" /boot/grub/menu.lst
+        sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro ${BOOT_APPEND}|g" /boot/grub/menu.lst
         # not sure why savedefault does not work for me; any ideas?
         sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
         $UPDATEGRUB -y

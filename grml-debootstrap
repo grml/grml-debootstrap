@@ -41,16 +41,17 @@ usage() {
   echo
   einfo "Valid options:"
   echo  "
-    -h|--help              Print this usage information and exit.
-    -v|--version           Show summary of options and exit.
+    -h|--help                   Print this usage information and exit.
+    -v|--version                Show summary of options and exit.
 
-    -t|--target <target>   Target partition (/dev/...) or directory.
-    -r|--release <release> Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
-    -m|--mirror <URL>      Specify mirror which should be used for apt-get/aptitude.
-    -p|--mntpoint <mnt>    Specify mountpoint that should be used for mounting the target system.
-    --groot <device>       Specify root device for usage in grub (corresponds with \$TARGET).
-    --grub <device>        Where do you want to install grub to? Use grub syntax for specifying.
-    --password <pwd>       Use specified password as password for user root. Use with caution.
+    -t|--target <target>        Target partition (/dev/...) or directory.
+    -r|--release <release>      Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+    -m|--mirror <URL>           Specify mirror which should be used for apt-get/aptitude.
+    -p|--mntpoint <mnt>         Specify mountpoint that should be used for mounting the target system.
+    --groot <device>            Specify root device for usage in grub (corresponds with \$TARGET).
+    --grub <device>             Where do you want to install grub to? Use grub syntax for specifying.
+    --password <pwd>            Use specified password as password for user root. Use with caution.
+    --boot_append <appendline>  Add specified appendline to kernel whilst booting
 
 "
 }

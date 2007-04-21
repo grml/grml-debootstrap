@@ -40,6 +40,10 @@ GRUB=''
 # GROOT='hd0,0'
 GROOT=''
 
+# specifiy additional bootparameters for usage in grub 
+# e.g. "pci=nomsi"
+BOOT_APPEND=''
+
 ################################################################################
 # Now the variables you might want to adjust, but need not to...
 
