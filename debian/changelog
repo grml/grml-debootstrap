@@ -1,3 +1,9 @@
+grml-debootstrap (0.8) unstable; urgency=low
+
+  * Add BOOT_APPEND option for kernel appendline 
+
+ -- Alexander Wirt <formorer@grml.org>  Sat, 21 Apr 2007 11:19:06 +0200
+
 grml-debootstrap (0.7) unstable; urgency=low
 
   * Support setting some variables via cmdline.
