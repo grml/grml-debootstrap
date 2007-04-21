@@ -12,3 +12,5 @@ TODO list for grml-debootstrap
 * provide zsh-completion for grml-debootstrap's cmdline variables
 * support installation on usb-pen (like grml2usb for Debian)
   -> http://blog.256bit.org/archives/172-Debian-in-der-Hosentasche.html#extended
+* install all packages within /etc/debootstrap/packages.d/ to system
+* support installation of grml-kernel
