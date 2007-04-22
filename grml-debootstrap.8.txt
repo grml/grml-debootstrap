@@ -7,7 +7,7 @@ grml-debootstrap - wrapper around debootstrap for installing plain Debian via gr
 
 Synopsis
 --------
-grml-debootstrap [ options ]
+grml-debootstrap [ _options_ ]
 
 image:images/screenshot.png[Screenshot]
 
@@ -31,51 +31,46 @@ CAUTION: The grml team does not take responsibility for loss of any data!
 Options and environment variables
 ---------------------------------
 
-  -h, --help
+*-h*, *--help*::
+    Show summary of options and exit.
 
-Show summary of options and exit.
+*-v*, *--version*::
+    Show version of program and exit.
 
-  -v, --version
+*--grub* <_device_>::
+    Where do you want to install grub to? Use grub syntax for specifying.
+    Do not forget to set groot as well. Leave empty to avoid installation of grub.
 
-Show version of program and exit.
+*--groot* <_device_>::
+    Specify root device for usage in grub (corresponds with $TARGET).
+    Again, use grub syntax for specifying.
+    Corresponding with configuration variable GROOT.
 
-  --grub <device>
+*--boot_append* <_appendline for the kernel_>::
+    Specifiy appendline for the kernel. 
+    E.g. "_pci=nomsi_"
 
-Where do you want to install grub to? Use grub syntax for specifying.
-Do not forget to set groot as well. Leave empty to avoid installation of grub.
+*-m*, *--mirror* <_URL_>::
+    Specify mirror which should be used for apt-get/aptitude. Notice that
+    specifying the mirror also sets the chrootmirror to the given value.
+    Corresponding with configuration variables MIRROR and CHROOTMIRROR.
 
-  --groot <device>
+*-p*, *--mntpoint* <_/mntpoint_>::
+    Specify mountpoint that should be used for mounting the target system.
+    Corresponding with configuration variable MNTPOINT.
 
-Specify root device for usage in grub (corresponds with $TARGET).
-Again, use grub syntax for specifying.
-Corresponding with configuration variable GROOT.
+*--password* <_password_>::
+    Use specified password as password for user root. Use with caution, as your
+    commandline might be visible in the process list and the shell history.
+    It's meant for automatic installation only.
 
-  -m, --mirror <URL>
+*-r*, *--release* <_releasename_>::
+    Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+    Corresponding with configuration variable RELEASE.
 
-Specify mirror which should be used for apt-get/aptitude. Notice that
-specifying the mirror also sets the chrootmirror to the given value.
-Corresponding with configuration variables MIRROR and CHROOTMIRROR.
-
-  -p, --mntpoint </mntpoint>
-
-Specify mountpoint that should be used for mounting the target system.
-Corresponding with configuration variable MNTPOINT.
-
-  --password <password>
-
-Use specified password as password for user root. Use with caution, as your
-commandline might be visible in the process list and the shell history.
-It's meant for automatic installation only.
-
-  -r, --release <releasename>
-
-Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
-Corresponding with configuration variable RELEASE.
-
-  -t, --target <target>
-
-Target partition (/dev/...) or directory (anything else without /dev at the
-beginning).
+*-t*, *--target* <_target_>::
+    Target partition (/dev/...) or directory (anything else without /dev at the
+    beginning).
 
 WARNING: the commandline parsing of grml-debootstrap does not validate the provided
 arguments for the commandline options. Please be careful and check docs and
@@ -127,6 +122,11 @@ Defines the default locales used for generating locales via locale-gen.
 Defines the software packages which should be installed in the new
 Debian system by default.
 
+  /etc/debootstrap/extrapackages
+
+Debian Packages dropped here will be installed into the new Debian system by
+default (Controlvariable: EXTRAPACKAGES)
+
   /etc/debootstrap/stages/
 
 The default directory for storing information about executed stages. Every
@@ -148,7 +148,9 @@ Debian system can be defined via the file /etc/debootstrap/packages.  If you
 want to put existing files to the new Debian system you can place them into the
 (by default non-existing) directories boot, etc, share, usr and var in
 /etc/debootstrap/. Every existing directory will be copied to the new Debian
-system then.
+system then. If you want to install additional packages that are not available
+via the grml or debian mirror drop them into /etc/debootstrap/extrapackages and
+take sure that EXTRAPACKAGES is set to "yes". 
 
 Automatic installation
 ----------------------
