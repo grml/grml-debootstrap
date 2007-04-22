@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 16 18:39:21 CEST 2007 [mika]
+# Latest change: Mon Apr 23 00:22:33 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -55,14 +55,15 @@ chrootmirror() {
 grmlrepos() {
   if [ -n "$GRMLREPOS" ] ; then
      cat >> /etc/apt/sources.list << EOF
-# stable repository:
+
+# grml: stable repository:
   deb     http://deb.grml.org/ grml-stable  main
   deb-src http://deb.grml.org/ grml-stable  main
 
-# testing/development repository:
+# grml: testing/development repository:
   deb     http://deb.grml.org/ grml-testing main
   deb-src http://deb.grml.org/ grml-testing main
-'
+
 EOF
   fi
 }
@@ -107,11 +108,11 @@ packages() {
 
 # install extra packages {{{
 extrapackages() {
-    if [ "$EXTRAPACKAGES" = 'yes' ] ; then 
+    if [ "$EXTRAPACKAGES" = 'yes' ] ; then
         PACKAGELIST=$(find /etc/debootstrap/extrapackages -type f -name '*.deb')
         if [ -n "$PACKAGELIST" ]; then
             dpkg -i $PACKAGELIST
-            # run apt again to resolve any deps 
+            # run apt again to resolve any deps
             DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL
         fi
     fi
@@ -387,25 +388,13 @@ finalize() {
 # }}}
 
 # execute the functions {{{
-  stage chrootmirror   && chrootmirror   && stage chrootmirror done
-  stage grmlrepos      && grmlrepos      && stage grmlrepos done
-  stage kernelimg_conf && kernelimg_conf && stage kernelimg_conf done
-  stage makedev        && makedev        && stage makedev done
-  stage packages       && packages       && stage packages done
-  stage extrapackages  && extrapackages  && stage extrapackages done
-  stage mkinitrd       && mkinitrd       && stage mkinitrd done
-  stage kernel         && kernel         && stage kernel done
-  stage reconfigure    && reconfigure    && stage reconfigure done
-  stage hosts          && hosts          && stage hosts done
-  stage interfaces     && interfaces     && stage interfaces done
-  stage timezone       && timezone       && stage timezone done
-  stage fstab          && fstab          && stage fstab done
-  stage hostname       && hostname       && stage hostname done
-  stage initrd         && initrd         && stage initrd done
-  stage grub           && grub           && stage grub done
-  stage passwords      && passwords      && stage passwords done
-  stage services       && services       && stage services done
-  stage finalize       && finalize       && stage finalize done
+ for i in chrootmirror grmlrepos kernelimg_conf makedev packages extrapackages \
+     mkinitrd kernel reconfigure hosts interfaces timezone fstab hostname \
+     initrd grub passwords services finalize ; do
+    if stage $i ; then
+       $i && stage $i done || exit 1
+    fi
+  done
 # }}}
 
 # finally exit the chroot {{{
