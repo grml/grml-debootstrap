@@ -54,7 +54,16 @@ chrootmirror() {
 # set up grml repository {{{
 grmlrepos() {
   if [ -n "$GRMLREPOS" ] ; then
-     echo 'deb     http://grml.org/repos/ ./' >> /etc/apt/sources.list
+     cat >> /etc/apt/sources.list << EOF
+# stable repository:
+  deb     http://deb.grml.org/ grml-stable  main
+  deb-src http://deb.grml.org/ grml-stable  main
+
+# testing/development repository:
+  deb     http://deb.grml.org/ grml-testing main
+  deb-src http://deb.grml.org/ grml-testing main
+'
+EOF
   fi
 }
 # }}}
