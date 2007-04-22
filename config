@@ -98,6 +98,9 @@ DEBIAN_FRONTEND='noninteractive'
 # install packages defined in /etc/debootstrap/packages?
 PACKAGES='yes'
 
+# install extra packages in /etc/debootstrap/
+EXTRAPACKAGES='yes'
+
 # place of config files for debootstrap
 CONFFILES='/etc/debootstrap/'
 

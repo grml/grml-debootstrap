@@ -96,7 +96,20 @@ packages() {
 }
 # }}}
 
-# sarge specific stuff: mkinitrd {{{
+# install extra packages {{{
+extrapackages() {
+    if [ "$EXTRAPACKAGES" = 'yes' ] ; then 
+        PACKAGELIST=$(find /etc/debootstrap/extrapackages -type f -name '*.deb')
+        if [ -n "$PACKAGELIST" ]; then
+            dpkg -i $PACKAGELIST
+            # run apt again to resolve any deps 
+            DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL
+        fi
+    fi
+}
+# }}}
+
+#  sarge specific stuff: mkinitrd {{{
 mkinitrd() {
   if [ "$RELEASE" = 'sarge' ] ; then
      sed -i "s#ROOT=probe#ROOT=$TARGET#" /etc/mkinitrd/mkinitrd.conf
@@ -370,6 +383,7 @@ finalize() {
   stage kernelimg_conf && kernelimg_conf && stage kernelimg_conf done
   stage makedev        && makedev        && stage makedev done
   stage packages       && packages       && stage packages done
+  stage extrapackages  && extrapackages  && stage extrapackages done
   stage mkinitrd       && mkinitrd       && stage mkinitrd done
   stage kernel         && kernel         && stage kernel done
   stage reconfigure    && reconfigure    && stage reconfigure done

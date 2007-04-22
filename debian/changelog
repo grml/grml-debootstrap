@@ -1,3 +1,12 @@
+grml-debootstrap (0.9) unstable; urgency=low
+
+  * Add support for EXTRAPACKAGES that can be dropped in
+    /etc/debootstrap/extrapackages
+  * Add boot_append option to manpage
+  * Manpage reformatted  
+
+ -- Alexander Wirt <formorer@debian.org>  Sun, 22 Apr 2007 12:35:32 +0200
+
 grml-debootstrap (0.8) unstable; urgency=low
 
   * Add BOOT_APPEND option for kernel appendline 

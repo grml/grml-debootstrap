@@ -309,6 +309,8 @@ preparechroot() {
   cp /etc/debootstrap/packages        $MNTPOINT/etc/debootstrap/packages
   cp /etc/debootstrap/variables       $MNTPOINT/etc/debootstrap/variables
 
+  cp -a /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
+
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
 
