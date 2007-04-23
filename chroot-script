@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 23 11:51:59 CEST 2007 [mika]
+# Latest change: Mon Apr 23 12:02:03 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -70,8 +70,10 @@ EOF
      gpg --export F61E2E7CECDEA787 | apt-key add - || /bin/true # not yet sure
      # why it's necessary, sometimes we get an error even though it works [mika]
 
-     if grep -q grml /etc/apt/preferences 2>/dev/null ; then
-        cat >> /etc/apt/preferences >> EOF
+     # make sure we install packages from grml's pool only if not available
+     # from Debian!
+     if ! grep -q grml /etc/apt/preferences 2>/dev/null ; then
+        cat >> /etc/apt/preferences << EOF
 // debian pool (default):
 Package: *
 Pin: release o=Debian
@@ -82,6 +84,7 @@ Package: *
 Pin: origin deb.grml.org
 Pin-Priority: 991
 EOF
+     fi
   fi
 }
 # }}}
