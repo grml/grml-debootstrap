@@ -10,6 +10,7 @@ grml-debootstrap (0.9) unstable; urgency=low
   * Support grml-repository and installation of grml-kernel
     via GRMLREPOS and GRMLPACKAGES.
   * Use stage logic inside chroot-script as well.
+  * Activate zsh completion.
 
  -- Michael Prokop <mika@grml.org>  Mon, 23 Apr 2007 00:23:19 +0200
 
