@@ -227,12 +227,12 @@ if [ -n "$AUTOINSTALL" ] ; then
    fi
 else # if not running automatic installation display configuration and prompt for execution:
    einfo "$0 - Please recheck configuration before execution:"
-   echo "
-      Target:           $TARGET"
+   echo
+   echo "   Target:           $TARGET"
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
       [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
       [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "  Important! Continuing will delete all data from ${TARGET}!" ;; esac
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
       echo
    einfon "Is this ok for you? [y/N] "
    read a
