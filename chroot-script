@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 23 12:02:03 CEST 2007 [mika]
+# Latest change: Sam Apr 28 20:19:58 CEST 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -398,7 +398,9 @@ grub() {
 # make sure we don't have any running processes left {{{
 services() {
   for service in ssh mdadm mdadm-raid ; do
-      [ -x "/etc/init.d/$service" ] && "/etc/init.d/$service" stop
+    if [ -x /etc/init.d/"$service" ] ; then
+       /etc/init.d/"$service" stop || /bin/true
+    fi
   done
 }
 # }}}
