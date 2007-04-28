@@ -270,13 +270,20 @@ hosts() {
 
 # set up /etc/network/interfaces {{{
 interfaces() {
-  if ! [ -f /etc/network/interfaces ] ; then
+  touch /etc/network/interfaces
+  # make sure we add the entries only once
+  if ! grep -q eth0 /etc/network/interfaces ; then
      echo "Setting up /etc/network/interfaces"
      cat >> /etc/network/interfaces << EOF
+
+# loopback device:
 iface lo inet loopback
-iface eth0 inet dhcp
 auto lo
-auto eth0
+
+# eth0:
+# iface eth0 inet dhcp
+# auto eth0
+
 EOF
   fi
 }

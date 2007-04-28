@@ -11,6 +11,8 @@ grml-debootstrap (0.9) unstable; urgency=low
     via GRMLREPOS and GRMLPACKAGES.
   * Use stage logic inside chroot-script as well.
   * Activate zsh completion.
+  * Rewrote interfaces() code for handling of
+    /etc/network/interfaces. Thanks for the pointer, formorer.
 
  -- Michael Prokop <mika@grml.org>  Mon, 23 Apr 2007 00:23:19 +0200
 
