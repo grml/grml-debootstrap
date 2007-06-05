@@ -168,6 +168,7 @@ case $ISO in
     ISO=file:$1
     ;;
 esac
+ISODIR=${ISO##file:}
 
 # provide variables to chroot system
 touch /etc/debootstrap/variables
@@ -202,7 +203,7 @@ bailout(){
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a    1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
-        [ -d "$TARGET/$ISO" ] && umount "$TARGET/$ISO"
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
         einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
      fi
   fi
@@ -296,9 +297,9 @@ mount_target() {
        eend $?
      fi
   fi
-  if [ -n "$ISO" ] ; then
-     mkdir "$TARGET/$ISO"
-     mount --bind "$ISO" "$TARGET/$ISO"
+  if [ -n "$ISODIR" ] ; then
+     mkdir -p "$MNTPOINT/$ISODIR"
+     mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
   fi
 }
 # }}}
