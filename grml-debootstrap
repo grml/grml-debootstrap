@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Jun 05 14:06:21 CEST 2007 [mika]
+# Latest change: Die Jun 05 14:23:38 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -169,6 +169,7 @@ case $ISO in
     ;;
 esac
 ISODIR=${ISO##file:}
+ISODIR=${ISODIR%%/}
 
 # provide variables to chroot system
 touch /etc/debootstrap/variables
@@ -386,7 +387,7 @@ grub_install() {
 # unmount $MNTPOINRT {{{
 umount_chroot() {
   if [ -n "$ISODIR" ] ; then
-     if grep -q "$MNTPOINT/$ISODIR" /proc/mounts ; then
+     if grep -q "$ISODIR" /proc/mounts ; then
         einfo "Unmount $MNTPOINT/$ISODIR"
         umount "$MNTPOINT/$ISODIR"
         eend $?
