@@ -2,8 +2,6 @@ TODO list for grml-debootstrap
 ------------------------------
 
 * support tarballs for customization/mirror source
-* support cdroms as mirror source
-  -> http://www.thorstenstrusch.de/software/debian-linux/mittels-grml-debootstrap-etch-installieren/
 * support automatic installation of grml packages:
   * grml-etc-core
   * grml-x + xserver-xorg [configuration of X]
