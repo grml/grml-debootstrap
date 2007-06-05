@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Jun 05 14:02:22 CEST 2007 [mika]
+# Latest change: Die Jun 05 14:04:47 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -96,7 +96,7 @@ while [ "$#" -gt "0" ] ; do
             ;;
         -i|--iso)
             shift
-	    [ -n "$MIRROR" ] && unset MIRROR
+            [ -n "$MIRROR" ] && unset MIRROR
             ISO=$1
             ;;
         -h|--help)
@@ -386,14 +386,18 @@ grub_install() {
 # unmount $MNTPOINRT {{{
 umount_chroot() {
   if [ -n "$ISODIR" ] ; then
-     einfo "Unmount $MNTPOINT/$ISODIR"
-     umount "$MNTPOINT/$ISODIR"
-     eend $?
+     if grep -q "$ISODIR" /proc/mounts ; then
+        einfo "Unmount $MNTPOINT/$ISODIR"
+        umount "$MNTPOINT/$ISODIR"
+        eend $?
+     fi
   fi
-  if [ -n "$PARTITION" ] ; then
-     einfo "Unmount $MNTPOINT"
-     umount $MNTPOINT
-     eend $?
+  if grep -q "$PARTITION" /proc/mounts ; then
+     if [ -n "$PARTITION" ] ; then
+        einfo "Unmount $MNTPOINT"
+        umount $MNTPOINT
+        eend $?
+     fi
   fi
 }
 # }}}
