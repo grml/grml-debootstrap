@@ -55,6 +55,13 @@ Options and environment variables
     specifying the mirror also sets the chrootmirror to the given value.
     Corresponding with configuration variables MIRROR and CHROOTMIRROR.
 
+*-i*, *--iso* <_/mntpoint_>::
+    Specify mountpoint where you have a Debian ISO mounted loopback.
+    Using this option instead of the mirror option gives you the possibility
+    to install the base-system without network access. Make sure you
+    mounted the according Debian-ISO to the given mntpoint. See section
+    'Usage examples' for a demonstration.
+
 *-p*, *--mntpoint* <_/mntpoint_>::
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
@@ -99,6 +106,15 @@ any bootloader).
 Install default Debian release (stable/etch) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
 Use specifed mirror instead of the default (ftp://ftp.debian.de/debian) one.
+
+  mount -o loop /mnt/hda6/debian-40r0-i386-CD-1.iso /mnt/iso
+  grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
+
+Install Debian stable/etch on /dev/hda1 using the loopback mounted Debian-ISO
+for the base-system and install bootmanager Grub in MBR (master boot record) of
+/dev/hda and use /dev/hda1 as system partition. Please notice, that the chroot
+system requires network access for all packages which are not part of the
+ISO.
 
 Files
 -----

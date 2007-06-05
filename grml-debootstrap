@@ -178,6 +178,7 @@ chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
 [ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
 [ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
 [ -n "$ISO" ]    && echo "ISO=$ISO"       >> /etc/debootstrap/variables
+[ -n "$ISODIR" ] && echo "ISODIR=$ISO"    >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> /etc/debootstrap/variables
 [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> /etc/debootstrap/variables
@@ -298,8 +299,10 @@ mount_target() {
      fi
   fi
   if [ -n "$ISODIR" ] ; then
+     einfo "Mounting Debian image loopback to $MNTPOINT/$ISODIR."
      mkdir -p "$MNTPOINT/$ISODIR"
      mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
+     eend $?
   fi
 }
 # }}}
