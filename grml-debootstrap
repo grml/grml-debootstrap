@@ -96,7 +96,7 @@ while [ "$#" -gt "0" ] ; do
             ;;
         -i|--iso)
             shift
-	    [ -n "$MIRROR"] && unset MIRROR
+	    [ -n "$MIRROR" ] && unset MIRROR
             ISO=$1
             ;;
         -h|--help)
@@ -163,7 +163,7 @@ fi
 # make sure we have the right syntax when using an iso image
 case $ISO in
    file*) # do nothing
-    ;
+    ;;
    *)
     ISO=file:$1
     ;;
