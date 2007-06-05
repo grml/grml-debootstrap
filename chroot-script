@@ -45,8 +45,13 @@ stage() {
 
 # define chroot mirror {{{
 chrootmirror() {
-  if [ -n "$CHROOTMIRROR" ] ; then
-     echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
+  if [ -n "$ISO" ] ; then
+     echo "deb $ISO $RELEASE main contrib" > /etc/apt/sources.list
+     [ -n "$CHROOTMIRROR" ] && echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" >> /etc/apt/sources.list
+  else
+    if [ -n "$CHROOTMIRROR" ] ; then
+       echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
+    fi
   fi
 }
 # }}}

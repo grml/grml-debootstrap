@@ -10,7 +10,7 @@
 
 set -e # exit on any error
 
-VERSION='0.7'
+VERSION='0.9'
 
 # source core functions {{{
 . /etc/grml/lsb-functions
@@ -47,6 +47,7 @@ usage() {
     -t|--target <target>        Target partition (/dev/...) or directory.
     -r|--release <release>      Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
     -m|--mirror <URL>           Specify mirror which should be used for apt-get/aptitude.
+    -i|--iso <mnt>              Specify mountpoint where Debian ISO is mounted to (instead of using mirror)
     -p|--mntpoint <mnt>         Specify mountpoint that should be used for mounting the target system.
     --groot <device>            Specify root device for usage in grub (corresponds with \$TARGET).
     --grub <device>             Where do you want to install grub to? Use grub syntax for specifying.
@@ -92,6 +93,11 @@ while [ "$#" -gt "0" ] ; do
             shift
             MIRROR=$1
             CHROOTMIRROR=$1
+            ;;
+        -i|--iso)
+            shift
+	    [ -n "$MIRROR"] && unset MIRROR
+            ISO=$1
             ;;
         -h|--help)
             usage ; eend 0
@@ -154,6 +160,15 @@ else
    ARCHINFO=" (${ARCH})"
 fi
 
+# make sure we have the right syntax when using an iso image
+case $ISO in
+   file*) # do nothing
+    ;
+   *)
+    ISO=file:$1
+    ;;
+esac
+
 # provide variables to chroot system
 touch /etc/debootstrap/variables
 chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
@@ -161,6 +176,7 @@ chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
 [ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> /etc/debootstrap/variables
 [ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
 [ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
+[ -n "$ISO" ]    && echo "ISO=$ISO"       >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
 [ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> /etc/debootstrap/variables
 [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> /etc/debootstrap/variables
@@ -186,6 +202,7 @@ bailout(){
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a    1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
+        [ -d "$TARGET/$ISO" ] && umount "$TARGET/$ISO"
         einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
      fi
   fi
@@ -232,6 +249,7 @@ else # if not running automatic installation display configuration and prompt fo
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
       [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
       [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
+      [ -n "$ISO" ] && echo "   Using iso:        $ISO"
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
       echo
    einfon "Is this ok for you? [y/N] "
@@ -278,6 +296,10 @@ mount_target() {
        eend $?
      fi
   fi
+  if [ -n "$ISO" ] ; then
+     mkdir "$TARGET/$ISO"
+     mount --bind "$ISO" "$TARGET/$ISO"
+  fi
 }
 # }}}
 
@@ -287,8 +309,9 @@ debootstrap_system() {
           mount_target
   fi
   if grep -q $MNTPOINT /proc/mounts ; then
-     einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using mirror $MIRROR"
-     $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR
+     einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
+     [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR || \
+     $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $ISO
      eend $?
   else
      eerror "Error: $MNTPOINT not mounted, can not continue."
