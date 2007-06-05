@@ -3,7 +3,9 @@ grml-debootstrap (0.10) unstable; urgency=low
   * Add console-common to /etc/debootstrap/packages. Thanks for
     the feature request, Thorsten Strusch!
   * Support option -i/--iso: now it's possible to install packages
-    from a normal Debian ISO.
+    from a normal Debian ISO. Thanks for the idea and the basic
+    instructions to Thorsten Strusch!
+    http://www.thorstenstrusch.de/software/debian-linux/
 
  -- Michael Prokop <mika@grml.org>  Mon, 04 Jun 2007 10:13:32 +0200
 
