@@ -17,3 +17,4 @@ TODO list for grml-debootstrap
 * support installation on usb-pen (like grml2usb for Debian)
   -> http://blog.256bit.org/archives/172-Debian-in-der-Hosentasche.html#extended
 * support adduser for new user who has same permissions as an user created by d-i
+* support adding own sources.list entries
