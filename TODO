@@ -18,3 +18,4 @@ TODO list for grml-debootstrap
   -> http://blog.256bit.org/archives/172-Debian-in-der-Hosentasche.html#extended
 * support adduser for new user who has same permissions as an user created by d-i
 * support adding own sources.list entries
+* test support for Ubuntu dapper, edgy, feisty, and gutsy as debootstrap 1.0.0 provides support for it
