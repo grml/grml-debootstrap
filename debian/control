@@ -5,7 +5,9 @@ Maintainer: Michael Prokop <mika@grml.org>
 Uploaders: Alexander Wirt <formorer@grml.org>
 Build-Depends: debhelper (>= 5), asciidoc, xsltproc, docbook-xsl
 Standards-Version: 3.7.2
-XS-Vcs-hg: http://hg.grml.org/grml-debootstrap
+Homepage: http://hg.grml.org/grml-debootstrap/
+XS-Vcs-hg: http://hg.grml.org/grml-debootstrap/
+XS-Vcs-Browser: http://hg.grml.org/grml-debootstrap/
 
 Package: grml-debootstrap
 Architecture: all
