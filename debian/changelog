@@ -1,3 +1,10 @@
+grml-debootstrap (0.11) unstable; urgency=low
+
+  * Better inform user about already executed stages.
+    [Closes: issue299]
+
+ -- Michael Prokop <mika@grml.org>  Sat,  6 Oct 2007 18:03:16 +0200
+
 grml-debootstrap (0.10) unstable; urgency=low
 
   * Add console-common to /etc/debootstrap/packages. Thanks for

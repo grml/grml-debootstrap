@@ -4,13 +4,13 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Jun 05 14:23:38 CEST 2007 [mika]
+# Latest change: Sam Okt 06 18:01:53 CEST 2007 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
 set -e # exit on any error
 
-VERSION='0.10'
+VERSION='0.11'
 
 # source core functions {{{
 . /etc/grml/lsb-functions
@@ -125,7 +125,7 @@ if [ -z "$STAGES" ] ; then
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
 
-if [ -r $STAGES/grml-debootstrap ] ; then
+if [ -r "$STAGES"/grml-debootstrap ] ; then
    if grep -q done $STAGES/grml-debootstrap ; then
       eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
       eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
@@ -222,6 +222,9 @@ stage() {
      return 0
   elif grep -q done "$STAGES/$1" 2>/dev/null ; then
      ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     eindent
+       ewarn "To reexecute it clean up the according directory inside $STAGES" ; eend 0
+     eoutdent
      return 1
   fi
 }
