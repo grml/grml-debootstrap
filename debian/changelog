@@ -1,3 +1,10 @@
+grml-debootstrap (0.12) unstable; urgency=low
+
+  * Fixed some typos in the manpage.
+    Thanks for the patch, Alexander 'Stone' Steinböck!
+
+ -- Michael Prokop <mika@grml.org>  Wed, 24 Oct 2007 10:16:03 +0200
+
 grml-debootstrap (0.11) unstable; urgency=low
 
   * Better inform user about already executed stages.

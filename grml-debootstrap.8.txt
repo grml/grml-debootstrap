@@ -47,7 +47,7 @@ Options and environment variables
     Corresponding with configuration variable GROOT.
 
 *--boot_append* <_appendline for the kernel_>::
-    Specifiy appendline for the kernel. 
+    Specify appendline for the kernel. 
     E.g. "_pci=nomsi_"
 
 *-m*, *--mirror* <_URL_>::
@@ -59,7 +59,7 @@ Options and environment variables
     Specify mountpoint where you have a Debian ISO mounted loopback.
     Using this option instead of the mirror option gives you the possibility
     to install the base-system without network access. Make sure you
-    mounted the according Debian-ISO to the given mntpoint. See section
+    mounted the according Debian-ISO to the given <_/mntpoint_>. See section
     'Usage examples' for a demonstration.
 
 *-p*, *--mntpoint* <_/mntpoint_>::
@@ -72,7 +72,7 @@ Options and environment variables
     It's meant for automatic installation only.
 
 *-r*, *--release* <_releasename_>::
-    Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
+    Specify release of new Debian system. Supported releases: sarge, etch, lenny and sid.
     Corresponding with configuration variable RELEASE.
 
 *-t*, *--target* <_target_>::
@@ -105,7 +105,7 @@ any bootloader).
 
 Install default Debian release (stable/etch) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
-Use specifed mirror instead of the default (ftp://ftp.debian.de/debian) one.
+Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
 
   mount -o loop /mnt/hda6/debian-40r0-i386-CD-1.iso /mnt/iso
   grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
@@ -150,7 +150,7 @@ single function of grml-debootstrap will write 'done' to the stages directory
 into a file named as the function itself if it has been executed successfully.
 You can adjust the location of the directory via configuration variable STAGES
 via /etc/debootstrap/config.  Please notice that you have to remove the stages
-directory on your own if you want to re-execute grml-deboostrap after running it
+directory on your own if you want to re-execute grml-debootstrap after running it
 successfully once. This should avoid recurrent execution by error of
 grml-debootstrap (which might delete present data).
 
@@ -207,7 +207,7 @@ Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
 
   password=...
 
-Set passwort of user root without prompting for it but set it to the given
+Set password of user root without prompting for it but set it to the given
 argument. Usage example: password=AiTh5ahn
 
 Usage example for automatic installation:
