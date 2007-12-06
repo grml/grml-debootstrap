@@ -21,7 +21,7 @@ man-stamp: grml-debootstrap.8.txt
 	cp grml-debootstrap.8 grml-debootstrap.8.tmp
 	uniq grml-debootstrap.8.tmp > grml-debootstrap.8
 	# ugly hack to avoid '.sp' at the end of a sentence or paragraph:
-	sed -i 's/\.sp$//' grml-debootstrap.8
+	sed -i 's/\.sp//' grml-debootstrap.8
 	rm grml-debootstrap.8.tmp
 	touch man-stamp
 
