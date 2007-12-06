@@ -1,3 +1,9 @@
+grml-debootstrap (0.13) unstable; urgency=low
+
+  * Fix manpage handling of xsltproc.
+
+ -- Michael Prokop <mika@grml.org>  Thu, 06 Dec 2007 23:47:09 +0100
+
 grml-debootstrap (0.12) unstable; urgency=low
 
   * Fixed some typos in the manpage.

@@ -20,6 +20,8 @@ man-stamp: grml-debootstrap.8.txt
 	# notice: docbook-xsl 1.71.0.dfsg.1-1 is broken! make sure you use 1.68.1.dfsg.1-0.2!
 	cp grml-debootstrap.8 grml-debootstrap.8.tmp
 	uniq grml-debootstrap.8.tmp > grml-debootstrap.8
+	# ugly hack to avoid '.sp' at the end of a sentence or paragraph:
+	sed -i 's/\.sp$//' grml-debootstrap.8
 	rm grml-debootstrap.8.tmp
 	touch man-stamp
 
