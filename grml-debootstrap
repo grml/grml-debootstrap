@@ -161,13 +161,15 @@ else
 fi
 
 # make sure we have the right syntax when using an iso image
-case $ISO in
-   file*) # do nothing
-    ;;
-   *)
-    ISO=file:$1
-    ;;
-esac
+if [ -n "$ISO" ] ; then
+   case $ISO in
+      file*) # do nothing
+      ;;
+      *)
+      ISO=file:$1
+      ;;
+   esac
+fi
 ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
 
@@ -439,4 +441,4 @@ else
 fi
 
 ## END OF FILE #################################################################
-# vim: ai tw=100 expandtab foldmethod=marker
+# vim: ai tw=100 expandtab foldmethod=marker shiftwidth=3
