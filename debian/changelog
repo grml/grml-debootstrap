@@ -1,7 +1,7 @@
 grml-debootstrap (0.14) unstable; urgency=low
 
   * Make sure variable ISO is unset variable if not used.
-    Thanks for the bugreport, Darsha! [Testing: issue352]
+    Thanks for the bugreport, Darsha! [Closes: issue352]
 
  -- Michael Prokop <mika@grml.org>  Sun, 09 Dec 2007 20:16:15 +0100
 
