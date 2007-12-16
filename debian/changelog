@@ -1,3 +1,10 @@
+grml-debootstrap (0.15) unstable; urgency=low
+
+  * Make sure the passwd command succeeds.
+    Thanks, Wolfgang Karall! [Closes: issue363]
+
+ -- Michael Prokop <mika@grml.org>  Sun, 16 Dec 2007 16:30:37 +0100
+
 grml-debootstrap (0.14) unstable; urgency=low
 
   * Make sure variable ISO is unset variable if not used.
