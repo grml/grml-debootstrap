@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Son Dez 16 16:30:31 CET 2007 [mika]
+# Latest change: Mit Dez 19 10:10:50 CET 2007 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -257,9 +257,8 @@ passwords() {
   else
      echo "Setting password for user root:"
      set +e # do not exit if passwd returns error due to missmatching passwords
-     passwd
      until passwd; do echo "Please try again to set the password:" ; done
-     echo ""
+     echo
      set -e # restore default behaviour again
   fi
 }

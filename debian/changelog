@@ -1,3 +1,9 @@
+grml-debootstrap (0.16) unstable; urgency=low
+
+  * Drop the second passwd call.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 19 Dec 2007 10:10:54 +0100
+
 grml-debootstrap (0.15) unstable; urgency=low
 
   * Make sure the passwd command succeeds.
