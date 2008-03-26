@@ -1,3 +1,10 @@
+grml-debootstrap (0.17) unstable; urgency=low
+
+  * Support "-r" option as well as "--release" as being documented.
+    Thanks for reporting, Jens Kubieziel.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 26 Mar 2008 22:44:06 +0100
+
 grml-debootstrap (0.16) unstable; urgency=low
 
   * Drop the second passwd call.
