@@ -1,3 +1,20 @@
+grml-debootstrap (0.18) unstable; urgency=low
+
+  The "development sponsored by Sipwise GmbH" release.
+
+  * Provide interactive configuration dialog.
+  * Use stages based on target information, this gives us
+    the possibility to run multiple instance of grml-debootstrap.
+    [Testing: issue510]
+  * Use policy-rc.d inside chroot to avoid startup of daemons.
+    [Testing: issue509]
+  * Do not activate /sys by default anymore in /etc/fstab.
+  * Copy /etc/network/interfaces from running system to target
+    installation.
+  * Setting password via passwd does not work, use chpaswd instead.
+
+ -- Michael Prokop <mika@grml.org>  Tue, 26 Aug 2008 20:59:35 +0200
+
 grml-debootstrap (0.17) unstable; urgency=low
 
   * Support "-r" option as well as "--release" as being documented.

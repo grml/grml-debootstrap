@@ -4,70 +4,92 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mit Mär 26 22:44:03 CET 2008 [mika]
+# Latest change: Wed Aug 27 01:46:13 CEST 2008 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
 set -e # exit on any error
 
-VERSION='0.17'
+# variables {{{
+PN="$(basename $0)"
+VERSION='0.18'
+MNTPOINT="/mnt/debootstrap.$$"
+
+# inside the chroot system locales might not be available, so use minimum:
+export LANG=C
+export LC_ALL=C
+
+# make sure interactive mode is only executed when
+# using an empty configuration file or option --interactive
+INTERACTIVE=''
+# }}}
 
 # source core functions {{{
 . /etc/grml/lsb-functions
 . /etc/grml/script-functions
 # }}}
 
+# help text {{{
+usage() {
+  echo "$PN - wrapper around debootstrap for installing Debian
+
+Usage: $PN [options]
+
+  -h|--help                   Print this usage information and exit.
+  -v|--version                Show summary of options and exit.
+
+  -c|--config <configfile>    Use specified configuration file,
+                              defaults to /etc/debootstrap/config
+  -i|--iso <mnt>              Mountpoint where a Debian ISO is mounted to,
+                              for use instead of fetching packages from a mirror
+  -m|--mirror <URL>           Mirror which should be used for apt-get/aptitude.
+  -p|--mntpoint <mnt>         Mountpoint used for mounting the target system.
+  -r|--release <release>      Release of new Debian system (default: stable)
+  -t|--target <target>        Target partition (/dev/...) or directory.
+
+  --boot_append <appendline>  Add specified appendline to kernel whilst booting
+  --groot <device>            Root device for usage in grub, corresponds with
+                              \$TARGET in grub syntax, like hd0,0 for /dev/sda1
+  --grub <device>             Target for grub installation. Use grub syntax
+                              for specifying, like hd0 for /dev/sda
+  --interactive               Use interactive mode (frontend)
+  --password <pwd>            Use specified password as password for user root.
+
+Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
+"
+}
+
+if [ "$1" = '-h' ] || [ "$1" == '-help' ] ; then
+   usage
+   echo 'Please notice that this script requires root permissions!'
+   exit 0
+fi
+# }}}
+
 # make sure we have what we need {{{
-check4progs debootstrap || exit 1
+check4progs debootstrap dialog || exit 1
 check4root || exit 1
 # }}}
 
-# without config file it won't work {{{
+# source configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
-   . /etc/debootstrap/config
-else
-   eerror "/etc/debootstrap/config could not be read, exiting." ; eend 1
-   exit 1
+   if [ -n "$CONFIGFILE" ] ; then
+      if ! . "$CONFIGFILE" ; then
+         eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
+      fi
+   else
+      . /etc/debootstrap/config
+   fi
 fi
 # }}}
 
 # cmdline handling {{{
-usage() {
-  einfo "$0 - version $VERSION"
-  echo  "   A wrapper around debootstrap for installing plain Debian via grml"
-  echo
-  einfo "Usage: $0 [options]"
-  echo  "   Adjust /etc/debootstrap/config and invoke $0 afterwards or use the cmdline option:"
-  echo
-  einfo "Valid options:"
-  echo  "
-    -h|--help                   Print this usage information and exit.
-    -v|--version                Show summary of options and exit.
-
-    -t|--target <target>        Target partition (/dev/...) or directory.
-    -r|--release <release>      Specify release of new Debian system. Supported relases: sarge, etch, lenny and sid.
-    -m|--mirror <URL>           Specify mirror which should be used for apt-get/aptitude.
-    -i|--iso <mnt>              Specify mountpoint where Debian ISO is mounted to (instead of using mirror)
-    -p|--mntpoint <mnt>         Specify mountpoint that should be used for mounting the target system.
-    --groot <device>            Specify root device for usage in grub (corresponds with \$TARGET).
-    --grub <device>             Where do you want to install grub to? Use grub syntax for specifying.
-    --password <pwd>            Use specified password as password for user root. Use with caution.
-    --boot_append <appendline>  Add specified appendline to kernel whilst booting
-
-"
-}
 
 while [ "$#" -gt "0" ] ; do
     case $1 in
-        -v|--version)
-            einfo "$0 - version $VERSION"
-            einfo "Send bug reports to Michael Prokop <mika@grml.org>."
-            eend 0
-            exit 0
-            ;;
-        -t|--target)
+        -c|--config)
             shift
-            TARGET=$1
+            CONFIGFILE=$1
             ;;
         --grub)
             shift
@@ -77,9 +99,23 @@ while [ "$#" -gt "0" ] ; do
             shift
             GROOT=$1
             ;;
-        -r|--release)
+        -h|--help)
+            usage ; eend 0
+            eend 0
+            exit 0
+            ;;
+        --interactive)
+            INTERACTIVE=1
+            ;;
+        -i|--iso)
             shift
-            RELEASE=$1
+            [ -n "$MIRROR" ] && unset MIRROR
+            ISO=$1
+            ;;
+        -m|--mirror)
+            shift
+            MIRROR=$1
+            CHROOTMIRROR=$1
             ;;
         -p|--mntpoint)
             shift
@@ -89,18 +125,17 @@ while [ "$#" -gt "0" ] ; do
             shift
             ROOTPASSWORD=$1
             ;;
-        -m|--mirror)
+        -r|--release)
             shift
-            MIRROR=$1
-            CHROOTMIRROR=$1
+            RELEASE=$1
             ;;
-        -i|--iso)
+        -t|--target)
             shift
-            [ -n "$MIRROR" ] && unset MIRROR
-            ISO=$1
+            TARGET=$1
             ;;
-        -h|--help)
-            usage ; eend 0
+        -v|--version)
+            einfo "$PN - version $VERSION"
+            einfo "Send bug reports to bugs@grml.org or http://grml.org/bugs/"
             eend 0
             exit 0
             ;;
@@ -114,14 +149,170 @@ while [ "$#" -gt "0" ] ; do
 done
 # }}}
 
-# set/check variables {{{
+# ask for target {{{
+prompt_for_target()
+{
+  AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
+               sed 's/*//' | \
+               grep -v 'Extended$' | \
+               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
 
-# inside the chroot system the locales might not be available, so use minimum:
-export LANG=C
-export LC_ALL=C
+  [ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
+  PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
+                       echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet])"
+                   done)
 
+  TARGET=$(dialog --title "$PN" --single-quoted --stdout \
+         --menu "Please select the target partition:" 0 0 0 \
+         $PARTITION_LIST)
+}
+# }}}
+
+# ask for bootmanager {{{
+prompt_for_bootmanager()
+{
+  ADDITIONAL_PARAMS=""
+  for device in sda hda; do
+    if [ /dev/$device != ${TARGET%[0-9]} ]; then
+      grep -q $device /proc/partitions && \
+      ADDITIONAL_PARAMS=:$device:"install bootmanager grub into MBR of /dev/${device}"
+    fi
+  done
+  ADDITIONAL_PARAMS=${ADDITIONAL_PARAMS#:}
+
+  OIFS="$IFS"; IFS=:
+
+  [[ $TARGET == *md* ]] && MBRPART=$TARGET || MBRPART="${TARGET%[0-9]}"
+
+  GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
+          --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
+            mbr       "install bootmanager into MBR of $MBRPART" \
+            partition "install bootmanager into partition $TARGET" \
+            nowhere   "do NOT install bootmanager at all" \
+          ${ADDITIONAL_PARAMS})
+  [ $? -eq 0 ] || bailout 3
+  IFS="$OIFS"
+
+  case "$GETMBR" in
+    mbr)
+      USE_MBR=1
+      # /dev/md0: has to be installed in MBR of /dev/md0 and not in /dev/md:
+      if [[ $TARGET == *md* ]] ; then
+         BOOT_PARTITION=${TARGET}
+      else
+        BOOT_PARTITION=${TARGET%[0-9]}
+      fi
+      ;;
+    partition)
+      BOOT_PARTITION="$TARGET"
+      ;;
+    hda)
+      USE_MBR=1
+      BOOT_PARTITION="/dev/hda"
+      ;;
+    sda)
+      USE_MBR=1
+      BOOT_PARTITION="/dev/sda"
+      ;;
+    none)
+      BOOT_PARTITION=''
+      ;;
+    *)
+      BOOT_PARTITION="$GETMBR"
+      ;;
+  esac
+}
+# }}}
+
+# ask for Debian mirror {{{
+prompt_for_mirror()
+{
+  MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
+            "Please enter Debian mirror you would like to use for installing packages." \
+            0 0 http://ftp.de.debian.org/debian)"
+}
+# }}}
+
+# get grub's syntax for /dev/ice
+# usage example: 'grubdevice /dev/hda2' returns '(hd0,1)'
+grubdevice() {
+  if [ -z "$1" ] ; then
+     echo "Usage: grubdevice <device>">&2
+     return 1
+  fi
+
+  device="$1"
+  device_map=/boot/grub/device.map
+
+  # create device.map
+  if ! [ -f "$device_map" ] ; then
+     echo 'quit' | grub --device-map="$device_map" 1>/dev/null 2>&1
+  fi
+
+  # taken from d-i's trunk/packages/arch/i386/grub-installer/grub-installer:
+  tmp_disk=`echo "$device" | sed -e 's%\([sh]d[a-z]\)[0-9]*$%\1%' \
+                    -e 's%\(fd[0-9]*\)$%\1%' \
+                    -e 's%/part[0-9]*$%/disc%' \
+                    -e 's%\(c[0-7]d[0-9]*\).*$%\1%'`
+  tmp_part=`echo "$device" | sed -e 's%.*/[sh]d[a-z]\([0-9]*\)$%\1%' \
+                    -e 's%.*/fd[0-9]*$%%' \
+                    -e 's%.*/floppy/[0-9]*$%%' \
+                    -e 's%.*/\(disc\|part\([0-9]*\)\)$%\2%' \
+                    -e 's%.*c[0-7]d[0-9]*p*%%'`
+  tmp_drive=$(grep -v '^#' $device_map | grep "$tmp_disk *$" | sed 's%.*\([hf]d[0-9][a-g0-9,]*\).*%\1%')
+  GRUB="$(echo "$tmp_drive")"
+
+  case $1 in
+     /dev/[sh]d[a-z]) # we expect something like 'hd0'
+        GROOT="$(echo "$tmp_drive")"
+        ;;
+      *) # we expect something like 'hd0,0'
+        # make sure we don't install into MBR if $USE_MBR is not set
+        if [ -z "$USE_MBR" ] ; then
+           GROOT="$(echo "$tmp_drive" | sed "s%)$%,`expr $tmp_part - 1`)%")"
+        else
+           GROOT="$(echo "$tmp_drive" | sed "s%,[0-9]%%")"
+        fi
+        ;;
+  esac
+}
+
+# interactive mode {{{
+interactive_mode()
+{
+  prompt_for_target
+  prompt_for_bootmanager
+  prompt_for_mirror
+  grubdevice $TARGET
+
+  # FIXME
+  echo "debug: BOOT_PARTITION=$BOOT_PARTITION"
+  echo "debug: TARGET=$TARGET"
+  echo "debug: MIRROR=$MIRROR"
+  echo "debug: GROOT=$GROOT"
+  # ask for raid
+  # ask for lvm
+}
+
+# run interactive mode if we didn't get the according configuration yet
+if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
+   interactive_mode
+fi
+# }}}
+
+# finally make sure at least $TARGET is set [the partition for the new system] {{{
+if [ -n "$TARGET" ] ; then
+   SHORT_TARGET="${TARGET##*/}"
+else
+   eerror "Please adjust /etc/debootstrap/config or..."
+   eerror "... use the interactive version for configuration before running ${0}" ; eend 1
+   exit 1
+fi
+# }}}
+
+# stages setup {{{
 if [ -z "$STAGES" ] ; then
-   STAGES='/etc/debootstrap/stages'
+   STAGES="/etc/debootstrap/stages_${SHORT_TARGET}"
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
 
@@ -131,7 +322,9 @@ if [ -r "$STAGES"/grml-debootstrap ] ; then
       eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
    fi
 fi
+# }}}
 
+# partition handling {{{
 PARTITION=''
 DIRECTORY=''
 
@@ -150,7 +343,9 @@ case $TARGET in
     GROOT=''
     ;;
 esac
+# }}}
 
+# architecture setup {{{
 if [ -n "$ARCH" ] ; then
    ARCHCMD="--arch $ARCH"
    ARCHINFO=" (${ARCH})"
@@ -159,8 +354,9 @@ else
    ARCHCMD="--arch $ARCH"
    ARCHINFO=" (${ARCH})"
 fi
+# }}}
 
-# make sure we have the right syntax when using an iso image
+# make sure we have the right syntax when using an iso image {{{
 if [ -n "$ISO" ] ; then
    case $ISO in
       file*) # do nothing
@@ -172,25 +368,21 @@ if [ -n "$ISO" ] ; then
 fi
 ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
+# }}}
 
-# provide variables to chroot system
-touch /etc/debootstrap/variables
-chmod 600 /etc/debootstrap/variables # make sure nobody except root can read it
-[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     >  /etc/debootstrap/variables
-[ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> /etc/debootstrap/variables
-[ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> /etc/debootstrap/variables
-[ -n "$TARGET" ] && echo "TARGET=$TARGET" >> /etc/debootstrap/variables
-[ -n "$ISO" ]    && echo "ISO=$ISO"       >> /etc/debootstrap/variables
-[ -n "$ISODIR" ] && echo "ISODIR=$ISO"    >> /etc/debootstrap/variables
-[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> /etc/debootstrap/variables
-[ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> /etc/debootstrap/variables
-[ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> /etc/debootstrap/variables
-
-# make sure at least $TARGET is set [the partition for the new system]
-if [ -z "$TARGET" ] ; then
-   eerror "Please adjust /etc/debootstrap/config before running ${0}" ; eend 1
-   exit 1
-fi
+# provide variables to chroot system {{{
+CHROOT_VARIABLES="/etc/debootstrap/variables_${SHORT_TARGET}"
+touch $CHROOT_VARIABLES
+chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
+[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     >  $CHROOT_VARIABLES
+[ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> $CHROOT_VARIABLES
+[ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> $CHROOT_VARIABLES
+[ -n "$TARGET" ] && echo "TARGET=$TARGET" >> $CHROOT_VARIABLES
+[ -n "$ISO" ]    && echo "ISO=$ISO"       >> $CHROOT_VARIABLES
+[ -n "$ISODIR" ] && echo "ISODIR=$ISO"    >> $CHROOT_VARIABLES
+[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> $CHROOT_VARIABLES
+[ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> $CHROOT_VARIABLES
+[ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
 # }}}
 
 # helper functions {{{
@@ -207,12 +399,19 @@ bailout(){
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a    1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
-        einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
+        [ -d "$MNTPOINT/$ISODIR" ]    && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
+        einfo "Unmounting $MNTPOINT"   ; umount "$MNTPOINT" ; eend $?
+
+        # remove directory only if we used the default with process id inside the name
+        if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
+           einfo "Removing directory ${MNTPOINT}" ; rmdir $MNTPOINT ; eend $?
+        fi
      fi
   fi
+
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
+
   exit "$EXIT"
 }
 trap bailout 1 2 3 15
@@ -220,9 +419,9 @@ trap bailout 1 2 3 15
 # we want to execute all the functions only once, simple check for it:
 stage() {
   if [ -n "$2" ] ; then
-     echo "$2" > "$STAGES/$1"
+     echo "$2" > "${STAGES}/${1}"
      return 0
-  elif grep -q done "$STAGES/$1" 2>/dev/null ; then
+  elif grep -q done "${STAGES}/${1}" 2>/dev/null ; then
      ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
      eindent
        ewarn "To reexecute it clean up the according directory inside $STAGES" ; eend 0
@@ -235,7 +434,7 @@ stage() {
 # user should recheck his configuration {{{
 # support full automatic installation:
 checkforrun() {
-   dialog --timeout 10 --title "$0" \
+   dialog --timeout 10 --title "$PN" \
           --yesno "Do you want to stop at this stage?
 
 Notice: you are running grml-debootstrap in non-interactive mode.
@@ -251,13 +450,15 @@ if [ -n "$AUTOINSTALL" ] ; then
       exit 1
    fi
 else # if not running automatic installation display configuration and prompt for execution:
-   einfo "$0 - Please recheck configuration before execution:"
+   einfo "$PN - Please recheck configuration before execution:"
    echo
-   echo "   Target:           $TARGET"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount-point:      $MNTPOINT" ;; esac
-      [ -n "$GRUB" ]   && echo "   Install grub to:  $GROOT / $GRUB"
-      [ -n "$MIRROR" ] && echo "   Using mirror:     $MIRROR"
-      [ -n "$ISO" ] && echo "   Using iso:        $ISO"
+   echo "   Target:                      $TARGET"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:                 $MNTPOINT" ;; esac
+      [ -n "$GRUB" ]    && echo "   Install grub to:             $GRUB"
+      [ -n "$GROOT" ]   && echo "   Use root partition in grub:  $GROOT"
+      [ -n "$RELEASE" ] && echo "   Using release:               $RELEASE"
+      [ -n "$MIRROR" ]  && echo "   Using mirror:                $MIRROR"
+      [ -n "$ISO" ]     && echo "   Using iso:                   $ISO"
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
       echo
    einfon "Is this ok for you? [y/N] "
@@ -297,7 +498,6 @@ mount_target() {
      if grep -q $TARGET /proc/mounts ; then
         eerror "$TARGET already mounted, exiting."
      else
-       [ -n "$MNTPOINT" ] || MNTPOINT='/mnt/test'
        [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
        einfo "Mounting $TARGET to $MNTPOINT"
        mount -o rw,suid,dev $TARGET $MNTPOINT
@@ -316,7 +516,7 @@ mount_target() {
 # install main chroot {{{
 debootstrap_system() {
   if ! grep -q $MNTPOINT /proc/mounts ; then
-          mount_target
+     mount_target
   fi
   if grep -q $MNTPOINT /proc/mounts ; then
      einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
@@ -338,9 +538,9 @@ preparechroot() {
   mkdir $MNTPOINT/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp /etc/debootstrap/config          $MNTPOINT/etc/debootstrap/
-  cp /etc/debootstrap/packages        $MNTPOINT/etc/debootstrap/packages
-  cp /etc/debootstrap/variables       $MNTPOINT/etc/debootstrap/variables
+  cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
+  cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
+  cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables # do NOT use $CHROOT_VARIABLES inside chroot!
 
   cp -a /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
 
@@ -356,6 +556,13 @@ preparechroot() {
   [ -d /etc/debootstrap/share ] && cp -a /etc/debootstrap/share/* $MNTPOINT/share/
   [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
   [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
+
+  # copy local network setup to chroot
+  if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
+     [ -d $MNTPOINT/etc/network ] || mkdir $MNTPOINT/etc/network
+     cp /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+  fi
+
   eend 0
 }
 # }}}
@@ -422,8 +629,8 @@ fscktool() {
 # now execute all the functions {{{
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
          chrootscript grub_install umount_chroot fscktool ; do
-    if stage $i ; then
-       $i && stage $i done || bailout 2 "i"
+    if stage "${i}" ; then
+       $i && stage "${i}" done || bailout 2 "i"
     fi
 done
 # }}}
@@ -432,13 +639,15 @@ done
   echo done > $STAGES/grml-debootstrap
 # }}}
 
+# end dialog of autoinstallation {{{
 if [ -n "$AUTOINSTALL" ] ; then
-   dialog --title "$0" --msgbox \
+   dialog --title "$PN" --msgbox \
           "Finished execution of ${0}.
 Enjoy your Debian system." 6 60
 else
-   einfo "Finished execution of $0 - enjoy your Debian system." ; eend 0
+   einfo "Finished execution of $PN - enjoy your Debian system." ; eend 0
 fi
+# }}}
 
 ## END OF FILE #################################################################
 # vim: ai tw=100 expandtab foldmethod=marker shiftwidth=3

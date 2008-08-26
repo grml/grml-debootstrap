@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mit Dez 19 10:10:50 CET 2007 [mika]
+# Latest change: Tue Aug 26 20:59:31 CEST 2008 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -12,7 +12,7 @@ set -e # exit on any error
 . /etc/debootstrap/config    || exit 1
 . /etc/debootstrap/variables || exit 1
 
-[ -r /proc/1 ] || mount -t proc   none /proc
+[ -r /proc/1 ] || mount -t proc none /proc
 
 # variable checks {{{
 
@@ -117,6 +117,19 @@ makedev() {
 }
 # }}}
 
+# make sure services do not start up {{{
+install_policy_rcd() {
+  if ! [ -r /usr/sbin/policy-rc.d ] ; then
+     export POLICYRCD=1
+     cat > /usr/sbin/policy-rc.d << EOF
+#!/bin/sh
+exit 101
+EOF
+     chmod 775 /usr/sbin/policy-rc.d
+  fi
+}
+# }}}
+
 # install additional packages {{{
 packages() {
   if [ "$PACKAGES" = 'yes' ] ; then
@@ -188,78 +201,20 @@ reconfigure() {
 # }}}
 
 # set password of user root {{{
-setpassword() {
-# Set a password, via chpasswd.
-# Use perl rather than echo, to avoid the password
-# showing in the process table. (However, this is normally
-# only called when first booting the system, when root has no
-# password at all, so that should be an unnecessary precaution).
-#
-# Pass in three arguments: the user, the password, and 'true' if the
-# password has been pre-crypted (by preseeding).
-#
-# Taken from /var/lib/dpkg/info/passwd.config
-        SETPASSWD_PW="$2"
-        export SETPASSWD_PW
-
-        # This is very annoying. chpasswd cannot handle generating md5
-        # passwords as it is not PAM-aware. Thus, I have to work around
-        # that by crypting the password myself if md5 is used.
-        USE_MD5=1
-        export USE_MD5
-
-        if [ "$3" = true ]; then
-                PRECRYPTED=1
-        else
-                PRECRYPTED=''
-        fi
-        export PRECRYPTED
-        LC_ALL=C LANGUAGE=C LANG=C perl -e '
-                sub CreateCryptSalt {
-                        my $md5 = shift;
-
-                        my @valid = split(//, "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                        my ($in, $out);
-
-                        my $cryptsaltlen = ($md5 ? 8 : 2);
-
-                        open (F, "</dev/urandom") || die "No /dev/urandom found!";
-                        foreach (1..$cryptsaltlen) {
-                                read(F, $in, 1);
-                                $out .= $valid[ord($in) % ($#valid + 1)];
-                        }
-                        close F;
-                        return ($md5 ? "\$1\$$out\$" : $out);
-                }
-
-                open(P,"| chpasswd -e");
-                if ($ENV{PRECRYPTED}) {
-                        print P shift().":$ENV{SETPASSWD_PW}\n";
-                } else {
-                        print P shift().":".
-                                crypt($ENV{SETPASSWD_PW}, CreateCryptSalt($ENV{USE_MD5})).
-                                "\n";
-                }
-                close P;
-        ' "$1"
-        SETPASSWD_PW=''
-        USE_MD5=''
-        PRECRYPTED=''
-}
-
 passwords() {
   echo "Activating shadow passwords."
   shadowconfig on
 
   if [ -n "$ROOTPASSWORD" ] ; then
-     setpassword root "$ROOTPASSWD" false
+     echo root:"$ROOTPASSWD" | chpasswd -m
      export ROOTPASSWD=''
   else
      echo "Setting password for user root:"
-     set +e # do not exit if passwd returns error due to missmatching passwords
-     until passwd; do echo "Please try again to set the password:" ; done
+     echo -n "Enter new UNIX password for user root: "
+     read -s a
+     echo root:"$a" | chpasswd -m
+     unset a
      echo
-     set -e # restore default behaviour again
   fi
 }
 # }}}
@@ -275,9 +230,7 @@ hosts() {
 
 # set up /etc/network/interfaces {{{
 interfaces() {
-  touch /etc/network/interfaces
-  # make sure we add the entries only once
-  if ! grep -q eth0 /etc/network/interfaces ; then
+  if ! [ -r /etc/network/interfaces ] ; then
      echo "Setting up /etc/network/interfaces"
      cat >> /etc/network/interfaces << EOF
 
@@ -308,9 +261,9 @@ createfstab(){
      echo "Setting up /etc/fstab"
 cat > /etc/fstab << EOF
 $TARGET      /            auto    defaults,errors=remount-ro 0   1
-/sys           /sys         sysfs   rw,nosuid,nodev,noexec     0   0
-proc           /proc        proc    defaults                   0   0
-/dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto             0   0
+proc           /proc        proc    defaults                      0   0
+/sys           /sys         sysfs   noauto,rw,nosuid,nodev,noexec 0   0
+/dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto                0   0
 # some other examples:
 # /dev/sda2       none         swap    sw                   0   0
 # /dev/hda1       /Grml        ext3    dev,suid,user,noauto 0  2
@@ -414,6 +367,7 @@ services() {
 finalize() {
   # make sure we don't leave any sensible data
   rm -f /etc/debootstrap/variables
+  [ -n "$POLICYRCD" ] && rm -f /usr/sbin/policy-rc.d
   umount -a    1>/dev/null 2>/dev/null || true
   umount /proc 1>/dev/null 2>/dev/null || true
   umount /proc 1>/dev/null 2>/dev/null || true
@@ -422,9 +376,9 @@ finalize() {
 # }}}
 
 # execute the functions {{{
- for i in chrootmirror grmlrepos kernelimg_conf makedev packages extrapackages \
-     mkinitrd kernel reconfigure hosts interfaces timezone fstab hostname \
-     initrd grub passwords services finalize ; do
+ for i in chrootmirror grmlrepos kernelimg_conf makedev install_policy_rcd \
+     packages extrapackages mkinitrd kernel reconfigure hosts interfaces   \
+     timezone fstab hostname initrd grub passwords services finalize ; do
     if stage $i ; then
        $i && stage $i done || exit 1
     fi
