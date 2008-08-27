@@ -288,7 +288,7 @@ RAIDLEVEL=$(dialog --stdout --title "$PN" --default-item raid1 \
 [ $? -eq 0 ] || bailout 20
 
 MD_LIST=$(for i in $(seq 0 9) ; do
-            awk '{print $4}' /proc/partitions | grep md$i /proc/partitions  || \
+            awk '{print $4}' /proc/partitions | grep -q md$i || \
             echo "/dev/md$i /dev/md$i"
           done)
 
@@ -304,7 +304,9 @@ AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
              grep -v 'Extended$' | \
              gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
 [ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
-PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do echo "$i $i off" ; done)
+PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
+                     echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet]) off"
+                 done)
 
 dialog --title "$PN" \
        --single-quoted \
@@ -315,15 +317,32 @@ SELECTED_PARTITIONS="$(cat $TMPFILE)"
 
 NUM_PARTITIONS=0
 for i in $(cat $TMPFILE) ; do
-  NUM_PARTITIONS="$((${NUM_PARTITIONS}+1))"
+   NUM_PARTITIONS=$((${NUM_PARTITIONS}+1))
 done
 
-echo "
-Debug:
+ERRORFILE=$(mktemp)
+set +e
+# TODO: better error handling?
+yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
+      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} 1>/dev/null 2>$ERRORFILE
+RC=$?
+set -e
 
-mdadm --create --verbose $TARGET --level=$RAIDLEVEL
-      --raid-devices=$NUM_PARTITIONS $SELECTED_PARTITIONS
-"
+if [ "$RC" = 0 ] ; then
+   dialog --title "$PN" --msgbox \
+   "Creating $TARGET was successful." 0 0
+   rm -f "$TMPFILE" "$ERRORFILE"
+else
+   dialog --title "$PN" --msgbox \
+   "There was an error setting up $TARGET:
+
+$(cat $ERRORFILE)
+
+Exiting." 0 0
+   rm -f "$TMPFILE" "$ERRORFILE"
+   exit 1
+fi
+
 }
 
 prompt_for_swraid()
@@ -349,6 +368,7 @@ interactive_mode()
 
   prompt_for_bootmanager
 
+  # FIXME: there seems to be a problem with grubdevice if it's /dev/md*
   [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
   [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
 
