@@ -3,6 +3,7 @@ grml-debootstrap (0.18) unstable; urgency=low
   The "development sponsored by Sipwise GmbH" release.
 
   * Provide interactive configuration dialog.
+  * Initial support for SW-RAID.
   * Use stages based on target information, this gives us
     the possibility to run multiple instance of grml-debootstrap.
     [Testing: issue510]
@@ -13,7 +14,7 @@ grml-debootstrap (0.18) unstable; urgency=low
     installation.
   * Setting password via passwd does not work, use chpaswd instead.
 
- -- Michael Prokop <mika@grml.org>  Tue, 26 Aug 2008 20:59:35 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 27 Aug 2008 02:41:08 +0200
 
 grml-debootstrap (0.17) unstable; urgency=low
 

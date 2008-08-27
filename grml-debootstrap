@@ -4,7 +4,7 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Wed Aug 27 01:46:13 CEST 2008 [mika]
+# Latest change: Wed Aug 27 02:41:00 CEST 2008 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -272,9 +272,71 @@ grubdevice() {
         echo "$tmp_drive"
         ;;
       *) # we expect something like 'hd0,0'
-        echo "$tmp_drive" | sed "s%$%,`expr $tmp_part - 1`%"
+        echo "$tmp_drive" | sed "s%$%,`expr $tmp_part - 1`%" # FIXME => md0
         ;;
   esac
+}
+# }}}
+
+# software raid setup {{{
+config_swraid_setup()
+{
+TMPFILE=$(mktemp)
+RAIDLEVEL=$(dialog --stdout --title "$PN" --default-item raid1 \
+                   --menu "Which RAID level do you want to use?" 0 0 0 \
+                     raid1 "Software RAID level 1" \
+                     raid5 "Software RAID level 5")
+[ $? -eq 0 ] || bailout 20
+
+MD_LIST=$(for i in $(seq 0 9) ; do
+            awk '{print $4}' /proc/partitions | grep md$i /proc/partitions  || \
+            echo "/dev/md$i /dev/md$i"
+          done)
+
+TARGET=$(dialog --stdout --title "$PN" --default-item /dev/md0 \
+--menu "Which device do you want to use for ${RAIDLEVEL}?
+
+Notice: activated devices will not be listed for security reasons. Anyway, please make sure the selected device is not in use already!" 0 0 0 \
+$MD_LIST)
+[ $? -eq 0 ] || bailout 20
+
+AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
+             sed 's/*//' | \
+             grep -v 'Extended$' | \
+             gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
+[ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
+PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do echo "$i $i off" ; done)
+
+dialog --title "$PN" \
+       --single-quoted \
+       --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
+       $PARTITION_LIST 2>$TMPFILE
+RETVAL=$?
+SELECTED_PARTITIONS=$(cat $TMPFILE)
+
+NUM_PARTITIONS=0
+for i in $(cat $TMPFILE) ; do
+  NUM_PARTITIONS=$(($NUM_PARTITIONS+1))
+done
+
+echo "
+Debug:
+
+mdadm --create --verbose $TARGET --level=$RAIDLEVEL
+      --raid-devices=$NUM_PARTITIONS $SELECTED_PARTITIONS
+"
+}
+
+prompt_for_swraid()
+{
+if dialog --stdout --title "$PN" \
+          --defaultno --yesno "Do you want to configure Software RAID?
+
+Notice: currently only RAID levels 1 and 5 are
+supported by ${PN}. Configuration will be
+take place using mdadm." 0 0 ; then
+  config_swraid_setup
+fi
 }
 # }}}
 
@@ -282,16 +344,18 @@ grubdevice() {
 interactive_mode()
 {
   welcome_dialog
-  prompt_for_target
+
+  prompt_for_swraid
+
+  # do not prompt for partition dialog if swraid has been configured already
+  [ -n "$TARGET" ] || prompt_for_target
+
   prompt_for_bootmanager
-  prompt_for_mirror
 
   [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
   [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
 
-  # TODO
-  # ask for raid
-  # ask for lvm
+  prompt_for_mirror
 }
 
 # run interactive mode if we didn't get the according configuration yet
