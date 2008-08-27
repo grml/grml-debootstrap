@@ -59,7 +59,7 @@ Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
 "
 }
 
-if [ "$1" = '-h' ] || [ "$1" == '-help' ] ; then
+if [ "$1" = '-h' ] || [ "$1" = '-help' ] ; then
    usage
    echo 'Please notice that this script requires root permissions!'
    exit 0
@@ -182,13 +182,17 @@ prompt_for_bootmanager()
 
   OIFS="$IFS"; IFS=:
 
-  [[ $TARGET == *md* ]] && MBRPART=$TARGET || MBRPART="${TARGET%[0-9]}"
+  if echo $TARGET | grep -q "*md*" ; then
+     MBRPART=$TARGET
+  else
+     MBRPART="${TARGET%[0-9]}"
+  fi
 
   GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
             mbr       "install bootmanager into MBR of $MBRPART" \
             partition "install bootmanager into partition $TARGET" \
-            nowhere   "do NOT install bootmanager at all" \
+            nowhere   "do not install bootmanager at all" \
           ${ADDITIONAL_PARAMS})
   [ $? -eq 0 ] || bailout 3
   IFS="$OIFS"
@@ -197,10 +201,10 @@ prompt_for_bootmanager()
     mbr)
       USE_MBR=1
       # /dev/md0: has to be installed in MBR of /dev/md0 and not in /dev/md:
-      if [[ $TARGET == *md* ]] ; then
-         BOOT_PARTITION=${TARGET}
+      if echo $TARGET | grep -q "*md*" ; then
+         BOOT_PARTITION="${TARGET}"
       else
-        BOOT_PARTITION=${TARGET%[0-9]}
+         BOOT_PARTITION="${TARGET%[0-9]}"
       fi
       ;;
     partition)
@@ -214,11 +218,8 @@ prompt_for_bootmanager()
       USE_MBR=1
       BOOT_PARTITION="/dev/sda"
       ;;
-    none)
+    nowhere)
       BOOT_PARTITION=''
-      ;;
-    *)
-      BOOT_PARTITION="$GETMBR"
       ;;
   esac
 }
@@ -233,8 +234,8 @@ prompt_for_mirror()
 }
 # }}}
 
-# get grub's syntax for /dev/ice
-# usage example: 'grubdevice /dev/hda2' returns '(hd0,1)'
+# get grub's syntax for /dev/ice {{{
+# usage example: 'grubdevice /dev/sda2' returns 'hd0,1'
 grubdevice() {
   if [ -z "$1" ] ; then
      echo "Usage: grubdevice <device>">&2
@@ -260,22 +261,22 @@ grubdevice() {
                     -e 's%.*/\(disc\|part\([0-9]*\)\)$%\2%' \
                     -e 's%.*c[0-7]d[0-9]*p*%%'`
   tmp_drive=$(grep -v '^#' $device_map | grep "$tmp_disk *$" | sed 's%.*\([hf]d[0-9][a-g0-9,]*\).*%\1%')
-  GRUB="$(echo "$tmp_drive")"
 
   case $1 in
      /dev/[sh]d[a-z]) # we expect something like 'hd0'
-        GROOT="$(echo "$tmp_drive")"
+        echo "$tmp_drive"
         ;;
       *) # we expect something like 'hd0,0'
         # make sure we don't install into MBR if $USE_MBR is not set
         if [ -z "$USE_MBR" ] ; then
-           GROOT="$(echo "$tmp_drive" | sed "s%)$%,`expr $tmp_part - 1`)%")"
+           echo "$tmp_drive" | sed "s%$%,`expr $tmp_part - 1`%"
         else
-           GROOT="$(echo "$tmp_drive" | sed "s%,[0-9]%%")"
+           echo "$tmp_drive" | sed "s%,[0-9]%%"
         fi
         ;;
   esac
 }
+# }}}
 
 # interactive mode {{{
 interactive_mode()
@@ -283,13 +284,18 @@ interactive_mode()
   prompt_for_target
   prompt_for_bootmanager
   prompt_for_mirror
-  grubdevice $TARGET
+
+  [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
+  [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
 
   # FIXME
   echo "debug: BOOT_PARTITION=$BOOT_PARTITION"
   echo "debug: TARGET=$TARGET"
   echo "debug: MIRROR=$MIRROR"
   echo "debug: GROOT=$GROOT"
+  echo "debug: GRUB=$GRUB"
+
+  # TODO
   # ask for raid
   # ask for lvm
 }
@@ -414,7 +420,7 @@ bailout(){
 
   exit "$EXIT"
 }
-trap bailout 1 2 3 15
+trap bailout HUP INT QUIT TERM
 
 # we want to execute all the functions only once, simple check for it:
 stage() {
@@ -452,13 +458,12 @@ if [ -n "$AUTOINSTALL" ] ; then
 else # if not running automatic installation display configuration and prompt for execution:
    einfo "$PN - Please recheck configuration before execution:"
    echo
-   echo "   Target:                      $TARGET"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:                 $MNTPOINT" ;; esac
-      [ -n "$GRUB" ]    && echo "   Install grub to:             $GRUB"
-      [ -n "$GROOT" ]   && echo "   Use root partition in grub:  $GROOT"
-      [ -n "$RELEASE" ] && echo "   Using release:               $RELEASE"
-      [ -n "$MIRROR" ]  && echo "   Using mirror:                $MIRROR"
-      [ -n "$ISO" ]     && echo "   Using iso:                   $ISO"
+   echo "   Target:          $TARGET"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
+      [ -n "$GRUB" ]    && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+      [ -n "$RELEASE" ] && echo "   Using release:   $RELEASE"
+      [ -n "$MIRROR" ]  && echo "   Using mirror:    $MIRROR"
+      [ -n "$ISO" ]     && echo "   Using iso:       $ISO"
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
       echo
    einfon "Is this ok for you? [y/N] "
