@@ -4,7 +4,6 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Wed Aug 27 02:41:00 CEST 2008 [mika]
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -152,8 +151,8 @@ done
 # welcome screen {{{
 welcome_dialog()
 {
-   dialog --title "$PN" --msgbox "Welcome to the interactive configuration of grml-debootstrap." 0 0
-   # TODO: improve message
+   dialog --title "$PN" --yesno "Welcome to the interactive configuration of ${PN}.
+Do you want to continue installing Debian using this frontend?" 0 0
 }
 # }}}
 
@@ -312,11 +311,11 @@ dialog --title "$PN" \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
        $PARTITION_LIST 2>$TMPFILE
 RETVAL=$?
-SELECTED_PARTITIONS=$(cat $TMPFILE)
+SELECTED_PARTITIONS="$(cat $TMPFILE)"
 
 NUM_PARTITIONS=0
 for i in $(cat $TMPFILE) ; do
-  NUM_PARTITIONS=$(($NUM_PARTITIONS+1))
+  NUM_PARTITIONS="$((${NUM_PARTITIONS}+1))"
 done
 
 echo "
@@ -332,9 +331,7 @@ prompt_for_swraid()
 if dialog --stdout --title "$PN" \
           --defaultno --yesno "Do you want to configure Software RAID?
 
-Notice: currently only RAID levels 1 and 5 are
-supported by ${PN}. Configuration will be
-take place using mdadm." 0 0 ; then
+Please notice that currently only RAID levels 1 and 5 are supported by ${PN}. Configuration will take place using mdadm." 0 0 ; then
   config_swraid_setup
 fi
 }
@@ -501,8 +498,8 @@ checkforrun() {
    dialog --timeout 10 --title "$PN" \
           --yesno "Do you want to stop at this stage?
 
-Notice: you are running grml-debootstrap in non-interactive mode.
-grml-debootstrap will install Debian ${RELEASE} on ${TARGET}.
+Notice: you are running ${PN} in non-interactive mode.
+${PN} will install Debian ${RELEASE} on ${TARGET}.
 Last chance to quit. Timeout of 10 seconds running....
 
 Do you want to stop now?" 0 0 2>/dev/null
@@ -705,10 +702,9 @@ done
 # end dialog of autoinstallation {{{
 if [ -n "$AUTOINSTALL" ] ; then
    dialog --title "$PN" --msgbox \
-          "Finished execution of ${0}.
-Enjoy your Debian system." 6 60
+          "Finished execution of ${PN}. Enjoy your Debian system." 0 0
 else
-   einfo "Finished execution of $PN - enjoy your Debian system." ; eend 0
+   einfo "Finished execution of ${PN}. Enjoy your Debian system." ; eend 0
 fi
 # }}}
 
