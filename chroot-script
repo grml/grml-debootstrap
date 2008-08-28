@@ -200,7 +200,8 @@ reconfigure() {
 # }}}
 
 # set password of user root {{{
-passwords() {
+passwords()
+{
   echo "Activating shadow passwords."
   shadowconfig on
 
@@ -218,12 +219,15 @@ passwords() {
        echo -n "Retype new UNIX password for user root: "
        read -s b
        echo
-       echo root:"$a" | chpasswd -m
        if [ "$a" != "$b" ] ; then
          echo "Sorry, passwords do not match. Retry."
+         a='1'
+         b='2'
+       else
+         echo root:"$a" | chpasswd -m
+         unset a
+         unset b
        fi
-       unset a
-       unset b
      done
   fi
 }

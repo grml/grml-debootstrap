@@ -792,10 +792,12 @@ done
 # }}}
 
 # finalize {{{
+einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+
 # Remove temporary mountpoint again
 if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
    einfo "Removing directory ${MNTPOINT}" ; rmdir "$MNTPOINT" ; eend $?
-   einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
 fi
 # }}}
 
