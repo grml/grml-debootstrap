@@ -381,7 +381,7 @@ elif [ -n "$INTERACTIVE" ] ; then
    INFOTEXT="Please recheck configuration before execution:
    "
    [ -n "$TARGET" ]  && INFOTEXT="$INFOTEXT
-   Target:                 $TARGET"
+   Target:          $TARGET"
    [ -n "$GRUB" ]    && INFOTEXT="$INFOTEXT
    Install grub:    $GRUB"
    [ -n "$RELEASE" ] && INFOTEXT="$INFOTEXT
@@ -393,7 +393,7 @@ elif [ -n "$INTERACTIVE" ] ; then
 
 Is this ok for you? Notice: canceling will exit ${PN}."
 
-   dialog --title "$PN" \
+   dialog --title "$PN" --no-collapse \
           --yesno "$INFOTEXT" 0 0
 
 else # if not running automatic installation display configuration and prompt for execution:
@@ -523,7 +523,7 @@ ISODIR=${ISODIR%%/}
 # }}}
 
 # provide variables to chroot system {{{
-CHROOT_VARIABLES="/etc/debootstrap/variables_${SHORT_TARGET}"
+CHROOT_VARIABLES="/var/cache/grml-debootstrap/variables_${SHORT_TARGET}"
 touch $CHROOT_VARIABLES
 chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
 [ -n "$ARCH" ]   && echo "ARCH=$ARCH"     >  $CHROOT_VARIABLES
@@ -671,13 +671,15 @@ preparechroot() {
   # make sure we have our files for later use via chroot-script
   cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
-  sed -i "s/RELEASE=.*/RELEASE=\"${RELEASE}\"/" $MNTPOINT/etc/debootstrap/config
-  sed -i "s/TARGET=.*/TARGET=\"${TARGET}\"/"    $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GRUB=.*/GRUB=\"${GRUB}\"/"          $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GROOT=.*/GROOT=\"${GROOT}\"/"       $MNTPOINT/etc/debootstrap/config
+  sed -i "s/RELEASE=.*/RELEASE=\"$RELEASE\"/" $MNTPOINT/etc/debootstrap/config
+  sed -i "s/TARGET=.*/TARGET=\"$TARGET\"/"    $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GRUB=.*/GRUB=\"$GRUB\"/"          $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GROOT=.*/GROOT=\"$GROOT\"/"       $MNTPOINT/etc/debootstrap/config
 
   cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
-  cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables # do NOT use $CHROOT_VARIABLES inside chroot!
+
+  # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
+  cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
 
   cp -a /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
 
@@ -694,7 +696,7 @@ preparechroot() {
   [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
-  ( cd $MNTPOINT/dev && tar jxf /etc/debootstrap/devices.tar.gz )
+  ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing existing files to chroot
   [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
@@ -789,8 +791,12 @@ for i in mkfs tunefs mount_target debootstrap_system preparechroot \
 done
 # }}}
 
-# stages {{{
-  echo done > $STAGES/grml-debootstrap
+# finalize {{{
+# Remove temporary mountpoint again
+if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
+   einfo "Removing directory ${MNTPOINT}" ; rmdir "$MNTPOINT" ; eend $?
+   einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+fi
 # }}}
 
 # end dialog of autoinstallation {{{

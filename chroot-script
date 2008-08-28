@@ -4,7 +4,6 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Tue Aug 26 20:59:31 CEST 2008 [mika]
 ################################################################################
 
 set -e # exit on any error
@@ -138,7 +137,7 @@ packages() {
        exit 1
      else
        $APTUPDATE
-       DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(cat /etc/debootstrap/packages) $GRMLPACKAGES
+       DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(grep -v '^#' /etc/debootstrap/packages) $GRMLPACKAGES
      fi
   fi
 }
@@ -209,12 +208,23 @@ passwords() {
      echo root:"$ROOTPASSWD" | chpasswd -m
      export ROOTPASSWD=''
   else
+    a='1'
+    b='2'
      echo "Setting password for user root:"
-     echo -n "Enter new UNIX password for user root: "
-     read -s a
-     echo root:"$a" | chpasswd -m
-     unset a
-     echo
+     while [ "$a" != "$b" ] ; do
+       echo -n "Enter new UNIX password for user root: "
+       read -s a
+       echo
+       echo -n "Retype new UNIX password for user root: "
+       read -s b
+       echo
+       echo root:"$a" | chpasswd -m
+       if [ "$a" != "$b" ] ; then
+         echo "Sorry, passwords do not match. Retry."
+       fi
+       unset a
+       unset b
+     done
   fi
 }
 # }}}

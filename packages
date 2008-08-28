@@ -1,3 +1,4 @@
 locales console-data console-common
-initrd-tools grub mdadm lvm2
+initramfs-tools grub mdadm lvm2
 bzip2 dhcp3-client file less lsof most pciutils resolvconf screen ssh strace sysfsutils usbutils vim w3m zsh
+postfix
