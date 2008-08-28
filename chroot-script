@@ -17,7 +17,7 @@ set -e # exit on any error
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTINSTALL='aptitude -y install '
+   APTINSTALL='aptitude -y --without-recommends install '
    APTUPDATE='aptitude update'
 else
    APTINSTALL='apt-get --force-yes -y install'
