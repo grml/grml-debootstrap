@@ -25,8 +25,9 @@ grml-debootstrap (0.18) unstable; urgency=low
   * Install MTA postfix by default to avoid installation of unwanted
     packages like citadel in lenny.
   * Allow use of comments in file /etc/debootstrap/packages.
+  * Replace initrd-tools with initramfs-tools.
 
- -- Michael Prokop <mika@grml.org>  Thu, 28 Aug 2008 16:45:43 +0200
+ -- Michael Prokop <mika@grml.org>  Thu, 28 Aug 2008 16:46:24 +0200
 
 grml-debootstrap (0.17) unstable; urgency=low
 
