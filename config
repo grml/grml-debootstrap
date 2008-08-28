@@ -3,7 +3,6 @@
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Die Jun 05 14:00:07 CEST 2007 [mika]
 ################################################################################
 
 ################################################################################
@@ -96,9 +95,9 @@ DEBOOTSTRAP='debootstrap'
 # Which debconf-frontend should be used?
 DEBIAN_FRONTEND='noninteractive'
 
-# The single steps/stages of grml-deboostrap are stored inside /etc/debootstrap/stages
+# The single steps/stages of grml-deboostrap are stored inside /var/cache/grml-debootstrap
 # by default. Use another directory instead?
-# STAGES='/etc/debootstrap/stages'
+# STAGES='/var/cache/grml-debootstrap'
 
 # install packages defined in /etc/debootstrap/packages?
 PACKAGES='yes'
