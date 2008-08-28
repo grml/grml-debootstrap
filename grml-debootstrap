@@ -739,13 +739,13 @@ grub_install() {
      for device in $SELECTED_PARTITIONS ; do
         GRUB=$(grubdevice $device)
         einfo "Installing grub on ${GRUB}:"
-        [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install || GRUBINSTALL=/sbin/grub-install
+        [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install --no-floppy || GRUBINSTALL=/sbin/grub-install
         $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
         eend $?
      done
   else
      einfo "Installing grub on ${GRUB}:"
-     [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install || GRUBINSTALL=/sbin/grub-install
+     [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install --no-floppy || GRUBINSTALL=/sbin/grub-install
      $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
      eend $?
   fi
