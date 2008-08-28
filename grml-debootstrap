@@ -671,10 +671,10 @@ preparechroot() {
   # make sure we have our files for later use via chroot-script
   cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
-  sed -i "s/RELEASE=.*/RELEASE='${RELEASE}'/" $MNTPOINT/etc/debootstrap/config
-  sed -i "s/TARGET=.*/TARGET='${TARGET}'/"    $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GRUB=.*/GRUB='${GRUB}'/"          $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GROOT=.*/GROOT='${GROOT}'/"       $MNTPOINT/etc/debootstrap/config
+  sed -i "s/RELEASE=.*/RELEASE=\"${RELEASE}\"/" $MNTPOINT/etc/debootstrap/config
+  sed -i "s/TARGET=.*/TARGET=\"${TARGET}\"/"    $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GRUB=.*/GRUB=\"${GRUB}\"/"          $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GROOT=.*/GROOT=\"${GROOT}\"/"       $MNTPOINT/etc/debootstrap/config
 
   cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables # do NOT use $CHROOT_VARIABLES inside chroot!
@@ -692,6 +692,9 @@ preparechroot() {
 
   # setup default locales
   [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
+
+  # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
+  ( cd $MNTPOINT/dev && tar jxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing existing files to chroot
   [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
