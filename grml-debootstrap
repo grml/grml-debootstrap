@@ -229,6 +229,18 @@ prompt_for_bootmanager()
 }
 # }}}
 
+# ask for Debian release {{{
+prompt_for_release()
+{
+  RELEASE="$(dialog --stdout --title "${PN}" --default-item etch --menu \
+            "Please enter the Debian release you would like to use for installation:" \
+            0 50 3 \
+            etch   Debian/stable \
+            lenny  Debian/testing \
+            sid    Debian/unstable)"
+}
+# }}}
+
 # ask for Debian mirror {{{
 prompt_for_mirror()
 {
@@ -356,6 +368,55 @@ fi
 }
 # }}}
 
+# make sure the user is aware of the used configuration {{{
+checkconfiguration()
+{
+if [ -n "$AUTOINSTALL" ] ; then
+   if checkforrun ; then
+      eerror "Exiting as requested" ; eend 0
+      exit 1
+   fi
+elif [ -n "$INTERACTIVE" ] ; then
+
+   INFOTEXT="Please recheck configuration before execution:
+   "
+   [ -n "$TARGET" ]  && INFOTEXT="$INFOTEXT
+   Target:                 $TARGET"
+   [ -n "$GRUB" ]    && INFOTEXT="$INFOTEXT
+   Install grub:    $GRUB"
+   [ -n "$RELEASE" ] && INFOTEXT="$INFOTEXT
+   Using release:   $RELEASE"
+   [ -n "$MIRROR" ]  && INFOTEXT="$INFOTEXT
+   Using mirror:    $MIRROR"
+
+   INFOTEXT="$INFOTEXT
+
+Is this ok for you? Notice: canceling will exit ${PN}."
+
+   dialog --title "$PN" \
+          --yesno "$INFOTEXT" 0 0
+
+else # if not running automatic installation display configuration and prompt for execution:
+   einfo "$PN - Please recheck configuration before execution:"
+   echo
+   echo "   Target:          $TARGET"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
+      [ -n "$GRUB" ]    && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+      [ -n "$RELEASE" ] && echo "   Using release:   $RELEASE"
+      [ -n "$MIRROR" ]  && echo "   Using mirror:    $MIRROR"
+      [ -n "$ISO" ]     && echo "   Using iso:       $ISO"
+      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
+      echo
+   einfon "Is this ok for you? [y/N] "
+   read a
+   if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
+      eerror "Exiting as requested." ; eend 1
+      exit 1
+   fi
+fi
+}
+# }}}
+
 # interactive mode {{{
 interactive_mode()
 {
@@ -368,15 +429,25 @@ interactive_mode()
 
   prompt_for_bootmanager
 
+  prompt_for_release
+
   # FIXME: there seems to be a problem with grubdevice if it's /dev/md*
-  [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
-  [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
+  if echo "$TARGET" | grep -q '/dev/md' ; then
+     echo "debug: SELECTED_PARTITIONS = $SELECTED_PARTITIONS">&2
+  else
+     [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
+     [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
+  fi
 
   prompt_for_mirror
+
+  checkconfiguration
 }
 
 # run interactive mode if we didn't get the according configuration yet
 if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
+   # only target might be unset, so make sure the INTERACTIVE flag is set as well
+   INTERACTIVE=1
    interactive_mode
 fi
 # }}}
@@ -525,31 +596,6 @@ Last chance to quit. Timeout of 10 seconds running....
 Do you want to stop now?" 0 0 2>/dev/null
 }
 
-if [ -n "$AUTOINSTALL" ] ; then
-   if checkforrun ; then
-      eerror "Exiting as requested" ; eend 0
-      exit 1
-   fi
-else # if not running automatic installation display configuration and prompt for execution:
-   einfo "$PN - Please recheck configuration before execution:"
-   echo
-   echo "   Target:          $TARGET"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
-      [ -n "$GRUB" ]    && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
-      [ -n "$RELEASE" ] && echo "   Using release:   $RELEASE"
-      [ -n "$MIRROR" ]  && echo "   Using mirror:    $MIRROR"
-      [ -n "$ISO" ]     && echo "   Using iso:       $ISO"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
-      echo
-   einfon "Is this ok for you? [y/N] "
-   read a
-   if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
-      eerror "Exiting as requested." ; eend 1
-      exit 1
-   fi
-fi
-# }}}
-
 # create filesystem {{{
 mkfs() {
   if [ -n "$MKFS" ] ; then
@@ -619,6 +665,12 @@ preparechroot() {
 
   # make sure we have our files for later use via chroot-script
   cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
+  # make sure we adjust the configuration variables accordingly:
+  sed -i "s/RELEASE=.*/RELEASE='${RELEASE}'/" $MNTPOINT/etc/debootstrap/config
+  sed -i "s/TARGET=.*/TARGET='${TARGET}'/"    $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GRUB=.*/GRUB='${GRUB}'/"          $MNTPOINT/etc/debootstrap/config
+  sed -i "s/GROOT=.*/GROOT='${GROOT}'/"       $MNTPOINT/etc/debootstrap/config
+
   cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables # do NOT use $CHROOT_VARIABLES inside chroot!
 
@@ -626,6 +678,12 @@ preparechroot() {
 
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
+
+  # provide system's /etc/hosts to the target:
+  if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
+     cp /etc/hosts $MNTPOINT/etc/hosts
+     sed -i "s/127.0.0.1 .*/127.0.0.1       localhost  $HOSTNAME/" /etc/hosts
+  fi
 
   # setup default locales
   [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
@@ -667,6 +725,14 @@ chrootscript() {
 grub_install() {
   if [ -z "$GRUB" -o -z "$GROOT" ] ; then
      echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
+  elif [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
+     for device in $SELECTED_PARTITIONS ; do
+        GRUB=$(grubdevice $device)
+        einfo "Installing grub on ${GRUB}:"
+        [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install || GRUBINSTALL=/sbin/grub-install
+        $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
+        eend $?
+     done
   else
      einfo "Installing grub on ${GRUB}:"
      [ -x /usr/sbin/grub-install ] && GRUBINSTALL=/usr/sbin/grub-install || GRUBINSTALL=/sbin/grub-install
@@ -710,7 +776,7 @@ fscktool() {
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
          chrootscript grub_install umount_chroot fscktool ; do
     if stage "${i}" ; then
-       $i && stage "${i}" done || bailout 2 "i"
+       $i && ( stage "${i}" done &&  rmdir "${STAGES}/${1}" ) || bailout 2 "i"
     fi
 done
 # }}}

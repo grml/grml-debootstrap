@@ -13,8 +13,13 @@ grml-debootstrap (0.18) unstable; urgency=low
   * Copy /etc/network/interfaces from running system to target
     installation.
   * Setting password via passwd does not work, use chpaswd instead.
+  * Remove stages after successful execution.
+  * Make sure the configuration file inside the chroot provides
+    the same configuration as specified on the cmdline (thanks gebi
+    for reporting).
+  * Copy system's /etc/hosts to the target system.
 
- -- Michael Prokop <mika@grml.org>  Wed, 27 Aug 2008 02:41:08 +0200
+ -- Michael Prokop <mika@grml.org>  Thu, 28 Aug 2008 14:59:15 +0200
 
 grml-debootstrap (0.17) unstable; urgency=low
 
