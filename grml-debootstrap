@@ -464,7 +464,7 @@ fi
 
 # stages setup {{{
 if [ -z "$STAGES" ] ; then
-   STAGES="/etc/debootstrap/stages_${SHORT_TARGET}"
+   STAGES="/var/cache/grml-debootstrap/stages_${SHORT_TARGET}"
    [ -d "$STAGES" ] || mkdir -p "$STAGES"
 fi
 
@@ -553,6 +553,11 @@ bailout(){
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -d "$MNTPOINT/$ISODIR" ]    && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
         einfo "Unmounting $MNTPOINT"   ; umount "$MNTPOINT" ; eend $?
+
+        if [ -n "$STAGES" ] ; then
+           echo -n "Removing stages directory ${STAGES}: "
+           rm -rf "$STAGES" && echo done
+        fi
 
         # remove directory only if we used the default with process id inside the name
         if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
@@ -776,7 +781,7 @@ fscktool() {
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
          chrootscript grub_install umount_chroot fscktool ; do
     if stage "${i}" ; then
-       $i && ( stage "${i}" done &&  rmdir "${STAGES}/${1}" ) || bailout 2 "i"
+       $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
     fi
 done
 # }}}
