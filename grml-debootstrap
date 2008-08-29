@@ -694,10 +694,10 @@ preparechroot() {
   # make sure we have our files for later use via chroot-script
   cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
-  sed -i "s/RELEASE=.*/RELEASE=\"$RELEASE\"/" $MNTPOINT/etc/debootstrap/config
-  sed -i "s/TARGET=.*/TARGET=\"$TARGET\"/"    $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GRUB=.*/GRUB=\"$GRUB\"/"          $MNTPOINT/etc/debootstrap/config
-  sed -i "s/GROOT=.*/GROOT=\"$GROOT\"/"       $MNTPOINT/etc/debootstrap/config
+  sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
+  sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
+  sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
+  sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
   cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
 
@@ -712,7 +712,7 @@ preparechroot() {
   # provide system's /etc/hosts to the target:
   if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
      cp /etc/hosts $MNTPOINT/etc/hosts
-     sed -i "s/127.0.0.1 .*/127.0.0.1       localhost  $HOSTNAME/" /etc/hosts
+     sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
   fi
 
   # setup default locales
