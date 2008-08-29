@@ -307,11 +307,15 @@ grubdevice() {
 config_swraid_setup()
 {
 TMPFILE=$(mktemp)
-RAIDLEVEL=$(dialog --stdout --title "$PN" --default-item raid1 \
-                   --menu "Which RAID level do you want to use?" 0 0 0 \
-                     raid1 "Software RAID level 1" \
-                     raid5 "Software RAID level 5")
-[ $? -eq 0 ] || bailout 20
+
+# Currently we support only raid1:
+RAIDLEVEL='raid1'
+
+#RAIDLEVEL=$(dialog --stdout --title "$PN" --default-item raid1 \
+#                   --menu "Which RAID level do you want to use?" 0 0 0 \
+#                     raid1 "Software RAID level 1" \
+#                     raid5 "Software RAID level 5")
+#[ $? -eq 0 ] || bailout 20
 
 MD_LIST=$(for i in $(seq 0 9) ; do
             awk '{print $4}' /proc/partitions | grep -q md$i || \
@@ -376,7 +380,7 @@ prompt_for_swraid()
 if dialog --stdout --title "$PN" \
           --defaultno --yesno "Do you want to configure Software RAID?
 
-Please notice that currently only RAID levels 1 and 5 are supported by ${PN}. Configuration will take place using mdadm." 0 0 ; then
+Please notice that only RAID level 1 is supported by ${PN} currently. Configuration will take place using mdadm." 0 0 ; then
   config_swraid_setup
 fi
 }

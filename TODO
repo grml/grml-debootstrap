@@ -4,13 +4,14 @@ TODO list for grml-debootstrap
 Important
 ---------
 
-* /dev/MAKEDEV is missing in tarball
 * support for SW-RAID (work in progress, needs work on bootloader)
-* support for LVM
 
 Would be nice to have
 ---------------------
 
+* support execution of additional scripts for further customization
+* support for LVM
+* support grub2
 * support tarballs for customization/mirror source
   -> integrate/use 'fai dirinstall'?
 * support automatic installation of grml packages:

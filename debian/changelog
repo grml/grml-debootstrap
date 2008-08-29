@@ -6,14 +6,14 @@ grml-debootstrap (0.18) unstable; urgency=low
   * Initial support for SW-RAID.
   * Use stages based on target information, this gives us
     the possibility to run multiple instance of grml-debootstrap.
-    [Testing: issue510]
+    [Closes: issue510]
   * Use policy-rc.d inside chroot to avoid startup of daemons.
-    [Testing: issue509]
+    [Closes: issue509]
   * Do not activate /sys by default anymore in /etc/fstab.
   * Copy /etc/network/interfaces from running system to target
     installation.
   * Setting password via passwd does not work, use chpaswd instead.
-  * Remove stages after successful execution.
+  * Remove stages after successful execution. [Closes: issue513]
   * Make sure the configuration file inside the chroot provides
     the same configuration as specified on the cmdline (thanks gebi
     for reporting).
@@ -29,6 +29,9 @@ grml-debootstrap (0.18) unstable; urgency=low
   * Run aptitude with --without-recommends option.
   * Run grub-install using --no-floppy, as requested by gebi.
   * Support setting hostname via cmdline.
+  * Close issue in grml's BTS which showed up during development in hg:
+    Fix handling of config file inside chroot, thanks for spotting, gebi!
+    [Closes: issue512]
 
  -- Michael Prokop <mika@grml.org>  Fri, 29 Aug 2008 14:35:10 +0200
 
