@@ -39,6 +39,7 @@ Usage: $PN [options]
 
   -c|--config <configfile>    Use specified configuration file,
                               defaults to /etc/debootstrap/config
+  --hostname <hostname>       Hostname of Debian system
   -i|--iso <mnt>              Mountpoint where a Debian ISO is mounted to,
                               for use instead of fetching packages from a mirror
   -m|--mirror <URL>           Mirror which should be used for apt-get/aptitude.
@@ -102,6 +103,10 @@ while [ "$#" -gt "0" ] ; do
             usage ; eend 0
             eend 0
             exit 0
+            ;;
+        --hostname)
+            shift
+            HOSTNAME=$1
             ;;
         --interactive)
             INTERACTIVE=1
@@ -189,15 +194,15 @@ prompt_for_bootmanager()
 
   OIFS="$IFS"; IFS=:
 
-  if echo $TARGET | grep -q "*md*" ; then
-     MBRPART=$TARGET
+  if echo $TARGET | grep -q "/dev/md" ; then
+     MBRPART="all disks of Software RAID $TARGET"
   else
-     MBRPART="${TARGET%[0-9]}"
+     MBRPART="MBR of ${TARGET%[0-9]}"
   fi
 
   GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
-            mbr       "install bootmanager into MBR of $MBRPART" \
+            mbr       "install bootmanager into $MBRPART" \
             partition "install bootmanager into partition $TARGET" \
             nowhere   "do not install bootmanager at all" \
           ${ADDITIONAL_PARAMS})
@@ -238,6 +243,15 @@ prompt_for_release()
             etch   Debian/stable \
             lenny  Debian/testing \
             sid    Debian/unstable)"
+}
+# }}}
+
+# ask for hostname {{{
+prompt_for_hostname()
+{
+  HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
+            "Please enter the hostname you would like to use for installation:" \
+            0 0 grml)"
 }
 # }}}
 
@@ -391,7 +405,7 @@ elif [ -n "$INTERACTIVE" ] ; then
 
    INFOTEXT="$INFOTEXT
 
-Is this ok for you? Notice: canceling will exit ${PN}."
+Is this ok for you? Notice: selecting 'No' will exit ${PN}."
 
    dialog --title "$PN" --no-collapse \
           --yesno "$INFOTEXT" 0 0
@@ -431,9 +445,18 @@ interactive_mode()
 
   prompt_for_release
 
-  # FIXME: there seems to be a problem with grubdevice if it's /dev/md*
+  prompt_for_hostname
+
+  # use first disk of sw-raid for grub by default, install grub on
+  # all involved disks later on
   if echo "$TARGET" | grep -q '/dev/md' ; then
-     echo "debug: SELECTED_PARTITIONS = $SELECTED_PARTITIONS">&2
+     if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
+        # use hdX and not hdX,Y for $GRUB
+        TMPDEVICE=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}') # use first disk only
+        GRUB="$(grubdevice ${TMPDEVICE%%[0-9]})" # like: hd0
+        GROOT="$(grubdevice ${TMPDEVICE})"       # like: hd0,0
+        echo "debug: GRUB = $GRUB - GROOT = $GROOT" >/tmp/debug # FIXME
+     fi
   else
      [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
      [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
@@ -737,7 +760,11 @@ grub_install() {
      echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
   elif [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
      for device in $SELECTED_PARTITIONS ; do
-        GRUB=$(grubdevice $device)
+        # TMPDEVICE=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}')
+        # GRUB="$(grubdevice ${TMPDEVICE})"
+        # GRUB="$(grubdevice ${TMPDEVICE%%[0-9]})"
+        # GRUB=$(grubdevice $device)
+        GRUB="$(grubdevice ${device%%[0-9]})"
         einfo "Installing grub on ${GRUB}:"
         [ -x /usr/sbin/grub-install ] && GRUBINSTALL="/usr/sbin/grub-install --no-floppy" || GRUBINSTALL="/sbin/grub-install --no-floppy"
         $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
