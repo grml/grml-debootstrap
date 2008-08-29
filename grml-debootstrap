@@ -404,6 +404,8 @@ elif [ -n "$INTERACTIVE" ] ; then
    Install grub:    $GRUB"
    [ -n "$RELEASE" ] && INFOTEXT="$INFOTEXT
    Using release:   $RELEASE"
+   [ -n "$HOSTNAME" ] && INFOTEXT="$INFOTEXT
+   Using hostname   $HOSTNAME"
    [ -n "$MIRROR" ]  && INFOTEXT="$INFOTEXT
    Using mirror:    $MIRROR"
 

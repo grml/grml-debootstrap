@@ -33,7 +33,7 @@ grml-debootstrap (0.18) unstable; urgency=low
     Fix handling of config file inside chroot, thanks for spotting, gebi!
     [Closes: issue512]
 
- -- Michael Prokop <mika@grml.org>  Fri, 29 Aug 2008 14:35:10 +0200
+ -- Michael Prokop <mika@grml.org>  Sat, 30 Aug 2008 01:44:38 +0200
 
 grml-debootstrap (0.17) unstable; urgency=low
 

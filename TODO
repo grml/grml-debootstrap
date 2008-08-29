@@ -5,11 +5,12 @@ Important
 ---------
 
 * support for SW-RAID (work in progress, needs work on bootloader)
+* prompt for root password in interactive setup
+* support execution of additional scripts for further customization
 
 Would be nice to have
 ---------------------
 
-* support execution of additional scripts for further customization
 * support for LVM
 * support grub2
 * support tarballs for customization/mirror source
