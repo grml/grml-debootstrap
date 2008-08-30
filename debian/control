@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Uploaders: Alexander Wirt <formorer@grml.org>
 Build-Depends: debhelper (>= 5), asciidoc, xsltproc, docbook-xsl
-Standards-Version: 3.7.2
+Standards-Version: 3.8.0
 Homepage: http://hg.grml.org/grml-debootstrap/
 XS-Vcs-hg: http://hg.grml.org/grml-debootstrap/
 XS-Vcs-Browser: http://hg.grml.org/grml-debootstrap/
@@ -17,7 +17,7 @@ Description: wrapper around debootstrap for installing plain Debian via grml
  cdebootstrap for installing a plain Debian system via grml.
  .
  All you have to do is adjust a few variables in configuration
- file /etc/debootstrap/config and invoke grml-debootstrap then.
+ file /etc/debootstrap/config or use the configuration frontend.
  A plain and base Debian system will be installed on the given
  device (or directory) then. Customization of this process is
  possible as well.

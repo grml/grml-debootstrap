@@ -38,12 +38,8 @@ install: build
 	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/
 	install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/_grml-debootstrap
 
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
 # Build architecture-dependent files here.
-binary-arch: build install
+binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
@@ -59,5 +55,5 @@ binary-arch: build install
 	dh_md5sums
 	dh_builddeb
 
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+binary: binary-indep
+.PHONY: build clean binary-indep binary install
