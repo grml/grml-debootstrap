@@ -1,3 +1,10 @@
+grml-debootstrap (0.19) unstable; urgency=low
+
+  * Use dialog with --separate-output option to make sure mdadm
+    receives correct quoting for the RAID devices.
+
+ -- Michael Prokop <mika@grml.org>  Mon, 01 Sep 2008 12:16:55 +0200
+
 grml-debootstrap (0.18) unstable; urgency=low
 
   The "development sponsored by Sipwise GmbH" release.

@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.18'
+VERSION='0.19'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -338,8 +338,7 @@ PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
                      echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet]) off"
                  done)
 
-dialog --title "$PN" \
-       --single-quoted \
+dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
        $PARTITION_LIST 2>$TMPFILE
 RETVAL=$?
