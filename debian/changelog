@@ -1,3 +1,10 @@
+grml-debootstrap (0.21) unstable; urgency=low
+
+  * Make sure it works on target directories also if they are
+    *not* mounted separately. Thanks for reporting, Tong.
+
+ -- Michael Prokop <mika@grml.org>  Tue, 02 Sep 2008 23:19:05 +0200
+
 grml-debootstrap (0.20) unstable; urgency=low
 
   * Use root=UUID=... by default if possible to avoid possible
