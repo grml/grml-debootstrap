@@ -1,11 +1,16 @@
-grml-debootstrap (0.19) unstable; urgency=low
+grml-debootstrap (0.20) unstable; urgency=low
 
-  * Use dialog with --separate-output option to make sure mdadm
-    receives correct quoting for the RAID devices.
   * Use root=UUID=... by default if possible to avoid possible
     race conditions with libata vs. pata.
   * Fix setting hostname via interface.
   * Provide interface in dialog for setting root password.
+
+ -- Michael Prokop <mika@grml.org>  Tue, 02 Sep 2008 14:02:43 +0200
+
+grml-debootstrap (0.19) unstable; urgency=low
+
+  * Use dialog with --separate-output option to make sure mdadm
+    receives correct quoting for the RAID devices.
 
  -- Michael Prokop <mika@grml.org>  Tue, 02 Sep 2008 13:36:12 +0200
 
