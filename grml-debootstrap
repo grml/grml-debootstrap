@@ -255,6 +255,27 @@ prompt_for_hostname()
 }
 # }}}
 
+# ask for password {{{
+prompt_for_password()
+{
+     ROOTPW1='PW1'
+     ROOTPW2='PW2'
+     while [ "$ROOTPW1" != "$ROOTPW2" ]; do
+       ROOTPW1=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
+       "Please enter the password for the root account:" 10 60)
+       ROOTPW2=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
+       "Please enter the password for the root account again for \
+       confirmation:" 10 60)
+
+       if [ "$ROOTPW1" != "$ROOTPW2" ]; then
+         $(dialog --stdout --title "${PN}" --ok-label \
+         "Retry" --msgbox "Passwords do not match!" 10 60)
+       fi
+     done
+     ROOTPASSWORD="$ROOTPW1"
+}
+# }}}
+
 # ask for Debian mirror {{{
 prompt_for_mirror()
 {
@@ -452,6 +473,8 @@ interactive_mode()
 
   prompt_for_hostname
 
+  prompt_for_password
+
   # use first disk of sw-raid for grub by default, install grub on
   # all involved disks later on
   if echo "$TARGET" | grep -q '/dev/md' ; then
@@ -550,21 +573,6 @@ ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
 # }}}
 
-# provide variables to chroot system {{{
-CHROOT_VARIABLES="/var/cache/grml-debootstrap/variables_${SHORT_TARGET}"
-touch $CHROOT_VARIABLES
-chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
-[ -n "$ARCH" ]   && echo "ARCH=$ARCH"     >  $CHROOT_VARIABLES
-[ -n "$GRUB" ]   && echo "GRUB=$GRUB"     >> $CHROOT_VARIABLES
-[ -n "$GROOT" ]  && echo "GROOT=$GROOT"   >> $CHROOT_VARIABLES
-[ -n "$TARGET" ] && echo "TARGET=$TARGET" >> $CHROOT_VARIABLES
-[ -n "$ISO" ]    && echo "ISO=$ISO"       >> $CHROOT_VARIABLES
-[ -n "$ISODIR" ] && echo "ISODIR=$ISO"    >> $CHROOT_VARIABLES
-[ -n "$MIRROR" ] && echo "MIRROR=$MIRROR" >> $CHROOT_VARIABLES
-[ -n "$MIRROR" ] && echo "CHROOTMIRROR=$MIRROR" >> $CHROOT_VARIABLES
-[ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
-# }}}
-
 # helper functions {{{
 # we want to exit smoothly and clean:
 bailout(){
@@ -634,6 +642,7 @@ mkfs() {
   if [ -n "$MKFS" ] ; then
      einfo "Running $MKFS on $TARGET"
      $MKFS $TARGET
+     TARGET_UUID="$(vol_id -u $TARGET 2>/dev/null || echo '')"
      eend $?
   fi
 }
@@ -692,6 +701,24 @@ debootstrap_system() {
 # prepare chroot via chroot-script {{{
 preparechroot() {
   einfo "Preparing chroot system"
+
+  # provide variables to chroot system
+  CHROOT_VARIABLES="/var/cache/grml-debootstrap/variables_${SHORT_TARGET}"
+  touch $CHROOT_VARIABLES
+  chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
+  echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
+  [ -n "$ARCH" ]         && echo "ARCH=$ARCH"                 >> $CHROOT_VARIABLES
+  [ -n "$GROOT" ]        && echo "GROOT=$GROOT"               >> $CHROOT_VARIABLES
+  [ -n "$GRUB" ]         && echo "GRUB=$GRUB"                 >> $CHROOT_VARIABLES
+  [ -n "$HOSTNAME" ]     && echo "HOSTNAME=$HOSTNAME"         >> $CHROOT_VARIABLES
+  [ -n "$ISODIR" ]       && echo "ISODIR=$ISO"                >> $CHROOT_VARIABLES
+  [ -n "$ISO" ]          && echo "ISO=$ISO"                   >> $CHROOT_VARIABLES
+  [ -n "$MIRROR" ]       && echo "CHROOTMIRROR=$MIRROR"       >> $CHROOT_VARIABLES
+  [ -n "$MIRROR" ]       && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
+  [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
+  [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
+  [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
+  
   cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
   mkdir $MNTPOINT/etc/debootstrap/

@@ -206,8 +206,8 @@ passwords()
   shadowconfig on
 
   if [ -n "$ROOTPASSWORD" ] ; then
-     echo root:"$ROOTPASSWD" | chpasswd -m
-     export ROOTPASSWD=''
+     echo root:"$ROOTPASSWORD" | chpasswd -m
+     export ROOTPASSWORD=''
   else
     a='1'
     b='2'
@@ -273,8 +273,13 @@ timezone() {
 # helper function for fstab() {{{
 createfstab(){
      echo "Setting up /etc/fstab"
-cat > /etc/fstab << EOF
-$TARGET      /            auto    defaults,errors=remount-ro 0   1
+if [ -n "$TARGET_UUID" ] ; then
+   echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
+else
+   echo "${TARGET} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
+fi
+
+cat >> /etc/fstab << EOF
 proc           /proc        proc    defaults                      0   0
 /sys           /sys         sysfs   noauto,rw,nosuid,nodev,noexec 0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto                0   0
@@ -358,7 +363,11 @@ grub() {
      $UPDATEGRUB -y
      if [ -f /boot/grub/menu.lst ] ; then
         sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
-        sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro ${BOOT_APPEND}|g" /boot/grub/menu.lst
+	if [ -n "$TARGET_UUID" ] ; then
+	   sed -i "s|^# kopt=root=.*|# kopt=root=UUID=${TARGET_UUID} ro ${BOOT_APPEND}|g" /boot/grub/menu.lst
+	else
+	   sed -i "s|^# kopt=root=.*|# kopt=root=${TARGET} ro ${BOOT_APPEND}|g" /boot/grub/menu.lst
+	fi
         # not sure why savedefault does not work for me; any ideas?
         sed -i "s/^savedefault.*/# &/g" /boot/grub/menu.lst
         $UPDATEGRUB -y
