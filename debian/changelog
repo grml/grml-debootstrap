@@ -1,3 +1,9 @@
+grml-debootstrap (0.22) unstable; urgency=low
+
+  * Display meaningful information when no partitions could be found.
+
+ -- Michael Prokop <mika@grml.org>  Mon, 15 Sep 2008 19:46:20 +0200
+
 grml-debootstrap (0.21) unstable; urgency=low
 
   * Make sure it works on target directories also if they are

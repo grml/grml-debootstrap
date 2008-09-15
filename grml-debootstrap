@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.21'
+VERSION='0.22'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -169,7 +169,14 @@ prompt_for_target()
                grep -v 'Extended$' | \
                gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
 
-  [ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
+  if [ -z "$AVAILABLE_PARTITIONS" ] ; then
+     dialog --title "$PN" --single-quoted --stdout \
+     --msgbox "Sorry, no partitions found. Please configure your
+     harddisks (see /proc/partitions) using a tool like fdisk,
+     cfdisk, gpart, gparted,..." 0 0
+     exit 0
+  fi
+
   PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
                        echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet])"
                    done)
@@ -718,7 +725,7 @@ preparechroot() {
   [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
   [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
-  
+
   cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
   mkdir $MNTPOINT/etc/debootstrap/
