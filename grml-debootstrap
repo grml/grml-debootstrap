@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.22'
+VERSION='0.23'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -170,7 +170,7 @@ prompt_for_target()
                gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
 
   if [ -z "$AVAILABLE_PARTITIONS" ] ; then
-     dialog --title "$PN" --single-quoted --stdout \
+     dialog --title "$PN" --trim \
      --msgbox "Sorry, no partitions found. Please configure your
      harddisks (see /proc/partitions) using a tool like fdisk,
      cfdisk, gpart, gparted,..." 0 0
