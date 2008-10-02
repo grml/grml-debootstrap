@@ -760,12 +760,12 @@ preparechroot() {
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
   ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
-  # copy any existing existing files to chroot
-  [ -d /etc/debootstrap/boot  ] && cp -a /etc/debootstrap/boot/*  $MNTPOINT/boot/
-  [ -d /etc/debootstrap/etc   ] && cp -a /etc/debootstrap/etc/*   $MNTPOINT/etc/
-  [ -d /etc/debootstrap/share ] && cp -a /etc/debootstrap/share/* $MNTPOINT/share/
-  [ -d /etc/debootstrap/usr   ] && cp -a /etc/debootstrap/usr/*   $MNTPOINT/usr/
-  [ -d /etc/debootstrap/var   ] && cp -a /etc/debootstrap/var/*   $MNTPOINT/var/
+  # copy any existing files to chroot
+  [ -d /etc/debootstrap/boot  ] && cp -a -L /etc/debootstrap/boot/*  $MNTPOINT/boot/
+  [ -d /etc/debootstrap/etc   ] && cp -a -L /etc/debootstrap/etc/*   $MNTPOINT/etc/
+  [ -d /etc/debootstrap/share ] && cp -a -L /etc/debootstrap/share/* $MNTPOINT/share/
+  [ -d /etc/debootstrap/usr   ] && cp -a -L /etc/debootstrap/usr/*   $MNTPOINT/usr/
+  [ -d /etc/debootstrap/var   ] && cp -a -L /etc/debootstrap/var/*   $MNTPOINT/var/
 
   # copy local network setup to chroot
   if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
