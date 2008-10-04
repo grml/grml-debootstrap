@@ -77,7 +77,8 @@ Options and environment variables
 
 *-t*, *--target* <_target_>::
     Target partition (/dev/...) or directory (anything else without /dev at the
-    beginning).
+    beginning). To install grub using *--grub* and *--groot*, make sure to 
+    specify _device_ instead of directory as _target_.
 
 WARNING: the commandline parsing of grml-debootstrap does not validate the provided
 arguments for the commandline options. Please be careful and check docs and
