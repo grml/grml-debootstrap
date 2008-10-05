@@ -131,6 +131,11 @@ EOF
 
 # install additional packages {{{
 packages() {
+  # Pre-seed the debconf database with answers. Each question will be marked
+  # as seen to prevent debconf from asking the question interactively.
+  [ -f /etc/debootstrap/debconf-selections ] && \
+    cat /etc/debootstrap/debconf-selections | debconf-set-selections
+
   if [ "$PACKAGES" = 'yes' ] ; then
      if ! [ -r /etc/debootstrap/packages ] ; then
        echo "Error: /etc/debootstrap/packages not found, exiting."

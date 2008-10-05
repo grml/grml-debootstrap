@@ -1,15 +1,23 @@
 grml-debootstrap (0.23) unstable; urgency=low
 
+  The "hey, rocking - we get patches via git" release.
+
   * Improve look'n'feel of partition error dialog.
-  * Allow symlinks when coping existing files to chroot.
-    Patch by Tong Sun - thanks!
   * Improve documentation regarding installation of bootloader when
-    using directories as installation target. [Closes: issue539]
-    Patch by Tong Sun - thanks!
+    using directories as installation target. Thanks Tong Sun!
+    [Closes: issue539]
   * Copy /etc/debootstrap/[s]bin as well to the chroot if they are
     present. Suggestion by Tong Sun - thanks! [Closes: issue540]
+  * Apply several patches by Tong Sun (thanks!):
+    - allow symlinks when coping existing files to chroot.
+    - pre-seed packages using /etc/debootstrap/debconf-selections
+      [Closes: issue518]
+    - support DEBOOTSTRAP_OPT for passing extra parameters to the
+      debootstrap command
+    - support KEEP_SRC_LIST to allow user to provide their
+      own apt sources.list from /etc/debootstrap/etc/apt/sources.list
 
- -- Michael Prokop <mika@grml.org>  Sun, 05 Oct 2008 23:18:56 +0200
+ -- Michael Prokop <mika@grml.org>  Mon, 06 Oct 2008 00:15:52 +0200
 
 grml-debootstrap (0.22) unstable; urgency=low
 

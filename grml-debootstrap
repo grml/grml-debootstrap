@@ -694,9 +694,9 @@ debootstrap_system() {
      mount_target
   fi
   if grep -q $MNTPOINT /proc/mounts || [ -n "$DIRECTORY" ] ; then
-     einfo "Running $DEBOOTSTRAP for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
-     [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $MIRROR || \
-     $DEBOOTSTRAP $ARCHCMD $RELEASE $MNTPOINT $ISO
+     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
+     [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR || \
+     $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
      eend $?
   else
      eerror "Error: $MNTPOINT not mounted, can not continue."
@@ -739,6 +739,8 @@ preparechroot() {
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
   cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
+  [ -f /etc/debootstrap/debconf-selections -a "$DEBCONF" = 'yes' ] && \
+    cp /etc/debootstrap/debconf-selections $MNTPOINT/etc/debootstrap/
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables

@@ -111,6 +111,9 @@ DEBIAN_FRONTEND='noninteractive'
 # install packages defined in /etc/debootstrap/packages?
 PACKAGES='yes'
 
+# pre-seed packages using /etc/debootstrap/debconf-selections (if exist)?
+DEBCONF='yes'
+
 # install extra packages (.deb) from /etc/debootstrap/extrapackages/?
 EXTRAPACKAGES='yes'
 
