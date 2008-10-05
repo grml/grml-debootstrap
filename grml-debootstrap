@@ -761,8 +761,10 @@ preparechroot() {
   ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
+  [ -d /etc/debootstrap/bin   ] && cp -a -L /etc/debootstrap/bin/*   $MNTPOINT/bin/
   [ -d /etc/debootstrap/boot  ] && cp -a -L /etc/debootstrap/boot/*  $MNTPOINT/boot/
   [ -d /etc/debootstrap/etc   ] && cp -a -L /etc/debootstrap/etc/*   $MNTPOINT/etc/
+  [ -d /etc/debootstrap/sbin  ] && cp -a -L /etc/debootstrap/sbin/*  $MNTPOINT/sbin/
   [ -d /etc/debootstrap/share ] && cp -a -L /etc/debootstrap/share/* $MNTPOINT/share/
   [ -d /etc/debootstrap/usr   ] && cp -a -L /etc/debootstrap/usr/*   $MNTPOINT/usr/
   [ -d /etc/debootstrap/var   ] && cp -a -L /etc/debootstrap/var/*   $MNTPOINT/var/

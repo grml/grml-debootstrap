@@ -6,8 +6,10 @@ grml-debootstrap (0.23) unstable; urgency=low
   * Improve documentation regarding installation of bootloader when
     using directories as installation target. [Closes: issue539]
     Patch by Tong Sun - thanks!
+  * Copy /etc/debootstrap/[s]bin as well to the chroot if they are
+    present. Suggestion by Tong Sun - thanks! [Closes: issue540]
 
- -- Michael Prokop <mika@grml.org>  Sun, 05 Oct 2008 14:47:27 +0200
+ -- Michael Prokop <mika@grml.org>  Sun, 05 Oct 2008 23:18:56 +0200
 
 grml-debootstrap (0.22) unstable; urgency=low
 
