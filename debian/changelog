@@ -1,8 +1,13 @@
 grml-debootstrap (0.23) unstable; urgency=low
 
   * Improve look'n'feel of partition error dialog.
+  * Allow symlinks when coping existing files to chroot.
+    Patch by Tong Sun - thanks!
+  * Improve documentation regarding installation of bootloader when
+    using directories as installation target. [Closes: issue539]
+    Patch by Tong Sun - thanks!
 
- -- Michael Prokop <mika@grml.org>  Mon, 15 Sep 2008 19:51:57 +0200
+ -- Michael Prokop <mika@grml.org>  Sun, 05 Oct 2008 14:47:27 +0200
 
 grml-debootstrap (0.22) unstable; urgency=low
 
