@@ -58,6 +58,10 @@ CHROOTMIRROR='ftp://ftp.debian.de/debian'
 # use an available Debian-ISO instead
 # ISO='file:/mnt/iso/debian/'
 
+# do not build /etc/apt/sources.list on the fly. This allow user to
+# provide their own apt sources.list from /etc/debootstrap/etc/apt/sources.list
+# KEEP_SRC_LIST='yes'
+
 # add grml repository to /etc/apt/sources.list
 # if empty then the repository won't be added (notice: in testing phase)
 # GRMLREPOS='yes'
@@ -91,6 +95,11 @@ HOSTNAME='grml'
 # name of debootstrap executable
 # supported values: debootstrap cdebootstrap
 DEBOOTSTRAP='debootstrap'
+
+# To pass extra parameters to the debootstrap command. This feature allows
+# grml-debootstrap to pass extra parameters, e.g., --include=, --exclude=,
+# --components=, etc to debootstrap. E.g.,
+# DEBOOTSTRAP_OPT='--include=debconf-utils,locales,pciutils --exclude=nano,tasksel,tasksel-data,iptables'
 
 # Which debconf-frontend should be used?
 DEBIAN_FRONTEND='noninteractive'
