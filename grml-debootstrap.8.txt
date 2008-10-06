@@ -168,7 +168,7 @@ want to put existing files to the new Debian system you can place them into the
 /etc/debootstrap/. Every existing directory will be copied to the new Debian
 system then. If you want to install additional packages that are not available
 via the grml or debian mirror drop them into /etc/debootstrap/extrapackages and
-take sure that EXTRAPACKAGES is set to "yes".
+make sure that EXTRAPACKAGES is set to "yes".
 
 Automatic installation
 ----------------------

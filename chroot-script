@@ -44,6 +44,7 @@ stage() {
 
 # define chroot mirror {{{
 chrootmirror() {
+  [ -n "$KEEP_SRC_LIST" ] && return
   if [ -n "$ISO" ] ; then
      echo "deb $ISO $RELEASE main contrib" > /etc/apt/sources.list
      [ -n "$CHROOTMIRROR" ] && echo "deb $CHROOTMIRROR $RELEASE main contrib non-free" >> /etc/apt/sources.list
@@ -58,7 +59,9 @@ chrootmirror() {
 # set up grml repository {{{
 grmlrepos() {
   if [ -n "$GRMLREPOS" ] ; then
-     cat >> /etc/apt/sources.list << EOF
+     # user might have provided their own apt sources.list
+     if ! grep -q grml /etc/apt/sources.list 2>/dev/null ; then
+        cat >> /etc/apt/sources.list << EOF
 
 # grml: stable repository:
   deb     http://deb.grml.org/ grml-stable  main
@@ -69,6 +72,8 @@ grmlrepos() {
   deb-src http://deb.grml.org/ grml-testing main
 
 EOF
+     fi
+
      # make sure we have the keys available for aptitude
      gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
      gpg --export F61E2E7CECDEA787 | apt-key add - || /bin/true # not yet sure
@@ -133,8 +138,10 @@ EOF
 packages() {
   # Pre-seed the debconf database with answers. Each question will be marked
   # as seen to prevent debconf from asking the question interactively.
-  [ -f /etc/debootstrap/debconf-selections ] && \
+  [ -f /etc/debootstrap/debconf-selections ] && {
+    echo "Preseeding the debconf database, some lines might be skipped..."
     cat /etc/debootstrap/debconf-selections | debconf-set-selections
+  }
 
   if [ "$PACKAGES" = 'yes' ] ; then
      if ! [ -r /etc/debootstrap/packages ] ; then
