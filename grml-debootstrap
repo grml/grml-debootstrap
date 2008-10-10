@@ -746,7 +746,7 @@ preparechroot() {
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
 
-  cp -a /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
+  cp -a -L /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
 
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
