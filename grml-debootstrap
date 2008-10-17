@@ -49,10 +49,10 @@ Bootstrap options:
 Configuration options:
 
 
+  -c, --config=file      Use specified configuration file, defaults to
+                           /etc/debootstrap/config
   -d, --confdir=path     Place of config files for debootstrap, defaults to
                            /etc/debootstrap
-  -c, --config=file      Use specified configuration file, defaults to
-                           <confdir>/config
       --packages[=f]     Install packages defined in <confdir>/packages. Option
                            arg: alternative package list file.
       --debconf[=f]      Pre-seed packages using <confdir>/debconf-selections.
@@ -104,7 +104,20 @@ fi
 # source external command line parameter-processing script
 . $prog_real.clp
 
-# business-logic of command line parameter-processing
+# == business-logic of command line parameter-processing
+
+# source configuration file in <confdir> if supplied. {{{
+[ "$_opt_confdir" ] && {
+  CONFFILES=$_opt_confdir
+  if ! [ -r "$CONFFILES/config" ] ; then
+    eerror "Error: config file $CONFFILES/config not found."; eend 1; exit 1
+  fi
+  if ! . "$CONFFILES/config" ; then
+    eerror "Error reading config file $CONFFILES/config" ; eend 1 ; exit 1
+  fi
+}
+# }}}
+
 [ "$_opt_mirror" ]		&& MIRROR=$_opt_mirror
 [ "$_opt_iso" ]			&& ISO=$_opt_iso
 [ "$_opt_release" ]		&& RELEASE=$_opt_release
@@ -112,7 +125,6 @@ fi
 [ "$_opt_mntpoint" ]		&& MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]		&& DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]		&& INTERACTIVE=1
-[ "$_opt_confdir" ]		&& CONFFILES=$_opt_confdir
 [ "$_opt_config" ]		&& CONFIGFILE=$_opt_config
 [ "$_opt_packages_set" ]	&& PACKAGES='yes'
 [ "$_opt_debconf_set" ]		&& DEBCONF='yes'
