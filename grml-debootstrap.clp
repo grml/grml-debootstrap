@@ -19,8 +19,8 @@
 
 
 
-_opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:hv --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,config:,packages::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,help,version \
+_opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:d:c:hv --long \
+    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,confdir:,config:,packages::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,help,version \
   -- "$@"`
 if [ $? != 0 ]; then
   eerror "Try `grml-debootstrap --help' for more information."; eend 1; exit 1
@@ -55,14 +55,17 @@ while :; do
   #
 
   # == Configuration options
-  --config|-c)         # Use specified configuration file, defaults to /etc/debootstr
+  --confdir|-d)        # Place of config files for debootstrap, defaults to /etc/debo
+    shift; _opt_confdir="$1"
+    ;;
+  --config|-c)         # Use specified configuration file, defaults to <confdir>/conf
     shift; _opt_config="$1"
     ;;
-  --packages)          # Install packages defined in /etc/debootstrap/packages. Optio
+  --packages)          # Install packages defined in <confdir>/packages. Option arg:
     shift; _opt_packages="$1"
     _opt_packages_set=T
     ;;
-  --debconf)           # Pre-seed packages using /etc/debootstrap/debconf-selections.
+  --debconf)           # Pre-seed packages using <confdir>/debconf-selections. Option
     shift; _opt_debconf="$1"
     _opt_debconf_set=T
     ;;

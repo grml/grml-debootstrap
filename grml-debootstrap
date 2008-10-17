@@ -49,13 +49,14 @@ Bootstrap options:
 Configuration options:
 
 
+  -d, --confdir=path     Place of config files for debootstrap, defaults to
+                           /etc/debootstrap
   -c, --config=file      Use specified configuration file, defaults to
-                           /etc/debootstrap/config
-      --packages[=f]     Install packages defined in /etc/debootstrap/packages.
-                           Option arg: alternative package list file.
-      --debconf[=f]      Pre-seed packages using
-                           /etc/debootstrap/debconf-selections. Option arg:
-                           alternative preseed db file.
+                           <confdir>/config
+      --packages[=f]     Install packages defined in <confdir>/packages. Option
+                           arg: alternative package list file.
+      --debconf[=f]      Pre-seed packages using <confdir>/debconf-selections.
+                           Option arg: alternative pre-seed db file.
       --keep_src_list    Do not overwrite user provided apt sources.list.
       --hostname=name    Hostname of Debian system.
       --password=pwd     Use specified password as password for user root.
@@ -103,6 +104,7 @@ fi
 # source external command line parameter-processing script
 . $prog_real.clp
 
+# business-logic of command line parameter-processing
 [ "$_opt_mirror" ]		&& MIRROR=$_opt_mirror
 [ "$_opt_iso" ]			&& ISO=$_opt_iso
 [ "$_opt_release" ]		&& RELEASE=$_opt_release
@@ -110,6 +112,7 @@ fi
 [ "$_opt_mntpoint" ]		&& MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]		&& DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]		&& INTERACTIVE=1
+[ "$_opt_confdir" ]		&& CONFFILES=$_opt_confdir
 [ "$_opt_config" ]		&& CONFIGFILE=$_opt_config
 [ "$_opt_packages_set" ]	&& PACKAGES='yes'
 [ "$_opt_debconf_set" ]		&& DEBCONF='yes'
