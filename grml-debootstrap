@@ -720,9 +720,11 @@ preparechroot() {
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
-  cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
-  [ -f /etc/debootstrap/debconf-selections -a "$DEBCONF" = 'yes' ] && \
-    cp /etc/debootstrap/debconf-selections $MNTPOINT/etc/debootstrap/
+  cp ${_opt_packages:-/etc/debootstrap/packages} \
+    $MNTPOINT/etc/debootstrap/packages
+  _opt_debconf=${_opt_debconf:-/etc/debootstrap/debconf-selections}
+  [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
+    cp $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
