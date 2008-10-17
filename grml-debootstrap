@@ -45,6 +45,7 @@ Bootstrap options:
   -p, --mntpoint=mnt     Mountpoint used for mounting the target system.
       --debopt=params    Extra parameters passed to the debootstrap.
       --interactive      Use interactive mode (frontend).
+      --nodebootstrap    Skip debootstrap, only do configuration to the target.
 
 Configuration options:
 
@@ -688,6 +689,10 @@ mount_target() {
 debootstrap_system() {
   if ! grep -q $MNTPOINT /proc/mounts ; then
      mount_target
+  fi
+  if [ "$_opt_nodebootstrap" ]; then
+     einfo "Skipping debootstrap as requested."
+     return
   fi
   if grep -q $MNTPOINT /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
