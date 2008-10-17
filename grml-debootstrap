@@ -11,6 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
+prog_real=`readlink -f -- $0`
 VERSION='0.23'
 MNTPOINT="/mnt/debootstrap.$$"
 
@@ -99,73 +100,8 @@ fi
 # }}}
 
 # cmdline handling {{{
-
-while [ "$#" -gt "0" ] ; do
-    case $1 in
-        -c|--config)
-            shift
-            CONFIGFILE=$1
-            ;;
-        --grub)
-            shift
-            GRUB=$1
-            ;;
-        --groot)
-            shift
-            GROOT=$1
-            ;;
-        -h|--help)
-            usage ; eend 0
-            eend 0
-            exit 0
-            ;;
-        --hostname)
-            shift
-            HOSTNAME=$1
-            ;;
-        --interactive)
-            INTERACTIVE=1
-            ;;
-        -i|--iso)
-            shift
-            [ -n "$MIRROR" ] && unset MIRROR
-            ISO=$1
-            ;;
-        -m|--mirror)
-            shift
-            MIRROR=$1
-            CHROOTMIRROR=$1
-            ;;
-        -p|--mntpoint)
-            shift
-            MNTPOINT=$1
-            ;;
-        --password)
-            shift
-            ROOTPASSWORD=$1
-            ;;
-        -r|--release)
-            shift
-            RELEASE=$1
-            ;;
-        -t|--target)
-            shift
-            TARGET=$1
-            ;;
-        -v|--version)
-            einfo "$PN - version $VERSION"
-            einfo "Send bug reports to bugs@grml.org or http://grml.org/bugs/"
-            eend 0
-            exit 0
-            ;;
-        *)
-            eerror "Syntax error."
-            usage ; eend 1
-            exit 1
-            ;;
-    esac
-    shift
-done
+# source external command line parameter-processing script
+. $prog_real.clp
 # }}}
 
 # welcome screen {{{
