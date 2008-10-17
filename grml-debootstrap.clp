@@ -7,7 +7,7 @@
 # grml
 #
 # @Author:  Tong SUN
-# @Release: $Revision: $, under the BSD license
+# @Release: $Revision: 1.1 $, under the BSD license
 # @HomeURL: http://xpt.sourceforge.net/
 #
 
