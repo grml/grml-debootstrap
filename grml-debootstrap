@@ -34,26 +34,41 @@ usage() {
 
 Usage: $PN [options]
 
-  -h|--help                   Print this usage information and exit.
-  -v|--version                Show summary of options and exit.
+Bootstrap options:
 
-  -c|--config <configfile>    Use specified configuration file,
-                              defaults to /etc/debootstrap/config
-  --hostname <hostname>       Hostname of Debian system
-  -i|--iso <mnt>              Mountpoint where a Debian ISO is mounted to,
-                              for use instead of fetching packages from a mirror
-  -m|--mirror <URL>           Mirror which should be used for apt-get/aptitude.
-  -p|--mntpoint <mnt>         Mountpoint used for mounting the target system.
-  -r|--release <release>      Release of new Debian system (default: stable)
-  -t|--target <target>        Target partition (/dev/...) or directory.
+  -m, --mirror=URL       Mirror which should be used for apt-get/aptitude.
+  -i, --iso=mnt          Mountpoint where a Debian ISO is mounted to, for use
+                           instead of fetching packages from a mirror.
+  -r, --release=name     Release of new Debian system (default: stable).
+  -t, --target=target    Target partition (/dev/...) or directory.
+  -p, --mntpoint=mnt     Mountpoint used for mounting the target system.
+      --debopt=params    Extra parameters passed to the debootstrap.
+      --interactive      Use interactive mode (frontend).
 
-  --boot_append <appendline>  Add specified appendline to kernel whilst booting
-  --groot <device>            Root device for usage in grub, corresponds with
-                              \$TARGET in grub syntax, like hd0,0 for /dev/sda1
-  --grub <device>             Target for grub installation. Use grub syntax
-                              for specifying, like hd0 for /dev/sda
-  --interactive               Use interactive mode (frontend)
-  --password <pwd>            Use specified password as password for user root.
+Configuration options:
+
+
+  -c, --config=file      Use specified configuration file, defaults to
+                           /etc/debootstrap/config
+      --packages[=f]     Install packages defined in /etc/debootstrap/packages.
+                           Option arg: alternative package list file.
+      --debconf[=f]      Pre-seed packages using
+                           /etc/debootstrap/debconf-selections. Option arg:
+                           alternative preseed db file.
+      --keep_src_list    Do not overwrite user provided apt sources.list.
+      --hostname=name    Hostname of Debian system.
+      --password=pwd     Use specified password as password for user root.
+
+      --bootappend=line  Add specified appendline to kernel whilst booting.
+      --groot=device     Root device for usage in grub, corresponds with
+                           $TARGET in grub syntax, like hd0,0 for /dev/sda1.
+      --grub=device      Target for grub installation. Use grub syntax for
+                           specifying, like hd0 for /dev/sda.
+
+Other options:
+
+  -h, --help             Print this usage information and exit.
+  -v, --version          Show summary of options and exit.
 
 Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
 "
