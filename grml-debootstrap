@@ -510,7 +510,7 @@ fi
 if [ -n "$TARGET" ] ; then
    SHORT_TARGET="${TARGET##*/}"
 else
-   eerror "Please adjust /etc/debootstrap/config or..."
+   eerror "Please adjust $CONFFILES/config or..."
    eerror "... use the interactive version for configuration before running ${0}" ; eend 1
    exit 1
 fi
@@ -728,23 +728,23 @@ preparechroot() {
   mkdir $MNTPOINT/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
+  cp $CONFFILES/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
   sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
   sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
-  cp ${_opt_packages:-/etc/debootstrap/packages} \
+  cp ${_opt_packages:-$CONFFILES/packages} \
     $MNTPOINT/etc/debootstrap/packages
-  _opt_debconf=${_opt_debconf:-/etc/debootstrap/debconf-selections}
+  _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
   [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
     cp $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
   cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
 
-  cp -a -L /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
+  cp -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
 
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
@@ -756,19 +756,19 @@ preparechroot() {
   fi
 
   # setup default locales
-  [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
+  [ -n "$LOCALES" ] && cp $CONFFILES/locale.gen  $MNTPOINT/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
   ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
-  [ -d /etc/debootstrap/bin   ] && cp -a -L /etc/debootstrap/bin/*   $MNTPOINT/bin/
-  [ -d /etc/debootstrap/boot  ] && cp -a -L /etc/debootstrap/boot/*  $MNTPOINT/boot/
-  [ -d /etc/debootstrap/etc   ] && cp -a -L /etc/debootstrap/etc/*   $MNTPOINT/etc/
-  [ -d /etc/debootstrap/sbin  ] && cp -a -L /etc/debootstrap/sbin/*  $MNTPOINT/sbin/
-  [ -d /etc/debootstrap/share ] && cp -a -L /etc/debootstrap/share/* $MNTPOINT/share/
-  [ -d /etc/debootstrap/usr   ] && cp -a -L /etc/debootstrap/usr/*   $MNTPOINT/usr/
-  [ -d /etc/debootstrap/var   ] && cp -a -L /etc/debootstrap/var/*   $MNTPOINT/var/
+  [ -d $CONFFILES/bin   ] && cp -a -L $CONFFILES/bin/*   $MNTPOINT/bin/
+  [ -d $CONFFILES/boot  ] && cp -a -L $CONFFILES/boot/*  $MNTPOINT/boot/
+  [ -d $CONFFILES/etc   ] && cp -a -L $CONFFILES/etc/*   $MNTPOINT/etc/
+  [ -d $CONFFILES/sbin  ] && cp -a -L $CONFFILES/sbin/*  $MNTPOINT/sbin/
+  [ -d $CONFFILES/share ] && cp -a -L $CONFFILES/share/* $MNTPOINT/share/
+  [ -d $CONFFILES/usr   ] && cp -a -L $CONFFILES/usr/*   $MNTPOINT/usr/
+  [ -d $CONFFILES/var   ] && cp -a -L $CONFFILES/var/*   $MNTPOINT/var/
 
   # copy local network setup to chroot
   if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then

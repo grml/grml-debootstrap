@@ -118,7 +118,7 @@ DEBCONF='yes'
 EXTRAPACKAGES='yes'
 
 # place of config files for debootstrap
-CONFFILES='/etc/debootstrap/'
+CONFFILES='/etc/debootstrap'
 
 # mount point where chroot actions should take place
 # MNTPOINT='/mnt/debootstrap'
