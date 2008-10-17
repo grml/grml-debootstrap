@@ -11,6 +11,13 @@
 # @HomeURL: http://xpt.sourceforge.net/
 #
 
+# @WARNING: Do NOT modify this file without prior contacting the author.
+# This script is use for the command line *logic* processing. It should be
+# as dumb as possible. I.e., it should NOT be more complicated than
+# copy-paste-and-rename from existing code. All *business-logic* processing
+# should be handled in the main script, where it belongs.
+
+
 
 eval set -- `getopt \
   -o +m:i:r:t:p:c:hv --long \
@@ -93,30 +100,5 @@ while :; do
   shift
 done
 
-
-[ "$_opt_debug" ] && {
-  echo "[grml-debootstrap] debug: _opt_mirror=$_opt_mirror"
-  echo "[grml-debootstrap] debug: _opt_iso=$_opt_iso"
-  echo "[grml-debootstrap] debug: _opt_release=$_opt_release"
-  echo "[grml-debootstrap] debug: _opt_target=$_opt_target"
-  echo "[grml-debootstrap] debug: _opt_mntpoint=$_opt_mntpoint"
-  echo "[grml-debootstrap] debug: _opt_debopt=$_opt_debopt"
-  echo "[grml-debootstrap] debug: _opt_interactive=$_opt_interactive"
-  echo "[grml-debootstrap] debug: _opt_config=$_opt_config"
-  echo "[grml-debootstrap] debug: _opt_packages=$_opt_packages"
-  echo "[grml-debootstrap] debug: _opt_debconf=$_opt_debconf"
-  echo "[grml-debootstrap] debug: _opt_keep_src_list=$_opt_keep_src_list"
-  echo "[grml-debootstrap] debug: _opt_hostname=$_opt_hostname"
-  echo "[grml-debootstrap] debug: _opt_password=$_opt_password"
-  echo "[grml-debootstrap] debug: _opt_bootappend=$_opt_bootappend"
-  echo "[grml-debootstrap] debug: _opt_groot=$_opt_groot"
-  echo "[grml-debootstrap] debug: _opt_grub=$_opt_grub"
-  echo "[grml-debootstrap] debug: _opt_help=$_opt_help"
-  echo "[grml-debootstrap] debug: _opt_version=$_opt_version"
-}
-
-if [ "$_opt_check_failed" ]; then
-  eerror "Not all mandatory options are set."; eend 1 ; exit 1
-fi
 
 # End
