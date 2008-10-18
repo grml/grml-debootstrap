@@ -70,8 +70,9 @@ Configuration options:
 
 Other options:
 
+  -v, --verbose          Increase verbosity.
   -h, --help             Print this usage information and exit.
-  -v, --version          Show summary of options and exit.
+  -V, --version          Show summary of options and exit.
 
 Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
 "
@@ -92,6 +93,7 @@ check4root || exit 1
 # source configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
    if [ -n "$CONFIGFILE" ] ; then
+      einfo "Using config file $CONFIGFILE."
       if ! . "$CONFIGFILE" ; then
          eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
       fi
@@ -110,6 +112,7 @@ fi
 # source configuration file in <confdir> if supplied. {{{
 [ "$_opt_confdir" ] && {
   CONFFILES=$_opt_confdir
+  einfo "Using config files under $CONFFILES/."
   if ! [ -r "$CONFFILES/config" ] ; then
     eerror "Error: config file $CONFFILES/config not found."; eend 1; exit 1
   fi
@@ -135,6 +138,7 @@ fi
 [ "$_opt_bootappend" ]		&& BOOT_APPEND=$_opt_bootappend
 [ "$_opt_groot" ]		&& GROOT=$_opt_groot
 [ "$_opt_grub" ]		&& GRUB=$_opt_grub
+[ "$_opt_verbose" ]		&& VERBOSE="-v"
 
 [ "$_opt_help" ] && {
   usage ; eend 0
@@ -728,57 +732,57 @@ preparechroot() {
   [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
 
-  cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
+  cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
   mkdir $MNTPOINT/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp $CONFFILES/config    $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE $CONFFILES/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
   sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
   sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
-  cp ${_opt_packages:-$CONFFILES/packages} \
+  cp $VERBOSE ${_opt_packages:-$CONFFILES/packages} \
     $MNTPOINT/etc/debootstrap/packages
   _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
   [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
-    cp $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
+    cp $VERBOSE $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
-  cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
+  cp $VERBOSE $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
 
-  cp -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
 
   # make sure we can access network [relevant for cdebootstrap]
-  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
+  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp $VERBOSE /etc/resolv.conf $MNTPOINT/etc/resolv.conf
 
   # provide system's /etc/hosts to the target:
   if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
-     cp /etc/hosts $MNTPOINT/etc/hosts
+     cp $VERBOSE /etc/hosts $MNTPOINT/etc/hosts
      sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
   fi
 
   # setup default locales
-  [ -n "$LOCALES" ] && cp $CONFFILES/locale.gen  $MNTPOINT/etc/locale.gen
+  [ -n "$LOCALES" ] && cp $VERBOSE $CONFFILES/locale.gen  $MNTPOINT/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
   ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
-  [ -d $CONFFILES/bin   ] && cp -a -L $CONFFILES/bin/*   $MNTPOINT/bin/
-  [ -d $CONFFILES/boot  ] && cp -a -L $CONFFILES/boot/*  $MNTPOINT/boot/
-  [ -d $CONFFILES/etc   ] && cp -a -L $CONFFILES/etc/*   $MNTPOINT/etc/
-  [ -d $CONFFILES/sbin  ] && cp -a -L $CONFFILES/sbin/*  $MNTPOINT/sbin/
-  [ -d $CONFFILES/share ] && cp -a -L $CONFFILES/share/* $MNTPOINT/share/
-  [ -d $CONFFILES/usr   ] && cp -a -L $CONFFILES/usr/*   $MNTPOINT/usr/
-  [ -d $CONFFILES/var   ] && cp -a -L $CONFFILES/var/*   $MNTPOINT/var/
+  [ -d $CONFFILES/bin   ] && cp $VERBOSE -a -L $CONFFILES/bin/*   $MNTPOINT/bin/
+  [ -d $CONFFILES/boot  ] && cp $VERBOSE -a -L $CONFFILES/boot/*  $MNTPOINT/boot/
+  [ -d $CONFFILES/etc   ] && cp $VERBOSE -a -L $CONFFILES/etc/*   $MNTPOINT/etc/
+  [ -d $CONFFILES/sbin  ] && cp $VERBOSE -a -L $CONFFILES/sbin/*  $MNTPOINT/sbin/
+  [ -d $CONFFILES/share ] && cp $VERBOSE -a -L $CONFFILES/share/* $MNTPOINT/share/
+  [ -d $CONFFILES/usr   ] && cp $VERBOSE -a -L $CONFFILES/usr/*   $MNTPOINT/usr/
+  [ -d $CONFFILES/var   ] && cp $VERBOSE -a -L $CONFFILES/var/*   $MNTPOINT/var/
 
   # copy local network setup to chroot
   if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
      [ -d $MNTPOINT/etc/network ] || mkdir $MNTPOINT/etc/network
-     cp /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+     cp $VERBOSE /etc/network/interfaces $MNTPOINT/etc/network/interfaces
   fi
 
   eend 0

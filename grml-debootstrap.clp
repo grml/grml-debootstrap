@@ -7,7 +7,7 @@
 # grml
 #
 # @Author:  Tong SUN
-# @Release: $Revision: 1.3 $, under the BSD license
+# @Release: $Revision: 1.3 $
 # @HomeURL: http://xpt.sourceforge.net/
 #
 
@@ -19,8 +19,8 @@
 
 
 
-_opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:hv --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,help,version \
+_opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
+    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,verbose,help,version \
   -- "$@"`
 if [ $? != 0 ]; then
   eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
@@ -93,10 +93,14 @@ while :; do
     ;;
 
   # == Other options
+  --verbose|-v)        # Increase verbosity.
+    if [ "$_opt_verbose" ]; then _opt_verbose=`expr $_opt_verbose + 1`
+    else _opt_verbose=1; fi
+    ;;
   --help|-h)           # Print this usage information and exit.
     _opt_help=T
     ;;
-  --version|-v)        # Show summary of options and exit.
+  --version|-V)        # Show summary of options and exit.
     _opt_version=T
     ;;
   --)
