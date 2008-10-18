@@ -119,6 +119,8 @@ fi
   if ! . "$CONFFILES/config" ; then
     eerror "Error reading config file $CONFFILES/config" ; eend 1 ; exit 1
   fi
+  # restore the command line parameter value
+  CONFFILES=$_opt_confdir
 }
 # }}}
 
