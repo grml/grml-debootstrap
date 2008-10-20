@@ -1,23 +1,16 @@
 # -*- shell-script -*-
-
-#
-# shell script command line parameter-processing for:
-#
-# grml-debootstrap - wrapper around debootstrap for installing plain Debian via
-# grml
-#
-# @Author:  Tong SUN
-# @Release: $Revision: 1.3 $
-# @HomeURL: http://xpt.sourceforge.net/
-#
-
+# Filename:      grml-debootstrap.clp
+# Purpose:       shell script command line parameter-processing for grml-debootstrap
+# Authors:       grml-team (grml.org), Tong Sun <suntong@cpan.org>
+# Bug-Reports:   see http://grml.org/bugs/
+# License:       This file is licensed under the GPL v2 or any later version.
+################################################################################
 # @WARNING: Do NOT modify this file without prior contacting the author.
 # This script is use for the command line *logic* processing. It should be
 # as dumb as possible. I.e., it should NOT be more complicated than
 # copy-paste-and-rename from existing code. All *business-logic* processing
 # should be handled in the main script, where it belongs.
-
-
+################################################################################
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,verbose,help,version \
@@ -113,5 +106,4 @@ while :; do
   shift
 done
 
-
-# End
+## END OF FILE #################################################################

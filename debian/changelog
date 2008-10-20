@@ -16,8 +16,13 @@ grml-debootstrap (0.23) unstable; urgency=low
       debootstrap command
     - support KEEP_SRC_LIST to allow user to provide their
       own apt sources.list from /etc/debootstrap/etc/apt/sources.list
+    - provide cmdline processing in separate script
+    - added the '-d, --confdir=path' option
+    - added "--nodebootstrap": Skip debootstrap, only do configuration
+      to the target
+    - add -v, --verbose: Increase verbosity
 
- -- Michael Prokop <mika@grml.org>  Mon, 06 Oct 2008 00:15:52 +0200
+ -- Michael Prokop <mika@grml.org>  Mon, 20 Oct 2008 16:09:03 +0200
 
 grml-debootstrap (0.22) unstable; urgency=low
 
