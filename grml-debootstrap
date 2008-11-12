@@ -11,6 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
+prog_real=`readlink -f -- $0`
 VERSION='0.23'
 MNTPOINT="/mnt/debootstrap.$$"
 
@@ -34,26 +35,44 @@ usage() {
 
 Usage: $PN [options]
 
-  -h|--help                   Print this usage information and exit.
-  -v|--version                Show summary of options and exit.
+Bootstrap options:
 
-  -c|--config <configfile>    Use specified configuration file,
-                              defaults to /etc/debootstrap/config
-  --hostname <hostname>       Hostname of Debian system
-  -i|--iso <mnt>              Mountpoint where a Debian ISO is mounted to,
-                              for use instead of fetching packages from a mirror
-  -m|--mirror <URL>           Mirror which should be used for apt-get/aptitude.
-  -p|--mntpoint <mnt>         Mountpoint used for mounting the target system.
-  -r|--release <release>      Release of new Debian system (default: stable)
-  -t|--target <target>        Target partition (/dev/...) or directory.
+  -m, --mirror=URL       Mirror which should be used for apt-get/aptitude.
+  -i, --iso=mnt          Mountpoint where a Debian ISO is mounted to, for use
+                           instead of fetching packages from a mirror.
+  -r, --release=name     Release of new Debian system (default: stable).
+  -t, --target=target    Target partition (/dev/...) or directory.
+  -p, --mntpoint=mnt     Mountpoint used for mounting the target system.
+      --debopt=params    Extra parameters passed to the debootstrap.
+      --interactive      Use interactive mode (frontend).
+      --nodebootstrap    Skip debootstrap, only do configuration to the target.
 
-  --boot_append <appendline>  Add specified appendline to kernel whilst booting
-  --groot <device>            Root device for usage in grub, corresponds with
-                              \$TARGET in grub syntax, like hd0,0 for /dev/sda1
-  --grub <device>             Target for grub installation. Use grub syntax
-                              for specifying, like hd0 for /dev/sda
-  --interactive               Use interactive mode (frontend)
-  --password <pwd>            Use specified password as password for user root.
+Configuration options:
+
+
+  -c, --config=file      Use specified configuration file, defaults to
+                           /etc/debootstrap/config
+  -d, --confdir=path     Place of config files for debootstrap, defaults to
+                           /etc/debootstrap
+      --packages[=f]     Install packages defined in <confdir>/packages. Option
+                           arg: alternative package list file.
+      --debconf[=f]      Pre-seed packages using <confdir>/debconf-selections.
+                           Option arg: alternative pre-seed db file.
+      --keep_src_list    Do not overwrite user provided apt sources.list.
+      --hostname=name    Hostname of Debian system.
+      --password=pwd     Use specified password as password for user root.
+
+      --bootappend=line  Add specified appendline to kernel whilst booting.
+      --groot=device     Root device for usage in grub, corresponds with
+                           $TARGET in grub syntax, like hd0,0 for /dev/sda1.
+      --grub=device      Target for grub installation. Use grub syntax for
+                           specifying, like hd0 for /dev/sda.
+
+Other options:
+
+  -v, --verbose          Increase verbosity.
+  -h, --help             Print this usage information and exit.
+  -V, --version          Show summary of options and exit.
 
 Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
 "
@@ -74,6 +93,7 @@ check4root || exit 1
 # source configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
    if [ -n "$CONFIGFILE" ] ; then
+      einfo "Using config file $CONFIGFILE."
       if ! . "$CONFIGFILE" ; then
          eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
       fi
@@ -84,73 +104,56 @@ fi
 # }}}
 
 # cmdline handling {{{
+# source external command line parameter-processing script
+. $prog_real.clp
 
-while [ "$#" -gt "0" ] ; do
-    case $1 in
-        -c|--config)
-            shift
-            CONFIGFILE=$1
-            ;;
-        --grub)
-            shift
-            GRUB=$1
-            ;;
-        --groot)
-            shift
-            GROOT=$1
-            ;;
-        -h|--help)
-            usage ; eend 0
-            eend 0
-            exit 0
-            ;;
-        --hostname)
-            shift
-            HOSTNAME=$1
-            ;;
-        --interactive)
-            INTERACTIVE=1
-            ;;
-        -i|--iso)
-            shift
-            [ -n "$MIRROR" ] && unset MIRROR
-            ISO=$1
-            ;;
-        -m|--mirror)
-            shift
-            MIRROR=$1
-            CHROOTMIRROR=$1
-            ;;
-        -p|--mntpoint)
-            shift
-            MNTPOINT=$1
-            ;;
-        --password)
-            shift
-            ROOTPASSWORD=$1
-            ;;
-        -r|--release)
-            shift
-            RELEASE=$1
-            ;;
-        -t|--target)
-            shift
-            TARGET=$1
-            ;;
-        -v|--version)
-            einfo "$PN - version $VERSION"
-            einfo "Send bug reports to bugs@grml.org or http://grml.org/bugs/"
-            eend 0
-            exit 0
-            ;;
-        *)
-            eerror "Syntax error."
-            usage ; eend 1
-            exit 1
-            ;;
-    esac
-    shift
-done
+# == business-logic of command line parameter-processing
+
+# source configuration file in <confdir> if supplied. {{{
+[ "$_opt_confdir" ] && {
+  CONFFILES=$_opt_confdir
+  einfo "Using config files under $CONFFILES/."
+  if ! [ -r "$CONFFILES/config" ] ; then
+    eerror "Error: config file $CONFFILES/config not found."; eend 1; exit 1
+  fi
+  if ! . "$CONFFILES/config" ; then
+    eerror "Error reading config file $CONFFILES/config" ; eend 1 ; exit 1
+  fi
+  # restore the command line parameter value
+  CONFFILES=$_opt_confdir
+}
+# }}}
+
+[ "$_opt_mirror" ]		&& MIRROR=$_opt_mirror
+[ "$_opt_iso" ]			&& ISO=$_opt_iso
+[ "$_opt_release" ]		&& RELEASE=$_opt_release
+[ "$_opt_target" ]		&& TARGET=$_opt_target
+[ "$_opt_mntpoint" ]		&& MNTPOINT=$_opt_mntpoint
+[ "$_opt_debopt" ]		&& DEBOOTSTRAP_OPT=$_opt_debopt
+[ "$_opt_interactive" ]		&& INTERACTIVE=1
+[ "$_opt_config" ]		&& CONFIGFILE=$_opt_config
+[ "$_opt_packages_set" ]	&& PACKAGES='yes'
+[ "$_opt_debconf_set" ]		&& DEBCONF='yes'
+[ "$_opt_keep_src_list" ]	&& KEEP_SRC_LIST='yes'
+[ "$_opt_hostname" ]		&& HOSTNAME=$_opt_hostname
+[ "$_opt_password" ]		&& ROOTPASSWORD=$_opt_password
+[ "$_opt_bootappend" ]		&& BOOT_APPEND=$_opt_bootappend
+[ "$_opt_groot" ]		&& GROOT=$_opt_groot
+[ "$_opt_grub" ]		&& GRUB=$_opt_grub
+[ "$_opt_verbose" ]		&& VERBOSE="-v"
+
+[ "$_opt_help" ] && {
+  usage ; eend 0
+  eend 0
+  exit 0
+}
+
+[ "$_opt_version" ] && {
+  einfo "$PN - version $VERSION"
+  einfo "Send bug reports to bugs@grml.org or http://grml.org/bugs/"
+  eend 0
+  exit 0
+}
 # }}}
 
 # welcome screen {{{
@@ -514,7 +517,7 @@ fi
 if [ -n "$TARGET" ] ; then
    SHORT_TARGET="${TARGET##*/}"
 else
-   eerror "Please adjust /etc/debootstrap/config or..."
+   eerror "Please adjust $CONFFILES/config or..."
    eerror "... use the interactive version for configuration before running ${0}" ; eend 1
    exit 1
 fi
@@ -693,6 +696,10 @@ debootstrap_system() {
   if ! grep -q $MNTPOINT /proc/mounts ; then
      mount_target
   fi
+  if [ "$_opt_nodebootstrap" ]; then
+     einfo "Skipping debootstrap as requested."
+     return
+  fi
   if grep -q $MNTPOINT /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
      [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR || \
@@ -727,55 +734,57 @@ preparechroot() {
   [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
 
-  cp $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
+  cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
   mkdir $MNTPOINT/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp /etc/debootstrap/config    $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE $CONFFILES/config    $MNTPOINT/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
   sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
   sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
-  cp /etc/debootstrap/packages  $MNTPOINT/etc/debootstrap/packages
-  [ -f /etc/debootstrap/debconf-selections -a "$DEBCONF" = 'yes' ] && \
-    cp /etc/debootstrap/debconf-selections $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE ${_opt_packages:-$CONFFILES/packages} \
+    $MNTPOINT/etc/debootstrap/packages
+  _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
+  [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
+    cp $VERBOSE $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
-  cp $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
+  cp $VERBOSE $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
 
-  cp -a -L /etc/debootstrap/extrapackages/ $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
 
   # make sure we can access network [relevant for cdebootstrap]
-  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp /etc/resolv.conf $MNTPOINT/etc/resolv.conf
+  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp $VERBOSE /etc/resolv.conf $MNTPOINT/etc/resolv.conf
 
   # provide system's /etc/hosts to the target:
   if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
-     cp /etc/hosts $MNTPOINT/etc/hosts
+     cp $VERBOSE /etc/hosts $MNTPOINT/etc/hosts
      sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
   fi
 
   # setup default locales
-  [ -n "$LOCALES" ] && cp /etc/debootstrap/locale.gen  $MNTPOINT/etc/locale.gen
+  [ -n "$LOCALES" ] && cp $VERBOSE $CONFFILES/locale.gen  $MNTPOINT/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
   ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
-  [ -d /etc/debootstrap/bin   ] && cp -a -L /etc/debootstrap/bin/*   $MNTPOINT/bin/
-  [ -d /etc/debootstrap/boot  ] && cp -a -L /etc/debootstrap/boot/*  $MNTPOINT/boot/
-  [ -d /etc/debootstrap/etc   ] && cp -a -L /etc/debootstrap/etc/*   $MNTPOINT/etc/
-  [ -d /etc/debootstrap/sbin  ] && cp -a -L /etc/debootstrap/sbin/*  $MNTPOINT/sbin/
-  [ -d /etc/debootstrap/share ] && cp -a -L /etc/debootstrap/share/* $MNTPOINT/share/
-  [ -d /etc/debootstrap/usr   ] && cp -a -L /etc/debootstrap/usr/*   $MNTPOINT/usr/
-  [ -d /etc/debootstrap/var   ] && cp -a -L /etc/debootstrap/var/*   $MNTPOINT/var/
+  [ -d $CONFFILES/bin   ] && cp $VERBOSE -a -L $CONFFILES/bin/*   $MNTPOINT/bin/
+  [ -d $CONFFILES/boot  ] && cp $VERBOSE -a -L $CONFFILES/boot/*  $MNTPOINT/boot/
+  [ -d $CONFFILES/etc   ] && cp $VERBOSE -a -L $CONFFILES/etc/*   $MNTPOINT/etc/
+  [ -d $CONFFILES/sbin  ] && cp $VERBOSE -a -L $CONFFILES/sbin/*  $MNTPOINT/sbin/
+  [ -d $CONFFILES/share ] && cp $VERBOSE -a -L $CONFFILES/share/* $MNTPOINT/share/
+  [ -d $CONFFILES/usr   ] && cp $VERBOSE -a -L $CONFFILES/usr/*   $MNTPOINT/usr/
+  [ -d $CONFFILES/var   ] && cp $VERBOSE -a -L $CONFFILES/var/*   $MNTPOINT/var/
 
   # copy local network setup to chroot
   if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
      [ -d $MNTPOINT/etc/network ] || mkdir $MNTPOINT/etc/network
-     cp /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+     cp $VERBOSE /etc/network/interfaces $MNTPOINT/etc/network/interfaces
   fi
 
   eend 0
