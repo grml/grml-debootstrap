@@ -31,29 +31,34 @@ CAUTION: The grml team does not take responsibility for loss of any data!
 Options and environment variables
 ---------------------------------
 
-*-h*, *--help*::
-    Show summary of options and exit.
+*--boot_append* <_appendline for the kernel_>::
+    Specify appendline for the kernel.
+    E.g. "_pci=nomsi_"
 
-*-v*, *--version*::
-    Show version of program and exit.
+*-c*, *--config* <_file_>::
+    Use specified configuration file, defaults to /etc/debootstrap/config.
 
-*--grub* <_device_>::
-    Where do you want to install grub to? Use grub syntax for specifying.
-    Do not forget to set groot as well. Leave empty to avoid installation of grub.
+*-d*, *--confdir* <_path_>::
+    Place of configuration files for debootstrap, defaults to /etc/debootstrap.
+
+*--debconf* <_file_>::
+    Use specified file for preseeding Debian packages instead of using
+    the default <confdir>/debconf-selections.
 
 *--groot* <_device_>::
     Specify root device for usage in grub (corresponds with $TARGET).
     Again, use grub syntax for specifying.
     Corresponding with configuration variable GROOT.
 
-*--boot_append* <_appendline for the kernel_>::
-    Specify appendline for the kernel.
-    E.g. "_pci=nomsi_"
+*--grub* <_device_>::
+    Where do you want to install grub to? Use grub syntax for specifying.
+    Do not forget to set groot as well. Leave empty to avoid installation of grub.
 
-*-m*, *--mirror* <_URL_>::
-    Specify mirror which should be used for apt-get/aptitude. Notice that
-    specifying the mirror also sets the chrootmirror to the given value.
-    Corresponding with configuration variables MIRROR and CHROOTMIRROR.
+*--help*, *-h*::
+    Show summary of options and exit.
+
+*--hostname* <_hostname_>::
+    Use specified hostname instead of the default (being 'grml').
 
 *-i*, *--iso* <_/mntpoint_>::
     Specify mountpoint where you have a Debian ISO mounted loopback.
@@ -62,9 +67,21 @@ Options and environment variables
     mounted the according Debian-ISO to the given <_/mntpoint_>. See section
     'Usage examples' for a demonstration.
 
+*--keep_src_list*::
+     Do not overwrite user provided /etc/apt/sources.list.
+
+*-m*, *--mirror* <_URL_>::
+    Specify mirror which should be used for apt-get/aptitude. Notice that
+    specifying the mirror also sets the chrootmirror to the given value.
+    Corresponding with configuration variables MIRROR and CHROOTMIRROR.
+
 *-p*, *--mntpoint* <_/mntpoint_>::
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
+
+*--packages* <_file_>::
+    Use specified file as list for packages that should be installed instead of
+    the default package list file <confdir>/packages.
 
 *--password* <_password_>::
     Use specified password as password for user root. Use with caution, as your
@@ -81,6 +98,12 @@ Options and environment variables
     use a _device_ instead of a directory as _target_ (installation of
     grub as bootloader when using directories isn't supported yet).
 
+*-v*, *--verbose*::
+    Increase verbosity.
+
+*-V*, *--version*::
+    Show version of program and exit.
+
 WARNING: the commandline parsing of grml-debootstrap does not validate the provided
 arguments for the commandline options. Please be careful and check docs and
 /etc/debootstrap/config for further information.
@@ -88,15 +111,15 @@ arguments for the commandline options. Please be careful and check docs and
 Usage examples
 ---------------
 
-  grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0
+  grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0
 
-Install default Debian release (stable/etch) on /dev/hda1 and install bootmanager
-Grub in MBR (master boot record) of /dev/hda and use /dev/hda1 as system partition.
+Install default Debian release (stable/etch) on /dev/sda1 and install bootmanager
+Grub in MBR (master boot record) of /dev/sda and use /dev/sda1 as system partition.
 
-  grml-debootstrap --target /dev/hda6 --grub hd0 --groot hd0,5 --release sid
+  grml-debootstrap --target /dev/sda6 --grub hd0 --groot hd0,5 --release sid
 
-Install Debian unstable/sid on /dev/hda6, install bootmanager
-Grub in MBR (master boot record) of /dev/hda and use /dev/hda6 as system partition.
+Install Debian unstable/sid on /dev/sda6, install bootmanager
+Grub in MBR (master boot record) of /dev/sda and use /dev/sda6 as system partition.
 
   grml-debootstrap --target /data/chroot
 
@@ -109,12 +132,12 @@ Install default Debian release (stable/etch) on /dev/sda3 and install bootmanage
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
 Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
 
-  mount -o loop /mnt/hda6/debian-40r0-i386-CD-1.iso /mnt/iso
-  grml-debootstrap --target /dev/hda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
+  mount -o loop /mnt/sda6/debian-40r0-i386-CD-1.iso /mnt/iso
+  grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
 
-Install Debian stable/etch on /dev/hda1 using the loopback mounted Debian-ISO
+Install Debian stable/etch on /dev/sda1 using the loopback mounted Debian-ISO
 for the base-system and install bootmanager Grub in MBR (master boot record) of
-/dev/hda and use /dev/hda1 as system partition. Please notice, that the chroot
+/dev/sda and use /dev/sda1 as system partition. Please notice, that the chroot
 system requires network access for all packages which are not part of the
 ISO.
 
@@ -184,7 +207,7 @@ mentioned above):
   target=...
 
 The target partition/directory of the new Debian system. Usage example:
-target=/dev/hda1
+target=/dev/sda1
 
   grub=...
 
@@ -215,10 +238,10 @@ argument. Usage example: password=AiTh5ahn
 Usage example for automatic installation:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  debian2hd target=/dev/hda1 grub=hd0 groot=hd0,0 mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
+  debian2hd target=/dev/sda1 grub=hd0 groot=hd0,0 mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
 
 You have to enter this commandline at the bootprompt of grml. Please make sure
-that /dev/hda1 is the partition where you really want to install your new Debian
+that /dev/sda1 is the partition where you really want to install your new Debian
 system.
 
 [NOTE]
@@ -238,7 +261,7 @@ include::releasetable.txt[]
 [1] Please notice that Sarge is the current old-stable within Debian.
 grml-debootstrap can handle the release but you really should not
 use Sarge anymore unless you really know what you are doing. Choose
-Etch instead.
+Etch or Lenny instead.
 =====================================================================
 
 Bugs
