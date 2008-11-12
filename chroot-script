@@ -256,7 +256,7 @@ hosts() {
 
 # set up /etc/network/interfaces {{{
 interfaces() {
-  if ! [ -r /etc/network/interfaces ] ; then
+  if ! [ -r /etc/network/interfaces ] || ! grep -q "auto lo" /etc/network/interfaces ; then
      echo "Setting up /etc/network/interfaces"
      cat >> /etc/network/interfaces << EOF
 
@@ -324,6 +324,11 @@ hostname() {
   if [ -n "$HOSTNAME" ] ; then
      echo "Setting hostname to ${HOSTNAME}."
      echo "$HOSTNAME" > /etc/hostname
+
+     # adjust postfix configuration
+     if [ -r /etc/postfix/main.cf ] ; then
+        sed -i "s/grml/$HOSTNAME/g" /etc/postfix/main.cf
+     fi
   fi
 }
 # }}}
