@@ -11,7 +11,6 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-prog_real=`readlink -f -- $0`
 VERSION='0.23'
 MNTPOINT="/mnt/debootstrap.$$"
 
