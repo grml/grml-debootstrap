@@ -144,7 +144,8 @@ FSCK='yes'
 # FSCKTOOL=''
 
 # which packages do you want do dpkg-reconfigure?
-RECONFIGURE='locales console-data'
+# RECONFIGURE='locales console-data'
+RECONFIGURE='console-data'
 
 # use /etc/debootstrap/locale.gen for configuration of locales?
 LOCALES='yes'

@@ -28,8 +28,10 @@ grml-debootstrap (0.23) unstable; urgency=low
   * Unify the --bootappend option, it's not --boot_append (thanks for
     the hint, Tong Sun).
   * Support execution of further scripts via --scripts and --chroot-scripts.
+  * Drop locales from RECONFIGURE list (thanks for hint, Tong Sun).
+    [Closes: issue560]
 
- -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:49:05 +0100
+ -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:57:20 +0100
 
 grml-debootstrap (0.22) unstable; urgency=low
 
