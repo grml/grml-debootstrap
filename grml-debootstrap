@@ -729,6 +729,7 @@ preparechroot() {
   [ -n "$MIRROR" ]       && echo "CHROOTMIRROR=$MIRROR"       >> $CHROOT_VARIABLES
   [ -n "$MIRROR" ]       && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
   [ -n "$KEEP_SRC_LIST" ] && echo "KEEP_SRC_LIST=$KEEP_SRC_LIST" >> $CHROOT_VARIABLES
+  [ -n "$PACKAGES" ]     && echo "PACKAGES=$PACKAGES"         >> $CHROOT_VARIABLES
   [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
   [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
