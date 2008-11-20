@@ -85,10 +85,9 @@ Options and environment variables
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
 
-*--packages* [<_file_>]::
+*--packages* <_file_>::
     Use specified file as list for packages that should be installed instead of
-    the default package list file <confdir>/packages. If no file parameter is given
-    it activates the default package list file <confdir>/packages.
+    the default package list file <confdir>/packages.
 
 *--password* <_password_>::
     Use specified password as password for user root. Use with caution, as your

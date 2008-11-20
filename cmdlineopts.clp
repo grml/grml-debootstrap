@@ -24,68 +24,68 @@ while :; do
   case "$1" in
 
   # == Bootstrap options
-  --mirror|-m)         # Mirror which should be used for apt-get/aptitude.
+  --mirror|-m)         # Mirror which should be used for apt-get/aptitude
     shift; _opt_mirror="$1"
     ;;
-  --iso|-i)            # Mountpoint where a Debian ISO is mounted to, for use instead
+  --iso|-i)            # Mountpoint where a Debian ISO is mounted to
     shift; _opt_iso="$1"
     ;;
-  --release|-r)        # Release of new Debian system (default: stable).
+  --release|-r)        # Release of new Debian system (default: stable)
     shift; _opt_release="$1"
     ;;
-  --target|-t)         # Target partition (/dev/...) or directory.
+  --target|-t)         # Target partition (/dev/...) or directory
     shift; _opt_target="$1"
     ;;
-  --mntpoint|-p)       # Mountpoint used for mounting the target system.
+  --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
     ;;
-  --debopt)            # Extra parameters passed to the debootstrap.
+  --debopt)            # Extra parameters passed to the debootstrap
     shift; _opt_debopt="$1"
     ;;
-  --interactive)       # Use interactive mode (frontend).
+  --interactive)       # Use interactive mode (frontend)
     _opt_interactive=T
     ;;
-  --nodebootstrap)     # Skip debootstrap, only do configuration to the target.
+  --nodebootstrap)     # Skip debootstrap, only do configuration to the target
     _opt_nodebootstrap=T
     ;;
   #
 
   # == Configuration options
-  --config|-c)         # Use specified configuration file, defaults to /etc/debootstr
+  --config|-c)         # Use specified configuration file, defaults to /etc/debootstrap
     shift; _opt_config="$1"
     ;;
-  --confdir|-d)        # Place of config files for debootstrap, defaults to /etc/debo
+  --confdir|-d)        # Place of config files for debootstrap, defaults to /etc/debootstrap
     shift; _opt_confdir="$1"
     ;;
-  --packages)          # Install packages defined in <confdir>/packages. Option arg:
+  --packages)          # Install packages defined in specified file
     shift; _opt_packages="$1"
     _opt_packages_set=T
     ;;
-  --debconf)           # Pre-seed packages using <confdir>/debconf-selections. Option
+  --debconf)           # Pre-seed packages using specified file
     shift; _opt_debconf="$1"
     _opt_debconf_set=T
     ;;
-  --scripts)           # Execute scripts from <confdir>/scripts/. Option
+  --scripts)           # Execute scripts from specified directory
     shift; _opt_scripts="$1"
     _opt_scripts_set=T
     ;;
-  --chroot-scripts)   # Execute scripts from <confdir>/chroot-scripts/. Option
+  --chroot-scripts)   # Execute chroot scripts from specified directory
     shift; _opt_chroot_scripts_set="$1"
     _opt_chroot_scripts_set=T
     ;;
-  --keep_src_list)     # Do not overwrite user provided apt sources.list.
+  --keep_src_list)     # Do not overwrite user provided apt sources.list
     _opt_keep_src_list=T
     ;;
-  --hostname)          # Hostname of Debian system.
+  --hostname)          # Hostname of Debian system
     shift; _opt_hostname="$1"
     ;;
-  --password)          # Use specified password as password for user root.
+  --password)          # Use specified password as password for user root
     shift; _opt_password="$1"
     ;;
-  --bootappend)        # Add specified appendline to kernel whilst booting.
+  --bootappend)        # Add specified appendline to kernel whilst booting
     shift; _opt_bootappend="$1"
     ;;
-  --groot)             # Root device for usage in grub, corresponds with $TARGET in g
+  --groot)             # Root device for usage in grub, corresponds with $TARGET in grub
     shift; _opt_groot="$1"
     ;;
   --grub)              # Target for grub installation. Use grub syntax for specifying
@@ -93,14 +93,14 @@ while :; do
     ;;
 
   # == Other options
-  --verbose|-v)        # Increase verbosity.
+  --verbose|-v)        # Increase verbosity
     if [ "$_opt_verbose" ]; then _opt_verbose=`expr $_opt_verbose + 1`
     else _opt_verbose=1; fi
     ;;
-  --help|-h)           # Print this usage information and exit.
+  --help|-h)           # Print usage information and exit
     _opt_help=T
     ;;
-  --version|-V)        # Show summary of options and exit.
+  --version|-V)        # Show version information and exit
     _opt_version=T
     ;;
   --)

@@ -36,38 +36,34 @@ Usage: $PN [options]
 
 Bootstrap options:
 
-  -m, --mirror=URL       Mirror which should be used for apt-get/aptitude.
-  -i, --iso=mnt          Mountpoint where a Debian ISO is mounted to, for use
+  -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
+  -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                            instead of fetching packages from a mirror.
-  -r, --release=name     Release of new Debian system (default: stable).
-  -t, --target=target    Target partition (/dev/...) or directory.
-  -p, --mntpoint=mnt     Mountpoint used for mounting the target system.
-      --debopt=params    Extra parameters passed to the debootstrap.
+  -r, --release <name>   Release of new Debian system (default: stable).
+  -t, --target <target>  Target partition (/dev/...) or directory.
+  -p, --mntpoint <mnt>   Mountpoint used for mounting the target system.
+      --debopt <params>  Extra parameters passed to the debootstrap.
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
-      --groot=device     Root device for usage in grub, corresponds with
+      --groot <device>   Root device for usage in grub, corresponds with
                            \$TARGET in grub syntax, like hd0,0 for /dev/sda1.
-      --grub=device      Target for grub installation. Use grub syntax for
+      --grub <device>    Target for grub installation. Use grub syntax for
                            specifying, like hd0 for /dev/sda.
 
 Configuration options:
 
-  -c, --config=file        Use specified configuration file, defaults to
+  -c, --config <file>      Use specified configuration file, defaults to
                              /etc/debootstrap/config
-  -d, --confdir=path       Place of config files for debootstrap, defaults
+  -d, --confdir <path>     Place of config files for debootstrap, defaults
                              to /etc/debootstrap
-      --packages[=f]       Install packages defined in <confdir>/packages.
-                             Option arg: alternative package list file.
-      --debconf[=f]        Pre-seed packages using <confdir>/debconf-selections.
-                             Option arg: alternative pre-seed db file.
+      --packages <file>    Install packages defined in specified list file.
+      --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --keep_src_list      Do not overwrite user provided apt sources.list.
-      --hostname=name      Hostname of Debian system.
-      --password=pwd       Use specified password as password for user root.
-      --bootappend=line    Add specified appendline to kernel whilst booting.
-      --chroot-scripts[=f] Execute scripts from <confdir>/chroot-scripts/
-                             Option arg: alternative chroot-scripts directory.
-      --scripts[=d]        Execute scripts from <confdir>/scripts/.
-                             Option arg: alternative scripts directory.
+      --hostname <name>    Hostname of Debian system.
+      --password <pwd>     Use specified password as password for user root.
+      --bootappend <line>  Add specified appendline to kernel whilst booting.
+      --chroot-scripts <d> Execute scripts specified chroot-scripts directory.
+      --scripts <dir>      Execute scripts from specified  scripts directory.
 
 Other options:
 
@@ -76,7 +72,7 @@ Other options:
   -V, --version          Show summary of options and exit.
 
 Usage examples can be found in the grml-debootstrap manpage.
-Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
+Send bugreports to the grml-team: bugs (at) grml.org || http://grml.org/bugs/
 "
 }
 

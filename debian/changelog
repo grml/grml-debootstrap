@@ -21,13 +21,14 @@ grml-debootstrap (0.23) unstable; urgency=low
     - added "--nodebootstrap": Skip debootstrap, only do configuration
       to the target
     - add -v, --verbose: Increase verbosity
-    - do not create stage file for finalize
+    - do not create stage file at finalize()
   * Edit /etc/network/interfaces as well if the file exists already,
     we definitely need at least a loopback interface.
   * Adjust hostname in /etc/postfix/main.cf.
   * Unify the --bootappend option, it's not --boot_append (thanks for
     the hint, Tong Sun).
-  * Support execution of further scripts via --scripts and --chroot-scripts.
+  * Support execution of further scripts via options --scripts and
+    --chroot-scripts.
   * Drop locales from RECONFIGURE list (thanks for hint, Tong Sun).
     [Closes: issue560]
 
