@@ -65,6 +65,14 @@ while :; do
     shift; _opt_debconf="$1"
     _opt_debconf_set=T
     ;;
+  --scripts)           # Execute scripts from <confdir>/scripts/. Option
+    shift; _opt_scripts="$1"
+    _opt_scripts_set=T
+    ;;
+  --chroot-scripts)   # Execute scripts from <confdir>/chroot-scripts/. Option
+    shift; _opt_chroot_scripts_set="$1"
+    _opt_chroot_scripts_set=T
+    ;;
   --keep_src_list)     # Do not overwrite user provided apt sources.list.
     _opt_keep_src_list=T
     ;;
@@ -74,7 +82,6 @@ while :; do
   --password)          # Use specified password as password for user root.
     shift; _opt_password="$1"
     ;;
-  #
   --bootappend)        # Add specified appendline to kernel whilst booting.
     shift; _opt_bootappend="$1"
     ;;

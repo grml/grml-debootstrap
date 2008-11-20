@@ -114,6 +114,12 @@ PACKAGES='yes'
 # pre-seed packages using /etc/debootstrap/debconf-selections (if exist)?
 DEBCONF='yes'
 
+# execute scripts from /etc/debootstrap/chroot-scripts/ inside the chroot?
+CHROOT_SCRIPTS='yes'
+
+# execute scripts from /etc/debootstrap/scripts/ after setting up chroot?
+SCRIPTS='yes'
+
 # install extra packages (.deb) from /etc/debootstrap/extrapackages/?
 EXTRAPACKAGES='yes'
 
