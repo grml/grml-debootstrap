@@ -45,27 +45,29 @@ Bootstrap options:
       --debopt=params    Extra parameters passed to the debootstrap.
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
+      --groot=device     Root device for usage in grub, corresponds with
+                           \$TARGET in grub syntax, like hd0,0 for /dev/sda1.
+      --grub=device      Target for grub installation. Use grub syntax for
+                           specifying, like hd0 for /dev/sda.
 
 Configuration options:
 
-
-  -c, --config=file      Use specified configuration file, defaults to
-                           /etc/debootstrap/config
-  -d, --confdir=path     Place of config files for debootstrap, defaults to
-                           /etc/debootstrap
-      --packages[=f]     Install packages defined in <confdir>/packages. Option
-                           arg: alternative package list file.
-      --debconf[=f]      Pre-seed packages using <confdir>/debconf-selections.
-                           Option arg: alternative pre-seed db file.
-      --keep_src_list    Do not overwrite user provided apt sources.list.
-      --hostname=name    Hostname of Debian system.
-      --password=pwd     Use specified password as password for user root.
-
-      --bootappend=line  Add specified appendline to kernel whilst booting.
-      --groot=device     Root device for usage in grub, corresponds with
-                           $TARGET in grub syntax, like hd0,0 for /dev/sda1.
-      --grub=device      Target for grub installation. Use grub syntax for
-                           specifying, like hd0 for /dev/sda.
+  -c, --config=file        Use specified configuration file, defaults to
+                             /etc/debootstrap/config
+  -d, --confdir=path       Place of config files for debootstrap, defaults
+                             to /etc/debootstrap
+      --packages[=f]       Install packages defined in <confdir>/packages.
+                             Option arg: alternative package list file.
+      --debconf[=f]        Pre-seed packages using <confdir>/debconf-selections.
+                             Option arg: alternative pre-seed db file.
+      --keep_src_list      Do not overwrite user provided apt sources.list.
+      --hostname=name      Hostname of Debian system.
+      --password=pwd       Use specified password as password for user root.
+      --bootappend=line    Add specified appendline to kernel whilst booting.
+      --chroot-scripts[=f] Execute scripts from <confdir>/chroot-scripts/
+                             Option arg: alternative chroot-scripts directory.
+      --scripts[=d]        Execute scripts from <confdir>/scripts/.
+                             Option arg: alternative scripts directory.
 
 Other options:
 
@@ -73,6 +75,7 @@ Other options:
   -h, --help             Print this usage information and exit.
   -V, --version          Show summary of options and exit.
 
+Usage examples can be found in the grml-debootstrap manpage.
 Send bugreports to the grml-team: bugs@grml.org || http://grml.org/bugs/
 "
 }
@@ -104,7 +107,14 @@ fi
 
 # cmdline handling {{{
 # source external command line parameter-processing script
-. /usr/share/grml-debootstrap/functions/cmdlineopts.clp
+if [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
+   . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
+elif [ -r ./cmdlineopts.clp ] ; then
+   . ./cmdlineopts.clp
+else
+   echo "Error: cmdline function file not found, exiting.">&2
+   exit 1
+fi
 
 # == business-logic of command line parameter-processing
 
@@ -133,6 +143,8 @@ fi
 [ "$_opt_config" ]		&& CONFIGFILE=$_opt_config
 [ "$_opt_packages_set" ]	&& PACKAGES='yes'
 [ "$_opt_debconf_set" ]		&& DEBCONF='yes'
+[ "$_opt_scripts_set" ]         && SCRIPTS='yes'
+[ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
 [ "$_opt_keep_src_list" ]	&& KEEP_SRC_LIST='yes'
 [ "$_opt_hostname" ]		&& HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]		&& ROOTPASSWORD=$_opt_password
@@ -745,14 +757,22 @@ preparechroot() {
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
+  # package selection:
   cp $VERBOSE ${_opt_packages:-$CONFFILES/packages} \
     $MNTPOINT/etc/debootstrap/packages
+
+  # debconf preseeding:
   _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
   [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
     cp $VERBOSE $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
+  # copy scripts that should be executed inside the chroot:
+  _opt_chroot_scripts=${_opt_chroot_scripts:-$CONFFILES/chroot_scripts/}
+  [ -f $_opt_chroot_scripts -a "$CHROOT_SCRIPTS" = 'yes' ] && \
+    cp -a $VERBOSE $_opt_chroot_scripts $MNTPOINT/etc/debootstrap/
+
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
-  cp $VERBOSE $CHROOT_VARIABLES          $MNTPOINT/etc/debootstrap/variables
+  cp $VERBOSE $CHROOT_VARIABLES  $MNTPOINT/etc/debootstrap/variables
 
   cp $VERBOSE -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
 
@@ -787,6 +807,19 @@ preparechroot() {
   fi
 
   eend 0
+}
+# }}}
+
+# execute all scripts in /etc/debootstrap/scripts/ {{{
+execute_scripts() {
+   if [ -f $_opt_scripts -a "$SCRIPTS" = 'yes' ] ; then
+      for script in /etc/debootstrap/scripts/* ; do
+         if [ -x "$script" ] ; then
+            einfo "Executing script $script"
+            $script ; eend $?
+         fi
+      done
+   fi
 }
 # }}}
 
@@ -863,7 +896,8 @@ fscktool() {
 
 # now execute all the functions {{{
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
-         chrootscript grub_install umount_chroot fscktool ; do
+         chrootscript execute_scripts grub_install umount_chroot   \
+         fscktool ; do
     if stage "${i}" ; then
        $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
     fi
