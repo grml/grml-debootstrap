@@ -62,14 +62,14 @@ Configuration options:
       --hostname <name>    Hostname of Debian system.
       --password <pwd>     Use specified password as password for user root.
       --bootappend <line>  Add specified appendline to kernel whilst booting.
-      --chroot-scripts <d> Execute scripts specified chroot-scripts directory.
-      --scripts <dir>      Execute scripts from specified  scripts directory.
+      --chroot-scripts <d> Execute chroot scripts from specified directory.
+      --scripts <dir>      Execute scripts from specified directory.
 
 Other options:
 
-  -v, --verbose          Increase verbosity.
-  -h, --help             Print this usage information and exit.
-  -V, --version          Show summary of options and exit.
+  -v, --verbose            Increase verbosity.
+  -h, --help               Print this usage information and exit.
+  -V, --version            Show summary of options and exit.
 
 Usage examples can be found in the grml-debootstrap manpage.
 Send bugreports to the grml-team: bugs (at) grml.org || http://grml.org/bugs/
@@ -764,7 +764,7 @@ preparechroot() {
     cp $VERBOSE $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
 
   # copy scripts that should be executed inside the chroot:
-  _opt_chroot_scripts=${_opt_chroot_scripts:-$CONFFILES/chroot_scripts/}
+  _opt_chroot_scripts=${_opt_chroot_scripts:-$CONFFILES/chroot-scripts/}
   [ -f $_opt_chroot_scripts -a "$CHROOT_SCRIPTS" = 'yes' ] && \
     cp -a $VERBOSE $_opt_chroot_scripts $MNTPOINT/etc/debootstrap/
 
@@ -809,8 +809,9 @@ preparechroot() {
 
 # execute all scripts in /etc/debootstrap/scripts/ {{{
 execute_scripts() {
-   if [ -f $_opt_scripts -a "$SCRIPTS" = 'yes' ] ; then
-      for script in /etc/debootstrap/scripts/* ; do
+   if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
+      [ -d "$_opt_scripts" ] && scripts="$_opt_scripts" || scripts="$CONFFILES/scripts/"
+      for script in ${scripts}/* ; do
          if [ -x "$script" ] ; then
             einfo "Executing script $script"
             $script ; eend $?
