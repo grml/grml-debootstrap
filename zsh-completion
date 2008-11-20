@@ -5,7 +5,6 @@
 # Authors:       grml-team (grml.org), (c) Frank Terbeck <ft@grml.org>, (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
-# Latest change: Mon Apr 23 13:03:08 CEST 2007 [mika]
 ################################################################################
 
 _arguments -s                                                                                   \
@@ -18,7 +17,7 @@ _arguments -s                                                                   
   '--grub[installation device for grub]:grub syntax'                                            \
   '--groot[root device for usage in grub]:grub syntax'                                          \
   '--password[specify password for root user]'							\
-  '--boot_append[appendline for kernel]'
+  '--bootappend[appendline for kernel]'
 
 ## END OF FILE #################################################################
 # vim:ft=zsh

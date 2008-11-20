@@ -24,8 +24,11 @@ grml-debootstrap (0.23) unstable; urgency=low
   * Edit /etc/network/interfaces as well if the file exists already,
     we definitely need at least a loopback interface.
   * Adjust hostname in /etc/postfix/main.cf.
+  * Unify the --bootappend option, it's not --boot_append (thanks for
+    the hint, Tong Sun).
+  * Support execution of further scripts via --scripts and --chroot-scripts.
 
- -- Michael Prokop <mika@grml.org>  Wed, 12 Nov 2008 18:19:01 +0100
+ -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:45:19 +0100
 
 grml-debootstrap (0.22) unstable; urgency=low
 

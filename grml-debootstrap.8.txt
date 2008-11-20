@@ -31,7 +31,7 @@ CAUTION: The grml team does not take responsibility for loss of any data!
 Options and environment variables
 ---------------------------------
 
-*--boot_append* <_appendline for the kernel_>::
+*--bootappend* <_appendline for the kernel_>::
     Specify appendline for the kernel.
     E.g. "_pci=nomsi_"
 
@@ -44,6 +44,9 @@ Options and environment variables
 *--debconf* <_file_>::
     Use specified file for preseeding Debian packages instead of using
     the default <confdir>/debconf-selections.
+
+*--debopt* <_params_>::
+    Extra parameters passed to the debootstrap.
 
 *--groot* <_device_>::
     Specify root device for usage in grub (corresponds with $TARGET).
@@ -75,13 +78,17 @@ Options and environment variables
     specifying the mirror also sets the chrootmirror to the given value.
     Corresponding with configuration variables MIRROR and CHROOTMIRROR.
 
+*--nodebootstrap*::
+    Skip debootstrap, only do configuration to the target.
+
 *-p*, *--mntpoint* <_/mntpoint_>::
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
 
-*--packages* <_file_>::
+*--packages* [<_file_>]::
     Use specified file as list for packages that should be installed instead of
-    the default package list file <confdir>/packages.
+    the default package list file <confdir>/packages. If no file parameter is given
+    it activates the default package list file <confdir>/packages.
 
 *--password* <_password_>::
     Use specified password as password for user root. Use with caution, as your
