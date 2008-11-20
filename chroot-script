@@ -36,9 +36,11 @@ stage() {
      echo "$2" > "$STAGES/$1"
      return 0
   elif grep -q done "$STAGES/$1" 2>/dev/null ; then
-     echo "[*] Notice: stage $1 has been executed already, skipping execution therefore.">&2
+     echo "   [*] Notice: stage $1 has been executed already, skipping execution therefore.">&2
      return 1
   fi
+  echo "   Executing stage ${1}"
+  return 0
 }
 # }}}
 
@@ -429,12 +431,13 @@ finalize() {
 # execute the functions {{{
  for i in chrootmirror grmlrepos kernelimg_conf makedev install_policy_rcd \
      packages extrapackages mkinitrd kernel reconfigure hosts interfaces   \
-     timezone fstab hostname initrd grub passwords custom_scripts \
-     services finalize ; do
+     timezone fstab hostname initrd grub passwords custom_scripts services ; do
      if stage $i ; then
        $i && stage $i done || exit 1
      fi
   done
+  # always execute the finalize stage:
+  finalize
 # }}}
 
 # finally exit the chroot {{{

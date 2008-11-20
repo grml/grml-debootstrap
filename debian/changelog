@@ -21,6 +21,7 @@ grml-debootstrap (0.23) unstable; urgency=low
     - added "--nodebootstrap": Skip debootstrap, only do configuration
       to the target
     - add -v, --verbose: Increase verbosity
+    - do not create stage file for finalize
   * Edit /etc/network/interfaces as well if the file exists already,
     we definitely need at least a loopback interface.
   * Adjust hostname in /etc/postfix/main.cf.
@@ -28,7 +29,7 @@ grml-debootstrap (0.23) unstable; urgency=low
     the hint, Tong Sun).
   * Support execution of further scripts via --scripts and --chroot-scripts.
 
- -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:45:19 +0100
+ -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:49:05 +0100
 
 grml-debootstrap (0.22) unstable; urgency=low
 
