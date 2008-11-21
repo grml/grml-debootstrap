@@ -779,7 +779,6 @@ preparechroot() {
   # provide system's /etc/hosts to the target:
   if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
      cp $VERBOSE /etc/hosts $MNTPOINT/etc/hosts
-     sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
   fi
 
   # setup default locales
