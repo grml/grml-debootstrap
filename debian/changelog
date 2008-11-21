@@ -24,7 +24,9 @@ grml-debootstrap (0.23) unstable; urgency=low
     - do not create stage file at finalize()
   * Edit /etc/network/interfaces as well if the file exists already,
     we definitely need at least a loopback interface.
-  * Adjust hostname in /etc/postfix/main.cf.
+  * Adjust postfix configuration:
+    - modify hostname related options in /etc/postfix/main.cf
+    - listen on loopback interface by default (thanks for suggestion, gebi)
   * Unify the --bootappend option, it's not --boot_append (thanks for
     the hint, Tong Sun).
   * Support execution of further scripts via options --scripts and
