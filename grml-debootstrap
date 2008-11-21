@@ -765,7 +765,7 @@ preparechroot() {
 
   # copy scripts that should be executed inside the chroot:
   _opt_chroot_scripts=${_opt_chroot_scripts:-$CONFFILES/chroot-scripts/}
-  [ -f $_opt_chroot_scripts -a "$CHROOT_SCRIPTS" = 'yes' ] && \
+  [ -d $_opt_chroot_scripts -a "$CHROOT_SCRIPTS" = 'yes' ] && \
     cp -a $VERBOSE $_opt_chroot_scripts $MNTPOINT/etc/debootstrap/
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!

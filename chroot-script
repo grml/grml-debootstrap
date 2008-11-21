@@ -340,7 +340,7 @@ hostname() {
 
         # listen on loopback interface only:
         sed -i "s/^inet_interfaces = .*/inet_interfaces = loopback-only/" /etc/postfix/main.cf
-        grep inet_interfaces /etc/postfix/main.cf || echo 'inet_interfaces = loopback-only' >> /etc/postfix/main.cf
+        grep -q inet_interfaces /etc/postfix/main.cf || echo 'inet_interfaces = loopback-only' >> /etc/postfix/main.cf
      fi
   fi
 }
