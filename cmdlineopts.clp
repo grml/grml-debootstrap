@@ -70,7 +70,7 @@ while :; do
     _opt_scripts_set=T
     ;;
   --chroot-scripts)   # Execute chroot scripts from specified directory
-    shift; _opt_chroot_scripts_set="$1"
+    shift; _opt_chroot_scripts="$1"
     _opt_chroot_scripts_set=T
     ;;
   --keep_src_list)     # Do not overwrite user provided apt sources.list

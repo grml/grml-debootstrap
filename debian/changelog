@@ -34,7 +34,7 @@ grml-debootstrap (0.23) unstable; urgency=low
   * Drop locales from RECONFIGURE list (thanks for hint, Tong Sun).
     [Closes: issue560]
 
- -- Michael Prokop <mika@grml.org>  Thu, 20 Nov 2008 14:57:20 +0100
+ -- Michael Prokop <mika@grml.org>  Mon, 24 Nov 2008 23:29:30 +0100
 
 grml-debootstrap (0.22) unstable; urgency=low
 
