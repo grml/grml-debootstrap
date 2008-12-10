@@ -38,6 +38,13 @@ Options and environment variables
 *-c*, *--config* <_file_>::
     Use specified configuration file, defaults to /etc/debootstrap/config.
 
+*--chroot-scripts* <_directory_>::
+
+    Execute chroot scripts from specified directory. This allows customisation
+    of the chroot setup, the executable script(s) present in the given directory
+    are executed at the end of the chroot procedure.
+    Default directory: /etc/debootstrap/chroot-scripts/
+
 *-d*, *--confdir* <_path_>::
     Place of configuration files for debootstrap, defaults to /etc/debootstrap.
 
@@ -97,6 +104,12 @@ Options and environment variables
 *-r*, *--release* <_releasename_>::
     Specify release of new Debian system. Supported releases: sarge, etch, lenny and sid.
     Corresponding with configuration variable RELEASE.
+
+*--scripts* <_directory_>::
+
+    Execute scripts from specified directory. This allows customisation of
+    the system after the chroot has been set up.
+    Default directory: /etc/debootstrap/scripts/
 
 *-t*, *--target* <_target_>::
     Target partition (/dev/...) or directory (anything else without /dev at the

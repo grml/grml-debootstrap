@@ -1,3 +1,9 @@
+grml-debootstrap (0.24) unstable; urgency=low
+
+  * Update documentation.
+
+ -- Michael Prokop <mika@grml.org>  Wed, 10 Dec 2008 11:07:56 +0100
+
 grml-debootstrap (0.23) unstable; urgency=low
 
   The "hey, rocking - we get patches via git" release.
