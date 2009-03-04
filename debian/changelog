@@ -1,8 +1,10 @@
 grml-debootstrap (0.24) unstable; urgency=low
 
   * Update documentation.
+  * Use configure $MIRROR and $HOSTNAME as defaults in interactive
+    script.
 
- -- Michael Prokop <mika@grml.org>  Wed, 10 Dec 2008 11:07:56 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 16:05:14 +0100
 
 grml-debootstrap (0.23) unstable; urgency=low
 

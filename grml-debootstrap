@@ -268,7 +268,7 @@ prompt_for_hostname()
 {
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
-            0 0 grml)"
+            0 0 $HOSTNAME)"
 }
 # }}}
 
@@ -298,7 +298,7 @@ prompt_for_mirror()
 {
   MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter Debian mirror you would like to use for installing packages." \
-            0 0 http://ftp.de.debian.org/debian)"
+            0 0 $MIRROR)"
 }
 # }}}
 
