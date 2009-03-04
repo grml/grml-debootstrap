@@ -735,7 +735,6 @@ preparechroot() {
   [ -n "$HOSTNAME" ]     && echo "HOSTNAME=$HOSTNAME"         >> $CHROOT_VARIABLES
   [ -n "$ISODIR" ]       && echo "ISODIR=$ISO"                >> $CHROOT_VARIABLES
   [ -n "$ISO" ]          && echo "ISO=$ISO"                   >> $CHROOT_VARIABLES
-  [ -n "$MIRROR" ]       && echo "CHROOTMIRROR=$MIRROR"       >> $CHROOT_VARIABLES
   [ -n "$MIRROR" ]       && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
   [ -n "$KEEP_SRC_LIST" ] && echo "KEEP_SRC_LIST=$KEEP_SRC_LIST" >> $CHROOT_VARIABLES
   [ -n "$PACKAGES" ]     && echo "PACKAGES=$PACKAGES"         >> $CHROOT_VARIABLES

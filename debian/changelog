@@ -6,8 +6,10 @@ grml-debootstrap (0.24) unstable; urgency=low
   * Add initial support for Debian/squeeze and drop sarge instead.
   * Update VCS*-headers and long description of Debian package.
   * Move asciidoc, docbook-xsl, xsltproc to Build-Depends-Indep.
+  * Drop $CHROOTMIRROR variable, instead use $MIRROR for debootstrap
+    as well as inside the chroot.
 
- -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 17:37:16 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 18:53:21 +0100
 
 grml-debootstrap (0.23) unstable; urgency=low
 

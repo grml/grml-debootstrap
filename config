@@ -46,20 +46,19 @@ BOOT_APPEND=''
 ################################################################################
 # Now the variables you might want to adjust, but need not to...
 
-# set mirror where debootstrap should download packages from
-MIRROR='ftp://ftp.debian.de/debian'
-
-# specify entry which should be used for /etc/apt/sources.list,
-# if empty then existing /etc/apt/sources.list will be taken
-CHROOTMIRROR='ftp://ftp.debian.de/debian'
+# set mirror where debootstrap and chrootscript should download
+# packages from; if empty an existing
+# /etc/debootstrap/etc/apt/sources.list is used instead
+MIRROR='ftp://ftp.de.debian.org/debian'
 
 # specify directory of loopback mounted Debian-ISO so you don't
 # have to download all the core packages via network but can
 # use an available Debian-ISO instead
 # ISO='file:/mnt/iso/debian/'
 
-# do not build /etc/apt/sources.list on the fly. This allow user to
-# provide their own apt sources.list from /etc/debootstrap/etc/apt/sources.list
+# If /etc/apt/sources.list should NOT be build on the fly, this
+# options allows providing a separate apt file via
+# /etc/debootstrap/etc/apt/sources.list
 # KEEP_SRC_LIST='yes'
 
 # add grml repository to /etc/apt/sources.list

@@ -91,9 +91,8 @@ Options and environment variables
 
 *-m*, *--mirror* <_URL_>::
 
-    Specify mirror which should be used for apt-get/aptitude. Notice that
-    specifying the mirror also sets the chrootmirror to the given value.
-    Corresponding with configuration variables MIRROR and CHROOTMIRROR.
+    Specify mirror which should be used for apt-get/aptitude.
+    Corresponding with configuration variable MIRROR.
 
 *--nodebootstrap*::
 
