@@ -117,9 +117,9 @@ Options and environment variables
 
 *-r*, *--release* <_releasename_>::
 
-    Specify release of new Debian system. Supported releases: sarge (not
-    recommended though), etch, lenny, squeeze (note: requires current version of
-    debootstrap) and sid.  Corresponding with configuration variable RELEASE.
+    Specify release of new Debian system. Supported releases: etch, lenny,
+    squeeze (note: requires current version of debootstrap) and sid.
+    Corresponding with configuration variable RELEASE.
 
 *--scripts* <_directory_>::
 
@@ -257,8 +257,7 @@ Again, use grub syntax for specifying. Usage example: groot=hd0,0
   release=...
 
 Specify release of new Debian system. Defaults to Debian stable.  Supported
-relases: sarge (not recommended though), etch, lenny, squeeze and sid. Usage
-example: release=sid
+relases: etch, lenny, squeeze and sid. Usage example: release=sid
 
   mirror=...
 
@@ -292,12 +291,11 @@ Supported Releases
 include::releasetable.txt[]
 
 [NOTE]
-.Sarge-Release
+.Etch-Release
 ================================================================================
 [1] Please notice that Etch is the current old-stable within Debian.
-grml-debootstrap can handle the release (as well as sarge) but you really should
-not use Etch anymore unless you really know what you are doing. Choose Lenny
-instead.
+grml-debootstrap can handle the release but you really should not use Etch
+anymore unless you really know what you are doing. Choose Lenny instead.
 ================================================================================
 
 Bugs

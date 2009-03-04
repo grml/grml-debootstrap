@@ -3,11 +3,11 @@ grml-debootstrap (0.24) unstable; urgency=low
   * Update documentation.
   * Use configure $MIRROR and $HOSTNAME as defaults in interactive
     script.
-  * Add initial support for Debian/squeeze.
+  * Add initial support for Debian/squeeze and drop sarge instead.
   * Update VCS*-headers and long description of Debian package.
   * Move asciidoc, docbook-xsl, xsltproc to Build-Depends-Indep.
 
- -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 17:13:54 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 17:37:16 +0100
 
 grml-debootstrap (0.23) unstable; urgency=low
 

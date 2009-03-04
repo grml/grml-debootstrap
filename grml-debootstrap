@@ -254,12 +254,13 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  RELEASE="$(dialog --stdout --title "${PN}" --default-item etch --menu \
+  RELEASE="$(dialog --stdout --title "${PN}" --default-item lenny --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 3 \
-            etch   Debian/stable \
-            lenny  Debian/testing \
-            sid    Debian/unstable)"
+            etch     Debian/old-stable \
+            lenny    Debian/stable \
+            squeeze  Debian/testing \
+            sid      Debian/unstable)"
 }
 # }}}
 
