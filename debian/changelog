@@ -5,8 +5,9 @@ grml-debootstrap (0.24) unstable; urgency=low
     script.
   * Add initial support for Debian/squeeze.
   * Update VCS*-headers and long description of Debian package.
+  * Move asciidoc, docbook-xsl, xsltproc to Build-Depends-Indep.
 
- -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 17:11:29 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 04 Mar 2009 17:13:54 +0100
 
 grml-debootstrap (0.23) unstable; urgency=low
 

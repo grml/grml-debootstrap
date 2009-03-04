@@ -3,7 +3,8 @@ Section: grml
 Priority: optional
 Maintainer: Michael Prokop <mika@grml.org>
 Uploaders: Alexander Wirt <formorer@grml.org>
-Build-Depends: debhelper (>= 5), asciidoc, xsltproc, docbook-xsl
+Build-Depends: debhelper (>= 5)
+Build-Depends-Indep: asciidoc, docbook-xsl, xsltproc
 Standards-Version: 3.8.0
 Homepage: http://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
