@@ -14,17 +14,15 @@ image:images/screenshot.png[Screenshot]
 Introduction
 ------------
 
-grml-debootstrap is a wrapper suite around debootstrap
-(and cdebootstrap if you want) for installing a plain Debian
-system via grml very fast and easy.
+grml-debootstrap is a wrapper suite around debootstrap (and cdebootstrap if you
+want) for installing a plain Debian system via grml very fast and easy.
 
 All you have to do is adjust a few variables in configuration file
 /etc/debootstrap/config (or specify some variables via commandline) and invoke
 grml-debootstrap without any further options then.
 
-A plain and base Debian system will be installed on the given
-device (or directory) then. Customization of this process is
-possible as well.
+A plain and base Debian system will be installed on the given device (or
+directory) then. Customization of this process is possible as well.
 
 CAUTION: The grml team does not take responsibility for loss of any data!
 
@@ -32,10 +30,12 @@ Options and environment variables
 ---------------------------------
 
 *--bootappend* <_appendline for the kernel_>::
+
     Specify appendline for the kernel.
     E.g. "_pci=nomsi_"
 
 *-c*, *--config* <_file_>::
+
     Use specified configuration file, defaults to /etc/debootstrap/config.
 
 *--chroot-scripts* <_directory_>::
@@ -46,31 +46,39 @@ Options and environment variables
     Default directory: /etc/debootstrap/chroot-scripts/
 
 *-d*, *--confdir* <_path_>::
+
     Place of configuration files for debootstrap, defaults to /etc/debootstrap.
 
 *--debconf* <_file_>::
+
     Use specified file for preseeding Debian packages instead of using
     the default <confdir>/debconf-selections.
 
 *--debopt* <_params_>::
+
     Extra parameters passed to the debootstrap.
 
 *--groot* <_device_>::
+
     Specify root device for usage in grub (corresponds with $TARGET).
     Again, use grub syntax for specifying.
     Corresponding with configuration variable GROOT.
 
 *--grub* <_device_>::
+
     Where do you want to install grub to? Use grub syntax for specifying.
     Do not forget to set groot as well. Leave empty to avoid installation of grub.
 
 *--help*, *-h*::
+
     Show summary of options and exit.
 
 *--hostname* <_hostname_>::
+
     Use specified hostname instead of the default (being 'grml').
 
 *-i*, *--iso* <_/mntpoint_>::
+
     Specify mountpoint where you have a Debian ISO mounted loopback.
     Using this option instead of the mirror option gives you the possibility
     to install the base-system without network access. Make sure you
@@ -78,32 +86,40 @@ Options and environment variables
     'Usage examples' for a demonstration.
 
 *--keep_src_list*::
+
      Do not overwrite user provided /etc/apt/sources.list.
 
 *-m*, *--mirror* <_URL_>::
+
     Specify mirror which should be used for apt-get/aptitude. Notice that
     specifying the mirror also sets the chrootmirror to the given value.
     Corresponding with configuration variables MIRROR and CHROOTMIRROR.
 
 *--nodebootstrap*::
+
     Skip debootstrap, only do configuration to the target.
 
 *-p*, *--mntpoint* <_/mntpoint_>::
+
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
 
 *--packages* <_file_>::
+
     Use specified file as list for packages that should be installed instead of
     the default package list file <confdir>/packages.
 
 *--password* <_password_>::
+
     Use specified password as password for user root. Use with caution, as your
     commandline might be visible in the process list and the shell history.
     It's meant for automatic installation only.
 
 *-r*, *--release* <_releasename_>::
-    Specify release of new Debian system. Supported releases: sarge, etch, lenny and sid.
-    Corresponding with configuration variable RELEASE.
+
+    Specify release of new Debian system. Supported releases: sarge (not
+    recommended though), etch, lenny, squeeze (note: requires current version of
+    debootstrap) and sid.  Corresponding with configuration variable RELEASE.
 
 *--scripts* <_directory_>::
 
@@ -132,7 +148,7 @@ Usage examples
 
   grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0
 
-Install default Debian release (stable/etch) on /dev/sda1 and install bootmanager
+Install default Debian release (stable/lenny) on /dev/sda1 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda1 as system partition.
 
   grml-debootstrap --target /dev/sda6 --grub hd0 --groot hd0,5 --release sid
@@ -142,19 +158,19 @@ Grub in MBR (master boot record) of /dev/sda and use /dev/sda6 as system partiti
 
   grml-debootstrap --target /data/chroot
 
-Install default Debian release (stable/etch) in directory /data/chroot (without
+Install default Debian release (stable/lenny) in directory /data/chroot (without
 any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub hd0 --groot hd0,2 --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default Debian release (stable/etch) on /dev/sda3 and install bootmanager
+Install default Debian release (stable/lenny) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
 Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
 
   mount -o loop /mnt/sda6/debian-40r0-i386-CD-1.iso /mnt/iso
   grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
 
-Install Debian stable/etch on /dev/sda1 using the loopback mounted Debian-ISO
+Install Debian stable/lenny on /dev/sda1 using the loopback mounted Debian-ISO
 for the base-system and install bootmanager Grub in MBR (master boot record) of
 /dev/sda and use /dev/sda1 as system partition. Please notice, that the chroot
 system requires network access for all packages which are not part of the
@@ -240,8 +256,9 @@ Again, use grub syntax for specifying. Usage example: groot=hd0,0
 
   release=...
 
-Specify release of new Debian system. Defaults to Debian stable.
-Supported relases: sarge, etch, lenny and sid. Usage example: release=sid
+Specify release of new Debian system. Defaults to Debian stable.  Supported
+relases: sarge (not recommended though), etch, lenny, squeeze and sid. Usage
+example: release=sid
 
   mirror=...
 
@@ -276,12 +293,12 @@ include::releasetable.txt[]
 
 [NOTE]
 .Sarge-Release
-=====================================================================
-[1] Please notice that Sarge is the current old-stable within Debian.
-grml-debootstrap can handle the release but you really should not
-use Sarge anymore unless you really know what you are doing. Choose
-Etch or Lenny instead.
-=====================================================================
+================================================================================
+[1] Please notice that Etch is the current old-stable within Debian.
+grml-debootstrap can handle the release (as well as sarge) but you really should
+not use Etch anymore unless you really know what you are doing. Choose Lenny
+instead.
+================================================================================
 
 Bugs
 ----

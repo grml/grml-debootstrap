@@ -71,8 +71,9 @@ CHROOTMIRROR='ftp://ftp.debian.de/debian'
 # GRMLPACKAGES='grml-etc-core'
 
 # release (which Debian version should be installed)
-# supported values: sarge etch lenny sid
-RELEASE='etch'
+# supported values: sarge (not recommended), etch (old-stable),
+#                   lenny (stable), squeeze (testing), sid (unstable)
+RELEASE='lenny'
 
 # architecture
 # if unset the default of the running system (see 'dpkg --print-architecture') will be taken
