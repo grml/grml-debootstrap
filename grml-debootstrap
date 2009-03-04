@@ -256,7 +256,7 @@ prompt_for_release()
 {
   RELEASE="$(dialog --stdout --title "${PN}" --default-item lenny --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 3 \
+            0 50 4 \
             etch     Debian/old-stable \
             lenny    Debian/stable \
             squeeze  Debian/testing \
