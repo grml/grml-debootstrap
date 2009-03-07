@@ -1,8 +1,17 @@
+grml-debootstrap (0.25) unstable; urgency=low
+
+  * Use configuration $RELEASE as well as default in interactive
+    setup script.
+  * Provide $MNTPOINT as environment variable for usage inside
+    /etc/debootstrap/scripts/.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 07 Mar 2009 14:37:46 +0100
+
 grml-debootstrap (0.24) unstable; urgency=low
 
   * Update documentation.
-  * Use configuration of $MIRROR, $HOSTNAME and $RELEASE as
-    defaults in interactive setup script.
+  * Use configuration of $MIRROR, $HOSTNAME as defaults in
+    interactive setup script.
   * Add initial support for Debian/squeeze and drop sarge instead.
   * Update VCS*-headers and long description of Debian package.
   * Move asciidoc, docbook-xsl, xsltproc to Build-Depends-Indep.
