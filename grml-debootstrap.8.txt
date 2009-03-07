@@ -123,7 +123,8 @@ Options and environment variables
 *--scripts* <_directory_>::
 
     Execute scripts from specified directory. This allows customisation of
-    the system after the chroot has been set up.
+    the system after the chroot has been set up. The environment variable
+    $MNTPOINT is available inside the scripts for direct access of the chroot.
     Default directory: /etc/debootstrap/scripts/
 
 *-t*, *--target* <_target_>::

@@ -8,8 +8,10 @@ grml-debootstrap (0.24) unstable; urgency=low
   * Move asciidoc, docbook-xsl, xsltproc to Build-Depends-Indep.
   * Drop $CHROOTMIRROR variable, instead use $MIRROR for debootstrap
     as well as inside the chroot.
+  * Provide $MNTPOINT as environment variable for usage inside
+    /etc/debootstrap/scripts/.
 
- -- Michael Prokop <mika@grml.org>  Sat, 07 Mar 2009 14:12:43 +0100
+ -- Michael Prokop <mika@grml.org>  Sat, 07 Mar 2009 14:15:32 +0100
 
 grml-debootstrap (0.23) unstable; urgency=low
 

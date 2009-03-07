@@ -811,6 +811,8 @@ preparechroot() {
 
 # execute all scripts in /etc/debootstrap/scripts/ {{{
 execute_scripts() {
+   # make sure we have $MNTPOINT available for our scripts
+   export MNTPOINT
    if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
       [ -d "$_opt_scripts" ] && scripts="$_opt_scripts" || scripts="$CONFFILES/scripts/"
       for script in ${scripts}/* ; do
