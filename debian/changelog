@@ -1,3 +1,9 @@
+grml-debootstrap (0.26) unstable; urgency=low
+
+  * Do not use UUID on SW-RAID.
+
+ -- Michael Prokop <mika@grml.org>  Tue, 17 Mar 2009 10:13:50 +0100
+
 grml-debootstrap (0.25) unstable; urgency=low
 
   * Use configuration $RELEASE as well as default in interactive
