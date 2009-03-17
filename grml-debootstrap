@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.25'
+VERSION='0.26'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -177,7 +177,7 @@ prompt_for_target()
   AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
                sed 's/*//' | \
                grep -v 'Extended$' | \
-               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
+               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}'; ls /dev/md*);
 
   if [ -z "$AVAILABLE_PARTITIONS" ] ; then
      dialog --title "$PN" --trim \
