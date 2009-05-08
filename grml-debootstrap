@@ -177,7 +177,7 @@ prompt_for_target()
   AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
                sed 's/*//' | \
                grep -v 'Extended$' | \
-               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}'; ls /dev/md*);
+               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}'; echo /dev/md*);
 
   if [ -z "$AVAILABLE_PARTITIONS" ] ; then
      dialog --title "$PN" --trim \
