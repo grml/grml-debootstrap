@@ -425,6 +425,19 @@ fi
 }
 # }}}
 
+# user should recheck his configuration {{{
+# support full automatic installation:
+checkforrun() {
+   dialog --timeout 10 --title "$PN" \
+          --yesno "Do you want to stop at this stage?
+
+Notice: you are running ${PN} in non-interactive mode.
+${PN} will install Debian ${RELEASE} on ${TARGET}.
+Last chance to quit. Timeout of 10 seconds running....
+
+Do you want to stop now?" 0 0 2>/dev/null
+}
+
 # make sure the user is aware of the used configuration {{{
 checkconfiguration()
 {
@@ -510,8 +523,6 @@ interactive_mode()
   fi
 
   prompt_for_mirror
-
-  checkconfiguration
 }
 
 # run interactive mode if we didn't get the according configuration yet
@@ -521,6 +532,8 @@ if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
    interactive_mode
 fi
 # }}}
+
+checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
 if [ -n "$TARGET" ] ; then
@@ -642,19 +655,6 @@ stage() {
   fi
 }
 # }}}
-
-# user should recheck his configuration {{{
-# support full automatic installation:
-checkforrun() {
-   dialog --timeout 10 --title "$PN" \
-          --yesno "Do you want to stop at this stage?
-
-Notice: you are running ${PN} in non-interactive mode.
-${PN} will install Debian ${RELEASE} on ${TARGET}.
-Last chance to quit. Timeout of 10 seconds running....
-
-Do you want to stop now?" 0 0 2>/dev/null
-}
 
 # create filesystem {{{
 mkfs() {
