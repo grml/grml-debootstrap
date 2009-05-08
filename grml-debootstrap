@@ -298,9 +298,25 @@ prompt_for_password()
 # ask for Debian mirror {{{
 prompt_for_mirror()
 {
-  MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
-            "Please enter Debian mirror you would like to use for installing packages." \
-            0 0 $MIRROR)"
+  [ -n "$ISO" ] && DEFAULT_MIRROR='local' || DEFAULT_MIRROR='net'
+
+  CHOOSE_MIRROR=$(dialog --stdout --title "$PN" --default-item $DEFAULT_MIRROR \
+          --menu "Where do you want to install from?" 0 0 0 \
+            net   "install via network (downloading from mirror)" \
+            local "install from local directory/mirror"
+          )
+
+  if [ "$CHOOSE_MIRROR" = 'net' ] ; then
+     [ -n "$MIRROR" ] || MIRROR='ftp://ftp.de.debian.org/debian'
+     MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
+               "Please enter Debian mirror you would like to use for installing packages." \
+               0 0 $MIRROR)"
+  else # CHROOT_VARIABLES == local
+     [ -n "$ISO" ] || ISO='/mnt/mirror'
+     ISO="$(dialog --stdout --title "${PN}" --inputbox \
+               "Please enter directory name you would like to use for installing packages." \
+               0 0 $ISO)"
+  fi
 }
 # }}}
 
@@ -460,6 +476,8 @@ elif [ -n "$INTERACTIVE" ] ; then
    Using hostname   $HOSTNAME"
    [ -n "$MIRROR" ]  && INFOTEXT="$INFOTEXT
    Using mirror:    $MIRROR"
+   [ -n "$ISO" ]  && INFOTEXT="$INFOTEXT
+   Using ISO:       $ISO"
 
    INFOTEXT="$INFOTEXT
 
@@ -476,7 +494,7 @@ else # if not running automatic installation display configuration and prompt fo
       [ -n "$GRUB" ]    && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
       [ -n "$RELEASE" ] && echo "   Using release:   $RELEASE"
       [ -n "$MIRROR" ]  && echo "   Using mirror:    $MIRROR"
-      [ -n "$ISO" ]     && echo "   Using iso:       $ISO"
+      [ -n "$ISO" ]     && echo "   Using ISO:       $ISO"
       case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
       echo
    einfon "Is this ok for you? [y/N] "
