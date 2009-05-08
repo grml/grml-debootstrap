@@ -675,6 +675,11 @@ stage() {
 
 # create filesystem {{{
 mkfs() {
+  if grep -q $TARGET /proc/mounts ; then
+     eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
+     exit 1
+  fi
+
   if [ -n "$MKFS" ] ; then
      einfo "Running $MKFS on $TARGET"
      $MKFS $TARGET
@@ -700,7 +705,7 @@ mount_target() {
      einfo "Running grml-debootstrap on a directory, nothing to mount."
   else
      if grep -q $TARGET /proc/mounts ; then
-        eerror "$TARGET already mounted, exiting."
+        ewarn "$TARGET already mounted, continuing anyway." ; eend 0
      else
        [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
        einfo "Mounting $TARGET to $MNTPOINT"
