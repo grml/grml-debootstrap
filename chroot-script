@@ -469,7 +469,7 @@ finalize() {
 
 # execute the functions {{{
  for i in chrootmirror grmlrepos kernelimg_conf makedev install_policy_rcd \
-     packages extrapackages mkinitrd kernel reconfigure hosts interfaces   \
+     kernel packages extrapackages mkinitrd reconfigure hosts interfaces   \
      timezone fstab hostname initrd grub passwords custom_scripts services ; do
      if stage $i ; then
        $i && stage $i done || exit 1

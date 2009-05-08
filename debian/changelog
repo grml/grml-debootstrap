@@ -15,10 +15,13 @@ grml-debootstrap (0.27) unstable; urgency=low
   * Minor changes:
     - check for mounted target in mkfs() step already instead of mount_target()
     - use '.. to the debootstrap command' in description of --debopt
+    - chroot-script: put installation of kernel before installing additional
+      packages so installation of kernel doesn't fail if the kernel directory
+      exists already
   * Debian Package:
     - bump Standard Version to 3.8.1 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 15:43:02 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 17:57:57 +0200
 
 grml-debootstrap (0.26) unstable; urgency=low
 
