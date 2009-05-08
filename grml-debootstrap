@@ -129,25 +129,25 @@ fi
 }
 # }}}
 
-[ "$_opt_mirror" ]		&& MIRROR=$_opt_mirror
-[ "$_opt_iso" ]			&& ISO=$_opt_iso
-[ "$_opt_release" ]		&& RELEASE=$_opt_release
-[ "$_opt_target" ]		&& TARGET=$_opt_target
-[ "$_opt_mntpoint" ]		&& MNTPOINT=$_opt_mntpoint
-[ "$_opt_debopt" ]		&& DEBOOTSTRAP_OPT=$_opt_debopt
-[ "$_opt_interactive" ]		&& INTERACTIVE=1
-[ "$_opt_config" ]		&& CONFIGFILE=$_opt_config
-[ "$_opt_packages_set" ]	&& PACKAGES='yes'
-[ "$_opt_debconf_set" ]		&& DEBCONF='yes'
+[ "$_opt_mirror" ]              && MIRROR=$_opt_mirror
+[ "$_opt_iso" ]                 && ISO=$_opt_iso
+[ "$_opt_release" ]             && RELEASE=$_opt_release
+[ "$_opt_target" ]              && TARGET=$_opt_target
+[ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
+[ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
+[ "$_opt_interactive" ]         && INTERACTIVE=1
+[ "$_opt_config" ]              && CONFIGFILE=$_opt_config
+[ "$_opt_packages_set" ]        && PACKAGES='yes'
+[ "$_opt_debconf_set" ]         && DEBCONF='yes'
 [ "$_opt_scripts_set" ]         && SCRIPTS='yes'
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
-[ "$_opt_keep_src_list" ]	&& KEEP_SRC_LIST='yes'
-[ "$_opt_hostname" ]		&& HOSTNAME=$_opt_hostname
-[ "$_opt_password" ]		&& ROOTPASSWORD=$_opt_password
-[ "$_opt_bootappend" ]		&& BOOT_APPEND=$_opt_bootappend
-[ "$_opt_groot" ]		&& GROOT=$_opt_groot
-[ "$_opt_grub" ]		&& GRUB=$_opt_grub
-[ "$_opt_verbose" ]		&& VERBOSE="-v"
+[ "$_opt_keep_src_list" ]       && KEEP_SRC_LIST='yes'
+[ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
+[ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
+[ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
+[ "$_opt_groot" ]               && GROOT=$_opt_groot
+[ "$_opt_grub" ]                && GRUB=$_opt_grub
+[ "$_opt_verbose" ]             && VERBOSE="-v"
 
 [ "$_opt_help" ] && {
   usage ; eend 0
