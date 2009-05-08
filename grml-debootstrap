@@ -42,7 +42,7 @@ Bootstrap options:
   -r, --release <name>   Release of new Debian system (default: stable).
   -t, --target <target>  Target partition (/dev/...) or directory.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system.
-      --debopt <params>  Extra parameters passed to the debootstrap.
+      --debopt <params>  Extra parameters passed to the debootstrap command.
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --groot <device>   Root device for usage in grub, corresponds with

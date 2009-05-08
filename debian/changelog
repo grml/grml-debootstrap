@@ -12,10 +12,12 @@ grml-debootstrap (0.27) unstable; urgency=low
       display for checking configuration again.
     - Drop 'do not prompt for partition dialog if swraid has been
       configured already' which doesn't make any sense in most situations
+  * Minor changes:
+    - use '.. to the debootstrap command' in description of --debopt
   * Debian Package:
     - bump Standard Version to 3.8.1 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 15:19:15 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 15:37:58 +0200
 
 grml-debootstrap (0.26) unstable; urgency=low
 

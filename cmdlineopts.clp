@@ -39,7 +39,7 @@ while :; do
   --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
     ;;
-  --debopt)            # Extra parameters passed to the debootstrap
+  --debopt)            # Extra parameters passed to the debootstrap command
     shift; _opt_debopt="$1"
     ;;
   --interactive)       # Use interactive mode (frontend)

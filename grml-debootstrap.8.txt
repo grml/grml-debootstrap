@@ -56,7 +56,7 @@ Options and environment variables
 
 *--debopt* <_params_>::
 
-    Extra parameters passed to the debootstrap.
+    Extra parameters passed to the debootstrap command.
 
 *--groot* <_device_>::
 
