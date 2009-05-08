@@ -74,6 +74,10 @@ MIRROR='ftp://ftp.de.debian.org/debian'
 #                   squeeze (testing), sid (unstable)
 RELEASE='lenny'
 
+# define components that should be used within sources.list
+# default:
+# COMPONENTS='main contrib non-free'
+
 # architecture
 # if unset the default of the running system (see 'dpkg --print-architecture') will be taken
 # notice: installing an amd64 system requires a 64bit kernel

@@ -47,12 +47,14 @@ stage() {
 # define chroot mirror {{{
 chrootmirror() {
   [ -n "$KEEP_SRC_LIST" ] && return
+  [ -z "$COMPONENTS" ]    && COMPONENTS='main contrib non-free'
+
   if [ -n "$ISO" ] ; then
-     echo "deb $ISO $RELEASE main contrib" > /etc/apt/sources.list
-     [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE main contrib non-free" >> /etc/apt/sources.list
+     echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
+     [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || /bin/true
   else
     if [ -n "$MIRROR" ] ; then
-       echo "deb $MIRROR $RELEASE main contrib non-free" > /etc/apt/sources.list
+       echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
     fi
   fi
 }
