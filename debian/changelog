@@ -1,12 +1,13 @@
 grml-debootstrap (0.27) unstable; urgency=low
 
   * Support setting Debian suite components (like main, contrib,...)
-    so it's possible to use a simple 'main' mirror.
+    through COMPONENTS so it's possible to use a simple 'main' mirror.
+  * Support setting aptitude/apt-get options through $DPKG_OPTIONS.
   * Bugfix: make sure to ignore /dev/md* devices if not using SW-RAID
   * Bugfix: do not fail in chrootmirror() when using $ISO variable.
   * Bump Standard Version to 3.8.1 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 13:53:30 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 14:28:27 +0200
 
 grml-debootstrap (0.26) unstable; urgency=low
 

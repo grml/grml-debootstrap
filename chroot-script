@@ -17,10 +17,10 @@ set -e # exit on any error
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTINSTALL='aptitude -y --without-recommends install '
+   APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
    APTUPDATE='aptitude update'
 else
-   APTINSTALL='apt-get --force-yes -y install'
+   APTINSTALL="apt-get --force-yes -y install $DPKG_OPTIONS"
    APTUPDATE='apt-get update'
 fi
 
@@ -363,7 +363,12 @@ hostname() {
 # generate initrd/initramfs {{{
 initrd() {
   # assume the first available kernel as our main kernel
-  KERNELIMG=$(ls -1 /boot/vmlinuz-* | head -1)
+  KERNELIMG=$(ls -1 /boot/vmlinuz-* 2>/dev/null | head -1)
+  if [ -z "$KERNELIMG" ] ; then
+     echo 'No kernel image found, skipping initrd stuff.'>&2
+     return
+  fi
+
   KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
   # generate initrd

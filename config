@@ -108,6 +108,9 @@ DEBOOTSTRAP='debootstrap'
 # Which debconf-frontend should be used?
 DEBIAN_FRONTEND='noninteractive'
 
+# execute aptitude/apt-get with any special options?
+# DPKG_OPTIONS='-o APT::Get::AllowUnauthenticated=true -o aptitude::Cmdline::ignore-trust-violations=yes'
+
 # The single steps/stages of grml-deboostrap are stored inside /var/cache/grml-debootstrap
 # by default. Use another directory instead?
 # STAGES='/var/cache/grml-debootstrap'
