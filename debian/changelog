@@ -1,15 +1,21 @@
 grml-debootstrap (0.27) unstable; urgency=low
 
-  * Support setting Debian suite components (like main, contrib,...)
-    through COMPONENTS so it's possible to use a simple 'main' mirror.
-  * Support setting aptitude/apt-get options through $DPKG_OPTIONS.
-  * Bugfix: make sure to ignore /dev/md* devices if not using SW-RAID
-  * Bugfix: do not fail in chrootmirror() when using $ISO variable.
-  * Bugfix: change order of checkconfiguration() so we get the prompt/
-    display for checking configuration again.
-  * Bump Standard Version to 3.8.1 (no further changes).
+  * New features:
+    - support setting Debian suite components (like main, contrib,...)
+      through COMPONENTS so it's possible to use a simple 'main' mirror.
+    - support setting aptitude/apt-get options through $DPKG_OPTIONS.
+    - support selection of netinstall vs. local mirror in interactive menu
+  * Bugfixes:
+    - make sure to ignore /dev/md* devices if not using SW-RAID
+    - do not fail in chrootmirror() when using $ISO variable.
+    - change order of checkconfiguration() so we get the prompt/
+      display for checking configuration again.
+    - Drop 'do not prompt for partition dialog if swraid has been
+      configured already' which doesn't make any sense in most situations
+  * Debian Package:
+    - bump Standard Version to 3.8.1 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 14:46:44 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 08 May 2009 15:19:15 +0200
 
 grml-debootstrap (0.26) unstable; urgency=low
 

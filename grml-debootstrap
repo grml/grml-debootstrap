@@ -514,8 +514,7 @@ interactive_mode()
 
   prompt_for_swraid
 
-  # do not prompt for partition dialog if swraid has been configured already
-  [ -n "$TARGET" ] || prompt_for_target
+  prompt_for_target
 
   prompt_for_bootmanager
 
