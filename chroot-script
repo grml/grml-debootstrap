@@ -221,8 +221,14 @@ passwords()
   echo "Activating shadow passwords."
   shadowconfig on
 
+  CHPASSWD_OPTION=
+  if chpasswd --help 2>&1 | grep -q -- '-m,' ; then
+     CHPASSWD_OPTION='-m'
+  fi
+
+
   if [ -n "$ROOTPASSWORD" ] ; then
-     echo root:"$ROOTPASSWORD" | chpasswd -m
+     echo root:"$ROOTPASSWORD" | chpasswd $CHPASSWD_OPTION
      export ROOTPASSWORD=''
   else
     a='1'
@@ -240,7 +246,7 @@ passwords()
          a='1'
          b='2'
        else
-         echo root:"$a" | chpasswd -m
+         echo root:"$a" | chpasswd $CHPASSWD_OPTION
          unset a
          unset b
        fi
