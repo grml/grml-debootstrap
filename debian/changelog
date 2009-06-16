@@ -1,3 +1,10 @@
+grml-debootstrap (0.28) unstable; urgency=low
+
+  * Work around the chpasswd problem. [Closes: issue692]
+    Thanks to Ulrich Dangel <uli@spamt.net> for the patch!
+
+ -- Michael Prokop <mika@grml.org>  Tue, 16 Jun 2009 16:11:30 +0200
+
 grml-debootstrap (0.27) unstable; urgency=low
 
   * New features:
