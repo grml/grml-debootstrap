@@ -1,3 +1,10 @@
+grml-debootstrap (0.29) UNRELEASED; urgency=low
+
+  * Install busybox in kernel stage to be able to debug initramfs
+    problems (thanks, gebi).
+
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:20:00 +0200
+
 grml-debootstrap (0.28) unstable; urgency=low
 
   * Work around the chpasswd problem. [Closes: issue692]

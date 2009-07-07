@@ -196,7 +196,8 @@ kernel() {
      if [ "$RELEASE" = 'sarge' ] ; then
         KERNELPACKAGES="kernel-image-$KERNEL kernel-headers-$KERNEL"
      else
-        KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL"
+        # note: install busybox to be able to debug initramfs
+        KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox"
      fi
       DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
