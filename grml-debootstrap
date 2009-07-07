@@ -39,7 +39,7 @@ Bootstrap options:
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                            instead of fetching packages from a mirror.
-  -r, --release <name>   Release of new Debian system (default: stable).
+  -r, --release <name>   Release of new Debian system (default: lenny).
   -t, --target <target>  Target partition (/dev/...) or directory.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system.
       --debopt <params>  Extra parameters passed to the debootstrap command.
@@ -637,7 +637,12 @@ bailout(){
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
         [ -d "$MNTPOINT/$ISODIR" ]    && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
-        einfo "Unmounting $MNTPOINT"   ; umount "$MNTPOINT" ; eend $?
+
+        if [ -n "$DIRECTORY" ] ; then
+          einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
+        else
+          einfo "Unmounting $MNTPOINT"   ; umount "$MNTPOINT" ; eend $?
+        fi
 
         if [ -n "$STAGES" ] ; then
            echo -n "Removing stages directory ${STAGES}: "
@@ -675,16 +680,21 @@ stage() {
 
 # create filesystem {{{
 mkfs() {
-  if grep -q $TARGET /proc/mounts ; then
-     eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
-     exit 1
-  fi
+  if [ -n "$DIRECTORY" ] ; then
+     einfo "Running grml-debootstrap on a directory, skipping mkfs stage."
+  else
+    if grep -q "$TARGET" /proc/mounts ; then
+      eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
+      exit 1
+    fi
 
-  if [ -n "$MKFS" ] ; then
-     einfo "Running $MKFS on $TARGET"
-     $MKFS $TARGET
-     TARGET_UUID="$(vol_id -u $TARGET 2>/dev/null || echo '')"
-     eend $?
+    if [ -n "$MKFS" ] ; then
+       einfo "Running $MKFS on $TARGET"
+       $MKFS $TARGET
+       TARGET_UUID="$(vol_id -u $TARGET 2>/dev/null || echo '')"
+       eend $?
+    fi
+
   fi
 }
 # }}}
@@ -897,6 +907,7 @@ umount_chroot() {
         eend $?
      fi
   fi
+
   if grep -q "$MNTPOINT" /proc/mounts ; then
      if [ -n "$PARTITION" ] ; then
         einfo "Unmount $MNTPOINT"

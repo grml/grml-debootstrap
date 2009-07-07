@@ -2,8 +2,12 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
 
   * Install busybox in kernel stage to be able to debug initramfs
     problems (thanks, gebi).
+  * Check whether we are installing into a directory in stage mkfs
+    so we don't skip if the target is already mounted.
+  * Mention "default: lenny" instead of "default: stable" in help
+    text as "stable" is invalid. Thanks, gebi.
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:20:00 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:37:57 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
