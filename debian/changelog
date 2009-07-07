@@ -6,8 +6,10 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
     so we don't skip if the target is already mounted.
   * Mention "default: lenny" instead of "default: stable" in help
     text as "stable" is invalid. Thanks, gebi.
+  * Use 'pri=0' as example for swap partition in /etc/fstab (thanks,
+    gebi).
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:37:57 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:41:46 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
