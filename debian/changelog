@@ -1,15 +1,18 @@
 grml-debootstrap (0.29) UNRELEASED; urgency=low
 
+  The "thanks to gebi for the bugreports and feedback" release. :)
   * Install busybox in kernel stage to be able to debug initramfs
-    problems (thanks, gebi).
+    problems.
   * Check whether we are installing into a directory in stage mkfs
     so we don't skip if the target is already mounted.
   * Mention "default: lenny" instead of "default: stable" in help
-    text as "stable" is invalid. Thanks, gebi.
-  * Use 'pri=0' as example for swap partition in /etc/fstab (thanks,
-    gebi).
+    text as "stable" is invalid.
+  * Use 'pri=0' as example for swap partition in /etc/fstab.
+  * Do not adjust mydestination and myhostname in /etc/postfix/main.cf as
+    mydestination defaults to "$myhostname, localhost.$mydomain, localhost",
+    myhostname defaults to gethostname() and mydomain to localdomain.
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:41:46 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:48:13 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
