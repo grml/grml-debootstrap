@@ -779,7 +779,7 @@ preparechroot() {
 
   cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
-  mkdir $MNTPOINT/etc/debootstrap/
+  [ -d "$MNTPOINT"/etc/debootstrap/ ] || mkdir "$MNTPOINT"/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
   cp $VERBOSE $CONFFILES/config    $MNTPOINT/etc/debootstrap/
