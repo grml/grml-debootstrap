@@ -17,8 +17,10 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
   * Mention hostname in configuration check dialog.
   * Apply patch by Zoran Dzelajlija which addresses the partition
     calculation problem when installing to /dev/cciss/c0d0*. Thanks!
+  * Use ls for locating /dev/md* devices instead of echo so we don't
+    have '/dev/md*' in the interactive partition dialog.
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 02:27:09 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 02:38:45 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
