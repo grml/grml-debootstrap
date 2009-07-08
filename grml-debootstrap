@@ -509,14 +509,19 @@ else # if not running automatic installation display configuration and prompt fo
    einfo "$PN - Please recheck configuration before execution:"
    echo
    echo "   Target:          $TARGET"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
-      [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
-      [ -n "$RELEASE" ]  && echo "   Using release:   $RELEASE"
-      [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
-      [ -n "$HOSTNAME" ] && echo "   Using hostname:  $HOSTNAME"
-      [ -n "$ISO" ]      && echo "   Using ISO:       $ISO"
-      case "$MNTPOINT" in "$TARGET") ;; *) echo "   Important! Continuing will delete all data from ${TARGET}!" ;; esac
-      echo
+
+   # do not display if MNTPOINT is the default one
+   case "$MNTPOINT" in /mnt/debootstrap*) ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
+
+   [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+   [ -n "$RELEASE" ]  && echo "   Using release:   $RELEASE"
+   [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
+   [ -n "$HOSTNAME" ] && echo "   Using hostname:  $HOSTNAME"
+   [ -n "$ISO" ]      && echo "   Using ISO:       $ISO"
+
+   echo "   Important! Continuing will delete all data from ${TARGET}!"
+
+   echo
    einfon "Is this ok for you? [y/N] "
    read a
    if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
