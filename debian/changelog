@@ -11,8 +11,9 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
   * Do not adjust mydestination and myhostname in /etc/postfix/main.cf as
     mydestination defaults to "$myhostname, localhost.$mydomain, localhost",
     myhostname defaults to gethostname() and mydomain to localdomain.
+  * Slightly improve wording of -t and -p options.
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 01:48:13 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 02:05:44 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 

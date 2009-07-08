@@ -40,8 +40,10 @@ Bootstrap options:
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                            instead of fetching packages from a mirror.
   -r, --release <name>   Release of new Debian system (default: lenny).
-  -t, --target <target>  Target partition (/dev/...) or directory.
-  -p, --mntpoint <mnt>   Mountpoint used for mounting the target system.
+  -t, --target <target>  Target partition (/dev/...) or directory where the
+                         system should be installed to.
+  -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
+                         has no effect if -t is given and represents a directory.
       --debopt <params>  Extra parameters passed to the debootstrap command.
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
@@ -734,14 +736,14 @@ mount_target() {
 
 # install main chroot {{{
 debootstrap_system() {
-  if ! grep -q $MNTPOINT /proc/mounts ; then
+  if ! grep -q "$MNTPOINT" /proc/mounts ; then
      mount_target
   fi
   if [ "$_opt_nodebootstrap" ]; then
      einfo "Skipping debootstrap as requested."
      return
   fi
-  if grep -q $MNTPOINT /proc/mounts || [ -n "$DIRECTORY" ] ; then
+  if grep -q "$MNTPOINT" /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
      [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR || \
      $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
