@@ -30,7 +30,7 @@ while :; do
   --iso|-i)            # Mountpoint where a Debian ISO is mounted to
     shift; _opt_iso="$1"
     ;;
-  --release|-r)        # Release of new Debian system (default: stable)
+  --release|-r)        # Release of new Debian system
     shift; _opt_release="$1"
     ;;
   --target|-t)         # Target partition (/dev/...) or directory

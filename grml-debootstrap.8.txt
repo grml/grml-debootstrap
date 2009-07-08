@@ -102,6 +102,8 @@ Options and environment variables
 
     Specify mountpoint that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
+    Note: this option has no effect if option -t is given and represents a
+    directory.
 
 *--packages* <_file_>::
 
@@ -116,7 +118,7 @@ Options and environment variables
 
 *-r*, *--release* <_releasename_>::
 
-    Specify release of new Debian system. Supported releases: etch, lenny,
+    Specify release of new Debian system. Supported releases names: etch, lenny,
     squeeze (note: requires current version of debootstrap) and sid.
     Corresponding with configuration variable RELEASE.
 
@@ -131,7 +133,7 @@ Options and environment variables
     Target partition (/dev/...) or directory (anything else without /dev at the
     beginning). To install grub using *--grub* and *--groot*, make sure to
     use a _device_ instead of a directory as _target_ (installation of
-    grub as bootloader when using directories isn't supported yet).
+    grub as bootloader when using directories is NOT supported).
 
 *-v*, *--verbose*::
     Increase verbosity.
@@ -156,6 +158,7 @@ Grub in MBR (master boot record) of /dev/sda and use /dev/sda1 as system partiti
 Install Debian unstable/sid on /dev/sda6, install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda6 as system partition.
 
+  mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
 
 Install default Debian release (stable/lenny) in directory /data/chroot (without
