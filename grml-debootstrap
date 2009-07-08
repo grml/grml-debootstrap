@@ -203,21 +203,38 @@ prompt_for_target()
 prompt_for_bootmanager()
 {
   ADDITIONAL_PARAMS=""
-  for device in sda hda; do
-    if [ /dev/$device != ${TARGET%[0-9]} ]; then
+
+  if echo "$TARGET" | grep -q "/dev/md" ; then
+     MBRPART="all disks of Software RAID $TARGET"
+  else
+     # figure out whole disk device
+     found=
+     for device in /dev/disk/by-id/*
+     do
+        [ $(readlink -f $device) = ${TARGET} ] || continue
+        found=1
+        break
+     done
+     [ -n "$found" ] && MBRDISK=$(echo ${device}|sed -e 's/-part[0-9][0-9]*$//')
+     if [ -e "$MBRDISK" ]; then
+        MBRDISK=$(readlink -f $MBRDISK)
+     else
+        # fall back to old behaviour
+        MBRDISK=$(echo ${TARGET} | sed -e 's/[0-9][0-9]*$/')
+     fi
+
+     MBRPART="MBR of $MBRDISK"
+  fi
+
+  for device in cciss/c0d0 sda hda; do
+    if [ /dev/$device != ${MBRDISK} ]; then
       grep -q $device /proc/partitions && \
-      ADDITIONAL_PARAMS=:$device:"install bootmanager grub into MBR of /dev/${device}"
+      ADDITIONAL_PARAMS="$ADDITIONAL_PARAMS:$device:install bootmanager grub into MBR of /dev/$device"
     fi
   done
   ADDITIONAL_PARAMS=${ADDITIONAL_PARAMS#:}
 
   OIFS="$IFS"; IFS=:
-
-  if echo $TARGET | grep -q "/dev/md" ; then
-     MBRPART="all disks of Software RAID $TARGET"
-  else
-     MBRPART="MBR of ${TARGET%[0-9]}"
-  fi
 
   GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
@@ -231,10 +248,10 @@ prompt_for_bootmanager()
   case "$GETMBR" in
     mbr)
       # /dev/md0: has to be installed in MBR of /dev/md0 and not in /dev/md:
-      if echo $TARGET | grep -q "*md*" ; then
-         BOOT_PARTITION="${TARGET}"
+      if echo "$TARGET" | grep -q "/dev/md" ; then
+         BOOT_PARTITION="$TARGET"
       else
-         BOOT_PARTITION="${TARGET%[0-9]}"
+         BOOT_PARTITION="$MBRDISK"
       fi
       ;;
     partition)

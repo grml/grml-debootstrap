@@ -15,8 +15,10 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
   * Do not try to create /etc/debootstrap if it already exists (which
     might be the case when installing to a directory).
   * Mention hostname in configuration check dialog.
+  * Apply patch by Zoran Dzelajlija which addresses the partition
+    calculation problem when installing to /dev/cciss/c0d0*. Thanks!
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 02:26:14 +0200
+ -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 02:27:09 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
