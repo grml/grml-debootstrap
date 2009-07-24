@@ -1,4 +1,4 @@
-grml-debootstrap (0.29) UNRELEASED; urgency=low
+grml-debootstrap (0.29) unstable; urgency=low
 
   The "thanks to gebi for the bugreports and feedback" release. :)
   * Install busybox in kernel stage to be able to debug initramfs
@@ -25,7 +25,7 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
   * Do not continue execution if provided mirror doesn't work.
     [Closes: issue711]
 
- -- Michael Prokop <mika@grml.org>  Fri, 24 Jul 2009 09:44:58 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 24 Jul 2009 09:46:36 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 
