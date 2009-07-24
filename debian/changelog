@@ -20,8 +20,12 @@ grml-debootstrap (0.29) UNRELEASED; urgency=low
   * Use ls for locating /dev/md* devices instead of echo so we don't
     have '/dev/md*' in the interactive partition dialog.
   * Do not display mountpoint if we are using the default one.
+  * Avoid duplicate 'Running ... on a directory, nothing to mount.'
+    message.
+  * Do not continue execution if provided mirror doesn't work.
+    [Closes: issue711]
 
- -- Michael Prokop <mika@grml.org>  Wed, 08 Jul 2009 22:33:29 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 24 Jul 2009 09:44:58 +0200
 
 grml-debootstrap (0.28) unstable; urgency=low
 

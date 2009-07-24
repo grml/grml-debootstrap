@@ -759,17 +759,18 @@ mount_target() {
 
 # install main chroot {{{
 debootstrap_system() {
-  if ! grep -q "$MNTPOINT" /proc/mounts ; then
-     mount_target
-  fi
   if [ "$_opt_nodebootstrap" ]; then
      einfo "Skipping debootstrap as requested."
      return
   fi
+
   if grep -q "$MNTPOINT" /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
-     [ -n "$MIRROR" ] && $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR || \
-     $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+     if [ -n "$MIRROR" ] ; then
+        $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
+     else
+        $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+     fi
      eend $?
   else
      eerror "Error: $MNTPOINT not mounted, can not continue."
