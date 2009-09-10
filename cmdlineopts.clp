@@ -13,7 +13,7 @@
 ################################################################################
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,chroot-scripts::,scripts::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,verbose,help,version \
+    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,chroot-scripts::,scripts::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,arch:,verbose,help,version \
   -- "$@"`
 if [ $? != 0 ]; then
   eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
@@ -47,6 +47,9 @@ while :; do
     ;;
   --nodebootstrap)     # Skip debootstrap, only do configuration to the target
     _opt_nodebootstrap=T
+    ;;
+  --arch)              # Target architecutre
+    shift; _opt_arch="$1"
     ;;
   #
 

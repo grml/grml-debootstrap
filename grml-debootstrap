@@ -51,6 +51,8 @@ Bootstrap options:
                            \$TARGET in grub syntax, like hd0,0 for /dev/sda1.
       --grub <device>    Target for grub installation. Use grub syntax for
                            specifying, like hd0 for /dev/sda.
+      --arch <arch>      Architecture to use. Currently only i386 and amd64
+                           are supported.
 
 Configuration options:
 
@@ -149,6 +151,7 @@ fi
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_groot" ]               && GROOT=$_opt_groot
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
+[ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_verbose" ]             && VERBOSE="-v"
 
 [ "$_opt_help" ] && {
