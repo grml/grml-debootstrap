@@ -7,8 +7,9 @@ grml-debootstrap (0.30) unstable; urgency=low
 
   [ Michael Prokop ]
   * Add according documentation for new --arch option.
+  * Bump Standards-Version to 3.8.3 (no further changes).
 
- -- Michael Prokop <mika@grml.org>  Thu, 10 Sep 2009 16:04:07 +0200
+ -- Michael Prokop <mika@grml.org>  Fri, 11 Sep 2009 03:15:46 +0200
 
 grml-debootstrap (0.29) unstable; urgency=low
 
