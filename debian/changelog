@@ -1,3 +1,15 @@
+grml-debootstrap (0.30) unstable; urgency=low
+
+  [ Ulrich Dangel ]
+  * Add cmdline option for specifying target architecture (--arch).
+    Allows to specify target architecture i386 if running on an amd64
+    system. [Closes: issue658]
+
+  [ Michael Prokop ]
+  * Add according documentation for new --arch option.
+
+ -- Michael Prokop <mika@grml.org>  Thu, 10 Sep 2009 16:04:07 +0200
+
 grml-debootstrap (0.29) unstable; urgency=low
 
   The "thanks to gebi for the bugreports and feedback" release. :)
