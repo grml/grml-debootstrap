@@ -416,6 +416,7 @@ grub() {
         UPDATEGRUB='/sbin/update-grub'
      fi
      $UPDATEGRUB -y
+
      if [ -f /boot/grub/menu.lst ] ; then
         sed -i "s/^# groot=.*/# groot=(${GROOT})/g" /boot/grub/menu.lst
         case "$TARGET" in

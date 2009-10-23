@@ -350,33 +350,48 @@ grubdevice() {
   fi
 
   device="$1"
-  device_map=/boot/grub/device.map
+  device_map=$(mktemp)
 
   # create device.map
-  if ! [ -f "$device_map" ] ; then
-     echo 'quit' | grub --device-map="$device_map" 1>/dev/null 2>&1
+  if which grub >/dev/null 2>&1 ; then
+     echo 'quit' | grub --device-map="$device_map" >/dev/null 2>&1
+  elif which grub-mkdevicemap >/dev/null 2>&1 ; then
+     grub-mkdevicemap --device-map="$device_map" >/dev/null 2>&1
+  else
+    echo "Error: neither grub nor grub-mkdevicemap command found." >&2
+    return 1
   fi
 
   # based on code from d-i's trunk/packages/arch/i386/grub-installer/grub-installer:
-  tmp_disk=`echo "$device" | sed -e 's%\([sh]d[a-z]\)[0-9]*$%\1%' \
+  tmp_disk=$(echo "$device" | sed -e 's%\(\(s\|h\|v\|xv\)d[a-z]\)[0-9]*$%\1%' \
                     -e 's%\(fd[0-9]*\)$%\1%' \
                     -e 's%/part[0-9]*$%/disc%' \
-                    -e 's%\(c[0-7]d[0-9]*\).*$%\1%'`
-  tmp_part=`echo "$device" | sed -e 's%.*/[sh]d[a-z]\([0-9]*\)$%\1%' \
+                    -e 's%\(c[0-7]d[0-9]*\).*$%\1%' \
+                    -e 's%\(mmcblk[0-9]d[0-9]*\).*$%\1%' \
+                    -e 's%\(/mapper/mpath[0-9]\+\)-part[0-9]\+$%\1%')
+  tmp_part=$(echo "$device" | sed -e 's%.*/\(s\|h\|v\|xv\)d[a-z]\([0-9]*\)$%\2%' \
                     -e 's%.*/fd[0-9]*$%%' \
                     -e 's%.*/floppy/[0-9]*$%%' \
                     -e 's%.*/\(disc\|part\([0-9]*\)\)$%\2%' \
-                    -e 's%.*c[0-7]d[0-9]*p*%%'`
+                    -e 's%.*c[0-7]d[0-9]*p*%%' \
+                    -e 's%.*mmcblk[0-9]d[0-9]*p%%' \
+                    -e 's%.*/mapper/mpath[0-9]\+-part\([0-9]\+\)%\1%')
   tmp_drive=$(grep -v '^#' $device_map | grep "$tmp_disk *$" | sed 's%.*\([hf]d[0-9][a-g0-9,]*\).*%\1%')
+
+  if [ -z "$tmp_drive" ]; then
+    echo "Error: $device does not have any corresponding BIOS drive." >&2
+    return 1
+  fi
 
   case $1 in
      /dev/[sh]d[a-z]) # we expect something like 'hd0'
         echo "$tmp_drive"
         ;;
       *) # we expect something like 'hd0,0'
-        echo "$tmp_drive" | sed "s%$%,`expr $tmp_part - 1`%" # FIXME => md0
+        echo "$tmp_drive" | sed "s%$%,$(expr $tmp_part - 1)%" # FIXME => md0
         ;;
   esac
+  rm -f "$device_map"
 }
 # }}}
 
@@ -559,7 +574,6 @@ interactive_mode()
         TMPDEVICE=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}') # use first disk only
         GRUB="$(grubdevice ${TMPDEVICE%%[0-9]})" # like: hd0
         GROOT="$(grubdevice ${TMPDEVICE})"       # like: hd0,0
-        echo "debug: GRUB = $GRUB - GROOT = $GROOT" >/tmp/debug # FIXME
      fi
   else
      [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
