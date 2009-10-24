@@ -164,4 +164,8 @@ TIMEZONE='Europe/Vienna'
 # generate initrd via update-initramfs?
 INITRD='yes'
 
+# this file contains information that has been caught during
+# installation and will be displayed at the end of the installation
+INSTALL_NOTES='/etc/debootstrap/install_notes'
+
 ## END OF FILE #################################################################

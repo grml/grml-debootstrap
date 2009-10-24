@@ -356,7 +356,7 @@ grubdevice() {
   if which grub >/dev/null 2>&1 ; then
      echo 'quit' | grub --device-map="$device_map" >/dev/null 2>&1
   elif which grub-mkdevicemap >/dev/null 2>&1 ; then
-     grub-mkdevicemap --device-map="$device_map" >/dev/null 2>&1
+     grub-mkdevicemap --no-floppy --device-map="$device_map" >/dev/null 2>&1
   else
     echo "Error: neither grub nor grub-mkdevicemap command found." >&2
     return 1
@@ -804,18 +804,19 @@ preparechroot() {
   touch $CHROOT_VARIABLES
   chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
-  [ -n "$ARCH" ]         && echo "ARCH=$ARCH"                 >> $CHROOT_VARIABLES
-  [ -n "$GROOT" ]        && echo "GROOT=$GROOT"               >> $CHROOT_VARIABLES
-  [ -n "$GRUB" ]         && echo "GRUB=$GRUB"                 >> $CHROOT_VARIABLES
-  [ -n "$HOSTNAME" ]     && echo "HOSTNAME=$HOSTNAME"         >> $CHROOT_VARIABLES
-  [ -n "$ISODIR" ]       && echo "ISODIR=$ISO"                >> $CHROOT_VARIABLES
-  [ -n "$ISO" ]          && echo "ISO=$ISO"                   >> $CHROOT_VARIABLES
-  [ -n "$MIRROR" ]       && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
+  [ -n "$ARCH" ]          && echo "ARCH=$ARCH"                 >> $CHROOT_VARIABLES
+  [ -n "$GROOT" ]         && echo "GROOT=$GROOT"               >> $CHROOT_VARIABLES
+  [ -n "$GRUB" ]          && echo "GRUB=$GRUB"                 >> $CHROOT_VARIABLES
+  [ -n "$HOSTNAME" ]      && echo "HOSTNAME=$HOSTNAME"         >> $CHROOT_VARIABLES
+  [ -n "$INSTALL_NOTES" ] && echo "INSTALL_NOTES=$INSTALL_NOTES" >> $CHROOT_VARIABLES
+  [ -n "$ISODIR" ]        && echo "ISODIR=$ISO"                >> $CHROOT_VARIABLES
+  [ -n "$ISO" ]           && echo "ISO=$ISO"                   >> $CHROOT_VARIABLES
+  [ -n "$MIRROR" ]        && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
   [ -n "$KEEP_SRC_LIST" ] && echo "KEEP_SRC_LIST=$KEEP_SRC_LIST" >> $CHROOT_VARIABLES
-  [ -n "$PACKAGES" ]     && echo "PACKAGES=$PACKAGES"         >> $CHROOT_VARIABLES
-  [ -n "$ROOTPASSWORD" ] && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
-  [ -n "$TARGET" ]       && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
-  [ -n "$TARGET_UUID" ]  && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
+  [ -n "$PACKAGES" ]      && echo "PACKAGES=$PACKAGES"         >> $CHROOT_VARIABLES
+  [ -n "$ROOTPASSWORD" ]  && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
+  [ -n "$TARGET" ]        && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
+  [ -n "$TARGET_UUID" ]   && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
 
   cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
@@ -828,6 +829,11 @@ preparechroot() {
   sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
   sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
+
+  # install notes:
+  if [ -n "$INSTALL_NOTES" ] ; then
+     [ -r "$INSTALL_NOTES" ] && cp "$INSTALL_NOTES" $MNTPOINT/etc/debootstrap/
+  fi
 
   # package selection:
   cp $VERBOSE ${_opt_packages:-$CONFFILES/packages} \
@@ -988,6 +994,12 @@ einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
 # Remove temporary mountpoint again
 if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
    einfo "Removing directory ${MNTPOINT}" ; rmdir "$MNTPOINT" ; eend $?
+fi
+# }}}
+
+# display installation notes {{{
+if [ -n "$INSTALL_NOTES" ] ; then
+   [ -r "$INSTALL_NOTES" ] && cat "$INSTALL_NOTES"
 fi
 # }}}
 
