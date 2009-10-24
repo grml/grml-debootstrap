@@ -492,7 +492,7 @@ to finalise configuration. This instructions are available
 in the header of /etc/default/grub as well.
 " >> $INSTALL_NOTES
 
-        $UPDATEGRUB -y
+        $UPDATEGRUB
      fi
   fi
 }
