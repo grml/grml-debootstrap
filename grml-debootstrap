@@ -946,8 +946,14 @@ grub_install() {
 }
 # }}}
 
-# unmount $MNTPOINRT {{{
+# unmount $MNTPOINT {{{
 umount_chroot() {
+
+  # display installation notes:
+  if [ -n "$INSTALL_NOTES" ] ; then
+     [ -r "${MNTPOINT}/${INSTALL_NOTES}" ] && cat "${MNTPOINT}/${INSTALL_NOTES}"
+  fi
+
   if [ -n "$ISODIR" ] ; then
      if grep -q "$ISODIR" /proc/mounts ; then
         einfo "Unmount $MNTPOINT/$ISODIR"
@@ -994,12 +1000,6 @@ einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
 # Remove temporary mountpoint again
 if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
    einfo "Removing directory ${MNTPOINT}" ; rmdir "$MNTPOINT" ; eend $?
-fi
-# }}}
-
-# display installation notes {{{
-if [ -n "$INSTALL_NOTES" ] ; then
-   [ -r "$INSTALL_NOTES" ] && cat "$INSTALL_NOTES"
 fi
 # }}}
 
