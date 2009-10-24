@@ -328,7 +328,7 @@ prompt_for_mirror()
           )
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
-     [ -n "$MIRROR" ] || MIRROR='ftp://ftp.de.debian.org/debian'
+     [ -n "$MIRROR" ] || MIRROR='http://cdn.debian.net/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
                0 0 $MIRROR)"

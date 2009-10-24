@@ -2,8 +2,9 @@ grml-debootstrap (0.31) unstable; urgency=low
 
   * Adjust grubdevice() handling and install grub-pc package for
     supporting grub2. [Closes: issue747]
+  * Use cdn.debian.net as default mirror.
 
- -- Michael Prokop <mika@grml.org>  Sat, 24 Oct 2009 00:35:17 +0200
+ -- Michael Prokop <mika@grml.org>  Sat, 24 Oct 2009 02:05:26 +0200
 
 grml-debootstrap (0.30) unstable; urgency=low
 

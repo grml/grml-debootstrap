@@ -49,7 +49,8 @@ BOOT_APPEND=''
 # set mirror where debootstrap and chrootscript should download
 # packages from; if empty an existing
 # /etc/debootstrap/etc/apt/sources.list is used instead
-MIRROR='ftp://ftp.de.debian.org/debian'
+# MIRROR='ftp://ftp.de.debian.org/debian'
+MIRROR='http://cdn.debian.net/debian'
 
 # specify directory of loopback mounted Debian-ISO so you don't
 # have to download all the core packages via network but can
