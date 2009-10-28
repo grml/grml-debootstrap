@@ -172,14 +172,6 @@ extrapackages() {
 }
 # }}}
 
-#  sarge specific stuff: mkinitrd {{{
-mkinitrd() {
-  if [ "$RELEASE" = 'sarge' ] ; then
-     sed -i "s#ROOT=probe#ROOT=$TARGET#" /etc/mkinitrd/mkinitrd.conf
-  fi
-}
-# }}}
-
 # install kernel packages {{{
 kernel() {
   # do not override $KERNEL if set via config file
@@ -193,13 +185,9 @@ kernel() {
 
   if [ -n "$KERNEL" ] ; then
      $APTUPDATE
-     if [ "$RELEASE" = 'sarge' ] ; then
-        KERNELPACKAGES="kernel-image-$KERNEL kernel-headers-$KERNEL"
-     else
-        # note: install busybox to be able to debug initramfs
-        KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox"
-     fi
-      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
+     # note: install busybox to be able to debug initramfs
+     KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox"
+     DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
 }
 # }}}
@@ -440,7 +428,7 @@ finalize() {
 
 # execute the functions {{{
  for i in chrootmirror grmlrepos kernelimg_conf makedev install_policy_rcd \
-     kernel packages extrapackages mkinitrd reconfigure hosts interfaces   \
+     kernel packages extrapackages reconfigure hosts interfaces   \
      timezone fstab hostname initrd grub_config passwords custom_scripts   \
      services ; do
      if stage $i ; then

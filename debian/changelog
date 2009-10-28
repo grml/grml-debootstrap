@@ -4,8 +4,9 @@ grml-debootstrap (0.32) unstable; urgency=low
   * Simplify usage for grub handling, now it's just GRUB="/dev/sdX[#]".
   * Execute blockdev to reread partition table.
   * Replace vol_id command with blkid.
+  * Drop deprecated sarge specific code.
 
- -- Michael Prokop <mika@grml.org>  Wed, 28 Oct 2009 21:40:46 +0100
+ -- Michael Prokop <mika@grml.org>  Wed, 28 Oct 2009 23:29:47 +0100
 
 grml-debootstrap (0.31) unstable; urgency=low
 
