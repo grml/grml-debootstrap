@@ -163,6 +163,21 @@ fi
 }
 # }}}
 
+# backwards compability checks {{{
+if [ -n "$GROOT" ] ; then
+   echo "Error: you seem to have \$GROOT configured." >&2
+   echo "This variable is no longer supported, please visit the" >&2
+   echo "grml-debootstrap documentation for details." >&2
+   exit 1
+fi
+
+if echo "$GRUB" | grep -q '^hd' ; then
+   echo "Error: this syntax for the grub configuration variable is no longer supported." >&2
+   echo "Please do not use hd... any longer but /dev/sdX instead." >&2
+   exit 1
+fi
+# }}}
+
 # welcome screen {{{
 welcome_dialog()
 {

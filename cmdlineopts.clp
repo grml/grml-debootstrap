@@ -13,7 +13,7 @@
 ################################################################################
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,chroot-scripts::,scripts::,debconf::,keep_src_list,hostname:,password:,bootappend:,groot:,grub:,arch:,verbose,help,version \
+    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages::,chroot-scripts::,scripts::,debconf::,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,verbose,help,version \
   -- "$@"`
 if [ $? != 0 ]; then
   eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
@@ -87,9 +87,6 @@ while :; do
     ;;
   --bootappend)        # Add specified appendline to kernel whilst booting
     shift; _opt_bootappend="$1"
-    ;;
-  --groot)             # Root device for usage in grub, corresponds with $TARGET in grub
-    shift; _opt_groot="$1"
     ;;
   --grub)              # Target for grub installation. Use grub syntax for specifying
     shift; _opt_grub="$1"
