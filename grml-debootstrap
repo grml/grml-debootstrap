@@ -662,9 +662,19 @@ mkfs() {
 
     if [ -n "$MKFS" ] ; then
        einfo "Running $MKFS on $TARGET"
-       $MKFS $TARGET
-       TARGET_UUID="$(vol_id -u $TARGET 2>/dev/null || echo '')"
-       eend $?
+       $MKFS $TARGET ; RC=$?
+
+       # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
+       # will fail to detect the uuid in the chroot
+       blockdev --rereadpt "${TARGET%%[0-9]*}"
+       # give the system 2 seconds, otherwise we might run into
+       # race conditions :-/
+       sleep 2
+
+       eval $(blkid -o udev $TARGET 2>/dev/null)
+       [ -n "$ID_FS_UUID" ] && TARGET_UUID="$ID_FS_UUID" || TARGET_UUID=""
+
+       eend $RC
     fi
 
   fi
