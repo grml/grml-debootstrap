@@ -1,5 +1,5 @@
 locales console-data console-common
 initramfs-tools mdadm lvm2
-grub grub-pc
+grub-pc
 bzip2 dhcp3-client file less lsof most pciutils resolvconf screen ssh strace sysfsutils usbutils vim w3m zsh
 postfix

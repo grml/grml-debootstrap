@@ -65,16 +65,14 @@ Options and environment variables
 
     Extra parameters passed to the debootstrap command.
 
-*--groot* <_device_>::
-
-    Specify root device for usage in grub (corresponds with $TARGET).
-    Again, use grub syntax for specifying.
-    Corresponding with configuration variable GROOT.
-
 *--grub* <_device_>::
 
-    Where do you want to install grub to? Use grub syntax for specifying.
-    Do not forget to set groot as well. Leave empty to avoid installation of grub.
+    Device where grub should be installed to. Note that only the MBR (master
+    boot record) can be used (/dev/sda, /dev/sdb,...). Partitions (like
+    /dev/sda1, /dev/sdb2,...) are NOT supported because grub2 doesn't support
+    installation into the PBR (partition boot record) anymore.  Usage example:
+    '--grub /dev/sda'.  Note: just do not set this option to avoid installation
+    of grub.
 
 *--help*, *-h*::
 
@@ -125,7 +123,7 @@ Options and environment variables
 
 *-r*, *--release* <_releasename_>::
 
-    Specify release of new Debian system. Supported releases names: etch, lenny,
+    Specify release of new Debian system. Supported releases names: lenny,
     squeeze (note: requires current version of debootstrap) and sid.
     Corresponding with configuration variable RELEASE.
 
@@ -138,9 +136,9 @@ Options and environment variables
 
 *-t*, *--target* <_target_>::
     Target partition (/dev/...) or directory (anything else without /dev at the
-    beginning). To install grub using *--grub* and *--groot*, make sure to
-    use a _device_ instead of a directory as _target_ (installation of
-    grub as bootloader when using directories is NOT supported).
+    beginning). To install grub using *--grub* make sure to use a _device_
+    instead of a directory as _target_ (installation of grub as bootloader when
+    using directories is NOT supported).
 
 *-v*, *--verbose*::
     Increase verbosity.
@@ -155,15 +153,15 @@ arguments for the commandline options. Please be careful and check docs and
 Usage examples
 ---------------
 
-  grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0
+  grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
 Install default Debian release (stable/lenny) on /dev/sda1 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda1 as system partition.
 
-  grml-debootstrap --target /dev/sda6 --grub hd0 --groot hd0,5 --release sid
+  grml-debootstrap --target /dev/sda6 --grub /dev/sda --release sid
 
-Install Debian unstable/sid on /dev/sda6, install bootmanager
-Grub in MBR (master boot record) of /dev/sda and use /dev/sda6 as system partition.
+Install Debian unstable/sid on /dev/sda6, install bootmanager Grub in MBR
+(master boot record) of /dev/sda and use /dev/sda6 as system partition.
 
   mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
@@ -171,14 +169,14 @@ Grub in MBR (master boot record) of /dev/sda and use /dev/sda6 as system partiti
 Install default Debian release (stable/lenny) in directory /data/chroot (without
 any bootloader).
 
-  grml-debootstrap --target /dev/sda3 --grub hd0 --groot hd0,2 --mirror ftp://ftp.tugraz.at/mirror/debian
+  grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
 Install default Debian release (stable/lenny) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
 Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
 
   mount -o loop /mnt/sda6/debian-40r0-i386-CD-1.iso /mnt/iso
-  grml-debootstrap --target /dev/sda1 --grub hd0 --groot hd0,0 --iso file:/mnt/iso/debian/
+  grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso file:/mnt/iso/debian/
 
 Install Debian stable/lenny on /dev/sda1 using the loopback mounted Debian-ISO
 for the base-system and install bootmanager Grub in MBR (master boot record) of
@@ -256,18 +254,12 @@ target=/dev/sda1
 
   grub=...
 
-Where do you want to install grub to? Use grub syntax for specifying.
-Usage example: grub=hd0
-
-  groot=...
-
-Specify root device for usage in grub (corresponds with $TARGET).
-Again, use grub syntax for specifying. Usage example: groot=hd0,0
+Where do you want to install grub to? Usage example: grub=/dev/sda
 
   release=...
 
 Specify release of new Debian system. Defaults to Debian stable.  Supported
-relases: etch, lenny, squeeze and sid. Usage example: release=sid
+relases: lenny, squeeze and sid. Usage example: release=sid
 
   mirror=...
 
@@ -283,7 +275,7 @@ argument. Usage example: password=AiTh5ahn
 Usage example for automatic installation:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  debian2hd target=/dev/sda1 grub=hd0 groot=hd0,0 mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
+  debian2hd target=/dev/sda1 grub=/dev/sda mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
 
 You have to enter this commandline at the bootprompt of grml. Please make sure
 that /dev/sda1 is the partition where you really want to install your new Debian

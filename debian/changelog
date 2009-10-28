@@ -1,3 +1,10 @@
+grml-debootstrap (0.32) unstable; urgency=low
+
+  * Drop support for old-stable/etch.
+  * Simplify usage for grub handling, now it's just GRUB="/dev/sdX[#]".
+
+ -- Michael Prokop <mika@grml.org>  Wed, 28 Oct 2009 21:40:46 +0100
+
 grml-debootstrap (0.31) unstable; urgency=low
 
   * Adjust grub handling and install grub-pc package for

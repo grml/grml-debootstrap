@@ -13,31 +13,23 @@
 #
 # Usually you want to use a partition. If you specify a string *without* /dev/
 # in the beginning, grml-debootstrap assumes you want to install Debian into a
-# directory. If so then MKFS, TUNE2FS, GRUB, GROOT and FSCK won't apply, no
-# matter of the configuration variables. Make sure the TARGET-directory is on a
-# partition with present dev and exec mount options.
+# directory. If so then MKFS, TUNE2FS, GRUB and FSCK won't apply, no matter of
+# the configuration variables. Make sure the TARGET-directory is on a partition
+# with present dev and exec mount options.
 #
 # usage examples:
 # TARGET='/dev/hda1'
 # TARGET='/mnt/grml'
 TARGET=''
 
-## Do you want to install grub? Then adjust the variables GRUB and GROOT.
-## If you do not set the variables grub will not be installed.
-# Where do you want to install grub to? Use grub syntax for specifying
-# hints:  hd0,0 is the first partition on the first disk
-#         hd0   is the MBR of the first disk
-# usage example:
-# GRUB='hd0'
+## Do you want to install grub? Just specify the device you'd like to use.
+## Example: Specify /dev/sda to install into MBR (master boot record) of
+## /dev/sda. If you do not set the variable grub will not be installed.
+## Please note that grub can NOT be installed into a partition (like /dev/sda2)
+## but in the master boot record only (/dev/sda, /dev/sdb,...).
+# Usage example:
+# GRUB='/dev/sda'
 GRUB=''
-
-# specify root device for usage in grub (corresponds with $TARGET)
-# notice: if you install Debian for example to /dev/hda1 use hd0,0
-#         hd0,0 is the first partition on the first disk
-#         hd0   is the MBR of the first disk
-# usage example:
-# GROOT='hd0,0'
-GROOT=''
 
 # specifiy additional bootparameters for usage in grub 
 # e.g. "pci=nomsi"

@@ -14,8 +14,7 @@ _arguments -s                                                                   
   '(-p --mntpoint)'{-p,--mntpoint}'[mountpoint for the target system]:mount point:_path_files'  \
   '(-r --release)'{-r,--release}'[specify the release name of the new system]:release'          \
   '(-t --target)'{-t,--target}'[target partition or directory]:device or directory:_path_files' \
-  '--grub[installation device for grub]:grub syntax'                                            \
-  '--groot[root device for usage in grub]:grub syntax'                                          \
+  '--grub[installation device for grub]'                                                        \
   '--password[specify password for root user]'							\
   '--bootappend[appendline for kernel]'
 

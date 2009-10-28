@@ -47,10 +47,7 @@ Bootstrap options:
       --debopt <params>  Extra parameters passed to the debootstrap command.
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
-      --groot <device>   Root device for usage in grub, corresponds with
-                           \$TARGET in grub syntax, like hd0,0 for /dev/sda1.
-      --grub <device>    Target for grub installation. Use grub syntax for
-                           specifying, like hd0 for /dev/sda.
+      --grub <device>    Target for grub installation. Usage example: /dev/sda
       --arch <arch>      Architecture to use. Currently only i386 is supported.
 
 Configuration options:
@@ -148,7 +145,6 @@ fi
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
-[ "$_opt_groot" ]               && GROOT=$_opt_groot
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_verbose" ]             && VERBOSE="-v"
@@ -251,22 +247,27 @@ prompt_for_bootmanager()
     mbr)
       # /dev/md0: has to be installed in MBR of /dev/md0 and not in /dev/md:
       if echo "$TARGET" | grep -q "/dev/md" ; then
-         BOOT_PARTITION="$TARGET"
+         # using sw-raid:
+         if [ -n "$SELECTED_PARTITIONS" ] ; then
+            GRUB=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}') # use first disk only
+         else
+            GRUB="$TARGET"
+         fi
       else
-         BOOT_PARTITION="$MBRDISK"
+        GRUB="$MBRDISK"
       fi
       ;;
     partition)
-      BOOT_PARTITION="$TARGET"
+      GRUB="$TARGET"
       ;;
     hda)
-      BOOT_PARTITION="/dev/hda"
+      GRUB="/dev/hda"
       ;;
     sda)
-      BOOT_PARTITION="/dev/sda"
+      GRUB="/dev/sda"
       ;;
     nowhere)
-      BOOT_PARTITION=''
+      GRUB=''
       ;;
   esac
 }
@@ -278,8 +279,7 @@ prompt_for_release()
   [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='lenny'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 4 \
-            etch     Debian/old-stable \
+            0 50 3 \
             lenny    Debian/stable \
             squeeze  Debian/testing \
             sid      Debian/unstable)"
@@ -338,60 +338,6 @@ prompt_for_mirror()
                "Please enter directory name you would like to use for installing packages." \
                0 0 $ISO)"
   fi
-}
-# }}}
-
-# get grub's syntax for /dev/ice {{{
-# usage example: 'grubdevice /dev/sda2' returns 'hd0,1'
-grubdevice() {
-  if [ -z "$1" ] ; then
-     echo "Usage: grubdevice <device>">&2
-     return 1
-  fi
-
-  device="$1"
-  device_map=$(mktemp)
-
-  # create device.map
-  if which grub >/dev/null 2>&1 ; then
-     echo 'quit' | grub --device-map="$device_map" >/dev/null 2>&1
-  elif which grub-mkdevicemap >/dev/null 2>&1 ; then
-     grub-mkdevicemap --no-floppy --device-map="$device_map" >/dev/null 2>&1
-  else
-    echo "Error: neither grub nor grub-mkdevicemap command found." >&2
-    return 1
-  fi
-
-  # based on code from d-i's trunk/packages/arch/i386/grub-installer/grub-installer:
-  tmp_disk=$(echo "$device" | sed -e 's%\(\(s\|h\|v\|xv\)d[a-z]\)[0-9]*$%\1%' \
-                    -e 's%\(fd[0-9]*\)$%\1%' \
-                    -e 's%/part[0-9]*$%/disc%' \
-                    -e 's%\(c[0-7]d[0-9]*\).*$%\1%' \
-                    -e 's%\(mmcblk[0-9]d[0-9]*\).*$%\1%' \
-                    -e 's%\(/mapper/mpath[0-9]\+\)-part[0-9]\+$%\1%')
-  tmp_part=$(echo "$device" | sed -e 's%.*/\(s\|h\|v\|xv\)d[a-z]\([0-9]*\)$%\2%' \
-                    -e 's%.*/fd[0-9]*$%%' \
-                    -e 's%.*/floppy/[0-9]*$%%' \
-                    -e 's%.*/\(disc\|part\([0-9]*\)\)$%\2%' \
-                    -e 's%.*c[0-7]d[0-9]*p*%%' \
-                    -e 's%.*mmcblk[0-9]d[0-9]*p%%' \
-                    -e 's%.*/mapper/mpath[0-9]\+-part\([0-9]\+\)%\1%')
-  tmp_drive=$(grep -v '^#' $device_map | grep "$tmp_disk *$" | sed 's%.*\([hf]d[0-9][a-g0-9,]*\).*%\1%')
-
-  if [ -z "$tmp_drive" ]; then
-    echo "Error: $device does not have any corresponding BIOS drive." >&2
-    return 1
-  fi
-
-  case $1 in
-     /dev/[sh]d[a-z]) # we expect something like 'hd0'
-        echo "$tmp_drive"
-        ;;
-      *) # we expect something like 'hd0,0'
-        echo "$tmp_drive" | sed "s%$%,$(expr $tmp_part - 1)%" # FIXME => md0
-        ;;
-  esac
-  rm -f "$device_map"
 }
 # }}}
 
@@ -566,20 +512,6 @@ interactive_mode()
 
   prompt_for_password
 
-  # use first disk of sw-raid for grub by default, install grub on
-  # all involved disks later on
-  if echo "$TARGET" | grep -q '/dev/md' ; then
-     if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
-        # use hdX and not hdX,Y for $GRUB
-        TMPDEVICE=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}') # use first disk only
-        GRUB="$(grubdevice ${TMPDEVICE%%[0-9]})" # like: hd0
-        GROOT="$(grubdevice ${TMPDEVICE})"       # like: hd0,0
-     fi
-  else
-     [ -n "$BOOT_PARTITION" ] && GRUB="$(grubdevice $BOOT_PARTITION)"
-     [ -n "$TARGET" ]         && GROOT="$(grubdevice $TARGET)"
-  fi
-
   prompt_for_mirror
 }
 
@@ -633,7 +565,6 @@ case $TARGET in
     TUNE2FS=''
     FSCK=''
     GRUB=''
-    GROOT=''
     ;;
 esac
 # }}}
@@ -805,7 +736,6 @@ preparechroot() {
   chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
   [ -n "$ARCH" ]          && echo "ARCH=$ARCH"                 >> $CHROOT_VARIABLES
-  [ -n "$GROOT" ]         && echo "GROOT=$GROOT"               >> $CHROOT_VARIABLES
   [ -n "$GRUB" ]          && echo "GRUB=$GRUB"                 >> $CHROOT_VARIABLES
   [ -n "$HOSTNAME" ]      && echo "HOSTNAME=$HOSTNAME"         >> $CHROOT_VARIABLES
   [ -n "$INSTALL_NOTES" ] && echo "INSTALL_NOTES=$INSTALL_NOTES" >> $CHROOT_VARIABLES
@@ -828,7 +758,6 @@ preparechroot() {
   sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
   sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
   sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
-  sed -i "s#GROOT=.*#GROOT=\"$GROOT\"#"       $MNTPOINT/etc/debootstrap/config
 
   # install notes:
   if [ -n "$INSTALL_NOTES" ] ; then
@@ -910,10 +839,13 @@ chrootscript() {
   if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
      mount_target
   fi
+
   if [ -x "$MNTPOINT/bin/chroot-script" ] ; then
      einfo "Executing chroot-script now"
-     chroot "$MNTPOINT" /bin/chroot-script
-     eend $?
+     mount --bind /dev "$MNTPOINT"/dev
+     chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
+     umount "$MNTPOINT"/dev
+     eend $RC
   else
      eerror "Fatal: $MNTPOINT/bin/chroot-script could not be found."
      eend 1
@@ -923,24 +855,23 @@ chrootscript() {
 
 # install booloader grub {{{
 grub_install() {
-  if [ -z "$GRUB" -o -z "$GROOT" ] ; then
-     echo "Notice: \$GRUB or \$GROOT not defined, will not install grub therefor."
-  elif [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
+  if [ -z "$GRUB" ] ; then
+     echo "Notice: \$GRUB not defined, will not install grub therefore."
+     return 0
+  fi
+
+  if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
      for device in $SELECTED_PARTITIONS ; do
-        # TMPDEVICE=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}')
-        # GRUB="$(grubdevice ${TMPDEVICE})"
-        # GRUB="$(grubdevice ${TMPDEVICE%%[0-9]})"
-        # GRUB=$(grubdevice $device)
-        GRUB="$(grubdevice ${device%%[0-9]})"
+        GRUB="${device%%[0-9]}"
         einfo "Installing grub on ${GRUB}:"
         [ -x /usr/sbin/grub-install ] && GRUBINSTALL="/usr/sbin/grub-install --no-floppy" || GRUBINSTALL="/sbin/grub-install --no-floppy"
-        $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
+        $GRUBINSTALL --root-directory="$MNTPOINT" "$GRUB"
         eend $?
      done
   else
      einfo "Installing grub on ${GRUB}:"
      [ -x /usr/sbin/grub-install ] && GRUBINSTALL="/usr/sbin/grub-install --no-floppy" || GRUBINSTALL="/sbin/grub-install --no-floppy"
-     $GRUBINSTALL --root-directory="$MNTPOINT" "(${GRUB})"
+     $GRUBINSTALL --root-directory="$MNTPOINT" "$GRUB"
      eend $?
   fi
 }
