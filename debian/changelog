@@ -1,3 +1,10 @@
+grml-debootstrap (0.33) UNRELEASED; urgency=low
+
+  * Do not provide the 'install bootloader into partition' feature
+    in the interactive menu (since grub2 can't handle that).
+
+ -- Michael Prokop <mika@grml.org>  Thu, 29 Oct 2009 01:40:37 +0100
+
 grml-debootstrap (0.32) unstable; urgency=low
 
   * Drop support for old-stable/etch.

@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.32'
+VERSION='0.33-pre1'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -252,7 +252,6 @@ prompt_for_bootmanager()
   GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
             mbr       "install bootmanager into $MBRPART" \
-            partition "install bootmanager into partition $TARGET" \
             nowhere   "do not install bootmanager at all" \
           ${ADDITIONAL_PARAMS})
   [ $? -eq 0 ] || bailout 3
@@ -271,9 +270,6 @@ prompt_for_bootmanager()
       else
         GRUB="$MBRDISK"
       fi
-      ;;
-    partition)
-      GRUB="$TARGET"
       ;;
     hda)
       GRUB="/dev/hda"
