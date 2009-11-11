@@ -49,6 +49,7 @@ Bootstrap options:
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
       --arch <arch>      Architecture to use. Currently only i386 is supported.
+      --insecure         Do not download and check Release file signatures.
 
 Configuration options:
 
@@ -147,6 +148,7 @@ fi
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
+[ "$_opt_insecure" ]            && SECURE='false'
 [ "$_opt_verbose" ]             && VERBOSE="-v"
 
 [ "$_opt_help" ] && {
@@ -591,6 +593,19 @@ else
 fi
 # }}}
 
+# keyring setupt {{{
+KEYRING=""
+if [ "$SECURE" = 'yes' ] ; then
+   if [ -e '/etc/apt/trusted.gpg' ] ; then
+      KEYRING="--keyring /etc/apt/trusted.gpg"
+   else
+      eerror "Could not find /etc/apt/trusted.gpg."
+   fi
+else
+   ewarn "Not checking Release signatures!"
+fi
+# }}}
+
 # make sure we have the right syntax when using an iso image {{{
 if [ -n "$ISO" ] ; then
    case $ISO in
@@ -735,9 +750,9 @@ debootstrap_system() {
   if grep -q "$MNTPOINT" /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
      if [ -n "$MIRROR" ] ; then
-        $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
+        $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
      else
-        $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+        $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
      fi
      eend $?
   else

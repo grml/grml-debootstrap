@@ -103,6 +103,10 @@ Options and environment variables
 
     Skip debootstrap, only do configuration to the target.
 
+*--insecure*::
+
+    Do not download and check signatures for retrieved Release files.
+
 *-p*, *--mntpoint* <_/mntpoint_>::
 
     Specify mountpoint that should be used for mounting the target system.

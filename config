@@ -93,6 +93,10 @@ HOSTNAME='grml'
 # supported values: debootstrap cdebootstrap
 DEBOOTSTRAP='debootstrap'
 
+# check signature of release file per default
+# set to any other value then yes to disable signature checks.
+SECURE='yes'
+
 # To pass extra parameters to the debootstrap command. This feature allows
 # grml-debootstrap to pass extra parameters, e.g., --include=, --exclude=,
 # --components=, etc to debootstrap. E.g.,
