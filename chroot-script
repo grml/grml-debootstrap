@@ -116,15 +116,6 @@ EOF
 }
 # }}}
 
-# create default devices {{{
-makedev() {
-  if ! [ -r /dev/hda20 ] ; then
-     echo "Creating generic devices in /dev - this might take a while..."
-     cd /dev && MAKEDEV generic
-  fi
-}
-# }}}
-
 # make sure services do not start up {{{
 install_policy_rcd() {
   if ! [ -r /usr/sbin/policy-rc.d ] ; then
@@ -427,7 +418,7 @@ finalize() {
 # }}}
 
 # execute the functions {{{
- for i in chrootmirror grmlrepos kernelimg_conf makedev install_policy_rcd \
+ for i in chrootmirror grmlrepos kernelimg_conf install_policy_rcd \
      kernel packages extrapackages reconfigure hosts interfaces   \
      timezone fstab hostname initrd grub_config passwords custom_scripts   \
      services ; do
