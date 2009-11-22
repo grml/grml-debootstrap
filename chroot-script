@@ -418,7 +418,11 @@ finalize() {
 # }}}
 
 # execute the functions {{{
- for i in chrootmirror grmlrepos kernelimg_conf install_policy_rcd \
+
+ # always execute install_policy_rcd
+ install_policy_rcd
+
+ for i in chrootmirror grmlrepos kernelimg_conf \
      kernel packages extrapackages reconfigure hosts interfaces   \
      timezone fstab hostname initrd grub_config passwords custom_scripts   \
      services ; do
