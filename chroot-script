@@ -417,6 +417,18 @@ finalize() {
 }
 # }}}
 
+# signal handler {{{
+signal_handler() {
+  finalize
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  exit "$EXIT"
+}
+# }}}
+
+# set signal handler {{{
+trap signal_handler HUP INT QUIT TERM
+# }}}
+
 # execute the functions {{{
 
  # always execute install_policy_rcd
