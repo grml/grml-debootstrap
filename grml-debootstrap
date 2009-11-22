@@ -629,12 +629,13 @@ bailout(){
         # make sure nothing is left inside chroot so we can unmount it
         [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
         [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-        # ugly, but make sure we really don't leav anything
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /sys  1>/dev/null 2>&1
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a    1>/dev/null 2>&1
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount /proc 1>/dev/null 2>&1
-        [ -d "$MNTPOINT/$ISODIR" ]    && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1
+        # ugly, but make sure we really don't leav anything (/proc /proc is intended)
+        for ARG in /sys -a /proc /proc ; do
+          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG 1>/dev/null 2>&1 || true
+        done
+        umount "$MNTPOINT"/dev 1>/dev/null 2>&1 || true
+
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1 || true
 
         if [ -n "$DIRECTORY" ] ; then
           einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
