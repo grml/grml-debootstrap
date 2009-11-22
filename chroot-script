@@ -51,7 +51,7 @@ chrootmirror() {
 
   if [ -n "$ISO" ] ; then
      echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
-     [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || /bin/true
+     [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || true
   else
     if [ -n "$MIRROR" ] ; then
        echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
@@ -80,7 +80,7 @@ EOF
 
      # make sure we have the keys available for aptitude
      gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
-     gpg --export F61E2E7CECDEA787 | apt-key add - || /bin/true # not yet sure
+     gpg --export F61E2E7CECDEA787 | apt-key add - || true # not yet sure
      # why it's necessary, sometimes we get an error even though it works [mika]
 
      # make sure we install packages from grml's pool only if not available
@@ -399,7 +399,7 @@ custom_scripts() {
 services() {
   for service in ssh mdadm mdadm-raid ; do
     if [ -x /etc/init.d/"$service" ] ; then
-       /etc/init.d/"$service" stop || /bin/true
+       /etc/init.d/"$service" stop || true
     fi
   done
 }
