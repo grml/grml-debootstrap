@@ -104,10 +104,10 @@ fi
 
 # cmdline handling {{{
 # source external command line parameter-processing script
-if [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
-   . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
-elif [ -r ./cmdlineopts.clp ] ; then
+if [ -r ./cmdlineopts.clp ] ; then
    . ./cmdlineopts.clp
+elif [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
+   . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
 else
    echo "Error: cmdline function file not found, exiting.">&2
    exit 1
