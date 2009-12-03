@@ -1,5 +1,5 @@
 # -*- shell-script -*-
-# Filename:      grml-debootstrap.clp
+# Filename:      cmdlineopts.clp
 # Purpose:       shell script command line parameter-processing for grml-debootstrap
 # Authors:       grml-team (grml.org), Tong Sun <suntong@cpan.org>
 # Bug-Reports:   see http://grml.org/bugs/
