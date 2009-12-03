@@ -576,13 +576,11 @@ set_target_directory(){
     GRUB=''
 }
 
-case $TARGET in
-  /dev/shm/*) set_target_directory ;;
-  /dev/*)
+if [ -b "$TARGET" ] ; then
     PARTITION=1
-    ;;
-  *) set_target_directory ;;
-esac
+else
+    set_target_directory
+fi
 # }}}
 
 # architecture setup {{{
