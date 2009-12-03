@@ -566,11 +566,7 @@ fi
 PARTITION=''
 DIRECTORY=''
 
-case $TARGET in
-  /dev/*)
-    PARTITION=1
-    ;;
-  *)
+set_target_directory(){
     # assume we are installing into a directory, don't run mkfs and grub related stuff therefore
     DIRECTORY=1
     MNTPOINT="$TARGET"
@@ -578,7 +574,14 @@ case $TARGET in
     TUNE2FS=''
     FSCK=''
     GRUB=''
+}
+
+case $TARGET in
+  /dev/shm/*) set_target_directory ;;
+  /dev/*)
+    PARTITION=1
     ;;
+  *) set_target_directory ;;
 esac
 # }}}
 
