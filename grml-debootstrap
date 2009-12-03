@@ -574,6 +574,10 @@ set_target_directory(){
     TUNE2FS=''
     FSCK=''
     GRUB=''
+    # make sure we normalise the path to an absolute directory name so something like:
+    #  mkdir -p foo/a bar/a; (cd foo; grml-debootstrap -t a)&; (cd bar; grml-debootstrap -t a)&; wait
+    # works
+    TARGET="$(readlink -f $TARGET)"
 }
 
 if [ -b "$TARGET" ] ; then
