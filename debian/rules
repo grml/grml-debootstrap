@@ -21,12 +21,12 @@ clean:
 	dh_testroot
 	rm -f build-stamp
 	make clean
-	dh_clean 
+	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_clean -k
 	dh_installdirs etc/debootstrap usr/sbin etc/debootstrap/extrapackages etc/zsh/completion.d \
 	  usr/share/grml-debootstrap/functions
 
@@ -48,7 +48,7 @@ binary-arch: build install
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs 
+	dh_installchangelogs
 	dh_installdocs TODO THANKS
 	dh_installman grml-debootstrap.8
 	dh_link
