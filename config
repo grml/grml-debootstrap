@@ -120,6 +120,9 @@ DEBCONF='yes'
 
 # execute scripts from /etc/debootstrap/chroot-scripts/ inside the chroot?
 CHROOT_SCRIPTS='yes'
+#
+# execute scripts from /etc/debootstrap/pre-scripts/ before setting up chroot?
+PRE_SCRIPTS='yes'
 
 # execute scripts from /etc/debootstrap/scripts/ after setting up chroot?
 SCRIPTS='yes'
