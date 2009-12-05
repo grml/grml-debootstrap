@@ -64,7 +64,8 @@ Configuration options:
       --password <pwd>     Use specified password as password for user root.
       --bootappend <line>  Add specified appendline to kernel whilst booting.
       --chroot-scripts <d> Execute chroot scripts from specified directory.
-      --scripts <dir>      Execute scripts from specified directory.
+      --pre-scripts <dir>  Execute scripts from specified directory (before chroot-scripts).
+      --scripts <dir>      Execute scripts from specified directory (after chroot-scripts).
 
 Other options:
 
@@ -141,6 +142,7 @@ fi
 [ "$_opt_packages_set" ]        && PACKAGES='yes'
 [ "$_opt_debconf_set" ]         && DEBCONF='yes'
 [ "$_opt_scripts_set" ]         && SCRIPTS='yes'
+[ "$_opt_pre_scripts_set" ]     && PRE_SCRIPTS='yes'
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
 [ "$_opt_keep_src_list" ]       && KEEP_SRC_LIST='yes'
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
@@ -856,6 +858,22 @@ preparechroot() {
 }
 # }}}
 
+# execute all scripts in /etc/debootstrap/pre-scripts/ {{{
+execute_pre_scripts() {
+   # make sure we have $MNTPOINT available for our scripts
+   export MNTPOINT
+   if [ -d "$_opt_pre_scripts" ] || [ "$PRE_SCRIPTS" = 'yes' ] ; then
+      [ -d "$_opt_pre_scripts" ] && pre_scripts="$_opt_pre_scripts" || pre_scripts="$CONFFILES/pre-scripts/"
+      for script in ${pre_scripts}/* ; do
+         if [ -x "$script" ] ; then
+            einfo "Executing pre-script $script"
+            $script ; eend $?
+         fi
+      done
+   fi
+}
+# }}}
+
 # execute all scripts in /etc/debootstrap/scripts/ {{{
 execute_scripts() {
    # make sure we have $MNTPOINT available for our scripts
@@ -954,7 +972,7 @@ fscktool() {
 
 # now execute all the functions {{{
 for i in mkfs tunefs mount_target debootstrap_system preparechroot \
-         chrootscript execute_scripts grub_install umount_chroot   \
+         execute_pre_scripts chrootscript execute_scripts grub_install umount_chroot   \
          fscktool ; do
     if stage "${i}" ; then
        $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
