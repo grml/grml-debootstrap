@@ -1,7 +1,30 @@
-grml-debootstrap (0.33) UNRELEASED; urgency=low
+grml-debootstrap (0.33) unstable; urgency=low
 
-  * Do not provide the 'install bootloader into partition' feature
-    in the interactive menu (since grub2 can't handle that).
+  [ Michael Prokop ]
+  * Do not provide the 'install bootloader into partition' feature in
+    the interactive menu.
+  * Install to directory: normalise the path to an absolute directory
+    name.
+  * remove cached debs to reduce diskpace during bootstrap (based on
+    patch by gebi, thanks).
+
+  [ Ulrich Dangel ]
+  * Support and enable per default --keyring option. [Closes: issue746]
+  * Do not run MAKEDEV inside the chroot.
+  * Adjusted umount handling in bailout() to work with set -e
+  * Always execute install_policy_rcd in chroot [Closes: issue778]
+  * Install signal handler to always cleanup chroot.
+  * Replace /bin/true with true in chroot-script
+  * Remove duplicate : in getopt definition. Caused wrong parameter
+    handling.
+  * Adjusted Filename comment in cmdlineopts.clp
+  * Remove trailing whitespace from debian/rules
+  * Switched order of including cmdlineopts.clp, first check local
+    directory
+  * Only set PARTITION=1 if target is a block device.
+
+  [ Michael Gebetsroither ]
+  * introduce --pre-scripts to be executed before chroot-scripts
 
  -- Michael Prokop <mika@grml.org>  Thu, 29 Oct 2009 01:40:37 +0100
 
@@ -318,7 +341,7 @@ grml-debootstrap (0.9) unstable; urgency=low
 
 grml-debootstrap (0.8) unstable; urgency=low
 
-  * Add BOOT_APPEND option for kernel appendline 
+  * Add BOOT_APPEND option for kernel appendline
 
  -- Alexander Wirt <formorer@grml.org>  Sat, 21 Apr 2007 11:19:06 +0200
 
