@@ -2,7 +2,6 @@ TODO list for grml-debootstrap
 ==============================
 
 * support for LVM
-* support grub2
 * support tarballs for customization/mirror source
   -> integrate/use 'fai dirinstall'?
 * support automatic installation of grml packages:
