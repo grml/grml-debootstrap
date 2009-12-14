@@ -13,7 +13,7 @@
 ################################################################################
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages:,chroot-scripts:,scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version \
+    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version \
   -- "$@"`
 if [ $? != 0 ]; then
   eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
@@ -70,6 +70,10 @@ while :; do
   --debconf)           # Pre-seed packages using specified file
     shift; _opt_debconf="$1"
     _opt_debconf_set=T
+    ;;
+  --pre-scripts)       # Execute scripts from specified directory (before chroot-scripts).
+    shift; _opt_pre_scripts="$1"
+    _opt_pre_scripts_set=T
     ;;
   --scripts)           # Execute scripts from specified directory
     shift; _opt_scripts="$1"

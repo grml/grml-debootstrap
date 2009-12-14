@@ -131,6 +131,14 @@ Options and environment variables
     squeeze (note: requires current version of debootstrap) and sid.
     Corresponding with configuration variable RELEASE.
 
+*--pre-scripts* <_directory_>::
+
+    Execute scripts from specified directory before executing the chroot
+    script. This allows customisation of the system before the chroot has
+    been set up.  The environment variable $MNTPOINT is available inside the
+    scripts for direct access of the chroot.
+    Default directory: /etc/debootstrap/pre-scripts/
+
 *--scripts* <_directory_>::
 
     Execute scripts from specified directory. This allows customisation of
