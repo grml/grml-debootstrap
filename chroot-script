@@ -129,6 +129,12 @@ EOF
 }
 # }}}
 
+# remove now useless apt cache {{{
+remove_apt_cache() {
+    find /var/cache/apt/archives -name '*.deb' -exec rm -f '{}' \;
+}
+# }}}
+
 # install additional packages {{{
 packages() {
   # Pre-seed the debconf database with answers. Each question will be marked
@@ -435,7 +441,7 @@ trap signal_handler HUP INT QUIT TERM
  install_policy_rcd
 
  for i in chrootmirror grmlrepos kernelimg_conf \
-     kernel packages extrapackages reconfigure hosts interfaces   \
+     remove_apt_cache kernel packages extrapackages reconfigure hosts interfaces   \
      timezone fstab hostname initrd grub_config passwords custom_scripts   \
      services ; do
      if stage $i ; then
