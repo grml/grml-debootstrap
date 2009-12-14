@@ -131,7 +131,7 @@ EOF
 
 # remove now useless apt cache {{{
 remove_apt_cache() {
-    find /var/cache/apt/archives -name '*.deb' -exec rm -f '{}' \;
+  apt-get clean
 }
 # }}}
 
