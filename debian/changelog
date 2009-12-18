@@ -7,6 +7,7 @@ grml-debootstrap (0.33) unstable; urgency=low
     name.
   * remove cached debs to reduce diskpace during bootstrap (based on
     patch by gebi, thanks).
+  * Fix sed usage for fall back to old behaviour in MBR handling.
 
   [ Ulrich Dangel ]
   * Support and enable per default --keyring option. [Closes: issue746]
@@ -26,7 +27,7 @@ grml-debootstrap (0.33) unstable; urgency=low
   [ Michael Gebetsroither ]
   * introduce --pre-scripts to be executed before chroot-scripts
 
- -- Michael Prokop <mika@grml.org>  Thu, 29 Oct 2009 01:40:37 +0100
+ -- Michael Prokop <mika@grml.org>  Fri, 18 Dec 2009 12:30:18 +0100
 
 grml-debootstrap (0.32) unstable; urgency=low
 
