@@ -12,9 +12,11 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version
+
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
-    mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version \
-  -- "$@"`
+    $CMDLINE_OPTS -- "$@"`
+
 if [ $? != 0 ]; then
   eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
 fi
