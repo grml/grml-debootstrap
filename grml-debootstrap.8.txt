@@ -56,10 +56,12 @@ Options and environment variables
 
     Place of configuration files for debootstrap, defaults to /etc/debootstrap.
 
-*--debconf* <_file_>::
+*--debconf*[=<_file_>]::
 
-    Use specified file for preseeding Debian packages instead of using
-    the default <confdir>/debconf-selections.
+    When using *--debconf* without the optional '=<_file_>' parameter, it
+    enables preseeding Debian packages using the default
+    '<confdir>/debconf-selections' file. If the optional parameter is given,
+    use the specified file for preseeding Debian packages instead.
 
 *--debopt* <_params_>::
 
@@ -114,10 +116,13 @@ Options and environment variables
     Note: this option has no effect if option -t is given and represents a
     directory.
 
-*--packages* <_file_>::
+*--packages*[=<_file_>]::
 
-    Use specified file as list for packages that should be installed instead of
-    the default package list file <confdir>/packages.
+    When using *--packages* without the optional '=<_file_>' parameter, it
+    enables installing the packages defined in the default package list
+    '<confdir>/packages' file. If the optional parameter is given, the
+    specified list file is used as list for packages that should be
+    installed instead.
 
 *--password* <_password_>::
 
@@ -131,20 +136,25 @@ Options and environment variables
     squeeze (note: requires current version of debootstrap) and sid.
     Corresponding with configuration variable RELEASE.
 
-*--pre-scripts* <_directory_>::
+*--pre-scripts*[=<_directory_>]::
 
-    Execute scripts from specified directory before executing the chroot
-    script. This allows customisation of the system before the chroot has
-    been set up.  The environment variable $MNTPOINT is available inside the
-    scripts for direct access of the chroot.
-    Default directory: /etc/debootstrap/pre-scripts/
+    When using *--pre-scripts* without the optional '=<_directory_>'
+    parameter, it enables executing scripts from the default
+    '<confdir>/pre-scripts/' directory before executing the chroot script.
+    If the optional parameter is given, execute scripts from the specified
+    directory instead. This allows customization of the system before the
+    chroot has been set up.  The environment variable $MNTPOINT is available
+    inside the scripts for direct access of the chroot.
 
-*--scripts* <_directory_>::
+*--scripts*[=<_directory_>]::
 
-    Execute scripts from specified directory. This allows customisation of
-    the system after the chroot has been set up. The environment variable
-    $MNTPOINT is available inside the scripts for direct access of the chroot.
-    Default directory: /etc/debootstrap/scripts/
+    When using *--scripts* without the optional '=<_directory_>' parameter,
+    it enables executing scripts from the default '<confdir>/scripts/'
+    directory after the chroot has been set up.  If the optional parameter is
+    given, execute scripts from the specified directory instead. This allows
+    customisation of the system after the chroot has been set up. The
+    environment variable $MNTPOINT is available inside the scripts for
+    direct access of the chroot.
 
 *-t*, *--target* <_target_>::
     Target partition (/dev/...) or directory (anything else without /dev at the
@@ -158,9 +168,21 @@ Options and environment variables
 *-V*, *--version*::
     Show version of program and exit.
 
-WARNING: the commandline parsing of grml-debootstrap does not validate the provided
+TIP: The long options may be abbreviated, as long as the abbreviation is not
+ambiguous. Eg. '--k' will be the same as '--keep_src_list', and '--pac' be
+'--packages'.
+
+[WARNING]
+=====================================================================
+
+- To specify the optional parameter for switches that accept them, the
+optional argument must be written directly after the long option name,
+separated by `=' (without space).
+
+- the commandline parsing of grml-debootstrap does not validate the provided
 arguments for the commandline options. Please be careful and check docs and
 /etc/debootstrap/config for further information.
+=====================================================================
 
 Usage examples
 ---------------

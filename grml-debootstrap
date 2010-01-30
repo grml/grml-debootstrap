@@ -57,15 +57,15 @@ Configuration options:
                              /etc/debootstrap/config
   -d, --confdir <path>     Place of config files for debootstrap, defaults
                              to /etc/debootstrap
-      --packages <file>    Install packages defined in specified list file.
-      --debconf <file>     Pre-seed packages using specified pre-seed db file.
+      --packages[=<file>]  Install packages defined in specified list file.
+      --debconf[=<file>]   Pre-seed packages using specified pre-seed db file.
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --hostname <name>    Hostname of Debian system.
       --password <pwd>     Use specified password as password for user root.
       --bootappend <line>  Add specified appendline to kernel whilst booting.
       --chroot-scripts <d> Execute chroot scripts from specified directory.
-      --pre-scripts <dir>  Execute scripts from specified directory (before chroot-scripts).
-      --scripts <dir>      Execute scripts from specified directory (after chroot-scripts).
+      --pre-scripts[=<d>]  Execute scripts from specified directory (before chroot-scripts).
+      --scripts[=<dir>]    Execute scripts from specified directory (after chroot-scripts).
 
 Other options:
 
