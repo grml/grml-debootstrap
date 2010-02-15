@@ -8,6 +8,7 @@ grml-debootstrap (0.33) unstable; urgency=low
   * remove cached debs to reduce diskpace during bootstrap (based on
     patch by gebi, thanks).
   * Fix sed usage for fall back to old behaviour in MBR handling.
+  * Bump Standards-Version to 3.8.4 (no further changes).
 
   [ Ulrich Dangel ]
   * Support and enable per default --keyring option. [Closes: issue746]
@@ -23,11 +24,14 @@ grml-debootstrap (0.33) unstable; urgency=low
   * Switched order of including cmdlineopts.clp, first check local
     directory
   * Only set PARTITION=1 if target is a block device.
+  * Apply patch by Tong Sun <suntong@cpan.org> which addresses
+    grml-debootstrap's parameter handling. Thanks!
+  * Added unit tests for cmddlineopts.clp.
 
   [ Michael Gebetsroither ]
   * introduce --pre-scripts to be executed before chroot-scripts
 
- -- Michael Prokop <mika@grml.org>  Fri, 18 Dec 2009 12:30:18 +0100
+ -- Michael Prokop <mika@grml.org>  Mon, 15 Feb 2010 22:32:33 +0100
 
 grml-debootstrap (0.32) unstable; urgency=low
 
