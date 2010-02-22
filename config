@@ -113,10 +113,10 @@ DEBIAN_FRONTEND='noninteractive'
 # STAGES='/var/cache/grml-debootstrap'
 
 # install packages defined in /etc/debootstrap/packages?
-PACKAGES=
+PACKAGES='yes'
 
 # pre-seed packages using /etc/debootstrap/debconf-selections (if exist)?
-DEBCONF=
+DEBCONF='yes'
 
 # execute scripts from /etc/debootstrap/chroot-scripts/ inside the chroot?
 CHROOT_SCRIPTS='yes'
