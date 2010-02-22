@@ -147,7 +147,7 @@ TUNE2FS='tune2fs -c0 -i0'
 # check filesystem when chroot stuff finished?
 FSCK='yes'
 
-# which tool should be used for fsck? if unset the tool will be guesst based on $MKFS
+# which tool should be used for fsck? if unset the tool will be guessed based on $MKFS
 # FSCKTOOL=''
 
 # which packages do you want do dpkg-reconfigure?
