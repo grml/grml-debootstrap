@@ -140,6 +140,7 @@ fi
 [ "$_opt_interactive" ]         && INTERACTIVE=1
 [ "$_opt_config" ]              && CONFIGFILE=$_opt_config
 [ "$_opt_packages_set" ]        && PACKAGES='yes'
+[ "$_opt_nopackages" ]          && PACKAGES=''
 [ "$_opt_debconf_set" ]         && DEBCONF='yes'
 [ "$_opt_scripts_set" ]         && SCRIPTS='yes'
 [ "$_opt_pre_scripts_set" ]     && PRE_SCRIPTS='yes'

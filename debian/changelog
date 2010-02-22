@@ -1,12 +1,16 @@
 grml-debootstrap (0.34) unstable; urgency=low
 
-  * Move the apt cache removal function to the end to avoid failure
-    of grub installation.
+  * Move the apt cache removal function to a later point of execution
+    so custom scripts still have access to the Debian packages.
   * Display executed debootstrap cmdline when running it.
   * Slightly improve checks for grub-install/update-grub and do
     no set full path to the binaries.
+  * Revert "Updated grml-debootstrap parameter handling" which
+    breaks the way grml-debootstrap used to work. Instead:
+  * Introduce option --nopackages to skip installation of packages
+    defined in /etc/debootstrap/packages.
 
- -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2010 22:30:19 +0100
+ -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2010 23:33:54 +0100
 
 grml-debootstrap (0.33) unstable; urgency=low
 

@@ -50,6 +50,9 @@ while :; do
   --nodebootstrap)     # Skip debootstrap, only do configuration to the target
     _opt_nodebootstrap=T
     ;;
+  --nopackages)        # Skip installation of packages defined in /etc/debootstrap/packages
+    _opt_nopackages=T
+    ;;
   --arch)              # Target architecutre
     shift; _opt_arch="$1"
     ;;
