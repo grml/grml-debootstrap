@@ -441,9 +441,9 @@ trap signal_handler HUP INT QUIT TERM
  install_policy_rcd
 
  for i in chrootmirror grmlrepos kernelimg_conf \
-     kernel packages extrapackages remove_apt_cache reconfigure hosts interfaces \
-     timezone fstab hostname initrd grub_config passwords custom_scripts         \
-     services ; do
+     kernel packages extrapackages  reconfigure hosts interfaces \
+     timezone fstab hostname initrd grub_config passwords        \
+     custom_scripts remove_apt_cache services ; do
      if stage $i ; then
        $i && stage $i done || exit 1
      fi

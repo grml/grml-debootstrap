@@ -1,3 +1,10 @@
+grml-debootstrap (0.34) unstable; urgency=low
+
+  * Move the apt cache removal function to the end to avoid failure
+    of grub installation.
+
+ -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2010 22:17:09 +0100
+
 grml-debootstrap (0.33) unstable; urgency=low
 
   [ Michael Prokop ]
