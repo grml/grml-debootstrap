@@ -206,7 +206,8 @@ Files
   /etc/debootstrap/config
 
 Main configuration file. You have to adjust it according to your needs
-before you are able to run grml-debootstrap.
+if you want to execute grml-debootstrap in the non-interactive mode without
+any special command line arguments.
 
   /etc/debootstrap/chroot-script
 
