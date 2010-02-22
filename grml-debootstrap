@@ -758,8 +758,10 @@ debootstrap_system() {
   if grep -q "$MNTPOINT" /proc/mounts || [ -n "$DIRECTORY" ] ; then
      einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
      if [ -n "$MIRROR" ] ; then
+        einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
         $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
      else
+        einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
         $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
      fi
      eend $?
