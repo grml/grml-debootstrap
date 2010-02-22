@@ -794,6 +794,7 @@ preparechroot() {
   [ -n "$ROOTPASSWORD" ]  && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
   [ -n "$TARGET" ]        && echo "TARGET=$TARGET"             >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]   && echo "TARGET_UUID=$TARGET_UUID"   >> $CHROOT_VARIABLES
+  [ -n "$RM_APTCACHE" ]   && echo "RM_APTCACHE=$RM_APTCACHE"   >> $CHROOT_VARIABLES
 
   cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script

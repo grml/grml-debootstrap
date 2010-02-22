@@ -9,8 +9,11 @@ grml-debootstrap (0.34) unstable; urgency=low
     breaks the way grml-debootstrap used to work. Instead:
   * Introduce option --nopackages to skip installation of packages
     defined in /etc/debootstrap/packages.
+  * Support config variable RM_APTCACHE to allow disabling removal
+    of apt-cache. Thanks for the idea and initial patch, Tong Sun.
+    [Closes: issue805]
 
- -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2010 23:33:54 +0100
+ -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2010 23:46:13 +0100
 
 grml-debootstrap (0.33) unstable; urgency=low
 

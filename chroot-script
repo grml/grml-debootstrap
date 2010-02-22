@@ -131,7 +131,12 @@ EOF
 
 # remove now useless apt cache {{{
 remove_apt_cache() {
-  apt-get clean
+  if [ "$RM_APTCACHE" = 'yes' ] ; then
+    echo "Cleaning apt cache."
+    apt-get clean
+  else
+    echo "Not cleaning apt cache as \$RM_APTCACHE is unset."
+  fi
 }
 # }}}
 

@@ -160,6 +160,9 @@ LOCALES='yes'
 # use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime
 TIMEZONE='Europe/Vienna'
 
+# remove apt cache in chroot after installation of packages finished?
+RM_APTCACHE='yes'
+
 # generate initrd via update-initramfs?
 INITRD='yes'
 
