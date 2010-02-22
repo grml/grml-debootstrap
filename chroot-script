@@ -380,8 +380,11 @@ grub_config() {
      # finally install grub
      if [ -x /usr/sbin/update-grub ] ; then
         UPDATEGRUB='/usr/sbin/update-grub'
-     else
+     elif [ -x /sbin/update-grub ] ; then
         UPDATEGRUB='/sbin/update-grub'
+     else
+       echo "Error: update-grub not available, can not execute it."
+       return 1
      fi
 
      # grub2:

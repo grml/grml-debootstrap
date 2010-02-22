@@ -922,18 +922,21 @@ grub_install() {
      return 0
   fi
 
+  if ! [ -x "$(which grub-install)" ] ; then
+     echo "Error: grub-install not available. (Error while installing grub package?)"
+     return 1
+  fi
+
   if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
      for device in $SELECTED_PARTITIONS ; do
         GRUB="${device%%[0-9]}"
         einfo "Installing grub on ${GRUB}:"
-        [ -x /usr/sbin/grub-install ] && GRUBINSTALL="/usr/sbin/grub-install --no-floppy" || GRUBINSTALL="/sbin/grub-install --no-floppy"
-        $GRUBINSTALL --root-directory="$MNTPOINT" "$GRUB"
+        grub-install --no-floppy --root-directory="$MNTPOINT" "$GRUB"
         eend $?
      done
   else
      einfo "Installing grub on ${GRUB}:"
-     [ -x /usr/sbin/grub-install ] && GRUBINSTALL="/usr/sbin/grub-install --no-floppy" || GRUBINSTALL="/sbin/grub-install --no-floppy"
-     $GRUBINSTALL --root-directory="$MNTPOINT" "$GRUB"
+     grub-install --no-floppy --root-directory="$MNTPOINT" "$GRUB"
      eend $?
   fi
 }
