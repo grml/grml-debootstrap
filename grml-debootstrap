@@ -58,6 +58,8 @@ Configuration options:
   -d, --confdir <path>     Place of config files for debootstrap, defaults
                              to /etc/debootstrap
       --packages <file>    Install packages defined in specified list file.
+      --nopackages         Skip installation of packages defined in
+                             /etc/debootstrap/packages
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --hostname <name>    Hostname of Debian system.
