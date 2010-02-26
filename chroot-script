@@ -419,15 +419,14 @@ services() {
 }
 # }}}
 
-# unmount all filesystems in chroot, make sure nothing is left {{{
+# unmount /proc and make sure nothing is left {{{
 finalize() {
   # make sure we don't leave any sensible data
   rm -f /etc/debootstrap/variables
+
   [ -n "$POLICYRCD" ] && rm -f /usr/sbin/policy-rc.d
-  umount -a    1>/dev/null 2>/dev/null || true
-  umount /proc 1>/dev/null 2>/dev/null || true
-  umount /proc 1>/dev/null 2>/dev/null || true
-  umount -a    1>/dev/null 2>/dev/null || true
+
+  umount /proc >/dev/null 2>/dev/null || true
 }
 # }}}
 

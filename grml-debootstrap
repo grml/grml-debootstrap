@@ -994,6 +994,12 @@ done
 # }}}
 
 # finalize {{{
+if [ -n "$ISODIR" ] ; then
+   einfo "Unmounting Debian image loopback from $MNTPOINT/$ISODIR."
+   umount "$MNTPOINT/$ISODIR"
+   eend $?
+fi
+
 einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
 einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
 
