@@ -4,8 +4,9 @@ grml-debootstrap (0.35) unstable; urgency=low
     can cause problems with installations to directories.
     Thanks for the bugreport and debugging, Tong Sun.
     [Closes: issue806]
+  * Replace vol_id command with blkid.
 
- -- Michael Prokop <mika@grml.org>  Fri, 26 Feb 2010 13:27:41 +0100
+ -- Michael Prokop <mika@grml.org>  Fri, 26 Feb 2010 15:19:10 +0100
 
 grml-debootstrap (0.34) unstable; urgency=low
 

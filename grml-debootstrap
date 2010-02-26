@@ -210,7 +210,7 @@ prompt_for_target()
   fi
 
   PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
-                       echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet])"
+                       echo "$i $(blkid -s TYPE -o value $i 2>/dev/null || echo [no_filesystem_yet])"
                    done)
 
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
@@ -391,7 +391,7 @@ AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
              gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
 [ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
 PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
-                     echo "$i $(vol_id --type $i 2>/dev/null || echo [no_filesystem_yet]) off"
+                     echo "$i $(blkid -s TYPE -o value $i 2>/dev/null || echo [no_filesystem_yet]) off"
                  done)
 
 dialog --title "$PN" --separate-output \
