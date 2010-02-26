@@ -1,3 +1,12 @@
+grml-debootstrap (0.35) unstable; urgency=low
+
+  * Do NOT execute 'umount -a' in chroot script for cleanup. This
+    can cause problems with installations to directories.
+    Thanks for the bugreport and debugging, Tong Sun.
+    [Closes: issue806]
+
+ -- Michael Prokop <mika@grml.org>  Fri, 26 Feb 2010 13:27:41 +0100
+
 grml-debootstrap (0.34) unstable; urgency=low
 
   * Move the apt cache removal function to a later point of execution
