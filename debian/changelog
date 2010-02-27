@@ -1,3 +1,13 @@
+grml-debootstrap (0.36) unstable; urgency=low
+
+  * Add support for specifying filesystem that should be created
+    when installing to directories through --filesystem.
+    [Closes: issue596]
+  * Provide /etc/network/interfaces.examples file.
+    [Closes: issue495]
+
+ -- Michael Prokop <mika@grml.org>  Sat, 27 Feb 2010 21:39:57 +0100
+
 grml-debootstrap (0.35) unstable; urgency=low
 
   * Do NOT execute 'umount -a' in chroot script for cleanup. This

@@ -65,6 +65,12 @@ Options and environment variables
 
     Extra parameters passed to the debootstrap command.
 
+*--filesystem* <_filesystem_>::
+
+    Filesystem that should be created when installing to a partition.
+    If unset defaults to ext3. Valid values are all filesystems that
+    can be created through mkfs.<filesystem>.
+
 *--grub* <_device_>::
 
     Device where grub should be installed to. Note that only the MBR (master

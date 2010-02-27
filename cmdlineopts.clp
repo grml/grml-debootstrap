@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nopackages,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,keep_src_list,hostname:,password:,bootappend:,grub:,arch:,insecure,verbose,help,version
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -43,6 +43,9 @@ while :; do
     ;;
   --debopt)            # Extra parameters passed to the debootstrap command
     shift; _opt_debopt="$1"
+    ;;
+  --filesystem)        # Filesystem that should be used
+    shift; _opt_filesystem="$1"
     ;;
   --interactive)       # Use interactive mode (frontend)
     _opt_interactive=T

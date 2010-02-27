@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.35'
+VERSION='0.36'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -49,6 +49,7 @@ Bootstrap options:
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
       --arch <arch>      Architecture to use. Currently only i386 is supported.
+      --filesystem <fs>  Filesystem that should be used when target is a partition.
       --insecure         Do not download and check Release file signatures.
 
 Configuration options:
@@ -141,6 +142,7 @@ fi
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
 [ "$_opt_config" ]              && CONFIGFILE=$_opt_config
+[ "$_opt_filesystem" ]          && MKFS="mkfs.$_opt_filesystem"
 [ "$_opt_packages_set" ]        && PACKAGES='yes'
 [ "$_opt_nopackages" ]          && PACKAGES=''
 [ "$_opt_debconf_set" ]         && DEBCONF='yes'
@@ -409,7 +411,7 @@ ERRORFILE=$(mktemp)
 set +e
 # TODO: better error handling?
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
-      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} 1>/dev/null 2>$ERRORFILE
+      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
 set -e
 
@@ -639,18 +641,18 @@ bailout(){
         # make sure nothing is left inside chroot so we can unmount it
         [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
         [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-        # ugly, but make sure we really don't leav anything (/proc /proc is intended)
+        # ugly, but make sure we really don't leave anything (/proc /proc is intended)
         for ARG in /sys -a /proc /proc ; do
-          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG 1>/dev/null 2>&1 || true
+          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
         done
-        umount "$MNTPOINT"/dev 1>/dev/null 2>&1 || true
+        umount "$MNTPOINT"/dev >/dev/null 2>&1 || true
 
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" 1>/dev/null 2>&1 || true
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
 
         if [ -n "$DIRECTORY" ] ; then
           einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
         else
-          einfo "Unmounting $MNTPOINT"   ; umount "$MNTPOINT" ; eend $?
+          einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
         fi
 
         if [ -n "$STAGES" ] ; then
@@ -720,7 +722,7 @@ mkfs() {
 
 # modify filesystem settings {{{
 tunefs() {
-  if [ -n "$TUNE2FS" ] ; then
+  if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
      $TUNE2FS $TARGET
      eend $?
@@ -862,6 +864,11 @@ preparechroot() {
   if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
      [ -d $MNTPOINT/etc/network ] || mkdir $MNTPOINT/etc/network
      cp $VERBOSE /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+  fi
+
+  # install config file providing some example entries
+  if [ -r /etc/network/interfaces.examples -a ! -r "$MNTPOINT/etc/network/interfaces.examples" ] ; then
+     cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
   fi
 
   eend 0
