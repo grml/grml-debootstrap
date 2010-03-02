@@ -1,3 +1,9 @@
+grml-debootstrap (0.37) unstable; urgency=low
+
+  * Do not unmount ISO loopback mount point in finalize().
+
+ -- Michael Prokop <mika@grml.org>  Tue, 02 Mar 2010 02:30:32 +0100
+
 grml-debootstrap (0.36) unstable; urgency=low
 
   * Add support for specifying filesystem that should be created
