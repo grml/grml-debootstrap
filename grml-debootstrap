@@ -707,7 +707,11 @@ mkfs() {
 
        # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
        # will fail to detect the uuid in the chroot
-       blockdev --rereadpt "${TARGET%%[0-9]*}"
+       if echo "$TARGET" | grep -q "/dev/md" ; then
+         blockdev --rereadpt "${TARGET}"
+       else
+         blockdev --rereadpt "${TARGET%%[0-9]*}"
+       fi
        # give the system 2 seconds, otherwise we might run into
        # race conditions :-/
        sleep 2
