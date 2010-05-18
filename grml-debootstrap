@@ -93,16 +93,9 @@ check4progs debootstrap dialog || exit 1
 check4root || exit 1
 # }}}
 
-# source configuration file {{{
+# source main configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
-   if [ -n "$CONFIGFILE" ] ; then
-      einfo "Using config file $CONFIGFILE."
-      if ! . "$CONFIGFILE" ; then
-         eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
-      fi
-   else
-      . /etc/debootstrap/config
-   fi
+  . /etc/debootstrap/config
 fi
 # }}}
 
@@ -170,6 +163,15 @@ fi
   eend 0
   exit 0
 }
+# }}}
+
+# source specified configuration file {{{
+if [ -n "$CONFIGFILE" ] ; then
+   einfo "Reading specified config file $CONFIGFILE."
+   if ! . "$CONFIGFILE" ; then
+      eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
+   fi
+fi
 # }}}
 
 # backwards compability checks {{{
