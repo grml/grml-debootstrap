@@ -1,3 +1,11 @@
+grml-debootstrap (0.38) unstable; urgency=low
+
+  * Source specified configuration file at according stage.
+  * Make sure to reread the correct partition table if using SW-RAID.
+  * Cosmetic: fix comment regarding local CHOOSE_MIRROR.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 28 May 2010 00:45:20 +0200
+
 grml-debootstrap (0.37) unstable; urgency=low
 
   * Do not unmount ISO loopback mount point in finalize().
