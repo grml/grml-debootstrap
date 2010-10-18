@@ -11,7 +11,7 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.39-git'
+VERSION='0.39'
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
