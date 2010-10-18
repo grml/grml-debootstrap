@@ -42,6 +42,15 @@ stage() {
   echo "   Executing stage ${1}"
   return 0
 }
+
+askpass() {
+  # read -s emulation for dash. result is in $resp.
+  set -o noglob
+  stty -echo
+  read resp
+  stty echo
+  set +o noglob
+}
 # }}}
 
 # define chroot mirror {{{
@@ -227,10 +236,14 @@ passwords()
      echo "Setting password for user root:"
      while [ "$a" != "$b" ] ; do
        echo -n "Enter new UNIX password for user root: "
-       read -s a
+       askpass
+       a="$resp"
+       unset resp
        echo
        echo -n "Retype new UNIX password for user root: "
-       read -s b
+       askpass
+       b="$resp"
+       unset resp
        echo
        if [ "$a" != "$b" ] ; then
          echo "Sorry, passwords do not match. Retry."

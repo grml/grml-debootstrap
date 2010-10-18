@@ -3,7 +3,10 @@ grml-debootstrap (0.39) UNRELEASED; urgency=low
   [ Tong Sun ]
   * remove 'umount -a' in bailout(). [Closes: issue806].
 
- -- Michael Prokop <mika@grml.org>  Wed, 09 Jun 2010 11:44:05 +0200
+  [ Christian Hofstaedtler ]
+  * Remove "read -s" bashism from target chroot script. [Closes: issue912].
+
+ -- Christian Hofstaedtler <ch@grml.org>  Mon, 18 Oct 2010 12:33:49 +0000
 
 grml-debootstrap (0.38) unstable; urgency=low
 
