@@ -323,6 +323,14 @@ grml-debootstrap can handle the release but you really should not use Etch
 anymore unless you really know what you are doing. Choose Lenny instead.
 ================================================================================
 
+[NOTE]
+.Lenny-Release
+================================================================================
+When installing lenny to a new mdraid, grml-debootstrap will use md metadata
+format version 0.90. This limits the device to a maximum size of 2TB, but has
+the advantage of grub-legacy actually being able to boot from it.
+================================================================================
+
 Bugs
 ----
 

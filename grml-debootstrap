@@ -409,11 +409,17 @@ for i in $(cat $TMPFILE) ; do
    NUM_PARTITIONS=$((${NUM_PARTITIONS}+1))
 done
 
+# force metadata version 0.90 for lenny so old grub can boot from this array.
+METADATA_VERSION=""
+if [ $RELEASE = "lenny" ]; then
+   METADATA_VERSION="-e0"
+fi
+
 ERRORFILE=$(mktemp)
 set +e
 # TODO: better error handling?
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
-      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
+      --raid-devices="${NUM_PARTITIONS}" ${METADATA_VERSION} ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
 set -e
 
@@ -522,13 +528,13 @@ interactive_mode()
 {
   welcome_dialog
 
+  prompt_for_release
+
   prompt_for_swraid
 
   prompt_for_target
 
   prompt_for_bootmanager
-
-  prompt_for_release
 
   prompt_for_hostname
 
