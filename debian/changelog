@@ -1,10 +1,11 @@
 grml-debootstrap (0.40) unstable; urgency=low
 
+  [ Christian Hofstaedtler ]
   * Create md raids with metadata format 0.90 when installing lenny, as
     grub from lenny can not boot from md with newer metadata versions.
     [Closes: issue878].
 
- -- Christian Hofstaedtler <ch@grml.org>  Mon, 18 Oct 2010 15:53:20 +0200
+ -- Michael Prokop <mika@grml.org>  Mon, 18 Oct 2010 16:27:57 +0200
 
 grml-debootstrap (0.39) unstable; urgency=low
 
