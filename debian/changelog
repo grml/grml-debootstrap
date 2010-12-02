@@ -1,3 +1,18 @@
+grml-debootstrap (0.41) unstable; urgency=low
+
+  * [97eb00e] Use /etc/apt/sources.list.d/grml.list (instead of
+    /etc/apt/sources.list) for grml-repository. Retrieve the
+    grml-debian-keyring Debian package if possible and fall back
+    to direct use of gpg/apt-key only if that fails. [Closes: issue867]
+  * [17695f7] Dynamically calculate version number using the Debian
+    package version.
+  * [0fd00f0] Run grml-debootstrap under bash.
+  * [171d6a2] Fix --help parsing.
+  * [6364b23] Improve check4root message WRT usage instructions.
+  * [8c38e6c] Improve check4root.
+
+ -- Michael Prokop <mika@grml.org>  Thu, 02 Dec 2010 14:55:19 +0100
+
 grml-debootstrap (0.40) unstable; urgency=low
 
   [ Christian Hofstaedtler ]
