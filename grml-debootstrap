@@ -1,9 +1,9 @@
 #!/bin/sh
-# Filename:      grml-bootstrap
-# Purpose:       wrapper around debootstrap for installing plain Debian via grml
+# Filename:      grml-debootstrap
+# Purpose:       wrapper around debootstrap for installing plain Debian via Grml
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see http://grml.org/bugs/
-# License:       This file is licensed under the GPL v2.
+# License:       This file is licensed under the GPL v2+
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
@@ -11,7 +11,8 @@ set -e # exit on any error
 
 # variables {{{
 PN="$(basename $0)"
-VERSION='0.40'
+VERSION="$(dpkg --list $PN 2>/dev/null| awk '/^i/ {print $3}')"
+VERSION="${VERSION:-unknown}"
 MNTPOINT="/mnt/debootstrap.$$"
 
 # inside the chroot system locales might not be available, so use minimum:
