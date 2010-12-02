@@ -91,10 +91,6 @@ fi
 
 # make sure we have what we need {{{
 check4progs debootstrap dialog || exit 1
-if ! check4root ; then
-   echo "For usage instructions please execute '$PN --help'."
-   exit 1
-fi
 # }}}
 
 # source main configuration file {{{
@@ -167,6 +163,13 @@ fi
   eend 0
   exit 0
 }
+# }}}
+
+# check for root permissions {{{
+if ! check4root ; then
+   echo "For usage instructions please execute '$PN --help'."
+   exit 1
+fi
 # }}}
 
 # source specified configuration file {{{
