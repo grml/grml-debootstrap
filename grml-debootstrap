@@ -82,7 +82,7 @@ Send bugreports to the grml-team: bugs (at) grml.org || http://grml.org/bugs/
 "
 }
 
-if [ "$1" = '-h' ] || [ "$1" = '-help' ] ; then
+if [ "$1" = '-h' ] || [ "$1" = '-help' ] || [ "$1" = "--help" ] ; then
    usage
    echo 'Please notice that this script requires root permissions!'
    exit 0
