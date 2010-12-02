@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Filename:      grml-debootstrap
 # Purpose:       wrapper around debootstrap for installing plain Debian via Grml
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
