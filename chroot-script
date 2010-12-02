@@ -73,8 +73,8 @@ chrootmirror() {
 grmlrepos() {
   if [ -n "$GRMLREPOS" ] ; then
      # user might have provided their own apt sources.list
-     if ! grep -q grml /etc/apt/sources.list 2>/dev/null ; then
-        cat >> /etc/apt/sources.list << EOF
+     if ! grep -q grml /etc/apt/sources.list.d/grml.list 2>/dev/null ; then
+        cat >> /etc/apt/sources.list.d/grml.list << EOF
 
 # grml: stable repository:
   deb     http://deb.grml.org/ grml-stable  main
@@ -87,10 +87,15 @@ grmlrepos() {
 EOF
      fi
 
-     # make sure we have the keys available for aptitude
-     gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
-     gpg --export F61E2E7CECDEA787 | apt-key add - || true # not yet sure
-     # why it's necessary, sometimes we get an error even though it works [mika]
+     if apt-get update ; then
+       apt-get -y --allow-unauthenticated install grml-debian-keyring
+       apt-get update
+     else
+       # make sure we have the keys available for aptitude
+       gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
+       gpg --export F61E2E7CECDEA787 | apt-key add - || true # not yet sure
+       # why it's necessary, sometimes we get an error even though it works [mika]
+     fi
 
      # make sure we install packages from grml's pool only if not available
      # from Debian!
