@@ -320,7 +320,8 @@ include::releasetable.txt[]
 ================================================================================
 [1] Please notice that Etch is the current old-stable within Debian.
 grml-debootstrap can handle the release but you really should not use Etch
-anymore unless you really know what you are doing. Choose Lenny instead.
+anymore unless you really know what you are doing. Choose Lenny or
+Squeeze instead.
 ================================================================================
 
 [NOTE]
