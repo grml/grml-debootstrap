@@ -394,25 +394,42 @@ initrd() {
 # }}}
 
 # grub configuration/installation {{{
-grub_config() {
+grub_install() {
+
   if [ -z "$GRUB" ] ; then
-     echo "Warning: \$GRUB is not defined, will not adjust grub configuration therefore."
-  else
-     echo "Adjusting grub configuration for use on ${GRUB}."
-
-     # finally install grub
-     if [ -x /usr/sbin/update-grub ] ; then
-        UPDATEGRUB='/usr/sbin/update-grub'
-     elif [ -x /sbin/update-grub ] ; then
-        UPDATEGRUB='/sbin/update-grub'
-     else
-       echo "Error: update-grub not available, can not execute it."
-       return 1
-     fi
-
-     # grub2:
-     $UPDATEGRUB
+     echo "Notice: \$GRUB not defined, will not install grub therefore."
+     return 0
   fi
+
+  if ! [ -x "$(which grub-install)" ] ; then
+     echo "Error: grub-install not available. (Error while installing grub package?)" >&2
+     return 1
+  fi
+
+  if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
+     for device in $SELECTED_PARTITIONS ; do
+        GRUB="${device%%[0-9]}"
+        echo "Installing grub on ${GRUB}:"
+        grub-install --no-floppy "$GRUB"
+     done
+  else
+     echo "Installing grub on ${GRUB}:"
+     grub-install --no-floppy "$GRUB"
+  fi
+
+  echo "Adjusting grub configuration for use on ${GRUB}."
+
+  # finally install grub
+  if [ -x /usr/sbin/update-grub ] ; then
+     UPDATEGRUB='/usr/sbin/update-grub'
+  elif [ -x /sbin/update-grub ] ; then
+     UPDATEGRUB='/sbin/update-grub'
+  else
+    echo "Error: update-grub not available, can not execute it." >&2
+    return 1
+  fi
+
+  $UPDATEGRUB
 }
 # }}}
 
@@ -467,7 +484,7 @@ trap signal_handler HUP INT QUIT TERM
 
  for i in chrootmirror grmlrepos kernelimg_conf \
      kernel packages extrapackages  reconfigure hosts interfaces \
-     timezone fstab hostname initrd grub_config passwords        \
+     timezone fstab hostname initrd grub_install passwords        \
      custom_scripts remove_apt_cache services ; do
      if stage $i ; then
        $i && stage $i done || exit 1
