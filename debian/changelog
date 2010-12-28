@@ -1,3 +1,13 @@
+grml-debootstrap (0.42) unstable; urgency=low
+
+  * [0d2a566] grml-debootstrap.8.txt: Add Squeeze as alternative
+    recommendation as suite.
+  * [9577874] Move grub_install from grml-debootstrap to chroot-script.
+  * [8782512] Makefile: drop uniq/sed/... workarounds for broken
+    docbook-xsl (1.71.0.dfsg.1-1).
+
+ -- Michael Prokop <mika@grml.org>  Tue, 28 Dec 2010 15:54:11 +0100
+
 grml-debootstrap (0.41) unstable; urgency=low
 
   * [97eb00e] Use /etc/apt/sources.list.d/grml.list (instead of
