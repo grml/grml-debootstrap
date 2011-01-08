@@ -1,3 +1,10 @@
+grml-debootstrap (0.43) unstable; urgency=low
+
+  * [57a2d9c] Automatically reboot after 10 seconds of inactivity after
+    successfully finishing automatic installation.
+
+ -- Michael Prokop <mika@grml.org>  Sat, 08 Jan 2011 01:33:25 +0100
+
 grml-debootstrap (0.42) unstable; urgency=low
 
   * [0d2a566] grml-debootstrap.8.txt: Add Squeeze as alternative
