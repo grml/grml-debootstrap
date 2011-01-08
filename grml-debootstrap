@@ -1005,8 +1005,12 @@ fi
 
 # end dialog of autoinstallation {{{
 if [ -n "$AUTOINSTALL" ] ; then
-   dialog --title "$PN" --msgbox \
-          "Finished execution of ${PN}. Enjoy your Debian system." 0 0
+   if dialog --title "${PN}" --pause "Finished execution of ${PN}.
+Automatically rebooting in 10 seconds.
+
+Choose Cancel to skip rebooting." 10 60 10 ; then
+     noeject noprompt reboot
+  fi
 else
    einfo "Finished execution of ${PN}. Enjoy your Debian system." ; eend 0
 fi
