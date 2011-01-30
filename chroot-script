@@ -20,7 +20,7 @@ if [ -x /usr/bin/aptitude ] ; then
    APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
    APTUPDATE='aptitude update'
 else
-   APTINSTALL="apt-get --force-yes -y install $DPKG_OPTIONS"
+   APTINSTALL="apt-get --force-yes -y --no-install-recommends install $DPKG_OPTIONS"
    APTUPDATE='apt-get update'
 fi
 
