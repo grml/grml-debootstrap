@@ -202,7 +202,7 @@ kernel() {
   if [ -n "$KERNEL" ] ; then
      $APTUPDATE
      # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox"
+     KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox firmware-linux"
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
 }
