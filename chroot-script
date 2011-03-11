@@ -61,9 +61,23 @@ chrootmirror() {
   if [ -n "$ISO" ] ; then
      echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
      [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || true
+     # add security.debian.org:
+     case "$RELEASE" in
+       unstable|sid) ;;  # no security pool available
+       *)
+         echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
+         ;;
+     esac
   else
     if [ -n "$MIRROR" ] ; then
        echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
+       # add security.debian.org:
+       case "$RELEASE" in
+         unstable|sid) ;;  # no security pool available
+         *)
+           echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
+           ;;
+       esac
     fi
   fi
 }
