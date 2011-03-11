@@ -63,9 +63,9 @@ MIRROR='http://cdn.debian.net/debian'
 # GRMLPACKAGES='grml-etc-core'
 
 # release (which Debian version should be installed)
-# supported values: etch (old-stable), lenny (stable),
-#                   squeeze (testing), sid (unstable)
-RELEASE='lenny'
+# supported values: lenny (old-stable), squeeze (stable),
+#                   wheezy (testing), sid (unstable)
+RELEASE='squeeze'
 
 # define components that should be used within sources.list
 # default:

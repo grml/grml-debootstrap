@@ -305,12 +305,13 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='lenny'
+  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='squeeze'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 3 \
-            lenny    Debian/stable \
-            squeeze  Debian/testing \
+            0 50 4 \
+            lenny    Debian/old-stable \
+            squeeze  Debian/stable \
+            wheezy   Debian/testing \
             sid      Debian/unstable)"
 }
 # }}}
