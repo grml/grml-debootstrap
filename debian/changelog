@@ -1,3 +1,19 @@
+grml-debootstrap (0.44) unstable; urgency=low
+
+  [ Christian Hofstaedtler ]
+  * [840f5b8] Install (non-free) firmware for Linux kernel
+  * [a6c9e87] turn off Install-Recommends for our apt-get calls
+  * [05d6993] add rsync to package list
+  * [7f6ece8] add lsb-release to package list
+
+  [ Michael Prokop ]
+  * [5c9bdb3] Add security.debian.org to sources.list (except for
+    unstable/sid). Thanks for the suggestion to Michael Renner.
+    [Closes: issue967]
+  * [cbe2eae] Integrate Debian/squeeze and Debian/wheezy proberly.
+
+ -- Michael Prokop <mika@grml.org>  Fri, 11 Mar 2011 12:31:05 +0100
+
 grml-debootstrap (0.43) unstable; urgency=low
 
   * [57a2d9c] Automatically reboot after 10 seconds of inactivity after
