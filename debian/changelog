@@ -1,3 +1,16 @@
+grml-debootstrap (0.46) unstable; urgency=low
+
+  * [f1c990c] Update package description and documentation to
+    reflect squeeze as current stable release.
+  * [fc6d883] Support --vmfile and --vmsize command line options
+    for deploying a virtual machine.
+  * [a64fecc] Support --force option to skip user acknowledgement
+    and do not prompt for user input.
+  * [5ee5cac] Consequently use eerror for displaying error messages.
+  * [25bfeb7] Bump Standards-Version to 3.9.2.
+
+ -- Michael Prokop <mika@grml.org>  Mon, 30 May 2011 23:27:33 +0200
+
 grml-debootstrap (0.45) unstable; urgency=low
 
   * [dc5e2a0] Install os-prober by default.
