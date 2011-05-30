@@ -1,6 +1,7 @@
 TODO list for grml-debootstrap
 ==============================
 
+* support Virtual Machine deployment in interactive mode(?)
 * support for LVM
 * support tarballs for customization/mirror source
   -> integrate/use 'fai dirinstall'?

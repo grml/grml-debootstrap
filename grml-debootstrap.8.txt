@@ -165,6 +165,18 @@ Options and environment variables
 *-v*, *--verbose*::
     Increase verbosity.
 
+*--vmfile*::
+    Set up a Virtual Machine instead of installing to a partition or directory.
+    This allows deployment of a Virtual Machine. The options needs to be
+    combined with the --target option.
+    Usage example: --vmfile --target /mnt/sda1/qemu.img
+
+*--vmsize* <_size_>::
+   Use specified size for size of Virtual Machine disk file. If not specified it
+   defaults to 2G (being 2GB). Syntax as supported by qemu-img (see manpage
+   qemu-img(1) for details.
+   Usage example: --vmsize 3G
+
 *-V*, *--version*::
     Show version of program and exit.
 
@@ -192,6 +204,12 @@ Install default Debian release (stable/squeeze) in directory /data/chroot (witho
 any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
+
+Install default debian release (stable/squeeze) in a Virtual Machine file with
+3GB disk size (including Grub as bootmanager in MBR of the virtual disk file):
+
+  mount /dev/sda1 /mnt/sda1
+  grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
 Install default Debian release (stable/squeeze) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.

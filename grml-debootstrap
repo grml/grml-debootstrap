@@ -15,6 +15,9 @@ VERSION="$(dpkg --list $PN 2>/dev/null| awk '/^i/ {print $3}')"
 VERSION="${VERSION:-unknown}"
 MNTPOINT="/mnt/debootstrap.$$"
 
+# defaults
+VMSIZE="2G"
+
 # inside the chroot system locales might not be available, so use minimum:
 export LANG=C
 export LC_ALL=C
@@ -39,7 +42,7 @@ Bootstrap options:
 
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
-                           instead of fetching packages from a mirror.
+                         instead of fetching packages from a mirror.
   -r, --release <name>   Release of new Debian system (default: squeeze).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
@@ -50,8 +53,17 @@ Bootstrap options:
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
       --arch <arch>      Architecture to use. Currently only i386 is supported.
-      --filesystem <fs>  Filesystem that should be used when target is a partition.
+      --filesystem <fs>  Filesystem that should be used when target is a partition
+                         or Virtual Machine (see --vmfile).
       --insecure         Do not download and check Release file signatures.
+
+Options for Virtual Machine deployment:
+
+      --vmfile           Set up a Virtual Machine instead of installing to
+                         a partition or directory, to be combined with --target,
+                         like: --vmfile --target /mnt/sda1/qemu.img
+      --vmsize <size>    Use specified size for size of VM file (default: 2G).
+                         Syntax as supported by qemu-img, like: --vmsize 3G
 
 Configuration options:
 
@@ -131,6 +143,8 @@ fi
 [ "$_opt_iso" ]                 && ISO=$_opt_iso
 [ "$_opt_release" ]             && RELEASE=$_opt_release
 [ "$_opt_target" ]              && TARGET=$_opt_target
+[ "$_opt_vmfile" ]              && VIRTUAL=1
+[ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
@@ -169,6 +183,12 @@ fi
 if ! check4root ; then
    echo "For usage instructions please execute '$PN --help'."
    exit 1
+fi
+# }}}
+
+# make sure we have what we need {{{
+if [ -n "$VIRTUAL" ] ; then
+  check4progs kpartx mksh qemu-img || exit 1
 fi
 # }}}
 
@@ -512,12 +532,22 @@ else # if not running automatic installation display configuration and prompt fo
    # do not display if MNTPOINT is the default one
    case "$MNTPOINT" in /mnt/debootstrap*) ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
 
-   [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+   if [ -n "$VIRTUAL" ] ; then
+      echo "   Install grub:    yes"
+   else
+     [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+   fi
+
    [ -n "$RELEASE" ]  && echo "   Using release:   $RELEASE"
    [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
    [ -n "$HOSTNAME" ] && echo "   Using hostname:  $HOSTNAME"
    [ -n "$ISO" ]      && echo "   Using ISO:       $ISO"
+   if [ -n "$VIRTUAL" ] ; then
+      echo "   Deploying as Virtual Machine."
+      [ -n "$VMSIZE" ] && echo "   Using Virtual Disk file with size of ${VMSIZE}."
+   fi
 
+   echo
    echo "   Important! Continuing will delete all data from ${TARGET}!"
 
    echo
@@ -603,7 +633,7 @@ set_target_directory(){
     TARGET="$(readlink -f $TARGET)"
 }
 
-if [ -b "$TARGET" ] ; then
+if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
     PARTITION=1
 else
     set_target_directory
@@ -683,6 +713,11 @@ bailout(){
      fi
   fi
 
+  if [ -n "${ORIG_TARGET}" ] ; then
+    einfo "Removing loopback mount of file ${ORIG_TARGET}."
+    kpartx -d "${ORIG_TARGET}" ; eend $?
+  fi
+
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
 
@@ -723,7 +758,7 @@ mkfs() {
        # will fail to detect the uuid in the chroot
        if echo "$TARGET" | grep -q "/dev/md" ; then
          blockdev --rereadpt "${TARGET}"
-       else
+       elif ! [ -n "$VIRTUAL" ] ; then
          blockdev --rereadpt "${TARGET%%[0-9]*}"
        fi
        # give the system 2 seconds, otherwise we might run into
@@ -758,8 +793,11 @@ mount_target() {
      if grep -q $TARGET /proc/mounts ; then
         ewarn "$TARGET already mounted, continuing anyway." ; eend 0
      else
-       [ -d "$MNTPOINT" ] || mkdir -p "$MNTPOINT"
+       if ! [ -d "${MNTPOINT}" ] ; then
+          [ -n "$VIRTUAL" ] || mkdir -p "${MNTPOINT}"
+       fi
        einfo "Mounting $TARGET to $MNTPOINT"
+       mkdir -p "$MNTPOINT"
        mount -o rw,suid,dev $TARGET $MNTPOINT
        eend $?
      fi
@@ -770,6 +808,90 @@ mount_target() {
      mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
      eend $?
   fi
+}
+# }}}
+
+# prepare VM image for usage with debootstrap {{{
+prepare_vm() {
+  if [ -z "$VIRTUAL" ] ; then
+     return 0 # be quite by intention
+  fi
+
+  if [ -b "$TARGET" ] ; then
+     eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
+     eend 1
+     exit 1
+  fi
+
+  ORIG_TARGET="$TARGET" # store for later reuse
+
+  qemu-img create -f raw "${TARGET}" "${VMSIZE}"
+  echo 4 66 | mksh /usr/share/grml-debootstrap/bootgrub.mksh -A | dd of="$TARGET" conv=notrunc
+  dd if=/dev/zero bs=1 conv=notrunc count=64 seek=446 of="$TARGET"
+  parted -s "${TARGET}" 'mkpart primary ext3 2M -1'
+
+  DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
+  if [ -z "${DEVINFO}" ] ; then
+    echo  Error setting up loopback device >&2
+    exit 1
+  fi
+
+  # hopefully this always works as expected
+  LOOP=$(echo ${DEVINFO} | sed 's/.* linear //; s/ [[:digit:]]*//') # '/dev/loop1'
+  BLOCKDEV=$(echo "${DEVINFO}" | sed -e 's/.* (\(.*:.*\)).*/\1/')   # '253:0'
+  LOOP_PART="$(echo ${DEVINFO##add map } | sed 's/ .*//')" # '/dev/loop1p1'
+  export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
+
+  blockdev --rereadpt "${LOOP}"
+
+  if [ -z "$TARGET" ] ; then
+     echo "Error: target could not be set to according /dev/mapper/* device." >&2
+     exit 1
+  fi
+}
+# }}}
+
+# make VM image bootable and unmount it {{{
+finalize_vm() {
+  if [ -z "${VIRTUAL}" ] ; then
+     return 0
+  fi
+
+  if ! mount "${TARGET}" "${MNTPOINT}" ; then
+    eerror "Error: Mounting ${TARGET} failed, can not continue." ; eend 1
+    exit 1
+  fi
+
+  einfo "Installing Grub as bootloader."
+  mount -t proc none "${MNTPOINT}"/proc
+  mount -t sysfs none "${MNTPOINT}"/sys
+  mount --bind /dev "${MNTPOINT}"/dev
+
+  mkdir -p "${MNTPOINT}/boot/grub"
+  if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
+     eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
+     exit 1
+  fi
+
+  cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
+  chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+  dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=4
+  rm -f "${MNTPOINT}/tmp/core.img"
+
+  einfo "Updating grub configuration file."
+  chroot "${MNTPOINT}" update-grub
+
+  umount "${MNTPOINT}"/proc
+  umount "${MNTPOINT}"/sys
+  umount "${MNTPOINT}"/dev
+
+  einfo "Adjusting grub.cfg for successful boot sequence."
+  # ugly but needed to boot grub acordingly
+  sed -i "s;set root=.*;set root='(hd0,msdos1)';" "${MNTPOINT}"/boot/grub/grub.cfg
+  sed -i "s; root=/dev/.*; root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
+
+  umount "${MNTPOINT}"
+  kpartx -d "${ORIG_TARGET}" >/dev/null
 }
 # }}}
 
@@ -985,9 +1107,9 @@ fscktool() {
 # }}}
 
 # now execute all the functions {{{
-for i in mkfs tunefs mount_target debootstrap_system preparechroot \
-         execute_pre_scripts chrootscript execute_scripts umount_chroot   \
-         fscktool ; do
+for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
+         preparechroot execute_pre_scripts chrootscript execute_scripts \
+         umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
        $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
     fi
