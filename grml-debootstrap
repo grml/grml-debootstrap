@@ -40,7 +40,7 @@ Bootstrap options:
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                            instead of fetching packages from a mirror.
-  -r, --release <name>   Release of new Debian system (default: lenny).
+  -r, --release <name>   Release of new Debian system (default: squeeze).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
