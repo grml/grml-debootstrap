@@ -17,6 +17,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 
 # defaults
 VMSIZE="2G"
+FORCE=''
 
 # inside the chroot system locales might not be available, so use minimum:
 export LANG=C
@@ -56,6 +57,7 @@ Bootstrap options:
       --filesystem <fs>  Filesystem that should be used when target is a partition
                          or Virtual Machine (see --vmfile).
       --insecure         Do not download and check Release file signatures.
+      --force            Do not prompt for user acknowledgement.
 
 Options for Virtual Machine deployment:
 
@@ -163,6 +165,7 @@ fi
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_insecure" ]            && SECURE='false'
+[ "$_opt_force" ]               && FORCE=$_opt_force
 [ "$_opt_verbose" ]             && VERBOSE="-v"
 
 [ "$_opt_help" ] && {
@@ -550,12 +553,16 @@ else # if not running automatic installation display configuration and prompt fo
    echo
    echo "   Important! Continuing will delete all data from ${TARGET}!"
 
-   echo
-   einfon "Is this ok for you? [y/N] "
-   read a
-   if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
-      eerror "Exiting as requested." ; eend 1
-      exit 1
+   if [ -n "$FORCE" ] ; then
+     einfo "Skip user acknowledgement as requested via --force option."
+   else
+     echo
+     einfon "Is this ok for you? [y/N] "
+     read a
+     if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
+        eerror "Exiting as requested." ; eend 1
+        exit 1
+     fi
    fi
 fi
 }
