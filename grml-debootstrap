@@ -120,7 +120,8 @@ if [ -r ./cmdlineopts.clp ] ; then
 elif [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
    . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
 else
-   echo "Error: cmdline function file not found, exiting.">&2
+   eerror "Error: cmdline function file not found, exiting."
+   eend 1
    exit 1
 fi
 
@@ -206,15 +207,17 @@ fi
 
 # backwards compability checks {{{
 if [ -n "$GROOT" ] ; then
-   echo "Error: you seem to have \$GROOT configured." >&2
-   echo "This variable is no longer supported, please visit the" >&2
-   echo "grml-debootstrap documentation for details." >&2
+   eerror "Error: you seem to have \$GROOT configured."
+   eerror "This variable is no longer supported, please visit the"
+   eerror "grml-debootstrap documentation for details."
+   eend 1
    exit 1
 fi
 
 if echo "$GRUB" | grep -q '^hd' ; then
-   echo "Error: this syntax for the grub configuration variable is no longer supported." >&2
-   echo "Please do not use hd... any longer but /dev/sdX instead." >&2
+   eerror "Error: this syntax for the grub configuration variable is no longer supported."
+   eerror "Please do not use hd... any longer but /dev/sdX instead."
+   eend 1
    exit 1
 fi
 # }}}
@@ -839,7 +842,7 @@ prepare_vm() {
 
   DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
-    echo  Error setting up loopback device >&2
+    eerror "Error setting up loopback device." ; eend 1
     exit 1
   fi
 
@@ -852,7 +855,7 @@ prepare_vm() {
   blockdev --rereadpt "${LOOP}"
 
   if [ -z "$TARGET" ] ; then
-     echo "Error: target could not be set to according /dev/mapper/* device." >&2
+     eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
      exit 1
   fi
 }
