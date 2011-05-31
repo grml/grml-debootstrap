@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 # Filename:      run_tests
 # Purpose:       run unit tests for grml-autoconfig
 # Authors:       grml-team (grml.org), (c) Ulrich Dangel <mru@grml.org>
