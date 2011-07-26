@@ -6,8 +6,6 @@
 # License:       This file is licensed under the GPL v2.
 ################################################################################
 
-set -e # exit on any error
-
 . /etc/debootstrap/config    || exit 1
 . /etc/debootstrap/variables || exit 1
 

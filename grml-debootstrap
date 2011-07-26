@@ -7,8 +7,6 @@
 ################################################################################
 # http://www.debian.org/releases/stable/i386/index.html.en
 
-set -e # exit on any error
-
 # variables {{{
 PN="$(basename $0)"
 VERSION="$(dpkg --list $PN 2>/dev/null| awk '/^i/ {print $3}')"
@@ -499,13 +497,9 @@ if [ $RELEASE = "lenny" ]; then
 fi
 
 ERRORFILE=$(mktemp)
-set +e
-# TODO: better error handling?
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
       --raid-devices="${NUM_PARTITIONS}" ${METADATA_VERSION} ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
-set -e
-
 if [ "$RC" = 0 ] ; then
    dialog --title "$PN" --msgbox \
    "Creating $TARGET was successful." 0 0
