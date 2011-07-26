@@ -96,7 +96,7 @@ if [ "$1" = '-h' ] || [ "$1" = '-help' ] || [ "$1" = "--help" ] ; then
 fi
 # }}}
 
-# {{{
+# early helper functions {{{
 GOOD='[32;01m'
 WARN='[33;01m'
 BAD='[31;01m'
@@ -148,7 +148,66 @@ check4progs(){
      return 1
   fi
 }
+# }}}
 
+# helper functions {{{
+# we want to exit smoothly and clean:
+bailout(){
+  # make sure $TARGET is not mounted when exiting grml-debootstrap
+  if [ -n "$MNTPOINT" ] ; then
+     if grep -q $MNTPOINT /proc/mounts ; then
+        # make sure nothing is left inside chroot so we can unmount it
+        [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
+        [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
+        # ugly, but make sure we really don't leave anything (/proc /proc is intended)
+        for ARG in /sys /proc /proc ; do
+          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
+        done
+        umount "$MNTPOINT"/dev >/dev/null 2>&1 || true
+
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
+
+        if [ -n "$DIRECTORY" ] ; then
+          einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
+        else
+          einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
+        fi
+
+        if [ -n "$STAGES" ] ; then
+           echo -n "Removing stages directory ${STAGES}: "
+           rm -rf "$STAGES" && echo done
+        fi
+
+        # remove directory only if we used the default with process id inside the name
+        if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
+           einfo "Removing directory ${MNTPOINT}" ; rmdir $MNTPOINT ; eend $?
+        fi
+     fi
+  fi
+
+  if [ -n "${ORIG_TARGET}" ] ; then
+    einfo "Removing loopback mount of file ${ORIG_TARGET}."
+    kpartx -d "${ORIG_TARGET}" ; eend $?
+  fi
+
+  [ -n "$1" ] && EXIT="$1" || EXIT="1"
+  [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
+
+  exit "$EXIT"
+}
+trap bailout HUP INT QUIT TERM
+
+# we want to execute all the functions only once, simple check for it:
+stage() {
+  if [ -n "$2" ] ; then
+     echo "$2" > "${STAGES}/${1}"
+     return 0
+  elif grep -q done "${STAGES}/${1}" 2>/dev/null ; then
+     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
+     ewarn "  To reexecute it clean up the according directory inside $STAGES" ; eend 0
+     return 1
+  fi
+}
 # }}}
 
 # make sure we have what we need {{{
@@ -274,7 +333,7 @@ fi
 welcome_dialog()
 {
    dialog --title "$PN" --yesno "Welcome to the interactive configuration of ${PN}.
-Do you want to continue installing Debian using this frontend?" 0 0
+Do you want to continue installing Debian using this frontend?" 0 0 || bailout 0
 }
 # }}}
 
@@ -301,6 +360,7 @@ prompt_for_target()
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
          --menu "Please select the target partition:" 0 0 0 \
          $PARTITION_LIST)
+  [ $? -eq 0 ] || bailout
 }
 # }}}
 
@@ -387,6 +447,7 @@ prompt_for_release()
             squeeze  Debian/stable \
             wheezy   Debian/testing \
             sid      Debian/unstable)"
+  [ $? -eq 0 ] || bailout
 }
 # }}}
 
@@ -396,6 +457,7 @@ prompt_for_hostname()
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
             0 0 $HOSTNAME)"
+  [ $? -eq 0 ] || bailout
 }
 # }}}
 
@@ -407,9 +469,11 @@ prompt_for_password()
      while [ "$ROOTPW1" != "$ROOTPW2" ]; do
        ROOTPW1=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
        "Please enter the password for the root account:" 10 60)
+       [ $? -eq 0 ] || bailout
        ROOTPW2=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
        "Please enter the password for the root account again for \
        confirmation:" 10 60)
+       [ $? -eq 0 ] || bailout
 
        if [ "$ROOTPW1" != "$ROOTPW2" ]; then
          $(dialog --stdout --title "${PN}" --ok-label \
@@ -430,17 +494,20 @@ prompt_for_mirror()
             net   "install via network (downloading from mirror)" \
             local "install from local directory/mirror"
           )
+  [ $? -eq 0 ] || bailout
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
      [ -n "$MIRROR" ] || MIRROR='http://cdn.debian.net/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
                0 0 $MIRROR)"
+     [ $? -eq 0 ] || bailout
   else # CHOOSE_MIRROR == local
      [ -n "$ISO" ] || ISO='/mnt/mirror'
      ISO="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter directory name you would like to use for installing packages." \
                0 0 $ISO)"
+     [ $? -eq 0 ] || bailout
   fi
 }
 # }}}
@@ -483,6 +550,7 @@ PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
 dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
        $PARTITION_LIST 2>$TMPFILE
+[ $? -eq 0 ] || bailout
 RETVAL=$?
 SELECTED_PARTITIONS="$(cat $TMPFILE)"
 
@@ -574,6 +642,7 @@ Is this ok for you? Notice: selecting 'No' will exit ${PN}."
 
    dialog --title "$PN" --no-collapse \
           --yesno "$INFOTEXT" 0 0
+   [ $? -eq 0 ] || bailout 0
 
 else # if not running automatic installation display configuration and prompt for execution:
    einfo "$PN - Please recheck configuration before execution:"
@@ -731,66 +800,6 @@ if [ -n "$ISO" ] ; then
 fi
 ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
-# }}}
-
-# helper functions {{{
-# we want to exit smoothly and clean:
-bailout(){
-  # make sure $TARGET is not mounted when exiting grml-debootstrap
-  if [ -n "$MNTPOINT" ] ; then
-     if grep -q $MNTPOINT /proc/mounts ; then
-        # make sure nothing is left inside chroot so we can unmount it
-        [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
-        [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-        # ugly, but make sure we really don't leave anything (/proc /proc is intended)
-        for ARG in /sys /proc /proc ; do
-          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
-        done
-        umount "$MNTPOINT"/dev >/dev/null 2>&1 || true
-
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
-
-        if [ -n "$DIRECTORY" ] ; then
-          einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
-        else
-          einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
-        fi
-
-        if [ -n "$STAGES" ] ; then
-           echo -n "Removing stages directory ${STAGES}: "
-           rm -rf "$STAGES" && echo done
-        fi
-
-        # remove directory only if we used the default with process id inside the name
-        if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-           einfo "Removing directory ${MNTPOINT}" ; rmdir $MNTPOINT ; eend $?
-        fi
-     fi
-  fi
-
-  if [ -n "${ORIG_TARGET}" ] ; then
-    einfo "Removing loopback mount of file ${ORIG_TARGET}."
-    kpartx -d "${ORIG_TARGET}" ; eend $?
-  fi
-
-  [ -n "$1" ] && EXIT="$1" || EXIT="1"
-  [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
-
-  exit "$EXIT"
-}
-trap bailout HUP INT QUIT TERM
-
-# we want to execute all the functions only once, simple check for it:
-stage() {
-  if [ -n "$2" ] ; then
-     echo "$2" > "${STAGES}/${1}"
-     return 0
-  elif grep -q done "${STAGES}/${1}" 2>/dev/null ; then
-     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-     ewarn "  To reexecute it clean up the according directory inside $STAGES" ; eend 0
-     return 1
-  fi
-}
 # }}}
 
 # create filesystem {{{
