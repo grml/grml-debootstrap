@@ -129,6 +129,7 @@ eend() {
   if [ $retval -gt 0 ]; then
     printf " ${BAD}-> Failed (rc=${retval})${NORMAL}\n"
   fi
+  return $retval
 }
 
 check4root(){
