@@ -540,6 +540,7 @@ Last chance to quit. Timeout of 10 seconds running....
 
 Do you want to stop now?" 0 0 2>/dev/null
 }
+# }}}
 
 # make sure the user is aware of the used configuration {{{
 checkconfiguration()
