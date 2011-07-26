@@ -5,7 +5,12 @@ It was downloaded from http://deb.grml.org/
 
 Upstream Author: Michael Prokop <mika@grml.org>
 
-Copyright: (c) 2006+ Michael Prokop <mika@grml.org>
+Copyright: 2006-2011 Michael Prokop <mika@grml.org>,
+  Alexander Wirt <formorer@grml.org>,
+  Christian Hofstaedtler <ch@grml.org>,
+  Michael Gebetsroither <michael@mgeb.org>,
+  Tong Sun <suntong@cpan.org>,
+  Ulrich Dangel <mru@grml.org>
 
 License:
 
@@ -26,5 +31,5 @@ License:
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
 
-The Debian packaging is (C) 2006, Michael Prokop <mika@grml.org> and
+The Debian packaging is Copyright 2006-2011, Michael Prokop <mika@grml.org> and
 is licensed under the GPL, see above.
