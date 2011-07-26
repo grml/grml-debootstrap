@@ -28,11 +28,6 @@ export LC_ALL=C
 INTERACTIVE=''
 # }}}
 
-# source core functions {{{
-. /etc/grml/lsb-functions
-. /etc/grml/script-functions
-# }}}
-
 # help text {{{
 usage() {
   echo "$PN - wrapper around debootstrap for installing Debian
@@ -101,6 +96,60 @@ if [ "$1" = '-h' ] || [ "$1" = '-help' ] || [ "$1" = "--help" ] ; then
    echo 'Please notice that this script requires root permissions!'
    exit 0
 fi
+# }}}
+
+# {{{
+GOOD='[32;01m'
+WARN='[33;01m'
+BAD='[31;01m'
+NORMAL='[0m'
+HILITE='[36;01m'
+BRACKET='[34;01m'
+
+einfo() {
+  einfon "$1\n"
+  return 0
+}
+
+einfon() {
+  [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
+  printf " ${GOOD}*${NORMAL} $*"
+  LAST_E_CMD=einfon
+  return 0
+}
+
+eerror() {
+  [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
+  printf " ${BAD}*${NORMAL} $*\n"
+  LAST_E_CMD=eerror
+  return 0
+}
+
+eend() {
+  local retval="${1:-0}"
+  shift
+  if [ $retval -gt 0 ]; then
+    printf " ${BAD}-> Failed (rc=${retval})${NORMAL}\n"
+  fi
+}
+
+check4root(){
+  if [ "$(id -u 2>/dev/null)" != 0 ] ; then
+    echo 1>&2 "Error: please run this script with uid 0 (root)." ; return 1
+  fi
+}
+
+check4progs(){
+  local RC=''
+  for arg in $* ; do
+    which $arg >/dev/null 2>&1 || RC="$arg"
+  done
+  if [ -n "$RC" ] ; then
+     echo "$RC not installed"
+     return 1
+  fi
+}
+
 # }}}
 
 # make sure we have what we need {{{
@@ -742,9 +791,7 @@ stage() {
      return 0
   elif grep -q done "${STAGES}/${1}" 2>/dev/null ; then
      ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-     eindent
-       ewarn "To reexecute it clean up the according directory inside $STAGES" ; eend 0
-     eoutdent
+     ewarn "  To reexecute it clean up the according directory inside $STAGES" ; eend 0
      return 1
   fi
 }

@@ -12,7 +12,7 @@ Vcs-Browser: http://git.grml.org/?p=grml-debootstrap.git
 
 Package: grml-debootstrap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16), grml-etc-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16)
 Recommends: kpartx, mksh, parted, qemu-utils
 Description: wrapper around debootstrap for installing plain Debian via Grml
  This package provides a wrapper suite around deboostrap and
