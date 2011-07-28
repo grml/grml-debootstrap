@@ -1,3 +1,26 @@
+grml-debootstrap (0.47) unstable; urgency=low
+
+  The "initial upload to Debian" release.
+
+  [ Ulrich Dangel ]
+  * [e47ca96] Use /bin/bash for tests instead of /bin/zsh
+
+  [ Christian Hofstaedtler ]
+  * [c87dc4a] Don't depend on grml-etc-core
+  * [5e16f74] Update copyright file based on git log
+  * [bf11621] Prepare control file for targetting Debian
+  * [23140a3] Fix lintian warning debian-rules-missing-recommended-target
+  * [fcc981a] Update package description
+  * [50de133] Depend on gawk, as we're using that
+  * [5081ff4] fix ported eend function return value
+  * [79ea500] bailout on dialog cancellation
+
+  [ Michael Prokop ]
+  * [561fb86] Drop "set -e" from the scripts.
+  * [4384a10] Fix vim syntax folding issue with missing }}}.
+
+ -- Michael Prokop <mika@grml.org>  Thu, 28 Jul 2011 18:04:13 +0200
+
 grml-debootstrap (0.46) unstable; urgency=low
 
   * [f1c990c] Update package description and documentation to
