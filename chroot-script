@@ -53,15 +53,25 @@ askpass() {
 
 # define chroot mirror {{{
 chrootmirror() {
-  [ -n "$KEEP_SRC_LIST" ] && return
-  [ -z "$COMPONENTS" ]    && COMPONENTS='main contrib non-free'
+  if [ -n "$KEEP_SRC_LIST" ] ; then
+    echo "KEEP_SRC_LIST has been set, skipping chrootmirror stage."
+    return
+  fi
+
+  if [ -z "$COMPONENTS" ] ; then
+    COMPONENTS='main contrib non-free'
+  fi
+  echo "Using repository components $COMPONENTS"
 
   if [ -n "$ISO" ] ; then
-     echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
-     [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || true
+    echo "Adjusting sources.list for ISO (${ISO})."
+    echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
+    echo "Adding mirror entry (${MIRROR}) to sources.list."
+    [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || true
   else
     if [ -n "$MIRROR" ] ; then
-       echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
+      echo "Adjusting sources.list for mirror (${MIRROR})."
+      echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
     fi
   fi
 
@@ -69,6 +79,7 @@ chrootmirror() {
   case "$RELEASE" in
     unstable|sid) ;;  # no security pool available
     *)
+      echo "Adding security.debian.org to sources.list."
       echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
   esac
