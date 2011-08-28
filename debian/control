@@ -17,7 +17,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap (>= 0.3.3.3) | cdeboots
 Recommends: kpartx, mksh, parted, qemu-utils
 Description: wrapper around debootstrap for installing pure Debian
  Provides a wrapper suite around debootstrap and cdebootstrap
- to ease installing a pure Debian system.
+ to ease installation of a pure Debian system.
  .
  Configuration can be done on the command line, in a dialog frontend
  or in /etc/debootstrap/config. You will get a pure Debian system
