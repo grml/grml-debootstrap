@@ -28,8 +28,8 @@ License:
    along with this package; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-On Debian systems, the complete text of the GNU General
-Public License can be found in `/usr/share/common-licenses/GPL'.
+On Debian systems, the complete text of the GNU General Public License,
+version 2 can be found in `/usr/share/common-licenses/GPL-2'.
 
 The Debian packaging is Copyright 2006-2011, Michael Prokop <mika@grml.org> and
 is licensed under the GPL, see above.
