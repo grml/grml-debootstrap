@@ -44,7 +44,7 @@ install: build
 	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/
 	install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/_grml-debootstrap
 	install -m 644 cmdlineopts.clp  debian/grml-debootstrap/usr/share/grml-debootstrap/functions/cmdlineopts.clp
-	install -m 644 bootgrub.mksh    debian/grml-debootstrap/usr/share/grml-debootstrap/bootgrub.mksh
+	install -m 755 bootgrub.mksh    debian/grml-debootstrap/usr/share/grml-debootstrap/bootgrub.mksh
 
 # Build architecture-dependent files here.
 binary-arch: build install

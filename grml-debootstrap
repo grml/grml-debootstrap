@@ -888,7 +888,7 @@ prepare_vm() {
   ORIG_TARGET="$TARGET" # store for later reuse
 
   qemu-img create -f raw "${TARGET}" "${VMSIZE}"
-  echo 4 66 | mksh /usr/share/grml-debootstrap/bootgrub.mksh -A | dd of="$TARGET" conv=notrunc
+  echo 4 66 | /usr/share/grml-debootstrap/bootgrub.mksh -A | dd of="$TARGET" conv=notrunc
   dd if=/dev/zero bs=1 conv=notrunc count=64 seek=446 of="$TARGET"
   parted -s "${TARGET}" 'mkpart primary ext3 2M -1'
 
