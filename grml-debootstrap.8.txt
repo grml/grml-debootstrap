@@ -3,7 +3,7 @@ grml-debootstrap(8)
 
 Name
 ----
-grml-debootstrap - wrapper around debootstrap for installing plain Debian via grml
+grml-debootstrap - wrapper around debootstrap for installing plain Debian
 
 Synopsis
 --------
@@ -15,16 +15,16 @@ Introduction
 ------------
 
 grml-debootstrap is a wrapper suite around debootstrap (and cdebootstrap if you
-want) for installing a plain Debian system via grml very fast and easy.
+want) for installing a plain Debian system (e.g. via Grml) very fast and easy.
 
 All you have to do is adjust a few variables in configuration file
-/etc/debootstrap/config (or specify some variables via commandline) and invoke
+/etc/debootstrap/config (or specify some variables via command line) and invoke
 grml-debootstrap without any further options then.
 
 A plain and base Debian system will be installed on the given device (or
 directory) then. Customization of this process is possible as well.
 
-CAUTION: The grml team does not take responsibility for loss of any data!
+CAUTION: The Grml team does not take responsibility for loss of any data!
 
 Options and environment variables
 ---------------------------------
@@ -36,40 +36,40 @@ Options and environment variables
     deploy an i386 system use this option. Note: deploying amd64 from an i386
     kernel does *not* work. Example: "_--arch i386_"
 
-*--bootappend* <_appendline for the kernel_>::
+*--bootappend* _appendline-for-the-kernel_::
 
     Specify appendline for the kernel.
     E.g. "_pci=nomsi_"
 
-*-c*, *--config* <_file_>::
+*-c*, *--config* _file_::
 
     Use specified configuration file, defaults to /etc/debootstrap/config.
 
-*--chroot-scripts* <_directory_>::
+*--chroot-scripts* _directory_::
 
     Execute chroot scripts from specified directory. This allows customisation
     of the chroot setup, the executable script(s) present in the given directory
     are executed at the end of the chroot procedure.
     Default directory: /etc/debootstrap/chroot-scripts/
 
-*-d*, *--confdir* <_path_>::
+*-d*, *--confdir* _path_::
 
     Place of configuration files for debootstrap, defaults to /etc/debootstrap.
 
-*--debconf* <_file_>::
+*--debconf* _file_::
 
     Use specified file for preseeding Debian packages instead of using
     the default <confdir>/debconf-selections.
 
-*--debopt* <_params_>::
+*--debopt* _params_::
 
     Extra parameters passed to the debootstrap command.
 
-*--filesystem* <_filesystem_>::
+*--filesystem* _filesystem_::
 
     Filesystem that should be created when installing to a partition.
     If unset defaults to ext3. Valid values are all filesystems that
-    can be created through mkfs.<filesystem>.
+    can be created through mkfs._filesystem_.
 
 *--force*::
 
@@ -81,7 +81,7 @@ Options and environment variables
     /etc/apt/sources.list.d/grml.list configuration file. This provides the
     option to install Debian packages from Grml's repository.
 
-*--grub* <_device_>::
+*--grub* _device_::
 
     Device where grub should be installed to. Note that only the MBR (master
     boot record) can be used (/dev/sda, /dev/sdb,...). Partitions (like
@@ -94,23 +94,27 @@ Options and environment variables
 
     Show summary of options and exit.
 
-*--hostname* <_hostname_>::
+*--hostname* _hostname_::
 
     Use specified hostname instead of the default (being 'grml').
 
-*-i*, *--iso* <_/mntpoint_>::
+*-i*, *--iso* _/mntpoint_::
 
-    Specify mountpoint where you have a Debian ISO mounted loopback.
+    Specify mount point where you have a Debian ISO mounted loopback.
     Using this option instead of the mirror option gives you the possibility
     to install the base-system without network access. Make sure you
-    mounted the according Debian-ISO to the given <_/mntpoint_>. See section
+    mounted the according Debian-ISO to the given _/mntpoint_. See section
     'Usage examples' for a demonstration.
+
+*--insecure*::
+
+    Do not download and check signatures for retrieved Release files.
 
 *--keep_src_list*::
 
      Do not overwrite user provided /etc/apt/sources.list.
 
-*-m*, *--mirror* <_URL_>::
+*-m*, *--mirror* _URL_::
 
     Specify mirror which should be used for apt-get/aptitude.
     Corresponding with configuration variable MIRROR.
@@ -129,35 +133,31 @@ Options and environment variables
     you want to set the root password during an automatic installation but don't
     want to use the interactive dialog.
 
-*--insecure*::
+*-p*, *--mntpoint* _/mntpoint_::
 
-    Do not download and check signatures for retrieved Release files.
-
-*-p*, *--mntpoint* <_/mntpoint_>::
-
-    Specify mountpoint that should be used for mounting the target system.
+    Specify mount point that should be used for mounting the target system.
     Corresponding with configuration variable MNTPOINT.
     Note: this option has no effect if option -t is given and represents a
     directory.
 
-*--packages* <_file_>::
+*--packages* _file_::
 
     Use specified file as list for packages that should be installed instead of
     the default package list file <confdir>/packages.
 
-*--password* <_password_>::
+*--password* _password_::
 
     Use specified password as password for user root. Use with caution, as your
-    commandline might be visible in the process list and the shell history.
+    command line might be visible in the process list and the shell history.
     It's meant for automatic installation only.
 
-*-r*, *--release* <_releasename_>::
+*-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names: lenny,
     squeeze, wheezy (note: requires current version of debootstrap) and sid.
     Corresponding with configuration variable RELEASE.
 
-*--pre-scripts* <_directory_>::
+*--pre-scripts* _directory_::
 
     Execute scripts from specified directory before executing the chroot
     script. This allows customisation of the system before the chroot has
@@ -165,14 +165,14 @@ Options and environment variables
     scripts for direct access of the chroot.
     Default directory: /etc/debootstrap/pre-scripts/
 
-*--scripts* <_directory_>::
+*--scripts* _directory_::
 
     Execute scripts from specified directory. This allows customisation of
     the system after the chroot has been set up. The environment variable
     $MNTPOINT is available inside the scripts for direct access of the chroot.
     Default directory: /etc/debootstrap/scripts/
 
-*-t*, *--target* <_target_>::
+*-t*, *--target* _target_::
     Target partition (/dev/...) or directory (anything else without /dev at the
     beginning). To install grub using *--grub* make sure to use a _device_
     instead of a directory as _target_ (installation of grub as bootloader when
@@ -187,7 +187,7 @@ Options and environment variables
     combined with the --target option.
     Usage example: --vmfile --target /mnt/sda1/qemu.img
 
-*--vmsize* <_size_>::
+*--vmsize* _size_::
    Use specified size for size of Virtual Machine disk file. If not specified it
    defaults to 2G (being 2GB). Syntax as supported by qemu-img (see manpage
    qemu-img(1) for details.
@@ -196,8 +196,8 @@ Options and environment variables
 *-V*, *--version*::
     Show version of program and exit.
 
-WARNING: the commandline parsing of grml-debootstrap does not validate the provided
-arguments for the commandline options. Please be careful and check docs and
+WARNING: the command line parsing of grml-debootstrap does not validate the provided
+arguments for the command line options. Please be careful and check docs and
 /etc/debootstrap/config for further information.
 
 Usage examples
@@ -263,10 +263,10 @@ Defines the default locales used for generating locales via locale-gen.
 Defines the software packages which should be installed in the new
 Debian system by default.
 
-  /etc/debootstrap/extrapackages
+  /etc/debootstrap/extrapackages/
 
-Debian Packages dropped here will be installed into the new Debian system by
-default (Controlvariable: EXTRAPACKAGES)
+Debian Packages dropped in this directory will be installed into the new Debian
+system by default (Control variable: EXTRAPACKAGES)
 
   /etc/debootstrap/stages/
 
@@ -284,13 +284,13 @@ Customization
 
 You can control execution of grml-debootstrap via adjusting
 /etc/debootstrap/config for some main stuff or via setting some selected
-variables via commandline.  The packages which should be installed in the new
+variables via command line.  The packages which should be installed in the new
 Debian system can be defined via the file /etc/debootstrap/packages.  If you
 want to put existing files to the new Debian system you can place them into the
 (by default non-existing) directories boot, etc, share, usr and var in
 /etc/debootstrap/. Every existing directory will be copied to the new Debian
 system then. If you want to install additional packages that are not available
-via the grml or debian mirror drop them into /etc/debootstrap/extrapackages and
+via the Grml or Debian mirror drop them into /etc/debootstrap/extrapackages and
 make sure that EXTRAPACKAGES is set to "yes".
 
 Automatic installation
@@ -299,9 +299,9 @@ Automatic installation
 If environment variable AUTOINSTALL is set grml-debootstrap can be executed in a
 full automatic mode. While this mode isn't really useful for interactive
 execution (just configure /etc/debootstrap/configure or specify the relevant
-variables on the commandline instead) it is meant for use via bootoption
-debian2hd. The bootoption debian2hd (more precise: the kernelname on bootprompt)
-supports the following bootoptions (they correspond with the commandline options
+variables on the command line instead) it is meant for use via boot option
+debian2hd. The boot option debian2hd (more precise: the kernelname on bootprompt)
+supports the following boot options (they correspond with the command line options
 mentioned above):
 
   target=...
@@ -334,15 +334,15 @@ Usage example for automatic installation:
 
   debian2hd target=/dev/sda1 grub=/dev/sda mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
 
-You have to enter this commandline at the bootprompt of grml. Please make sure
-that /dev/sda1 is the partition where you really want to install your new Debian
-system.
+You have to enter this command line at the bootprompt of the Grml live system.
+Please make sure that /dev/sda1 is the partition where you really want to
+install your new Debian system.
 
 [NOTE]
 Automatic installation within booting process is done in grml-autoconfig via
 setting environment variable AUTOINSTALL and creation of
 /usr/bin/grml-debootstrap_noninteractive with the available and relevant
-bootoptions for grml-debootstrap.
+boot options for grml-debootstrap.
 
 Supported Releases
 ------------------
