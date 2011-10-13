@@ -66,7 +66,8 @@ Configuration options:
                              /etc/debootstrap/config
   -d, --confdir <path>     Place of config files for debootstrap, defaults
                              to /etc/debootstrap
-      --packages <file>    Install packages defined in specified list file.
+      --packages <file>    Install packages defined in specified list file
+                             instead of using /etc/debootstrap/packages.
       --nopackages         Skip installation of packages defined in
                              /etc/debootstrap/packages
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
