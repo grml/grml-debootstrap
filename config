@@ -145,7 +145,7 @@ MKFS='mkfs.ext3'
 TUNE2FS='tune2fs -c0 -i0'
 
 # check filesystem when chroot stuff finished?
-FSCK='yes'
+# FSCK='yes'
 
 # which tool should be used for fsck? if unset the tool will be guessed based on $MKFS
 # FSCKTOOL=''
