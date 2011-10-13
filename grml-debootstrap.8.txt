@@ -117,6 +117,12 @@ Options and environment variables
 
     Skip installation of packages defined in /etc/debootstrap/packages.
 
+*--nopassword*::
+
+    Do not prompt for the root password. Note: Use the '--password' option if
+    you want to set the root password during an automatic installation but don't
+    want to use the interactive dialog.
+
 *--insecure*::
 
     Do not download and check signatures for retrieved Release files.

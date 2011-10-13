@@ -241,6 +241,11 @@ reconfigure() {
 # set password of user root {{{
 passwords()
 {
+  if [ -n "$NOPASSWORD" ] ; then
+    echo "Skip setting root password as requested."
+    return 0
+  fi
+
   echo "Activating shadow passwords."
   shadowconfig on
 
@@ -248,7 +253,6 @@ passwords()
   if chpasswd --help 2>&1 | grep -q -- '-m,' ; then
      CHPASSWD_OPTION='-m'
   fi
-
 
   if [ -n "$ROOTPASSWORD" ] ; then
      echo root:"$ROOTPASSWORD" | chpasswd $CHPASSWD_OPTION
