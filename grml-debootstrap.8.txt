@@ -75,6 +75,12 @@ Options and environment variables
 
     Skip user acknowledgement and do not prompt for user input.
 
+*--grmlrepos*::
+
+    Enable Grml.org's Debian repository (http://deb.grml.org/) via the
+    /etc/apt/sources.list.d/grml.list configuration file. This provides the
+    option to install Debian packages from Grml's repository.
+
 *--grub* <_device_>::
 
     Device where grub should be installed to. Note that only the MBR (master

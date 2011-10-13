@@ -92,7 +92,6 @@ grmlrepos() {
      # user might have provided their own apt sources.list
      if ! grep -q grml /etc/apt/sources.list.d/grml.list 2>/dev/null ; then
         cat >> /etc/apt/sources.list.d/grml.list << EOF
-
 # grml: stable repository:
   deb     http://deb.grml.org/ grml-stable  main
   deb-src http://deb.grml.org/ grml-stable  main
@@ -100,7 +99,6 @@ grmlrepos() {
 # grml: testing/development repository:
   deb     http://deb.grml.org/ grml-testing main
   deb-src http://deb.grml.org/ grml-testing main
-
 EOF
      fi
 
@@ -114,7 +112,7 @@ EOF
        # why it's necessary, sometimes we get an error even though it works [mika]
      fi
 
-     # make sure we install packages from grml's pool only if not available
+     # make sure we install packages from Grml's pool only if not available
      # from Debian!
      if ! grep -q grml /etc/apt/preferences 2>/dev/null ; then
         cat >> /etc/apt/preferences << EOF

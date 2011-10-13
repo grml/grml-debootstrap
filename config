@@ -54,8 +54,8 @@ MIRROR='http://cdn.debian.net/debian'
 # /etc/debootstrap/etc/apt/sources.list
 # KEEP_SRC_LIST='yes'
 
-# add grml repository to /etc/apt/sources.list
-# if empty then the repository won't be added (notice: in testing phase)
+# add Grml repository to /etc/apt/sources.list
+# if empty then the repository won't be added
 # GRMLREPOS='yes'
 
 # install packages from grml-pool? requires activated $GRMLREPOS from above

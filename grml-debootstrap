@@ -71,6 +71,7 @@ Configuration options:
       --nopackages         Skip installation of packages defined in
                              /etc/debootstrap/packages
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
+      --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
@@ -269,6 +270,7 @@ fi
 [ "$_opt_pre_scripts_set" ]     && PRE_SCRIPTS='yes'
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
 [ "$_opt_keep_src_list" ]       && KEEP_SRC_LIST='yes'
+[ "$_opt_grmlrepos" ]           && GRMLREPOS='yes'
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
@@ -1007,6 +1009,7 @@ preparechroot() {
   [ -n "$KEEP_SRC_LIST" ] && echo "KEEP_SRC_LIST=$KEEP_SRC_LIST" >> $CHROOT_VARIABLES
   [ -n "$MIRROR" ]        && echo "MIRROR=$MIRROR"             >> $CHROOT_VARIABLES
   [ -n "$PACKAGES" ]      && echo "PACKAGES=$PACKAGES"         >> $CHROOT_VARIABLES
+  [ -n "$GRMLREPOS" ]     && echo "GRMLREPOS=$GRMLREPOS"       >> $CHROOT_VARIABLES
   [ -n "$RM_APTCACHE" ]   && echo "RM_APTCACHE=$RM_APTCACHE"   >> $CHROOT_VARIABLES
   [ -n "$ROOTPASSWORD" ]  && echo "ROOTPASSWORD=$ROOTPASSWORD" >> $CHROOT_VARIABLES
   [ -n "$NOPASSWORD" ]    && echo "NOPASSWORD=true"            >> $CHROOT_VARIABLES
