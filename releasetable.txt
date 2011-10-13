@@ -3,8 +3,9 @@
 '---------.-----------------.---------------
 Release / Tool  debootstrap   cdebootstrap
 --------------------------------------------
-Lenny           works         works
+Lenny           works [1]     works [1]
 Squeeze         works         works
-Sid             works         works
+Wheezy          works         works
+Sid             works [2]     works [2]
 --------------------------------------------
 

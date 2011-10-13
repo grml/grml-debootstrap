@@ -350,20 +350,24 @@ Supported Releases
 include::releasetable.txt[]
 
 [NOTE]
-.Etch-Release
+.lenny release
 ================================================================================
-[1] Please notice that Etch is the current old-stable within Debian.
-grml-debootstrap can handle the release but you really should not use Etch
-anymore unless you really know what you are doing. Choose Lenny or
-Squeeze instead.
-================================================================================
+[1] Please notice that lenny is the current old-stable release within Debian.
+grml-debootstrap can handle the release but you really should not use lenny
+anymore unless you really know what you are doing. Choose stable (squeeze)
+instead.
 
-[NOTE]
-.Lenny-Release
-================================================================================
 When installing lenny to a new mdraid, grml-debootstrap will use md metadata
 format version 0.90. This limits the device to a maximum size of 2TB, but has
 the advantage of grub-legacy actually being able to boot from it.
+================================================================================
+
+[NOTE]
+.sid release
+================================================================================
+[2] Please notice that sid is Debian/unstable and due to its nature might not be
+always installable. What _might_ work instead is deploying stable (squeeze) or
+testing (wheezy) and upgrade it after installation finished.
 ================================================================================
 
 Bugs
