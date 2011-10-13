@@ -182,7 +182,7 @@ packages() {
 
   if [ "$PACKAGES" = 'yes' ] ; then
      if ! [ -r /etc/debootstrap/packages ] ; then
-       echo "Error: /etc/debootstrap/packages not found, exiting."
+       echo "Error: /etc/debootstrap/packages (inside chroot) not found, exiting." >&2
        exit 1
      else
        $APTUPDATE
