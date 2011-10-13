@@ -1168,12 +1168,17 @@ umount_chroot() {
 
 # execute filesystem check {{{
 fscktool() {
-  if [ "$FSCK" = 'yes' ] ; then
-     [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
-     einfo "Checking filesystem on $TARGET using $FSCKTOOL"
-     $FSCKTOOL $TARGET
-     eend $?
-  fi
+ if [ -n "$VIRTUAL" ] ; then
+   einfo "Skipping filesystem check since we deploy a virtual machine."
+   return 0
+ fi
+
+ if [ "$FSCK" = 'yes' ] ; then
+   [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
+   einfo "Checking filesystem on $TARGET using $FSCKTOOL"
+   $FSCKTOOL $TARGET
+   eend $?
+ fi
 }
 # }}}
 
