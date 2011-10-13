@@ -29,12 +29,12 @@ CAUTION: The grml team does not take responsibility for loss of any data!
 Options and environment variables
 ---------------------------------
 
-*--arch* <_architecture_>::
+*--arch* _architecture_::
 
-    Architecture you want to bootstrap. Currently only i386 is supported.
-    Defaults to the architecture that is currently running on your system. If
-    you're running an amd64 system and want to deploy a i386 system use this option.
-    Note: deploying amd64 from a i386 system won't work.
+    Set target architecture you want to install. Defaults to the architecture
+    you are currently running. If you're running an amd64 kernel and want to
+    deploy an i386 system use this option. Note: deploying amd64 from an i386
+    kernel does *not* work. Example: "_--arch i386_"
 
 *--bootappend* <_appendline for the kernel_>::
 

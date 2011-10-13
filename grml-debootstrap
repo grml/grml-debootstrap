@@ -46,7 +46,7 @@ Bootstrap options:
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
-      --arch <arch>      Architecture to use. Currently only i386 is supported.
+      --arch <arch>      Set target architecture, use for installing i386 on amd64.
       --filesystem <fs>  Filesystem that should be used when target is a partition
                          or Virtual Machine (see --vmfile).
       --insecure         Do not download and check Release file signatures.
