@@ -1021,40 +1021,40 @@ preparechroot() {
   touch $CHROOT_VARIABLES
   chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
-  [ -n "$ARCH" ]                && echo "ARCH=$ARCH"                               >> $CHROOT_VARIABLES
-  [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=$CHROOT_SCRIPTS"           >> $CHROOT_VARIABLES
-  [ -n "$CONFFILES" ]           && echo "CONFFILES=$CONFFILES"                     >> $CHROOT_VARIABLES
-  [ -n "$DEBCONF" ]             && echo "DEBCONF=$DEBCONF"                         >> $CHROOT_VARIABLES
-  [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=$DEBIAN_FRONTEND"         >> $CHROOT_VARIABLES
-  [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=$DEBOOTSTRAP"                 >> $CHROOT_VARIABLES
-  [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=$EXTRAPACKAGES"             >> $CHROOT_VARIABLES
-  [ -n "$FORCE" ]               && echo "FORCE=$FORCE"                             >> $CHROOT_VARIABLES
-  [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS=$GRMLREPOS"                     >> $CHROOT_VARIABLES
-  [ -n "$GRUB" ]                && echo "GRUB=$GRUB"                               >> $CHROOT_VARIABLES
-  [ -n "$HOSTNAME" ]            && echo "HOSTNAME=$HOSTNAME"                       >> $CHROOT_VARIABLES
-  [ -n "$INITRD" ]              && echo "INITRD=$INITRD"                           >> $CHROOT_VARIABLES
-  [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES=$INSTALL_NOTES"             >> $CHROOT_VARIABLES
-  [ -n "$ISODIR" ]              && echo "ISODIR=$ISO"                              >> $CHROOT_VARIABLES
-  [ -n "$ISO" ]                 && echo "ISO=$ISO"                                 >> $CHROOT_VARIABLES
-  [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST=$KEEP_SRC_LIST"             >> $CHROOT_VARIABLES
-  [ -n "$LOCALES" ]             && echo "LOCALES=$LOCALES"                         >> $CHROOT_VARIABLES
-  [ -n "$MIRROR" ]              && echo "MIRROR=$MIRROR"                           >> $CHROOT_VARIABLES
-  [ -n "$MKFS" ]                && echo "MKFS=$MKFS"                               >> $CHROOT_VARIABLES
-  [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=true"                          >> $CHROOT_VARIABLES
-  [ -n "$PACKAGES" ]            && echo "PACKAGES=$PACKAGES"                       >> $CHROOT_VARIABLES
-  [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=$PRE_SCRIPTS"                 >> $CHROOT_VARIABLES
-  [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=$RECONFIGURE"                 >> $CHROOT_VARIABLES
-  [ -n "$RELEASE" ]             && echo "RELEASE=$RELEASE"                         >> $CHROOT_VARIABLES
-  [ -n "$RM_APTCACHE" ]         && echo "RM_APTCACHE=$RM_APTCACHE"                 >> $CHROOT_VARIABLES
-  [ -n "$ROOTPASSWORD" ]        && echo "ROOTPASSWORD=$ROOTPASSWORD"               >> $CHROOT_VARIABLES
-  [ -n "$SCRIPTS" ]             && echo "SCRIPTS=$SCRIPTS"                         >> $CHROOT_VARIABLES
-  [ -n "$SECURE" ]              && echo "SECURE=$SECURE"                           >> $CHROOT_VARIABLES
-  [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS=$SELECTED_PARTITIONS" >> $CHROOT_VARIABLES
-  [ -n "$TARGET" ]              && echo "TARGET=$TARGET"                           >> $CHROOT_VARIABLES
-  [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID=$TARGET_UUID"                 >> $CHROOT_VARIABLES
-  [ -n "$TIMEZONE" ]            && echo "TIMEZONE=$TIMEZONE"                       >> $CHROOT_VARIABLES
-  [ -n "$TUNE2FS" ]             && echo "TUNE2FS=$TUNE2FS"                         >> $CHROOT_VARIABLES
-  [ -n "$VMSIZE" ]              && echo "VMSIZE=$VMSIZE"                           >> $CHROOT_VARIABLES
+  [ -n "$ARCH" ]                && echo "ARCH=\"$ARCH\""                               >> $CHROOT_VARIABLES
+  [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=\"$CHROOT_SCRIPTS\""           >> $CHROOT_VARIABLES
+  [ -n "$CONFFILES" ]           && echo "CONFFILES=\"$CONFFILES\""                     >> $CHROOT_VARIABLES
+  [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> $CHROOT_VARIABLES
+  [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\""         >> $CHROOT_VARIABLES
+  [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=\"$DEBOOTSTRAP\""                 >> $CHROOT_VARIABLES
+  [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=\"$EXTRAPACKAGES\""             >> $CHROOT_VARIABLES
+  [ -n "$FORCE" ]               && echo "FORCE=\"$FORCE\""                             >> $CHROOT_VARIABLES
+  [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS=\"$GRMLREPOS\""                     >> $CHROOT_VARIABLES
+  [ -n "$GRUB" ]                && echo "GRUB=\"$GRUB\""                               >> $CHROOT_VARIABLES
+  [ -n "$HOSTNAME" ]            && echo "HOSTNAME=\"$HOSTNAME\""                       >> $CHROOT_VARIABLES
+  [ -n "$INITRD" ]              && echo "INITRD=\"$INITRD\""                           >> $CHROOT_VARIABLES
+  [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES=\"$INSTALL_NOTES\""             >> $CHROOT_VARIABLES
+  [ -n "$ISODIR" ]              && echo "ISODIR=\"$ISO\""                              >> $CHROOT_VARIABLES
+  [ -n "$ISO" ]                 && echo "ISO=\"$ISO\""                                 >> $CHROOT_VARIABLES
+  [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST=\"$KEEP_SRC_LIST\""             >> $CHROOT_VARIABLES
+  [ -n "$LOCALES" ]             && echo "LOCALES=\"$LOCALES\""                         >> $CHROOT_VARIABLES
+  [ -n "$MIRROR" ]              && echo "MIRROR=\"$MIRROR\""                           >> $CHROOT_VARIABLES
+  [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> $CHROOT_VARIABLES
+  [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> $CHROOT_VARIABLES
+  [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> $CHROOT_VARIABLES
+  [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> $CHROOT_VARIABLES
+  [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=\"$RECONFIGURE\""                 >> $CHROOT_VARIABLES
+  [ -n "$RELEASE" ]             && echo "RELEASE=\"$RELEASE\""                         >> $CHROOT_VARIABLES
+  [ -n "$RM_APTCACHE" ]         && echo "RM_APTCACHE=\"$RM_APTCACHE\""                 >> $CHROOT_VARIABLES
+  [ -n "$ROOTPASSWORD" ]        && echo "ROOTPASSWORD=\"$ROOTPASSWORD\""               >> $CHROOT_VARIABLES
+  [ -n "$SCRIPTS" ]             && echo "SCRIPTS=\"$SCRIPTS\""                         >> $CHROOT_VARIABLES
+  [ -n "$SECURE" ]              && echo "SECURE=\"$SECURE\""                           >> $CHROOT_VARIABLES
+  [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS=\"$SELECTED_PARTITIONS\"" >> $CHROOT_VARIABLES
+  [ -n "$TARGET" ]              && echo "TARGET=\"$TARGET\""                           >> $CHROOT_VARIABLES
+  [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID=\"$TARGET_UUID\""                 >> $CHROOT_VARIABLES
+  [ -n "$TIMEZONE" ]            && echo "TIMEZONE=\"$TIMEZONE\""                       >> $CHROOT_VARIABLES
+  [ -n "$TUNE2FS" ]             && echo "TUNE2FS=\"$TUNE2FS\""                         >> $CHROOT_VARIABLES
+  [ -n "$VMSIZE" ]              && echo "VMSIZE=\"$VMSIZE\""                           >> $CHROOT_VARIABLES
 
   cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
