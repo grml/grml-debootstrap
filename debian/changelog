@@ -1,3 +1,37 @@
+grml-debootstrap (0.48) unstable; urgency=low
+
+  [ Michael Prokop ]
+  * [837ac57] chroot-script: de-duplicate code WRT security mirror.
+  * [6197947] chroot-script: be more verbose about steps executed in
+    chrootmirror().
+  * [c3dbeb4] clarify usage text of --packages option
+  * [aadfa9e] chroot-script: clarify error message iff packages is not
+    available + send it to stderr
+  * [ad7c3cf] Support --nopassword option to not prompt for the root
+    password
+  * [8fe289c] do not run fsck when deploying virtual machine
+  * [e68a7d9] vim modeline: set shiftwidth to a less insane value
+  * [a7bfe23] support --grmlrepos command line option
+  * [7140774] clarify usage of --arch option
+  * [6891310] docs: improve option formating, minor typo fixes
+  * [20a41b7] update release table (drop etch, add wheezy)
+  * [bcc5b04] disable filesystem check by default
+  * [d88d27d] drop enabled config variables from config file and use
+    defaults. Thanks to Christian Hofstaedtler <ch@grml.org> for review
+    and improvements.
+  * [3adae46] make sure chroot variables are quoted
+  * [1ba2adf] make sure grub-pc is installed when grub option is used
+
+  [ Christian Hofstaedtler ]
+  * [074c439] Reformat NEWS.Debian
+  * [56a04d7] Install bootgrub.mksh 0755
+  * [ab804e4] Switch to source format 3.0 (native)
+  * [9f2c2ff] Reworded package Description a tiny bit
+  * [19bf46a] Fix debian/copyright to point to GPL-2 license
+  * [2b2dc77] Add dialog to Recommends
+
+ -- Michael Prokop <mika@grml.org>  Sat, 26 Nov 2011 18:13:26 +0100
+
 grml-debootstrap (0.47) unstable; urgency=low
 
   The "initial upload to Debian" release.
