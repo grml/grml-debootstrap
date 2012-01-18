@@ -183,6 +183,10 @@
 # Default: 'yes'
 # RM_APTCACHE='no'
 
+# Upgrade system via apt-get/aptitude update + [safe-]upgrade.
+# Default: 'yes'
+# UPGRADE_SYSTEM='no'
+
 # Explicit generation of initrd via update-initramfs.
 # Default: 'yes'
 # INITRD='no'

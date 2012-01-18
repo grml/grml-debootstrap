@@ -36,6 +36,7 @@ SCRIPTS='yes'
 SECURE='yes'
 TIMEZONE='Europe/Vienna'
 TUNE2FS='tune2fs -c0 -i0'
+UPGRADE_SYSTEM='yes'
 VMSIZE="2G"
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -1051,6 +1052,7 @@ preparechroot() {
   [ -n "$SECURE" ]              && echo "SECURE=\"$SECURE\""                           >> $CHROOT_VARIABLES
   [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS=\"$SELECTED_PARTITIONS\"" >> $CHROOT_VARIABLES
   [ -n "$TARGET" ]              && echo "TARGET=\"$TARGET\""                           >> $CHROOT_VARIABLES
+  [ -n "$UPGRADE_SYSTEM" ]      && echo "UPGRADE_SYSTEM=\"$UPGRADE_SYSTEM\""           >> $CHROOT_VARIABLES
   [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID=\"$TARGET_UUID\""                 >> $CHROOT_VARIABLES
   [ -n "$TIMEZONE" ]            && echo "TIMEZONE=\"$TIMEZONE\""                       >> $CHROOT_VARIABLES
   [ -n "$TUNE2FS" ]             && echo "TUNE2FS=\"$TUNE2FS\""                         >> $CHROOT_VARIABLES
