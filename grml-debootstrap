@@ -176,44 +176,68 @@ check4progs(){
 # }}}
 
 # helper functions {{{
-# we want to exit smoothly and clean:
-bailout(){
+cleanup() {
+  set -x
+  einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+  einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+
+  # Remove temporary mountpoint again
+  if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
+     einfo "Removing directory ${MNTPOINT}"
+     rmdir "$MNTPOINT"
+     eend $?
+  fi
+
   # make sure $TARGET is not mounted when exiting grml-debootstrap
   if [ -n "$MNTPOINT" ] ; then
-     if grep -q $MNTPOINT /proc/mounts ; then
-        # make sure nothing is left inside chroot so we can unmount it
-        [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
-        [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-        # ugly, but make sure we really don't leave anything (/proc /proc is intended)
-        for ARG in /sys /proc /proc ; do
-          [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
-        done
-        umount "$MNTPOINT"/dev >/dev/null 2>&1 || true
+    if grep -q "$MNTPOINT" /proc/mounts ; then
+      # make sure nothing is left inside chroot so we can unmount it
+      [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
+      [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
 
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
+      [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1
 
-        if [ -n "$DIRECTORY" ] ; then
-          einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
-        else
-          einfo "Unmounting $MNTPOINT" ; umount "$MNTPOINT" ; eend $?
-        fi
+      # ugly, but make sure we really don't leave anything (/proc /proc is intended)
+      for ARG in /sys /proc /proc ; do
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1
+        umount "$MNTPOINT"/$ARG >/dev/null 2>&1
+      done
+      umount "$MNTPOINT"/dev >/dev/null 2>&1
 
-        if [ -n "$STAGES" ] ; then
-           echo -n "Removing stages directory ${STAGES}: "
-           rm -rf "$STAGES" && echo done
-        fi
+      [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1
 
-        # remove directory only if we used the default with process id inside the name
-        if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-           einfo "Removing directory ${MNTPOINT}" ; rmdir $MNTPOINT ; eend $?
-        fi
-     fi
+      if [ -n "$DIRECTORY" ] ; then
+        einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
+      else
+        einfo "Unmounting $MNTPOINT"
+        umount "$MNTPOINT"
+        eend $?
+      fi
+
+      if [ -n "$STAGES" ] ; then
+        echo -n "Removing stages directory ${STAGES}: "
+        rm -rf "$STAGES" && echo done
+      fi
+
+      # remove directory only if we used the default with process id inside the name
+      if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
+        einfo "Removing directory ${MNTPOINT}"
+        rmdir "$MNTPOINT"
+        eend $?
+      fi
+    fi
   fi
 
   if [ -n "${ORIG_TARGET}" ] ; then
     einfo "Removing loopback mount of file ${ORIG_TARGET}."
     kpartx -d "${ORIG_TARGET}" ; eend $?
   fi
+}
+
+# we want to exit smoothly and clean:
+bailout(){
+
+  cleanup
 
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
@@ -236,7 +260,7 @@ stage() {
 # }}}
 
 # make sure we have what we need {{{
-check4progs debootstrap dialog || exit 1
+check4progs debootstrap dialog || bailout 1
 # }}}
 
 # source main configuration file {{{
@@ -254,7 +278,7 @@ elif [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
 else
    eerror "Error: cmdline function file not found, exiting."
    eend 1
-   exit 1
+   bailout 1
 fi
 
 # == business-logic of command line parameter-processing
@@ -264,10 +288,10 @@ fi
   CONFFILES=$_opt_confdir
   einfo "Using config files under $CONFFILES/."
   if ! [ -r "$CONFFILES/config" ] ; then
-    eerror "Error: config file $CONFFILES/config not found."; eend 1; exit 1
+    eerror "Error: config file $CONFFILES/config not found."; eend 1; bailout 1
   fi
   if ! . "$CONFFILES/config" ; then
-    eerror "Error reading config file $CONFFILES/config" ; eend 1 ; exit 1
+    eerror "Error reading config file $CONFFILES/config" ; eend 1 ; bailout 1
   fi
   # restore the command line parameter value
   CONFFILES=$_opt_confdir
@@ -320,13 +344,13 @@ fi
 # check for root permissions {{{
 if ! check4root ; then
    echo "For usage instructions please execute '$PN --help'."
-   exit 1
+   bailout 1
 fi
 # }}}
 
 # make sure we have what we need {{{
 if [ -n "$VIRTUAL" ] ; then
-  check4progs kpartx mksh qemu-img || exit 1
+  check4progs kpartx mksh qemu-img || bailout 1
 fi
 # }}}
 
@@ -334,7 +358,7 @@ fi
 if [ -n "$CONFIGFILE" ] ; then
    einfo "Reading specified config file $CONFIGFILE."
    if ! . "$CONFIGFILE" ; then
-      eerror "Error reading config file $CONFIGFILE" ; eend 1 ; exit 1
+      eerror "Error reading config file $CONFIGFILE" ; eend 1 ; bailout 1
    fi
 fi
 # }}}
@@ -345,14 +369,14 @@ if [ -n "$GROOT" ] ; then
    eerror "This variable is no longer supported, please visit the"
    eerror "grml-debootstrap documentation for details."
    eend 1
-   exit 1
+   bailout 1
 fi
 
 if echo "$GRUB" | grep -q '^hd' ; then
    eerror "Error: this syntax for the grub configuration variable is no longer supported."
    eerror "Please do not use hd... any longer but /dev/sdX instead."
    eend 1
-   exit 1
+   bailout 1
 fi
 # }}}
 
@@ -377,7 +401,7 @@ prompt_for_target()
      --msgbox "Sorry, no partitions found. Please configure your
      harddisks (see /proc/partitions) using a tool like fdisk,
      cfdisk, gpart, gparted,..." 0 0
-     exit 0
+     bailout 1
   fi
 
   PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
@@ -387,7 +411,7 @@ prompt_for_target()
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
          --menu "Please select the target partition:" 0 0 0 \
          $PARTITION_LIST)
-  [ $? -eq 0 ] || bailout
+  [ $? -eq 0 ] || bailout 1
 }
 # }}}
 
@@ -613,7 +637,7 @@ $(cat $ERRORFILE)
 
 Exiting." 0 0
    rm -f "$TMPFILE" "$ERRORFILE"
-   exit 1
+   bailout 1
 fi
 
 }
@@ -649,7 +673,7 @@ checkconfiguration()
 if [ -n "$AUTOINSTALL" ] ; then
    if checkforrun ; then
       eerror "Exiting as requested" ; eend 0
-      exit 1
+      bailout 1
    fi
 elif [ -n "$INTERACTIVE" ] ; then
 
@@ -710,7 +734,7 @@ else # if not running automatic installation display configuration and prompt fo
      read a
      if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
         eerror "Exiting as requested." ; eend 1
-        exit 1
+        bailout 1
      fi
    fi
 fi
@@ -753,7 +777,7 @@ if [ -n "$TARGET" ] ; then
 else
    eerror "Please adjust $CONFFILES/config or..."
    eerror "... use the interactive version for configuration before running ${0}" ; eend 1
-   exit 1
+   bailout 1
 fi
 # }}}
 
@@ -841,7 +865,7 @@ mkfs() {
   else
     if grep -q "$TARGET" /proc/mounts ; then
       eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
-      exit 1
+      bailout 1
     fi
 
     if [ -n "$MKFS" ] ; then
@@ -914,7 +938,7 @@ prepare_vm() {
   if [ -b "$TARGET" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
      eend 1
-     exit 1
+     bailout 1
   fi
 
   ORIG_TARGET="$TARGET" # store for later reuse
@@ -927,7 +951,7 @@ prepare_vm() {
   DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
-    exit 1
+    bailout 1
   fi
 
   # hopefully this always works as expected
@@ -940,7 +964,7 @@ prepare_vm() {
 
   if [ -z "$TARGET" ] ; then
      eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
-     exit 1
+     bailout 1
   fi
 }
 # }}}
@@ -953,7 +977,7 @@ finalize_vm() {
 
   if ! mount "${TARGET}" "${MNTPOINT}" ; then
     eerror "Error: Mounting ${TARGET} failed, can not continue." ; eend 1
-    exit 1
+    bailout 1
   fi
 
   einfo "Installing Grub as bootloader."
@@ -964,7 +988,7 @@ finalize_vm() {
   mkdir -p "${MNTPOINT}/boot/grub"
   if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
      eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
-     exit 1
+     bailout 1
   fi
 
   cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
@@ -1234,16 +1258,8 @@ for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
        $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
     fi
 done
-# }}}
 
-# finalize {{{
-einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
-einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
-
-# Remove temporary mountpoint again
-if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-   einfo "Removing directory ${MNTPOINT}" ; rmdir "$MNTPOINT" ; eend $?
-fi
+cleanup
 # }}}
 
 # end dialog of autoinstallation {{{
