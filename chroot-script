@@ -431,8 +431,8 @@ initrd() {
 grub_install() {
 
   if [ -z "$GRUB" ] ; then
-     echo "Notice: \$GRUB not defined, will not install grub therefore."
-     return 0
+    echo "Notice: \$GRUB not defined, will not install grub inside chroot at this stage."
+    return 0
   fi
 
   if ! dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
