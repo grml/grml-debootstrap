@@ -954,6 +954,13 @@ prepare_vm() {
   dd if=/dev/zero bs=1 conv=notrunc count=64 seek=446 of="$TARGET"
   parted -s "${TARGET}" 'mkpart primary ext3 2M -1'
 
+  # if dm-mod isn't available then kpartx will fail with
+  # "Is device-mapper driver missing from kernel? [...]"
+  if ! kpartx -av $TARGET >/dev/null 2>&1 ; then
+    einfo "Device-mapper not ready yet, trying to load dm-mod module."
+    modprobe dm-mod ; eend $?
+  fi
+
   DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
