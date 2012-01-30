@@ -177,15 +177,17 @@ check4progs(){
 
 # helper functions {{{
 cleanup() {
-  set -x
-  einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
-  einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+  if [ -n "$CHROOT_VARIABLES" ] ; then
+    einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+  fi
+
+  if [ -n "$STAGES" ] ; then
+    einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+  fi
 
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-     einfo "Removing directory ${MNTPOINT}"
-     rmdir "$MNTPOINT"
-     eend $?
+    rmdir "$MNTPOINT" 2>/dev/null
   fi
 
   # make sure $TARGET is not mounted when exiting grml-debootstrap
@@ -204,7 +206,9 @@ cleanup() {
       done
       umount "$MNTPOINT"/dev >/dev/null 2>&1
 
-      [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1
+      if [ -n "$ISODIR" ] ; then
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1
+      fi
 
       if [ -n "$DIRECTORY" ] ; then
         einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
@@ -240,7 +244,7 @@ bailout(){
   cleanup
 
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
-  [ -n "$3" ] && einfo "Notice: just remove $STAGES/$3 to reexecute the stage"
+  [ -n "$2" ] && einfo "Notice: remove $STAGES/$2 to reexecute the stage"
 
   exit "$EXIT"
 }
@@ -1255,7 +1259,7 @@ for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_scripts \
          umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
-       $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "i"
+       $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "$i"
     fi
 done
 
