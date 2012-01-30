@@ -264,7 +264,7 @@ stage() {
 # }}}
 
 # make sure we have what we need {{{
-check4progs debootstrap dialog || bailout 1
+check4progs debootstrap || bailout 1
 # }}}
 
 # source main configuration file {{{
@@ -748,6 +748,8 @@ fi
 # interactive mode {{{
 interactive_mode()
 {
+  check4progs dialog || bailout 1
+
   welcome_dialog
 
   prompt_for_release
