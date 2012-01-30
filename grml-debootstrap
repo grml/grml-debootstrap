@@ -199,12 +199,12 @@ cleanup() {
 
       [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1
 
-      # ugly, but make sure we really don't leave anything (/proc /proc is intended)
-      for ARG in /sys /proc /proc ; do
+      # ugly, but make sure we really don't leave anything (/proc /proc and
+      # /dev /dev are intended, trying to work around timing issues, see #657023)
+      for ARG in /sys /proc /proc /dev /dev ; do
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1
       done
-      umount "$MNTPOINT"/dev >/dev/null 2>&1
 
       if [ -n "$ISODIR" ] ; then
         [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1
