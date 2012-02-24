@@ -1,3 +1,25 @@
+grml-debootstrap (0.49) unstable; urgency=low
+
+  * Team upload
+  * [d17c54b] Run upgrade procedure by default (disable via
+    UPGRADE_SYSTEM config)
+  * [04d37b9] Rework cleanup process
+  * [5f348b9] grub_install: slightly change message if grub is not
+    installed
+  * [0c7dbbc] Wording: since->because
+  * [f720b57] Slightly improve bailout and cleanup functions to better
+    catch errors
+  * [d31f878] Check for dialog executeable only when using interactive
+    mode
+  * [07c0379] VM installation: also check for parted executable
+  * [f48891f] Try to load dm-mod kernel module if kpartx fails
+  * [60881cb] Run unmount of chroot's /dev twice. Thanks to Michael Hanke
+    <mih@debian.org> for reporting and testing (Closes: #657023)
+  * [07c7f30] Bump Standards-Version to 3.9.3
+  * [851c803] Update years of copyright
+
+ -- Michael Prokop <mika@grml.org>  Fri, 24 Feb 2012 14:44:27 +0100
+
 grml-debootstrap (0.48) unstable; urgency=low
 
   [ Michael Prokop ]
