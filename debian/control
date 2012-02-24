@@ -6,7 +6,7 @@ Uploaders: Michael Prokop <mika@debian.org>, Alexander Wirt <formorer@debian.org
 DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 5)
 Build-Depends-Indep: asciidoc, docbook-xsl, xsltproc, shunit2
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Homepage: http://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
 Vcs-Browser: http://git.grml.org/?p=grml-debootstrap.git
