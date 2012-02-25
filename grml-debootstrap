@@ -774,6 +774,17 @@ if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
 fi
 # }}}
 
+# architecture setup {{{
+if [ -n "$ARCH" ] ; then
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+else
+   ARCH="$(dpkg --print-architecture)"
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+fi
+# }}}
+
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
@@ -822,17 +833,6 @@ if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
     PARTITION=1
 else
     set_target_directory
-fi
-# }}}
-
-# architecture setup {{{
-if [ -n "$ARCH" ] ; then
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
-else
-   ARCH="$(dpkg --print-architecture)"
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
 fi
 # }}}
 
