@@ -961,6 +961,18 @@ prepare_vm() {
     modprobe dm-mod ; eend $?
   fi
 
+  # make sure loop module is present
+  if ! losetup -f >/dev/null 2>&1; then
+    einfo "Can not find a usable loop device, retrying after loading loop module."
+    modprobe loop
+    if losetup -f >/dev/null 2>&1; then
+      einfo "Found a usable loop device now, continuing."
+    else
+      eerror "Error finding usable loop device" ; eend 1
+      bailout 1
+    fi
+  fi
+
   DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
