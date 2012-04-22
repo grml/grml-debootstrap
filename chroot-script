@@ -362,7 +362,6 @@ fi
 
 cat >> /etc/fstab << EOF
 proc           /proc        proc    defaults                      0   0
-/sys           /sys         sysfs   noauto,rw,nosuid,nodev,noexec 0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto                0   0
 # some other examples:
 # /dev/sda2       none         swap    sw,pri=0             0   0
