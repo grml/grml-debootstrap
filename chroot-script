@@ -5,6 +5,9 @@
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
 ################################################################################
+# GRML_CHROOT_SCRIPT_MARKER - do not remove this line unless you want to keep
+# this script as /bin/chroot-script on your new installed system
+################################################################################
 
 . /etc/debootstrap/config    || exit 1
 . /etc/debootstrap/variables || exit 1

@@ -1203,18 +1203,29 @@ execute_scripts() {
 # execute chroot-script {{{
 chrootscript() {
   if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
-     mount_target
+    mount_target
   fi
 
-  if [ -x "$MNTPOINT/bin/chroot-script" ] ; then
-     einfo "Executing chroot-script now"
-     mount --bind /dev "$MNTPOINT"/dev
-     chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
-     umount "$MNTPOINT"/dev
-     eend $RC
+  if ! [ -x "$MNTPOINT/bin/chroot-script" ] ; then
+    eerror "Fatal: $MNTPOINT/bin/chroot-script could not be found."
+    eend 1
   else
-     eerror "Fatal: $MNTPOINT/bin/chroot-script could not be found."
-     eend 1
+    einfo "Executing chroot-script now"
+    mount --bind /dev "$MNTPOINT"/dev
+    chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
+    umount "$MNTPOINT"/dev
+    eend $RC
+  fi
+
+  # finally get rid of chroot-script again, there's no good reason to
+  # keep it on the installed system
+  if grep -q GRML_CHROOT_SCRIPT_MARKER "${MNTPOINT}/bin/chroot-script" ; then
+    einfo "Removing chroot-script again"
+    rm -f "${MNTPOINT}/bin/chroot-script"
+    eend $?
+  else
+    einfo "Keeping chroot-script as string GRML_CHROOT_SCRIPT_MARKER could not be found"
+    eend 0
   fi
 }
 # }}}
