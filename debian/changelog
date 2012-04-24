@@ -1,3 +1,18 @@
+grml-debootstrap (0.50) unstable; urgency=low
+
+  [ Michael Prokop ]
+  * [772c343] docs: mention http://archive.debian.org/debian/ for
+    lenny release
+  * [6ea6382] Make sure loop module is present [Closes: issue1155]
+    Thanks to Christian Hofstaedtler for the bugreport.
+
+  [ Gregor Thill ]
+  * [afe4bad] Remove the sysfs noauto entry from the installed fstab.
+    Thanks to Carsten Hey <carsten@debian.org> for helping in
+    bug report handling and patch handling. (Closes: #670074)
+
+ -- Michael Prokop <mika@grml.org>  Tue, 24 Apr 2012 01:59:55 +0200
+
 grml-debootstrap (0.49) unstable; urgency=low
 
   * Team upload
