@@ -106,10 +106,6 @@ Options and environment variables
     mounted the according Debian-ISO to the given _/mntpoint_. See section
     'Usage examples' for a demonstration.
 
-*--insecure*::
-
-    Do not download and check signatures for retrieved Release files.
-
 *--keep_src_list*::
 
      Do not overwrite user provided /etc/apt/sources.list.

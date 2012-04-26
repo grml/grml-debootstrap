@@ -65,6 +65,7 @@ while :; do
   --arch)              # Target architecutre
     shift; _opt_arch="$1"
     ;;
+  # just for backwards compatibility
   --insecure)
     _opt_insecure=T
     ;;

@@ -95,10 +95,6 @@
 # Default: 'debootstrap'
 # DEBOOTSTRAP='debootstrap'
 
-# Enable Secure APT (Package sources must be signed).
-# Default: 'yes'
-# SECURE='no'
-
 # Pass extra options to debootstrap.
 # Default: no default.
 # Usage example:
