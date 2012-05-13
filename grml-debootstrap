@@ -1031,7 +1031,7 @@ finalize_vm() {
   einfo "Adjusting grub.cfg for successful boot sequence."
   # ugly but needed to boot grub acordingly
   sed -i "s;set root=.*;set root='(hd0,msdos1)';" "${MNTPOINT}"/boot/grub/grub.cfg
-  sed -i "s; root=/dev/.*; root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
+  sed -i "s;root=[^ ]\+;root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
 
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
