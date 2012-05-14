@@ -107,7 +107,7 @@ while :; do
   --password)          # Use specified password as password for user root
     shift; _opt_password="$1"
     ;;
-  --nopassword)          # Use specified password as password for user root
+  --nopassword)        # Skip password dialog
     _opt_nopassword=T
     ;;
   --grmlrepos)         # Enable Grml repository
