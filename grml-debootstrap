@@ -142,7 +142,7 @@ einfon() {
 
 eerror() {
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
-  printf " ${BAD}*${NORMAL} $*\n"
+  printf " ${BAD}*${NORMAL} $*\n" >&2
   LAST_E_CMD=eerror
   return 0
 }
