@@ -1032,19 +1032,33 @@ debootstrap_system() {
   fi
 
   if grep -q "$MNTPOINT" /proc/mounts || [ -n "$DIRECTORY" ] ; then
-     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
-     if [ -n "$MIRROR" ] ; then
-        einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
-        $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
-     else
-        einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
-        $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
-     fi
-     eend $?
+    :
   else
-     eerror "Error: $MNTPOINT not mounted, can not continue."
-     eend 1
+    eerror "Error: $MNTPOINT not mounted, can not continue."
+    eend 1 ; exit 1
   fi
+
+  einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
+  if [ -n "$MIRROR" ] ; then
+    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
+    RC=$?
+  else
+    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
+    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+    RC=$?
+  fi
+
+  if [ $RC -ne 0 ] ; then
+    if [ -r "$MNTPOINT/debootstrap/debootstrap.log" ] && \
+      [ -s "$MNTPOINT/debootstrap/debootstrap.log" ] ; then
+      einfo "Presenting last ten lines of debootstrap.log:"
+      tail -10 $MNTPOINT/debootstrap/debootstrap.log
+      einfo "End of debootstrap.log"
+    fi
+  fi
+
+  eend $RC
 }
 # }}}
 
