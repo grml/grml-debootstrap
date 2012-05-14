@@ -704,7 +704,7 @@ Is this ok for you? Notice: selecting 'No' will exit ${PN}."
    [ $? -eq 0 ] || bailout 0
 
 else # if not running automatic installation display configuration and prompt for execution:
-   einfo "$PN - Please recheck configuration before execution:"
+   einfo "$PN [${VERSION}] - Please recheck configuration before execution:"
    echo
    echo "   Target:          $TARGET"
 
