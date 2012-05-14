@@ -1,3 +1,20 @@
+grml-debootstrap (0.51) unstable; urgency=low
+
+  * [0452dad] VM feature: improve sed command line to replace root=...
+    kernel option. Thanks to Conny Seidel <conny.seidel@amd.com> for
+    bugreport + patch
+  * [06fc8bd] Drop --insecure/SECURE option + instead depend on
+    debian-archive-keyring package
+  * [4fac6ee] Redirect eerror messages to stderr
+  * [ab9101c] Remove chroot-script after execution
+  * [f831c79] Display debootstrap.log if bootstrapping failed and log
+    file isn't empty
+  * [8cf8a43] Display grml-debootstrap version information in
+    configuration-check dialog
+  * [14021b8] Adjust source code comment for --nopassword option
+
+ -- Michael Prokop <mika@grml.org>  Mon, 14 May 2012 18:21:55 +0200
+
 grml-debootstrap (0.50) unstable; urgency=low
 
   [ Michael Prokop ]
