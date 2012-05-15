@@ -689,11 +689,13 @@ elif [ -n "$INTERACTIVE" ] ; then
    [ -n "$RELEASE" ] && INFOTEXT="$INFOTEXT
    Using release:   $RELEASE"
    [ -n "$HOSTNAME" ] && INFOTEXT="$INFOTEXT
-   Using hostname   $HOSTNAME"
+   Using hostname:  $HOSTNAME"
    [ -n "$MIRROR" ]  && INFOTEXT="$INFOTEXT
    Using mirror:    $MIRROR"
    [ -n "$ISO" ]  && INFOTEXT="$INFOTEXT
    Using ISO:       $ISO"
+   [ -n "$ARCH" ]  && INFOTEXT="$INFOTEXT
+   Using arch:      $ARCH"
 
    INFOTEXT="$INFOTEXT
 
@@ -718,9 +720,10 @@ else # if not running automatic installation display configuration and prompt fo
    fi
 
    [ -n "$RELEASE" ]  && echo "   Using release:   $RELEASE"
-   [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
    [ -n "$HOSTNAME" ] && echo "   Using hostname:  $HOSTNAME"
+   [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
    [ -n "$ISO" ]      && echo "   Using ISO:       $ISO"
+   [ -n "$ARCH" ]     && echo "   Using arch:      $ARCH"
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
       [ -n "$VMSIZE" ] && echo "   Using Virtual Disk file with size of ${VMSIZE}."
@@ -774,6 +777,17 @@ if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
 fi
 # }}}
 
+# architecture setup {{{
+if [ -n "$ARCH" ] ; then
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+else
+   ARCH="$(dpkg --print-architecture)"
+   ARCHCMD="--arch $ARCH"
+   ARCHINFO=" (${ARCH})"
+fi
+# }}}
+
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
@@ -822,17 +836,6 @@ if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
     PARTITION=1
 else
     set_target_directory
-fi
-# }}}
-
-# architecture setup {{{
-if [ -n "$ARCH" ] ; then
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
-else
-   ARCH="$(dpkg --print-architecture)"
-   ARCHCMD="--arch $ARCH"
-   ARCHINFO=" (${ARCH})"
 fi
 # }}}
 
