@@ -945,7 +945,7 @@ prepare_vm() {
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
-  if ! kpartx -av $TARGET >/dev/null 2>&1 ; then
+  if ! kpartx -av $TARGET >/dev/null 2>&1 || ! grep -q device-mapper /proc/misc >/dev/null 2>&1 ; then
     einfo "Device-mapper not ready yet, trying to load dm-mod module."
     modprobe dm-mod ; eend $?
   fi
