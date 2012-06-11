@@ -1,3 +1,15 @@
+grml-debootstrap (0.52) unstable; urgency=low
+
+  [ Darshaka Pathirana ]
+  * [344f0e9] detect architecture before checkconfiguration
+  * [ddbb875] display architecture in checkconfiguration summary
+
+  [ Michael Prokop ]
+  * [14e6e30] dm-mod: also check for device-mapper support using
+    /proc/misc
+
+ -- Michael Prokop <mika@grml.org>  Mon, 11 Jun 2012 17:34:47 +0200
+
 grml-debootstrap (0.51) unstable; urgency=low
 
   * [0452dad] VM feature: improve sed command line to replace root=...
