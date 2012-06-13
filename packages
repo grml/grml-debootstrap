@@ -5,3 +5,4 @@ bzip2 dhcp3-client file less lsof most pciutils resolvconf screen ssh strace sys
 rsync
 postfix
 lsb-release
+acpi-support-base
