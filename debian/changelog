@@ -1,3 +1,9 @@
+grml-debootstrap (0.53) unstable; urgency=low
+
+  * [4d08103] Add acpi-support-base to default package selection
+
+ -- Michael Prokop <mika@grml.org>  Tue, 19 Jun 2012 23:04:16 +0200
+
 grml-debootstrap (0.52) unstable; urgency=low
 
   [ Darshaka Pathirana ]
