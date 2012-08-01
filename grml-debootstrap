@@ -845,7 +845,7 @@ if [ -n "$ISO" ] ; then
       file*) # do nothing
       ;;
       *)
-      ISO=file:$1
+      ISO=file:$ISO
       ;;
    esac
 fi
