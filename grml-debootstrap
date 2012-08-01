@@ -853,6 +853,12 @@ ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
 # }}}
 
+# Debian ISOs do not contain signed Release files {{{
+if [ -n "$ISO" ] ; then
+    DEBOOTSTRAP_OPT="$DEBOOTSTRAP_OPT --no-check-gpg"
+fi
+# }}}
+
 # create filesystem {{{
 mkfs() {
   if [ -n "$DIRECTORY" ] ; then
