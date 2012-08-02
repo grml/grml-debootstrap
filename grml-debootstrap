@@ -845,12 +845,18 @@ if [ -n "$ISO" ] ; then
       file*) # do nothing
       ;;
       *)
-      ISO=file:$1
+      ISO=file:$ISO
       ;;
    esac
 fi
 ISODIR=${ISO##file:}
 ISODIR=${ISODIR%%/}
+# }}}
+
+# Debian ISOs do not contain signed Release files {{{
+if [ -n "$ISO" ] ; then
+    DEBOOTSTRAP_OPT="$DEBOOTSTRAP_OPT --no-check-gpg"
+fi
 # }}}
 
 # create filesystem {{{
@@ -1041,14 +1047,15 @@ debootstrap_system() {
     eend 1 ; exit 1
   fi
 
-  einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}${ISO}"
-  if [ -n "$MIRROR" ] ; then
-    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
-    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
-    RC=$?
-  else
+  if [ -n "$ISO" ] ; then
+    einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${ISO}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
     $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+    RC=$?
+  else
+    einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
+    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
     RC=$?
   fi
 

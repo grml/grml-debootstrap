@@ -18,9 +18,15 @@
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
    APTUPDATE='aptitude update'
-   APTUPGRADE='aptitude -y safe-upgrade'
+   # Debian ISOs do not contain signed Release files
+   if [ -n "$ISO" ] ; then
+      APTINSTALL="aptitude -y --allow-untrusted --without-recommends install $DPKG_OPTIONS"
+      APTUPGRADE='aptitude -y --allow-untrusted safe-upgrade'
+   else
+      APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
+      APTUPGRADE='aptitude -y safe-upgrade'
+   fi
 else
    APTINSTALL="apt-get --force-yes -y --no-install-recommends install $DPKG_OPTIONS"
    APTUPDATE='apt-get update'
