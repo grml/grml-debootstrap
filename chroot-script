@@ -113,6 +113,8 @@ remove_chrootmirror() {
       echo "Removing local mirror (${MIRROR}) from sources.list."
       TMP_MIRROR=$(echo "$MIRROR" |sed 's#/#\\/#g')
       sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
+      echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
+      echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
     fi
   fi
 }
