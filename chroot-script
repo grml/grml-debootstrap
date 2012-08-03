@@ -97,6 +97,27 @@ chrootmirror() {
 }
 # }}}
 
+# remove local chroot mirror {{{
+remove_chrootmirror() {
+  if [ -n "$KEEP_SRC_LIST" ] ; then
+    echo "KEEP_SRC_LIST has been set, skipping remove_chrootmirror stage."
+    return
+  fi
+
+  if [ -n "$ISO" ] ; then
+    echo "Removing ISO (${ISO}) from sources.list."
+    TMP_ISO=$(echo "$ISO" |sed 's#/#\\/#g')
+    sed -i "/deb $TMP_ISO $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
+  else
+    if [ -n "$MIRROR" -a -n "$(echo $MIRROR|grep file:)" ] ; then
+      echo "Removing local mirror (${MIRROR}) from  sources.list."
+      TMP_MIRROR=$(echo "$MIRROR" |sed 's#/#\\/#g')
+      sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
+    fi
+  fi
+}
+# }}}
+
 # set up grml repository {{{
 grmlrepos() {
   if [ -n "$GRMLREPOS" ] ; then
@@ -532,7 +553,8 @@ trap signal_handler HUP INT QUIT TERM
  for i in chrootmirror grmlrepos kernelimg_conf \
      kernel packages extrapackages  reconfigure hosts interfaces \
      timezone fstab hostname initrd grub_install passwords        \
-     custom_scripts upgrade_system remove_apt_cache services ; do
+     custom_scripts upgrade_system remove_apt_cache services \
+     remove_chrootmirror; do
      if stage $i ; then
        $i && stage $i done || exit 1
      fi
