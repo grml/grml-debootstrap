@@ -226,21 +226,47 @@ extrapackages() {
 }
 # }}}
 
-# install kernel packages {{{
-kernel() {
+# check if the specified Debian package exists
+package_exists() {
+  output=$(apt-cache show "$1" 2>/dev/null)
+  [ -n "$output" ]
+  return $?
+}
+
+
+# determine the kernel version postfix
+get_kernel_version() {
   # do not override $KERNEL if set via config file
-  if [ -z "$KERNEL" ] ; then
-     if [ "$ARCH" = 'i386' ] ; then
-        KERNEL='2.6-686'
-     elif [ "$ARCH" = 'amd64' ] ; then
-        KERNEL='2.6-amd64'
-     fi
+  if [ -n "$KERNEL" ] ; then
+    echo "$KERNEL"
+    return 0
   fi
 
-  if [ -n "$KERNEL" ] ; then
-     $APTUPDATE
+  case $ARCH in
+    i386)   KARCH=i686  ;;
+    amd64)  KARCH=amd64 ;;
+    *)
+      echo "Only i386 and amd64 are currently supported" >&2
+      return 1
+  esac
+
+  for KPREFIX in "" "2.6-" ; do  # iterate through the kernel prefixes,
+                                 # currently "" and "2.6-"
+    if package_exists linux-image-${KPREFIX}${KARCH} ; then
+      echo ${KPREFIX}${KARCH}
+      return 0
+    fi
+
+  done
+}
+
+# install kernel packages {{{
+kernel() {
+  $APTUPDATE
+  KVER=$(get_kernel_version)
+  if [ -n "$KVER" ] ; then
      # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KERNEL linux-headers-$KERNEL busybox firmware-linux"
+     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux"
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
 }
