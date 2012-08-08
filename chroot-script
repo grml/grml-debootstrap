@@ -266,7 +266,7 @@ kernel() {
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
      # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux"
+     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free firmware-linux"
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   fi
 }
