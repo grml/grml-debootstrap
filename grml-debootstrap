@@ -1018,6 +1018,9 @@ finalize_vm() {
   rm -f "${MNTPOINT}/tmp/core.img"
 
   einfo "Updating grub configuration file."
+  if [ -n "$BOOT_APPEND" ] ; then
+     sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" "${MNTPOINT}"/etc/default/grub
+  fi
   chroot "${MNTPOINT}" update-grub
 
   umount "${MNTPOINT}"/proc
