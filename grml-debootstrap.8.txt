@@ -17,12 +17,14 @@ Introduction
 grml-debootstrap is a wrapper suite around debootstrap (and cdebootstrap if you
 want) for installing a plain Debian system (e.g. via Grml) very fast and easy.
 
-All you have to do is adjust a few variables in configuration file
-/etc/debootstrap/config (or specify some variables via command line) and invoke
-grml-debootstrap without any further options then.
+All you have to do is adjust a few variables in the configuration file
+/etc/debootstrap/config or specify some command line options and invoke
+grml-debootstrap. If invoked without any configuration modifications or command
+line options a dialog based frontend will be available to control some basic
+configuration options.
 
-A plain and base Debian system will be installed on the given device (or
-directory) then. Customization of this process is possible as well.
+A plain and base Debian system will be installed on the given device, directory
+or virtual image file then. Customization of this process is possible as well.
 
 CAUTION: The Grml team does not take responsibility for loss of any data!
 
