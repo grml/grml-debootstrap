@@ -317,7 +317,7 @@ relases: lenny, squeeze, wheezy and sid. Usage example: release=sid
   mirror=...
 
 Specify mirror which should be used for apt-get/aptitude instead
-of the default one (ftp://ftp.debian.de/debian).
+of the default one (http://cdn.debian.net/debian).
 Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
 
   password=...
