@@ -201,7 +201,7 @@ Usage examples
 
   grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (stable/squeeze) on /dev/sda1 and install bootmanager
+Install default Debian release (squeeze) on /dev/sda1 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda1 as system partition.
 
   grml-debootstrap --target /dev/sda6 --grub /dev/sda --release sid
@@ -212,25 +212,25 @@ Install Debian unstable/sid on /dev/sda6, install bootmanager Grub in MBR
   mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
 
-Install default Debian release (stable/squeeze) in directory /data/chroot (without
+Install default Debian release (squeeze) in directory /data/chroot (without
 any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default debian release (stable/squeeze) in a Virtual Machine file with
+Install default debian release (squeeze) in a Virtual Machine file with
 3GB disk size (including Grub as bootmanager in MBR of the virtual disk file):
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default Debian release (stable/squeeze) on /dev/sda3 and install bootmanager
+Install default Debian release (squeeze) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
 Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
 
   mount -o loop /mnt/sda6/debian-40r0-i386-CD-1.iso /mnt/iso
   grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso file:/mnt/iso/debian/
 
-Install Debian stable/squeeze on /dev/sda1 using the loopback mounted Debian-ISO
+Install Debian squeeze on /dev/sda1 using the loopback mounted Debian-ISO
 for the base-system and install bootmanager Grub in MBR (master boot record) of
 /dev/sda and use /dev/sda1 as system partition. Please notice, that the chroot
 system requires network access for all packages which are not part of the
@@ -350,8 +350,8 @@ include::releasetable.txt[]
 ================================================================================
 [1] Please notice that lenny is the current old-stable release within Debian.
 grml-debootstrap can handle the release but you really should not use lenny
-anymore unless you really know what you are doing. Choose stable (squeeze)
-instead.
+anymore unless you really know what you are doing. Choose Debian 6.0 (squeeze)
+or Debian 7.0 (wheezy) instead.
 
 Notice that you need to specify a mirror providing the lenny release, the
 default (http://cdn.debian.net/debian) doesn't provide it any longer nowadays.
@@ -367,8 +367,8 @@ the advantage of grub-legacy actually being able to boot from it.
 .sid release
 ================================================================================
 [2] Please notice that sid is Debian/unstable and due to its nature might not be
-always installable. What _might_ work instead is deploying stable (squeeze) or
-testing (wheezy) and upgrade it after installation finished.
+always installable. What _might_ work instead is deploying a stable or testing
+release and upgrade it after installation finished.
 ================================================================================
 
 Bugs
