@@ -296,9 +296,9 @@ If environment variable AUTOINSTALL is set grml-debootstrap can be executed in a
 full automatic mode. While this mode isn't really useful for interactive
 execution (just configure /etc/debootstrap/configure or specify the relevant
 variables on the command line instead) it is meant for use via boot option
-debian2hd. The boot option debian2hd (more precise: the kernelname on bootprompt)
-supports the following boot options (they correspond with the command line options
-mentioned above):
+debian2hd on the Grml live system. The boot option debian2hd (more precise: the
+kernelname at the bootprompt) supports the following boot options (they
+correspond with the command line options mentioned above):
 
   target=...
 
