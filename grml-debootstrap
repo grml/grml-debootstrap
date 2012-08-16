@@ -730,6 +730,12 @@ else # if not running automatic installation display configuration and prompt fo
       [ -n "$VMSIZE" ] && echo "   Using Virtual Disk file with size of ${VMSIZE}."
    fi
 
+   if [ ! -t 0 -a -z "$ROOTPASSWORD" -a -z "$NOPASSWORD" ] ; then
+      echo
+      echo "   You do not have a TTY allocated, your password will be shown in"
+      echo "   plaintext on the terminal! If you are using SSH, try its -t option!"
+   fi
+
    echo
    echo "   Important! Continuing will delete all data from ${TARGET}!"
 

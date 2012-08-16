@@ -55,9 +55,9 @@ stage() {
 askpass() {
   # read -s emulation for dash. result is in $resp.
   set -o noglob
-  stty -echo
+  [ -t 0 ] && stty -echo
   read resp
-  stty echo
+  [ -t 0 ] && stty echo
   set +o noglob
 }
 # }}}
