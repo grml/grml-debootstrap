@@ -1088,7 +1088,7 @@ preparechroot() {
   chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
   [ -n "$ARCH" ]                && echo "ARCH=\"$ARCH\""                               >> $CHROOT_VARIABLES
-  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS=\"$BACKPORTREPOS\""                     >> $CHROOT_VARIABLES
+  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS=\"$BACKPORTREPOS\""             >> $CHROOT_VARIABLES
   [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=\"$CHROOT_SCRIPTS\""           >> $CHROOT_VARIABLES
   [ -n "$CONFFILES" ]           && echo "CONFFILES=\"$CONFFILES\""                     >> $CHROOT_VARIABLES
   [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> $CHROOT_VARIABLES

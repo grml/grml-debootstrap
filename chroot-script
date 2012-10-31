@@ -165,27 +165,24 @@ EOF
 }
 # }}}
 
-# set up debian backports repository {{{
+# set up debian backports repository for squeeze{{{
 backportrepos() {
   if [ -n "$BACKPORTREPOS" ] ; then
+     if [ $RELEASE = "squeeze" ] ; then
      # user might have provided their own apt sources.list
-     if ! grep -q backports /etc/apt/sources.list.d/backports.list 2>/dev/null ; then
+        if ! grep -q backports /etc/apt/sources.list.d/backports.list 2>/dev/null ; then
         cat >> /etc/apt/sources.list.d/backports.list << EOF
-# debian backports: squeeze-backports repository:
-  deb http://backports.debian.org/debian-backports squeeze-backports main
-  deb-src http://backports.debian.org/debian-backports squeeze-backports main
+# debian backports: ${RELEASE}-backports repository:
+  deb http://backports.debian.org/debian-backports ${RELEASE}-backports main
+  deb-src http://backports.debian.org/debian-backports ${RELEASE}-backports main
 EOF
-     fi
-
-     if ! grep -q backports /etc/apt/preferences 2>/dev/null ; then
-        cat >> /etc/apt/preferences << EOF
-// debian backports-repository:
-Package: *
-Pin: origin backports.debian.org
-Pin-Priority: 999
-EOF
-     fi
-  fi
+        fi
+    else
+      echo "grml-debootstrap supports only Debian backports repository for the
+actually stable release version - squeeze."
+      exit 1
+    fi
+ fi
 }
 # }}}
 
@@ -604,7 +601,7 @@ trap signal_handler HUP INT QUIT TERM
 
  for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages  reconfigure hosts interfaces \
-     timezone fstab hostname initrd grub_install passwords        \
+     timezone fstab hostname initrd grub_install passwords  \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
      if stage $i ; then
