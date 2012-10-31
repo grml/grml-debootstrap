@@ -81,6 +81,12 @@ Options and environment variables
     /etc/apt/sources.list.d/grml.list configuration file. This provides the
     option to install Debian packages from Grml's repository.
 
+*--backportrepos*::
+
+    Enable Debian Backports repository (http://backports.debian.org/) via the
+    /etc/apt/sources.list.d/backports.list configuration file. This provides the
+    option to install Debian packages from Debian's backports repository.
+
 *--grub* _device_::
 
     Device where grub should be installed to. Note that only the MBR (master

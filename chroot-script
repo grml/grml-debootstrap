@@ -165,6 +165,30 @@ EOF
 }
 # }}}
 
+# set up debian backports repository {{{
+backportrepos() {
+  if [ -n "$BACKPORTREPOS" ] ; then
+     # user might have provided their own apt sources.list
+     if ! grep -q backports /etc/apt/sources.list.d/backports.list 2>/dev/null ; then
+        cat >> /etc/apt/sources.list.d/backports.list << EOF
+# debian backports: squeeze-backports repository:
+  deb http://backports.debian.org/debian-backports squeeze-backports main
+  deb-src http://backports.debian.org/debian-backports squeeze-backports main
+EOF
+     fi
+
+     if ! grep -q backports /etc/apt/preferences 2>/dev/null ; then
+        cat >> /etc/apt/preferences << EOF
+// debian backports-repository:
+Package: *
+Pin: origin backports.debian.org
+Pin-Priority: 999
+EOF
+     fi
+  fi
+}
+# }}}
+
 # set up kernel-img.conf {{{
 kernelimg_conf() {
   if ! [ -r /etc/kernel-img.conf ] ; then
@@ -578,7 +602,7 @@ trap signal_handler HUP INT QUIT TERM
  # always execute install_policy_rcd
  install_policy_rcd
 
- for i in chrootmirror grmlrepos kernelimg_conf \
+ for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages  reconfigure hosts interfaces \
      timezone fstab hostname initrd grub_install passwords        \
      custom_scripts upgrade_system remove_apt_cache services \
