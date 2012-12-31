@@ -63,10 +63,9 @@
 # GRMLPACKAGES='grml-etc-core'
 
 # Debian release that should be installed.
-# Supported values: lenny (old-stable), squeeze (stable),
-#                   wheezy (testing), sid (unstable)
-# Default: 'squeeze'
-# RELEASE='squeeze'
+# Supported values: lenny, squeeze, wheezy, sid
+# Default: 'wheezy'
+# RELEASE='wheezy'
 
 # Define components that should be used within sources.list.
 # Default: 'main contrib non-free'

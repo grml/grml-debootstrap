@@ -31,7 +31,7 @@ MKFS='mkfs.ext3'
 PACKAGES='yes'
 PRE_SCRIPTS='yes'
 RECONFIGURE='console-data'
-RELEASE='squeeze'
+RELEASE='wheezy'
 RM_APTCACHE='yes'
 SCRIPTS='yes'
 SECURE='yes'
@@ -60,7 +60,7 @@ Bootstrap options:
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                          instead of fetching packages from a mirror.
-  -r, --release <name>   Release of new Debian system (default: squeeze).
+  -r, --release <name>   Release of new Debian system (default: wheezy).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
@@ -494,13 +494,13 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='squeeze'
+  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='wheezy'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 4 \
-            lenny    Debian/old-stable \
-            squeeze  Debian/stable \
-            wheezy   Debian/testing \
+            lenny    Debian/5.0 \
+            squeeze  Debian/6.0 \
+            wheezy   Debian/7.0 \
             sid      Debian/unstable)"
   [ $? -eq 0 ] || bailout
 }

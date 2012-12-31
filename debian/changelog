@@ -1,3 +1,22 @@
+grml-debootstrap (0.54) unstable; urgency=low
+
+  The "happy new year, Verena" release.
+
+  [ Evgeni Golov ]
+  * [5ee8148] add BOOT_APPEND to GRUB_CMDLINE_LINUX_DEFAULT
+
+  [ Michael Prokop ]
+  * [62cec4e] Do not hardcode squeeze as Debian/stable
+  * [6589216] Set wheezy as the new default release [Closes: #688234]
+  * [ae9070d] docs: fix outdated default mirror reference
+  * [e5a6244] docs: clarify AUTOINSTALL is currently supported on Grml
+    live systems only. Thanks to Evgeni Golov <evgeni@grml.org> for review
+    + improving
+  * [4280921] docs: mention VM image and dialog based frontend support.
+    Thanks to Evgeni Golov <evgeni@grml.org> for review and improving
+
+ -- Michael Prokop <mika@grml.org>  Mon, 31 Dec 2012 23:52:42 +0100
+
 grml-debootstrap (0.53) unstable; urgency=low
 
   * [4d08103] Add acpi-support-base to default package selection
