@@ -94,6 +94,7 @@ Configuration options:
                              /etc/debootstrap/packages
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
+      --backportrepos      Enable Debian's backports repository (backports.debian.org).
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
@@ -321,6 +322,7 @@ fi
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
 [ "$_opt_keep_src_list" ]       && KEEP_SRC_LIST='yes'
 [ "$_opt_grmlrepos" ]           && GRMLREPOS='yes'
+[ "$_opt_backportrepos" ]       && BACKPORTREPOS='yes'
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
@@ -1092,6 +1094,7 @@ preparechroot() {
   chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
   [ -n "$ARCH" ]                && echo "ARCH=\"$ARCH\""                               >> $CHROOT_VARIABLES
+  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS=\"$BACKPORTREPOS\""             >> $CHROOT_VARIABLES
   [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=\"$CHROOT_SCRIPTS\""           >> $CHROOT_VARIABLES
   [ -n "$CONFFILES" ]           && echo "CONFFILES=\"$CONFFILES\""                     >> $CHROOT_VARIABLES
   [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> $CHROOT_VARIABLES

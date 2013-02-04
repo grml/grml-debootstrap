@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -112,6 +112,9 @@ while :; do
     ;;
   --grmlrepos)         # Enable Grml repository
     _opt_grmlrepos=T
+    ;;
+  --backportrepos)     # Enable Debian backports repository
+    _opt_backportrepos=T
     ;;
   --bootappend)        # Add specified appendline to kernel whilst booting
     shift; _opt_bootappend="$1"

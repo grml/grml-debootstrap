@@ -62,6 +62,11 @@
 # Default: no default.
 # GRMLPACKAGES='grml-etc-core'
 
+# To enable Debian's backports repository via
+# /etc/apt/sources.list.d/backports.list set this variable to 'yes'.
+# Default: 'no'
+# BACKPORTREPOS='yes'
+
 # Debian release that should be installed.
 # Supported values: lenny, squeeze, wheezy, sid
 # Default: 'wheezy'

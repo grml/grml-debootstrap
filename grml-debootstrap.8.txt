@@ -38,6 +38,12 @@ Options and environment variables
     deploy an i386 system use this option. Note: deploying amd64 from an i386
     kernel does *not* work. Example: "_--arch i386_"
 
+*--backportrepos*::
+
+    Enable Debian's Backports repository (http://backports.debian.org/) via the
+    /etc/apt/sources.list.d/backports.list configuration file. This provides the
+    option to install Debian packages from Debian's backports repository.
+
 *--bootappend* _appendline-for-the-kernel_::
 
     Specify appendline for the kernel.
