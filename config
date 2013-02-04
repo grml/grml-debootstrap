@@ -57,6 +57,11 @@
 # Default: 'no'
 # GRMLREPOS='yes'
 
+# To enable the Debian's backports repository via
+# /etc/apt/sources.list.d/backports.list set this variable to 'yes'.
+# Default: 'no'
+# BACKPORTREPOS='yes'
+
 # Install packages from grml-repository?
 # Requires activated $GRMLREPOS from above. If empty nothing will be added.
 # Default: no default.
