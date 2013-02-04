@@ -37,7 +37,7 @@
 
 # Set mirror where packages will be downloaded from.
 # Default: use /etc/debootstrap/etc/apt/sources.list if it exists, else
-# 'http://cdn.debian.net/debian'
+# 'http://http.debian.net/debian'
 # Usage example:
 # MIRROR='ftp://ftp.de.debian.org/debian'
 

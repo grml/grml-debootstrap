@@ -20,7 +20,7 @@ DEBCONF='yes'
 DEBIAN_FRONTEND='noninteractive'
 DEBOOTSTRAP='debootstrap'
 EXTRAPACKAGES='yes'
-FALLBACK_MIRROR='http://cdn.debian.net/debian'
+FALLBACK_MIRROR='http://http.debian.net/debian'
 FORCE=''
 HOSTNAME='grml'
 INITRD='yes'
@@ -557,7 +557,7 @@ prompt_for_mirror()
   [ $? -eq 0 ] || bailout
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
-     [ -n "$MIRROR" ] || MIRROR='http://cdn.debian.net/debian'
+     [ -n "$MIRROR" ] || MIRROR='http://http.debian.net/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
                0 0 $MIRROR)"

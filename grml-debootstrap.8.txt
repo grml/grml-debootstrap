@@ -319,7 +319,7 @@ relases: lenny, squeeze, wheezy and sid. Usage example: release=sid
   mirror=...
 
 Specify mirror which should be used for apt-get/aptitude instead
-of the default one (http://cdn.debian.net/debian).
+of the default one (http://http.debian.net/debian).
 Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
 
   password=...
@@ -356,7 +356,7 @@ anymore unless you really know what you are doing. Choose Debian 6.0 (squeeze)
 or Debian 7.0 (wheezy) instead.
 
 Notice that you need to specify a mirror providing the lenny release, the
-default (http://cdn.debian.net/debian) doesn't provide it any longer nowadays.
+default (http://http.debian.net/debian) doesn't provide it any longer nowadays.
 Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have
 your own lenny mirror.
 
