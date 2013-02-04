@@ -1,3 +1,28 @@
+grml-debootstrap (0.55) experimental; urgency=low
+
+  [ Evgeni Golov ]
+  * ISO related bugfixes:
+    * [6f8ba91] set ISO to file:$ISO, not to file:$1 which is
+      just wrong
+    * [ab690ec] debootstrap from an ISO when ISO is set as MIRROR
+      is always set
+    * [10690a9] Debian ISOs do not contain signed Release files
+    * [9c1ec11] remove local (file://) mirrors from sources.list
+  * Misc improvements:
+    - [010a354] add a fallback mirror to be added in case when a local
+      mirror is removed
+    - [91e39fc] Dynamically determine the correct kernel package name
+      [Closes: issue1206]
+    - [76ca758] Add firmware-linux-free to the packages to be installed
+    - [a9697fb] add BOOT_APPEND to GRUB_CMDLINE_LINUX_DEFAULT
+    - [a93156c] don't fail to ask for a password if there is no TTY
+      [Closes: issue1200]
+
+  [ Michael Prokop ]
+  * [f3a7ab6] Use http.debian.net as default mirror
+
+ -- Michael Prokop <mika@grml.org>  Mon, 04 Feb 2013 15:58:46 +0100
+
 grml-debootstrap (0.54) unstable; urgency=low
 
   The "happy new year, Verena" release.
