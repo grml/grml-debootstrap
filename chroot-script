@@ -292,7 +292,7 @@ get_kernel_version() {
   fi
 
   case $ARCH in
-    i386)   KARCH=i686  ;;
+    i386)   KARCH=686   ;;
     amd64)  KARCH=amd64 ;;
     *)
       echo "Only i386 and amd64 are currently supported" >&2
@@ -317,6 +317,8 @@ kernel() {
      # note: install busybox to be able to debug initramfs
      KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free firmware-linux"
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
+  else
+     echo "Warning: Could not find a kernel for your system. Your system won't be able to boot itself!"
   fi
 }
 # }}}
