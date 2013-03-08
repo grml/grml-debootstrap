@@ -1,3 +1,13 @@
+grml-debootstrap (0.56) experimental; urgency=low
+
+  [ Markus Rekkenbeil ]
+  * [4f9ea91] Add new feature "backportrepos" via option --backportrepos
+
+  [ Evgeni Golov ]
+  * [e45e376] fix kernel image search on i386
+
+ -- Michael Prokop <mika@grml.org>  Fri, 08 Mar 2013 15:28:21 +0100
+
 grml-debootstrap (0.55) experimental; urgency=low
 
   [ Evgeni Golov ]
