@@ -1,3 +1,13 @@
+grml-debootstrap (0.57) unstable; urgency=low
+
+  The "happy wheezy release" release
+
+  [ Christian Hofstaedtler ]
+  * [dfac692] Remove obsolete DM-Upload-Allowed flag
+  * [5fbec1d] Bump Standards-Version to 3.9.4 (no changes needed)
+
+ -- Michael Prokop <mika@grml.org>  Wed, 08 May 2013 16:21:23 +0200
+
 grml-debootstrap (0.56) experimental; urgency=low
 
   [ Markus Rekkenbeil ]
