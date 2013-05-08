@@ -3,7 +3,6 @@ Section: admin
 Priority: optional
 Maintainer: Grml Team <team@grml.org>
 Uploaders: Michael Prokop <mika@debian.org>, Alexander Wirt <formorer@debian.org>, Christian Hofstaedtler <christian@hofstaedtler.name>, Ulrich Dangel <mru@spamt.net>
-DM-Upload-Allowed: yes
 Build-Depends: debhelper (>= 5)
 Build-Depends-Indep: asciidoc, docbook-xsl, xsltproc, shunit2
 Standards-Version: 3.9.3
