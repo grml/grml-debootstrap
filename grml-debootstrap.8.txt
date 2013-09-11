@@ -40,7 +40,8 @@ Options and environment variables
 
 *--backportrepos*::
 
-    Enable Debian's Backports repository (http://backports.debian.org/) via the
+    Enable Debian's Backports repository (squeeze: http://backports.debian.org/
+    and others: http://http.debian.net/) via the
     /etc/apt/sources.list.d/backports.list configuration file. This provides the
     option to install Debian packages from Debian's backports repository.
 

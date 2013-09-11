@@ -94,7 +94,7 @@ Configuration options:
                              /etc/debootstrap/packages
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
-      --backportrepos      Enable Debian's backports repository (backports.debian.org).
+      --backportrepos      Enable Debian's backports repository.
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
