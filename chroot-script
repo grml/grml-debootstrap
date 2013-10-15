@@ -428,6 +428,14 @@ EOF
 }
 # }}}
 
+# set default locales {{{
+default_locales() {
+  if [ -n "$DEFAULT_LOCALES" ] ; then
+    update-locale LANG="$DEFAULT_LOCALES"
+  fi
+}
+# }}}
+
 # adjust timezone {{{
 timezone() {
   if [ -n "$TIMEZONE" ] ; then
@@ -608,7 +616,7 @@ trap signal_handler HUP INT QUIT TERM
 
  for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages  reconfigure hosts interfaces \
-     timezone fstab hostname initrd grub_install passwords        \
+     default_locales timezone fstab hostname initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
      if stage $i ; then

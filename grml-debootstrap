@@ -19,6 +19,7 @@ CONFFILES='/etc/debootstrap'
 DEBCONF='yes'
 DEBIAN_FRONTEND='noninteractive'
 DEBOOTSTRAP='debootstrap'
+DEFAULT_LOCALES='en_US.UTF-8'
 EXTRAPACKAGES='yes'
 FALLBACK_MIRROR='http://http.debian.net/debian'
 FORCE=''
@@ -1100,6 +1101,7 @@ preparechroot() {
   [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> $CHROOT_VARIABLES
   [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\""         >> $CHROOT_VARIABLES
   [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=\"$DEBOOTSTRAP\""                 >> $CHROOT_VARIABLES
+  [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES=\"$DEFAULT_LOCALES\""         >> $CHROOT_VARIABLES
   [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=\"$EXTRAPACKAGES\""             >> $CHROOT_VARIABLES
   [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR=\"$FALLBACK_MIRROR\""         >> $CHROOT_VARIABLES
   [ -n "$FORCE" ]               && echo "FORCE=\"$FORCE\""                             >> $CHROOT_VARIABLES
