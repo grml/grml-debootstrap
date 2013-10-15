@@ -450,7 +450,7 @@ prompt_for_bootmanager()
   fi
 
   for device in cciss/c0d0 sda hda; do
-    if [ /dev/$device != ${MBRDISK} ]; then
+    if [ "/dev/$device" != "${MBRDISK}" ]; then
       grep -q $device /proc/partitions && \
       ADDITIONAL_PARAMS="$ADDITIONAL_PARAMS:$device:install bootmanager grub into MBR of /dev/$device"
     fi
@@ -471,12 +471,7 @@ prompt_for_bootmanager()
     mbr)
       # /dev/md0: has to be installed in MBR of /dev/md0 and not in /dev/md:
       if echo "$TARGET" | grep -q "/dev/md" ; then
-         # using sw-raid:
-         if [ -n "$SELECTED_PARTITIONS" ] ; then
-            GRUB=$(echo ${SELECTED_PARTITIONS} | awk '{print $1}') # use first disk only
-         else
-            GRUB="$TARGET"
-         fi
+        GRUB="$TARGET"
       else
         GRUB="$MBRDISK"
       fi
