@@ -6,3 +6,4 @@ rsync
 postfix
 lsb-release
 acpi-support-base
+vlan
