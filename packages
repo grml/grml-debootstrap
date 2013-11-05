@@ -7,3 +7,4 @@ postfix
 lsb-release
 acpi-support-base
 vlan
+bridge-utils
