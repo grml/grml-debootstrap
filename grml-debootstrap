@@ -77,8 +77,8 @@ Bootstrap options:
 
 Options for Virtual Machine deployment:
 
-      --vmfile           Set up a Virtual Machine instead of installing to
-                         a partition or directory, to be combined with --target,
+      --vmfile           Set up a Virtual Machine (raw format) instead of installing
+                         to a partition or directory, to be combined with --target,
                          like: --vmfile --target /mnt/sda1/qemu.img
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
