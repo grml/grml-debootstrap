@@ -5,7 +5,6 @@
 # Bug-Reports:   see http://grml.org/bugs/
 # License:       This file is licensed under the GPL v2+
 ################################################################################
-# http://www.debian.org/releases/stable/i386/index.html.en
 
 # variables {{{
 PN="$(basename $0)"
