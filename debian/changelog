@@ -1,3 +1,11 @@
+grml-debootstrap (0.59) unstable; urgency=low
+
+  * [b8fb51c] Fix usage of configuration variables
+  * [6e7a2c8] Drop URL to release notes from script header
+  * [2ef61aa] Improve error handling for update-locale
+
+ -- Michael Prokop <mika@grml.org>  Tue, 12 Nov 2013 14:06:52 +0100
+
 grml-debootstrap (0.58) unstable; urgency=low
 
   * [ddf2a40] Support $DEFAULT_LOCALES to enable specified locales as
