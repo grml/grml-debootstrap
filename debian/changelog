@@ -1,3 +1,18 @@
+grml-debootstrap (0.58) unstable; urgency=low
+
+  * [ddf2a40] Support $DEFAULT_LOCALES to enable specified locales as
+    default
+  * [a75f067] Install grub to main md device when installing on
+    SW-RAID/mdadm
+  * [172555b] Support overriding configuration via environment variables
+  * [45642a3] Add vlan package to default package list
+  * [af82910] Add bridge-utils to default package list
+  * [53d51ac] Fix description of SCRIPTS variable in config file.
+    Thanks to Jimmy Gredler for the hint
+  * [2ecc3d3] Mention that "raw format" is used for vmfile option
+
+ -- Michael Prokop <mika@grml.org>  Tue, 12 Nov 2013 13:15:23 +0100
+
 grml-debootstrap (0.57) unstable; urgency=low
 
   The "happy wheezy release" release
