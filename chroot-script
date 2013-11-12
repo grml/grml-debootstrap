@@ -431,7 +431,13 @@ EOF
 # set default locales {{{
 default_locales() {
   if [ -n "$DEFAULT_LOCALES" ] ; then
-    update-locale LANG="$DEFAULT_LOCALES"
+    if ! [ -x /usr/sbin/update-locale ] ; then
+      echo "Warning: update-locale executable not available (no locales package installed?)"
+      echo "Ignoring request to run update-locale for $DEFAULT_LOCALES therefore"
+      return 0
+    fi
+
+    /usr/sbin/update-locale LANG="$DEFAULT_LOCALES"
   fi
 }
 # }}}
