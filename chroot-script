@@ -18,19 +18,19 @@
 
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
-   APTUPDATE='aptitude update'
+   APTUPDATE="aptitude update $DPKG_OPTIONS"
    # Debian ISOs do not contain signed Release files
    if [ -n "$ISO" ] ; then
       APTINSTALL="aptitude -y --allow-untrusted --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE='aptitude -y --allow-untrusted safe-upgrade'
+      APTUPGRADE="aptitude -y --allow-untrusted safe-upgrade $DPKG_OPTIONS"
    else
       APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE='aptitude -y safe-upgrade'
+      APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
    fi
 else
    APTINSTALL="apt-get --force-yes -y --no-install-recommends install $DPKG_OPTIONS"
-   APTUPDATE='apt-get update'
-   APTUPGRADE='apt-get --force-yes -y upgrade'
+   APTUPDATE="apt-get update $DPKG_OPTIONS"
+   APTUPGRADE="apt-get --force-yes -y upgrade $DPKG_OPTIONS"
 fi
 
 if [ -z "$STAGES" ] ; then
@@ -136,9 +136,9 @@ grmlrepos() {
 EOF
      fi
 
-     if apt-get update ; then
-       apt-get -y --allow-unauthenticated install grml-debian-keyring
-       apt-get update
+     if apt-get update $DPKG_OPTIONS; then
+       apt-get -y --allow-unauthenticated install grml-debian-keyring $DPKG_OPTIONS
+       apt-get update $DPKG_OPTIONS
      else
        # make sure we have the keys available for aptitude
        gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
@@ -234,7 +234,7 @@ upgrade_system() {
 remove_apt_cache() {
   if [ "$RM_APTCACHE" = 'yes' ] ; then
     echo "Cleaning apt cache."
-    apt-get clean
+    apt-get clean $DPKG_OPTIONS
   else
     echo "Not cleaning apt cache as \$RM_APTCACHE is unset."
   fi
