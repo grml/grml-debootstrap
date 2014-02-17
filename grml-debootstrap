@@ -8,7 +8,7 @@
 
 # variables {{{
 PN="$(basename $0)"
-VERSION="$(dpkg --list $PN 2>/dev/null| awk '/^i/ {print $3}')"
+VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 VERSION="${VERSION:-unknown}"
 MNTPOINT="/mnt/debootstrap.$$"
 
