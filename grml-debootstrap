@@ -792,6 +792,16 @@ else
 fi
 # }}}
 
+# It is not possible to build amd64 on i686. {{{
+CURRENT_ARCH="$(uname -m)"
+if [ "$CURRENT_ARCH" != "x86_64" ] ; then
+   if [ "$ARCH" = "amd64" ] ; then
+      eerror "It is not possible to build amd64 on $CURRENT_ARCH." ; eend 1
+      bailout 1
+   fi
+fi
+# }}}
+
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
