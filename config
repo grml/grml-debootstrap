@@ -201,4 +201,9 @@
 # Default: '/etc/debootstrap/install_notes' (empty file).
 # INSTALL_NOTES='/etc/debootstrap/install_notes'
 
+# Use fixed disk identifiers for Virtual Machine builds.
+# Useful for reproducible builds.
+# Default: 'no'
+# FIXED_DISK_IDENTIFIERS='yes'
+
 ## END OF FILE #################################################################
