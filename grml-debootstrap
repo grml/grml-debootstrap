@@ -889,9 +889,15 @@ mkfs() {
        $MKFS $TARGET ; RC=$?
 
        if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-         einfo "Changing disk uuid for $TARGET to fixed (non-random) value using tune2fs"
-         tune2fs "$TARGET" -U 26ada0c0-1165-4098-884d-aafd2220c2c6
-         eend $?
+         if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
+           eerror "Not changing disk uuid for $TARGET because $MKFS doesn't seem to match for ext{2,3,4} file system"
+           eend 1
+           bailout 1
+         else
+           einfo "Changing disk uuid for $TARGET to fixed (non-random) value using tune2fs"
+           tune2fs "$TARGET" -U 26ada0c0-1165-4098-884d-aafd2220c2c6
+           eend $?
+         fi
        fi
 
        # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
