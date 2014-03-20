@@ -1,3 +1,22 @@
+grml-debootstrap (0.60) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  * [4f436b4] added $DPKG_OPTIONS to all instances of apt-get and aptitude
+    https://github.com/grml/grml-debootstrap/issues/8
+  * [80fae65] [7ec9ddc] grml-debootstrap own version detection code
+    simplification
+  * [134498c] It is not possible to build amd64 on i386. Break when the
+    user attempts to do this.
+  * [5a873a8] Support FIXED_DISK_IDENTIFIERS option, useful for
+    reproducible builds
+
+  [ Michael Prokop ]
+  * [b9fc7bb] Abort if FIXED_DISK_IDENTIFIERS is set but mkfs.* does not
+    match for ext{2,3,4} file system
+  * [a59c1b4] Bump Standards-Version to 3.9.5
+
+ -- Michael Prokop <mika@grml.org>  Thu, 20 Mar 2014 16:18:49 +0100
+
 grml-debootstrap (0.59) unstable; urgency=low
 
   * [b8fb51c] Fix usage of configuration variables
