@@ -8,3 +8,5 @@ lsb-release
 acpi-support-base
 vlan
 bridge-utils
+ifenslave
+cryptsetup
