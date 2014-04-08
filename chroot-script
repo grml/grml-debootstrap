@@ -223,7 +223,7 @@ upgrade_system() {
   if [ "$UPGRADE_SYSTEM" = "yes" ] ; then
     echo "Running update + upgrade"
     $APTUPDATE
-    $APTUPGRADE
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTUPGRADE
   else
     echo "Not running update + upgrade as \$UPDATE_AND_UPGRADE is not set to 'yes'."
   fi
