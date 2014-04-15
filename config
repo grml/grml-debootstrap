@@ -151,7 +151,7 @@
 
 # File system creation tool to apply on $TARGET.
 # If empty, no file system will be created.
-# Default: 'mkfs.ext3'
+# Default: 'mkfs.ext4'
 # MKFS=''
 
 # Filesystem tuning tool to apply on $TARGET.

@@ -76,7 +76,7 @@ Options and environment variables
 *--filesystem* _filesystem_::
 
     Filesystem that should be created when installing to a partition.
-    If unset defaults to ext3. Valid values are all filesystems that
+    If unset defaults to ext4. Valid values are all filesystems that
     can be created through mkfs._filesystem_.
 
 *--force*::

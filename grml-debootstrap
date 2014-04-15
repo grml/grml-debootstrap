@@ -27,7 +27,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$INSTALL_NOTES" ] || INSTALL_NOTES='/etc/debootstrap/install_notes'
 [ -n "$LOCALES" ] || LOCALES='yes'
 [ -n "$MIRROR" ] || MIRROR="$FALLBACK_MIRROR"
-[ -n "$MKFS" ] || MKFS='mkfs.ext3'
+[ -n "$MKFS" ] || MKFS='mkfs.ext4'
 [ -n "$PACKAGES" ] || PACKAGES='yes'
 [ -n "$PRE_SCRIPTS" ] || PRE_SCRIPTS='yes'
 [ -n "$RECONFIGURE" ] || RECONFIGURE='console-data'
@@ -982,7 +982,7 @@ prepare_vm() {
     dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
     eend $?
   fi
-  parted -s "${TARGET}" 'mkpart primary ext3 2M -1'
+  parted -s "${TARGET}" 'mkpart primary ext4 2M -1'
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
