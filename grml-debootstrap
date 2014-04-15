@@ -108,6 +108,7 @@ Configuration options:
 Other options:
 
   -v, --verbose            Increase verbosity.
+      --debug              Execute in very verbose way.
   -h, --help               Print this usage information and exit.
   -V, --version            Show summary of options and exit.
 
@@ -333,6 +334,11 @@ fi
 [ "$_opt_insecure" ]            && echo "Warning: --insecure is deprecated, continuing anyway."
 [ "$_opt_force" ]               && FORCE=$_opt_force
 [ "$_opt_verbose" ]             && VERBOSE="-v"
+[ "$_opt_debug" ]               && DEBUG="true"
+
+if [ "$DEBUG" = "true" ] ; then
+  set -x
+fi
 
 [ "$_opt_help" ] && {
   usage ; eend 0
@@ -1277,7 +1283,11 @@ chrootscript() {
   else
     einfo "Executing chroot-script now"
     mount --bind /dev "$MNTPOINT"/dev
-    chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
+    if [ "$DEBUG" = "true" ] ; then
+      chroot "$MNTPOINT" /bin/sh -x /bin/chroot-script ; RC=$?
+    else
+      chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
+    fi
     umount "$MNTPOINT"/dev
     eend $RC
   fi

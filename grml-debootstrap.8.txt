@@ -73,6 +73,11 @@ Options and environment variables
 
     Extra parameters passed to the debootstrap command.
 
+*--debug*::
+
+   Execute in very verbose way. Useful for debugging possible problems
+   with grml-debootstrap or identify what's actually executed.
+
 *--filesystem* _filesystem_::
 
     Filesystem that should be created when installing to a partition.
