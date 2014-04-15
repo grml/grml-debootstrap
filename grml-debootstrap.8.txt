@@ -183,9 +183,7 @@ Options and environment variables
 
 *-t*, *--target* _target_::
     Target partition (/dev/...) or directory (anything else without /dev at the
-    beginning). To install grub using *--grub* make sure to use a _device_
-    instead of a directory as _target_ (installation of grub as bootloader when
-    using directories is NOT supported).
+    beginning).
 
 *-v*, *--verbose*::
     Increase verbosity.
