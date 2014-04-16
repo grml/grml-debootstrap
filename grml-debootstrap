@@ -93,6 +93,9 @@ Configuration options:
                              instead of using /etc/debootstrap/packages.
       --nopackages         Skip installation of packages defined in
                              /etc/debootstrap/packages
+      --nointerfaces       Do not copy /etc/network/interfaces from host system
+                           to target system.
+                           (This option is automatically enabled when using --vmfile.)
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
@@ -328,6 +331,7 @@ fi
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
+[ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
@@ -1147,6 +1151,7 @@ preparechroot() {
   [ -n "$MIRROR" ]              && echo "MIRROR=\"$MIRROR\""                           >> $CHROOT_VARIABLES
   [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> $CHROOT_VARIABLES
   [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> $CHROOT_VARIABLES
+  [ -n "$NOINTERFACES" ]        && echo "NOINTERFACES=\"true\""                        >> $CHROOT_VARIABLES
   [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> $CHROOT_VARIABLES
   [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> $CHROOT_VARIABLES
   [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=\"$RECONFIGURE\""                 >> $CHROOT_VARIABLES
@@ -1224,9 +1229,16 @@ preparechroot() {
   [ -d $CONFFILES/var   ] && cp $VERBOSE -a -L $CONFFILES/var/*   $MNTPOINT/var/
 
   # copy local network setup to chroot
-  if [ -r /etc/network/interfaces -a ! -r "${MNTPOINT}"/etc/network/interfaces ] ; then
-     [ -d $MNTPOINT/etc/network ] || mkdir $MNTPOINT/etc/network
-     cp $VERBOSE /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+  if [ -n "$NOINTERFACES" ] ; then
+    einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
+  elif [ -n "$VIRTUAL" ] ; then
+    einfo "Installing into Virtual Machine, skipping installation of /etc/network/interfaces" ; eend 0
+  elif [ -r /etc/network/interfaces ] ; then
+    einfo "Copying /etc/network/interfaces from host to target system"
+    cp $VERBOSE /etc/network/interfaces $MNTPOINT/etc/network/interfaces
+    eend $?
+  else
+    ewarn "Couldn't read /etc/network/interfaces, not copying to target system" ; eend 0
   fi
 
   # install config file providing some example entries

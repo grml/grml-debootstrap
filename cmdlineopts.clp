@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nointerfaces,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -106,6 +106,9 @@ while :; do
     ;;
   --password)          # Use specified password as password for user root
     shift; _opt_password="$1"
+    ;;
+  --nointerfaces)      # Skip installation of /etc/network/interfaces
+    _opt_nointerfaces=T
     ;;
   --nopassword)        # Skip password dialog
     _opt_nopassword=T

@@ -132,6 +132,11 @@ Options and environment variables
 
     Skip debootstrap, only do configuration to the target.
 
+*--nointerfaces*::
+
+    Do not copy /etc/network/interfaces from host system to the target.
+    This option is automatically enabled when using --vmfile.
+
 *--nopackages*::
 
     Skip installation of packages defined in /etc/debootstrap/packages.
