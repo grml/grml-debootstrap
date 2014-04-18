@@ -15,7 +15,7 @@ Introduction
 ------------
 
 grml-debootstrap is a wrapper suite around debootstrap (and cdebootstrap if you
-want) for installing a plain Debian system (e.g. via Grml) very fast and easy.
+want) for installing a plain Debian system very fast and easy.
 
 All you have to do is adjust a few variables in the configuration file
 /etc/debootstrap/config or specify some command line options and invoke
@@ -187,30 +187,35 @@ Options and environment variables
     Default directory: /etc/debootstrap/scripts/
 
 *-t*, *--target* _target_::
+
     Target partition (/dev/...) or directory (anything else without /dev at the
     beginning).
 
 *-v*, *--verbose*::
+
     Increase verbosity.
 
 *--vmfile*::
+
     Set up a Virtual Machine instead of installing to a partition or directory.
     This allows deployment of a Virtual Machine. The options needs to be
     combined with the --target option.
     Usage example: --vmfile --target /mnt/sda1/qemu.img
 
 *--vmsize* _size_::
+
    Use specified size for size of Virtual Machine disk file. If not specified it
    defaults to 2G (being 2GB). Syntax as supported by qemu-img (see manpage
    qemu-img(1) for details.
    Usage example: --vmsize 3G
 
 *-V*, *--version*::
+
     Show version of program and exit.
 
-WARNING: the command line parsing of grml-debootstrap does not validate the provided
-arguments for the command line options. Please be careful and check docs and
-/etc/debootstrap/config for further information.
+WARNING: the command line parsing of grml-debootstrap usually does not validate
+the provided arguments for the command line options. Please be careful and check
+docs and /etc/debootstrap/config for further information.
 
 Usage examples
 ---------------
@@ -257,9 +262,9 @@ Files
 
   /etc/debootstrap/config
 
-Main configuration file. You have to adjust it according to your needs
-if you want to execute grml-debootstrap in the non-interactive mode without
-any special command line arguments.
+Main configuration file. Adjust it according to your needs if you want to
+execute grml-debootstrap in the non-interactive mode without any special command
+line arguments.
 
   /etc/debootstrap/chroot-script
 
@@ -279,17 +284,6 @@ Debian system by default.
 
 Debian Packages dropped in this directory will be installed into the new Debian
 system by default (Control variable: EXTRAPACKAGES)
-
-  /etc/debootstrap/stages/
-
-The default directory for storing information about executed stages. Every
-single function of grml-debootstrap will write 'done' to the stages directory
-into a file named as the function itself if it has been executed successfully.
-You can adjust the location of the directory via configuration variable STAGES
-via /etc/debootstrap/config.  Please notice that you have to remove the stages
-directory on your own if you want to re-execute grml-debootstrap after running it
-successfully once. This should avoid recurrent execution by error of
-grml-debootstrap (which might delete present data).
 
 Customization
 -------------
@@ -341,8 +335,8 @@ Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
 Set password of user root without prompting for it but set it to the given
 argument. Usage example: password=AiTh5ahn
 
-Usage example for automatic installation:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Usage example for automatic installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   debian2hd target=/dev/sda1 grub=/dev/sda mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
 
@@ -364,7 +358,7 @@ include::releasetable.txt[]
 [NOTE]
 .lenny release
 ================================================================================
-[1] Please notice that lenny is the current old-stable release within Debian.
+[1] Please notice that lenny is an unsupported release within Debian nowadays.
 grml-debootstrap can handle the release but you really should not use lenny
 anymore unless you really know what you are doing. Choose Debian 6.0 (squeeze)
 or Debian 7.0 (wheezy) instead.
@@ -380,11 +374,11 @@ the advantage of grub-legacy actually being able to boot from it.
 ================================================================================
 
 [NOTE]
-.sid release
+.unstable and testing releases
 ================================================================================
-[2] Please notice that sid is Debian/unstable and due to its nature might not be
-always installable. What _might_ work instead is deploying a stable or testing
-release and upgrade it after installation finished.
+[2] Please notice that jessie (Debian/testing) and sid (Debian/unstable) might
+not be always installable due to their nature. What _might_ work instead is
+deploying a stable release and upgrade it after installation finished.
 ================================================================================
 
 Bugs
