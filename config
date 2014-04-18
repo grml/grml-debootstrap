@@ -82,7 +82,7 @@
 # ARCH='amd64'
 
 # Hostname of new system.
-# Default: 'grml'
+# Default: $HOSTNAME or if unset 'grml'
 # HOSTNAME='grml'
 
 # Kernel version to install.

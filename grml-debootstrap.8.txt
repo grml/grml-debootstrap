@@ -109,7 +109,7 @@ Options and environment variables
 
 *--hostname* _hostname_::
 
-    Use specified hostname instead of the default (being 'grml').
+    Use specified hostname instead of the default (being $HOSTNAME or if unset 'grml').
 
 *-i*, *--iso* _/mntpoint_::
 
