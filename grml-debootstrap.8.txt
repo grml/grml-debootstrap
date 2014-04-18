@@ -137,6 +137,13 @@ Options and environment variables
     Do not copy /etc/network/interfaces from host system to the target.
     This option is automatically enabled when using --vmfile.
 
+*--nokernel*::
+
+    Skip installation of default kernel images. This option might be
+    interesting for you if you want a Debian system which doesn't
+    need to provide regular boot, e.g. a system which provides
+    ISOs for booting via GRUB using grml-rescueboot.
+
 *--nopackages*::
 
     Skip installation of packages defined in /etc/debootstrap/packages.

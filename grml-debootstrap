@@ -96,6 +96,7 @@ Configuration options:
       --nointerfaces       Do not copy /etc/network/interfaces from host system
                            to target system.
                            (This option is automatically enabled when using --vmfile.)
+      --nokernel           Skip installation of default kernel images.
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
@@ -332,6 +333,7 @@ fi
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
+[ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
@@ -1152,6 +1154,7 @@ preparechroot() {
   [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> $CHROOT_VARIABLES
   [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> $CHROOT_VARIABLES
   [ -n "$NOINTERFACES" ]        && echo "NOINTERFACES=\"true\""                        >> $CHROOT_VARIABLES
+  [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                            >> $CHROOT_VARIABLES
   [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> $CHROOT_VARIABLES
   [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> $CHROOT_VARIABLES
   [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=\"$RECONFIGURE\""                 >> $CHROOT_VARIABLES

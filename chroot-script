@@ -311,6 +311,11 @@ get_kernel_version() {
 
 # install kernel packages {{{
 kernel() {
+  if [ -n "$NOKERNEL" ] ; then
+    echo "Skipping installation of kernel packages as requested via --nokernel"
+    return 0
+  fi
+
   $APTUPDATE
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
