@@ -414,25 +414,6 @@ EOF
 }
 # }}}
 
-# set up /etc/network/interfaces {{{
-interfaces() {
-  if ! [ -r /etc/network/interfaces ] || ! grep -q "auto lo" /etc/network/interfaces ; then
-     echo "Setting up /etc/network/interfaces"
-     cat >> /etc/network/interfaces << EOF
-
-# loopback device:
-iface lo inet loopback
-auto lo
-
-# eth0:
-# iface eth0 inet dhcp
-# auto eth0
-
-EOF
-  fi
-}
-# }}}
-
 # set default locales {{{
 default_locales() {
   if [ -n "$DEFAULT_LOCALES" ] ; then
@@ -626,7 +607,7 @@ trap signal_handler HUP INT QUIT TERM
  install_policy_rcd
 
  for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
-     kernel packages extrapackages  reconfigure hosts interfaces \
+     kernel packages extrapackages reconfigure hosts \
      default_locales timezone fstab hostname initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
