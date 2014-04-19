@@ -1,3 +1,28 @@
+grml-debootstrap (0.63) unstable; urgency=medium
+
+  [ Christian Hofstaedtler ]
+  * [1fa99e5] Fix smbfs example in fstab
+
+  [ Michael Prokop ]
+  * [95f4b7c] Switch default filesystem from ext3 to ext4
+  * [8b1c652] Provide --debug option for very verbose execution
+  * [d919319] Support execution of --grub when installing to target
+    directory. Thanks to Michael Renner <michael.renner@amd.co.at> for
+    initial bug report and sponsoring my development time
+  * [2976d92] Copy /etc/network/interfaces from host system, unless
+    --nointerfaces is used or target is a VM. Thanks to Michael Renner
+    <michael.renner@amd.co.at> for feature request and sponsoring my
+    development time
+  * [84fe150] Update documentation WRT supported releases and some minor
+    fixes
+  * [6cf66c7] Clarify usage of default hostname ($HOSTNAME is considered)
+  * [6c59725] Support --nokernel option to skip installation of default
+    kernel images
+  * [583bdc6] Do not enable security mirror for lenny release, being
+    unavailable/unsupported nowadays
+
+ -- Michael Prokop <mika@grml.org>  Sat, 19 Apr 2014 02:03:45 +0200
+
 grml-debootstrap (0.62) unstable; urgency=medium
 
   * [2751e66] Execute apt upgrade with DEBIAN_FRONTEND environment
