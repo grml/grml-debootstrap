@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -107,6 +107,9 @@ while :; do
   --password)          # Use specified password as password for user root
     shift; _opt_password="$1"
     ;;
+  --defaultinterfaces) # Install default /etc/network/interfaces
+    _opt_defaultinterfaces=T
+    ;;
   --nointerfaces)      # Skip installation of /etc/network/interfaces
     _opt_nointerfaces=T
     ;;
@@ -135,7 +138,7 @@ while :; do
     else _opt_verbose=1; fi
     ;;
   --debug)             # Execute in debug mode
-    _opt_debug==T
+    _opt_debug=T
     ;;
   --help|-h)           # Print usage information and exit
     _opt_help=T

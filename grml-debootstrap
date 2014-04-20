@@ -93,10 +93,12 @@ Configuration options:
                              instead of using /etc/debootstrap/packages.
       --nopackages         Skip installation of packages defined in
                              /etc/debootstrap/packages
+      --nokernel           Skip installation of default kernel images.
       --nointerfaces       Do not copy /etc/network/interfaces from host system
                            to target system.
                            (This option is automatically enabled when using --vmfile.)
-      --nokernel           Skip installation of default kernel images.
+      --defaultinterfaces  Install a default /etc/network/interfaces file (enabling
+                           DHCP for eth0) instead of taking over config from host system.
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
@@ -332,6 +334,7 @@ fi
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
+[ "$_opt_defaultinterfaces" ]   && DEFAULTINTERFACES="true"
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
@@ -1153,7 +1156,6 @@ preparechroot() {
   [ -n "$MIRROR" ]              && echo "MIRROR=\"$MIRROR\""                           >> $CHROOT_VARIABLES
   [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> $CHROOT_VARIABLES
   [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> $CHROOT_VARIABLES
-  [ -n "$NOINTERFACES" ]        && echo "NOINTERFACES=\"true\""                        >> $CHROOT_VARIABLES
   [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                            >> $CHROOT_VARIABLES
   [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> $CHROOT_VARIABLES
   [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> $CHROOT_VARIABLES
@@ -1247,8 +1249,12 @@ iface eth0 inet dhcp
 
   if [ -n "$NOINTERFACES" ] ; then
     einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
+  elif [ -n "$DEFAULT_INTERFACES" ] ; then
+    einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
+    echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    eend $?
   elif [ -n "$VIRTUAL" ] ; then
-    einfo "Installing into Virtual Machine, installing default /etc/network/interfaces"
+    einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
   elif [ -r /etc/network/interfaces ] ; then
