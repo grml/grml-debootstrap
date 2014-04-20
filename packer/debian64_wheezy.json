@@ -1,0 +1,63 @@
+{
+  "variables": {
+    "grml_type": "grml64-full",
+    "grml_version": "2014.03",
+    "grml_iso_checksum": "1d3a0adfa3d395746e9e7f8748faec536f5c7b84"
+  },
+
+  "builders": [
+  {
+    "type": "virtualbox-iso",
+    "vm_name": "{{ user `grml_type` }}_{{ user `grml_version` }}",
+    "guest_os_type": "Debian_64",
+    "hard_drive_interface": "sata",
+    "iso_url": "http://download.grml.org/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
+    "iso_checksum": "{{ user `grml_iso_checksum` }}",
+    "iso_checksum_type": "sha1",
+    "ssh_wait_timeout": "20m",
+    "ssh_username": "root",
+    "ssh_password": "grml",
+    "output_directory": "{{ user `grml_type` }}_output",
+    "headless": false,
+    "boot_wait": "5s",
+    "boot_command": [
+      "<tab> ssh=grml <enter>"
+    ],
+    "shutdown_command": "shutdown -h now"
+  }
+  ],
+    "provisioners": [
+    {
+      "type": "file",
+      "source": "fake-uname.so",
+      "destination": "/tmp/fake-uname.so"
+    },
+    {
+      "type": "file",
+      "source": "debian64.bats",
+      "destination": "/tmp/debian64.bats"
+    },
+    {
+      "type": "file",
+      "source": "../grml-debootstrap",
+      "destination": "/tmp/grml-debootstrap"
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "debian64_provision.sh"
+        ]
+    }
+  ],
+    "post-processors": [
+    {
+      "type": "vagrant",
+      "compression_level": 5,
+      "override": {
+        "virtualbox": {
+          "output": "debian64_wheezy.box"
+        }
+      }
+    }
+  ]
+}

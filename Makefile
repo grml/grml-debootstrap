@@ -24,3 +24,9 @@ online: all
 
 clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp
+
+testrun:
+	cd ./packer && $(MAKE) compile && $(MAKE) packer
+
+vagrant:
+	vagrant up
