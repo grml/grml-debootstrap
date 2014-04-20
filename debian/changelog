@@ -1,3 +1,17 @@
+grml-debootstrap (0.64) unstable; urgency=medium
+
+  The "happy easter ＼(◎o◎)／" release
+
+  * [bba7c19] Initial README.md (esp. for Github users)
+  * [329df0b] Set up default /etc/network/interfaces with dhcp for eth0 in
+    VM use case. Thanks to Ulrich Dangel <mru@spamt.net> for review and
+    Thanks to Christian Hofstaedtler <christian@hofstaedtler.name> for
+    suggestion + review
+  * [c653f57] Provide option --defaultinterfaces to install default
+    /etc/network/interfaces
+
+ -- Michael Prokop <mika@grml.org>  Sun, 20 Apr 2014 02:50:33 +0200
+
 grml-debootstrap (0.63) unstable; urgency=medium
 
   [ Christian Hofstaedtler ]
