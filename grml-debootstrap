@@ -77,9 +77,11 @@ Bootstrap options:
 
 Options for Virtual Machine deployment:
 
-      --vmfile           Set up a Virtual Machine (raw format) instead of installing
+      --vm               Set up a Virtual Machine, instead of plainly installing
                          to a partition or directory, to be combined with --target,
-                         like: --vmfile --target /mnt/sda1/qemu.img
+                         like: --vm --target /dev/mapper/your-vm-disk
+      --vmfile           Like --vm, but install into a file (raw format).
+                         Example: --vmfile --target /mnt/sda1/qemu.img
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
 
@@ -315,7 +317,8 @@ fi
 [ "$_opt_iso" ]                 && ISO=$_opt_iso
 [ "$_opt_release" ]             && RELEASE=$_opt_release
 [ "$_opt_target" ]              && TARGET=$_opt_target
-[ "$_opt_vmfile" ]              && VIRTUAL=1
+[ "$_opt_vm" ]                  && VIRTUAL=1
+[ "$_opt_vmfile" ]              && VMFILE=1 && VIRTUAL=1
 [ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
@@ -740,7 +743,9 @@ else # if not running automatic installation display configuration and prompt fo
    [ -n "$ARCH" ]     && echo "   Using arch:      $ARCH"
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
-      [ -n "$VMSIZE" ] && echo "   Using Virtual Disk file with size of ${VMSIZE}."
+      if [ -n "$VMSIZE" -a -n "$VMFILE" ]; then
+         echo "   Using Virtual Disk file with size of ${VMSIZE}."
+      fi
    fi
 
    if [ ! -t 0 -a -z "$ROOTPASSWORD" -a -z "$NOPASSWORD" ] ; then
@@ -974,18 +979,25 @@ mount_target() {
 # prepare VM image for usage with debootstrap {{{
 prepare_vm() {
   if [ -z "$VIRTUAL" ] ; then
-     return 0 # be quite by intention
+     return 0 # be quiet by intention
   fi
 
-  if [ -b "$TARGET" ] ; then
+  if [ -b "$TARGET" -a -n "$VMFILE" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
+     eend 1
+     bailout 1
+  fi
+  if [ ! -b "$TARGET" -a -z "$VMFILE" ] ; then
+     eerror "Error: specified virtual disk target ($TARGET) does not exist yet."
      eend 1
      bailout 1
   fi
 
   ORIG_TARGET="$TARGET" # store for later reuse
 
-  qemu-img create -f raw "${TARGET}" "${VMSIZE}"
+  if [ -n "$VMFILE" ]; then
+    qemu-img create -f raw "${TARGET}" "${VMSIZE}"
+  fi
   echo 4 66 | /usr/share/grml-debootstrap/bootgrub.mksh -A | dd of="$TARGET" conv=notrunc
   dd if=/dev/zero bs=1 conv=notrunc count=64 seek=446 of="$TARGET"
   if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then

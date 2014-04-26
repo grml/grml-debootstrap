@@ -135,7 +135,7 @@ Options and environment variables
 *--nointerfaces*::
 
     Do not copy /etc/network/interfaces from host system to the target.
-    This option is automatically enabled when using --vmfile.
+    This option is automatically enabled when using --vm or --vmfile.
 
 *--nokernel*::
 
@@ -201,6 +201,14 @@ Options and environment variables
 *-v*, *--verbose*::
 
     Increase verbosity.
+
+*--vm*::
+
+    Set up a Virtual Machine on an existing block device, which will be
+    partitioned.
+    This allows deployment of a Virtual Machine. The options needs to be
+    combined with the --target option.
+    Usage example: --vm --target /dev/mapper/your-vm-disk
 
 *--vmfile*::
 
