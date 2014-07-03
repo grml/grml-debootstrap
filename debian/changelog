@@ -1,3 +1,14 @@
+grml-debootstrap (0.65) unstable; urgency=medium
+
+  [ Christian Hofstaedtler ]
+  * [960e54d] Add option --vm to install VMs into LVs and such
+
+  [ Michael Prokop ]
+  * [7fc0e06] Initial packer/vagrant/autotest setup
+  * [21b0160] Improve packer deployment for usage in Vagrant
+
+ -- Michael Prokop <mika@grml.org>  Thu, 03 Jul 2014 12:27:55 +0200
+
 grml-debootstrap (0.64) unstable; urgency=medium
 
   The "happy easter ＼(◎o◎)／" release
