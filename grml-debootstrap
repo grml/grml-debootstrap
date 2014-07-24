@@ -19,6 +19,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
 [ -n "$DEBOOTSTRAP" ] || DEBOOTSTRAP='debootstrap'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
+[ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://http.debian.net/debian'
 [ -n "$FORCE" ] || FORCE=''
@@ -1153,6 +1154,7 @@ preparechroot() {
   [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\""         >> $CHROOT_VARIABLES
   [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=\"$DEBOOTSTRAP\""                 >> $CHROOT_VARIABLES
   [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES=\"$DEFAULT_LOCALES\""         >> $CHROOT_VARIABLES
+  [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE=\"$DEFAULT_LANGUAGE\""       >> $CHROOT_VARIABLES
   [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=\"$EXTRAPACKAGES\""             >> $CHROOT_VARIABLES
   [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR=\"$FALLBACK_MIRROR\""         >> $CHROOT_VARIABLES
   [ -n "$FORCE" ]               && echo "FORCE=\"$FORCE\""                             >> $CHROOT_VARIABLES

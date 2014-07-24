@@ -175,9 +175,13 @@
 # Default: 'yes'
 # LOCALES='no'
 
-# locales that should be used as default.
+# locales (LANG) that should be used as default.
 # Default: 'en_US.UTF-8'
 # DEFAULT_LOCALES='en_US.UTF-8'
+
+# locales (LANGUAGE) that should be used as default.
+# Default: 'en_US:en'
+# DEFAULT_LANGUAGE='en_US:en'
 
 # Use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime.
 # Default: 'Europe/Vienna'
