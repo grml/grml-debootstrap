@@ -423,7 +423,7 @@ default_locales() {
       return 0
     fi
 
-    /usr/sbin/update-locale LANG="$DEFAULT_LOCALES"
+    /usr/sbin/update-locale LANGUAGE="$DEFAULT_LANGUAGE" LANG="$DEFAULT_LOCALES"
   fi
 }
 # }}}

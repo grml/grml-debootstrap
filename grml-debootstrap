@@ -19,6 +19,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
 [ -n "$DEBOOTSTRAP" ] || DEBOOTSTRAP='debootstrap'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
+[ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://http.debian.net/debian'
 [ -n "$FORCE" ] || FORCE=''
