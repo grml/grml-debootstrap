@@ -2,9 +2,16 @@ Source: grml-debootstrap
 Section: admin
 Priority: optional
 Maintainer: Grml Team <team@grml.org>
-Uploaders: Michael Prokop <mika@debian.org>, Alexander Wirt <formorer@debian.org>, Christian Hofstaedtler <christian@hofstaedtler.name>, Ulrich Dangel <mru@spamt.net>
+Uploaders: Michael Prokop <mika@debian.org>,
+           Alexander Wirt <formorer@debian.org>,
+           Christian Hofstaedtler <christian@hofstaedtler.name>,
+           Ulrich Dangel <mru@spamt.net>
 Build-Depends: debhelper (>= 5)
-Build-Depends-Indep: asciidoc, docbook-xsl, xsltproc, shunit2, mksh
+Build-Depends-Indep: asciidoc,
+                     docbook-xsl,
+                     mksh,
+                     shunit2,
+                     xsltproc
 Standards-Version: 3.9.5
 Homepage: http://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
@@ -12,8 +19,16 @@ Vcs-Browser: http://git.grml.org/?p=grml-debootstrap.git
 
 Package: grml-debootstrap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16), gawk, debian-archive-keyring
-Recommends: kpartx, mksh, parted, qemu-utils, dialog
+Depends: debian-archive-keyring,
+         debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16),
+         gawk,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: dialog,
+            kpartx,
+            mksh,
+            parted,
+            qemu-utils
 Description: wrapper around debootstrap for installing pure Debian
  Provides a wrapper suite around debootstrap and cdebootstrap
  to ease installation of a pure Debian system.
