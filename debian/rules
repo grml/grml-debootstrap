@@ -18,6 +18,7 @@ build-indep: build-stamp
 build-stamp:
 	dh_testdir
 	(cd tests && ./run_tests.sh)
+	make shellcheck
 	make
 	touch $@
 

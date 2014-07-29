@@ -1,3 +1,7 @@
+BASH_SCRIPTS = grml-debootstrap
+SHELL_SCRIPTS = chroot-script
+MKSH_SCRIPTS = bootgrub.mksh
+
 all: doc
 
 doc: doc_man doc_html
@@ -17,10 +21,24 @@ man-stamp: grml-debootstrap.8.txt
 	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-debootstrap.8.xml
 	touch man-stamp
 
-online: all
-	scp grml-debootstrap.8.html grml:/var/www/grml/grml-debootstrap/index.html
-	scp images/icons/*          grml:/var/www/grml/grml-debootstrap/images/icons/
-	scp images/screenshot.png   grml:/var/www/grml/grml-debootstrap/images/
+shellcheck:
+	@echo -n "Checking for shell syntax errors"; \
+	for SCRIPT in $(SHELL_SCRIPTS); do \
+		test -r $${SCRIPT} || continue ; \
+		sh -n $${SCRIPT} || exit ; \
+		echo -n "."; \
+	done; \
+	for SCRIPT in $(BASH_SCRIPTS) ; do \
+		test -r $${SCRIPT} || continue ; \
+		bash -n $${SCRIPT} || exit ; \
+		echo -n "."; \
+	done; \
+	for SCRIPT in $(MKSH_SCRIPTS) ; do \
+		test -r $${SCRIPT} || continue ; \
+		mksh -n $${SCRIPT} || exit ; \
+		echo -n "."; \
+	done; \
+	echo " done."
 
 clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp
