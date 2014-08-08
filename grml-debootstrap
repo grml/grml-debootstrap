@@ -6,6 +6,34 @@
 # License:       This file is licensed under the GPL v2+
 ################################################################################
 
+# error_handler {{{
+[ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
+[ -n "$FAIL_TRAP_ERR" ] || FAIL_TRAP_ERR='no'
+
+error_handler() {
+   last_exit_code="$?"
+   last_bash_command="$BASH_COMMAND"
+   if [ "$REPORT_TRAP_ERR" = "yes" ]; then
+      echo "Unexpected non-zero exist code $last_exit_code in $BASH_SOURCE detected!
+last bash command: $last_bash_command"
+   fi
+   if [ ! "$FAIL_TRAP_ERR" = "yes" ]; then
+      return
+   fi
+   command -v bailout >/dev/null 2>&1
+   if [ "$?" = "0" ]; then
+      bailout 1
+   else
+      echo 'FAIL_TRAP_ERR is set to "yes", exit 1.'
+      exit 1
+   fi
+}
+
+trap "error_handler" ERR
+
+export -f "error_handler"
+# }}}
+
 # variables {{{
 PN="$(basename $0)"
 VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
@@ -53,6 +81,8 @@ INTERACTIVE=''
 
 # help text {{{
 usage() {
+  trap "error_handler" ERR
+
   echo "$PN - wrapper around debootstrap for installing Debian
 
 Usage: $PN [options]
@@ -142,11 +172,13 @@ HILITE='[36;01m'
 BRACKET='[34;01m'
 
 einfo() {
+  trap "error_handler" ERR
   einfon "$1\n"
   return 0
 }
 
 einfon() {
+  trap "error_handler" ERR
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
   printf " ${GOOD}*${NORMAL} $*"
   LAST_E_CMD=einfon
@@ -154,6 +186,7 @@ einfon() {
 }
 
 eerror() {
+  trap "error_handler" ERR
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
   printf " ${BAD}*${NORMAL} $*\n" >&2
   LAST_E_CMD=eerror
@@ -161,6 +194,7 @@ eerror() {
 }
 
 eend() {
+  trap "error_handler" ERR
   local retval="${1:-0}"
   shift
   if [ $retval -gt 0 ]; then
@@ -170,12 +204,14 @@ eend() {
 }
 
 check4root(){
+  trap "error_handler" ERR
   if [ "$(id -u 2>/dev/null)" != 0 ] ; then
     echo 1>&2 "Error: please run this script with uid 0 (root)." ; return 1
   fi
 }
 
 check4progs(){
+  trap "error_handler" ERR
   local RC=''
   for arg in $* ; do
     which $arg >/dev/null 2>&1 || RC="$arg"
@@ -189,6 +225,7 @@ check4progs(){
 
 # helper functions {{{
 cleanup() {
+  trap "error_handler" ERR
   if [ -n "$CHROOT_VARIABLES" ] ; then
     einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
   fi
@@ -252,6 +289,7 @@ cleanup() {
 
 # we want to exit smoothly and clean:
 bailout(){
+  trap "error_handler" ERR
 
   cleanup
 
@@ -264,6 +302,8 @@ trap bailout HUP INT QUIT TERM
 
 # we want to execute all the functions only once, simple check for it:
 stage() {
+  trap "error_handler" ERR
+
   if [ -n "$2" ] ; then
      echo "$2" > "${STAGES}/${1}"
      return 0
@@ -409,6 +449,7 @@ fi
 # welcome screen {{{
 welcome_dialog()
 {
+   trap "error_handler" ERR
    dialog --title "$PN" --yesno "Welcome to the interactive configuration of ${PN}.
 Do you want to continue installing Debian using this frontend?" 0 0 || bailout 0
 }
@@ -417,6 +458,7 @@ Do you want to continue installing Debian using this frontend?" 0 0 || bailout 0
 # ask for target {{{
 prompt_for_target()
 {
+  trap "error_handler" ERR
   AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
                sed 's/*//' | \
                grep -v 'Extended$' | \
@@ -444,6 +486,7 @@ prompt_for_target()
 # ask for bootmanager {{{
 prompt_for_bootmanager()
 {
+  trap "error_handler" ERR
   ADDITIONAL_PARAMS=""
 
   if echo "$TARGET" | grep -q "/dev/md" ; then
@@ -511,6 +554,7 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
+  trap "error_handler" ERR
   [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='wheezy'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
@@ -526,6 +570,7 @@ prompt_for_release()
 # ask for hostname {{{
 prompt_for_hostname()
 {
+  trap "error_handler" ERR
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
             0 0 $HOSTNAME)"
@@ -536,6 +581,7 @@ prompt_for_hostname()
 # ask for password {{{
 prompt_for_password()
 {
+  trap "error_handler" ERR
   if [ "$_opt_nopassword" ] ; then
     einfo "Skip asking for root password as requested."
     return 0
@@ -564,6 +610,7 @@ prompt_for_password()
 # ask for Debian mirror {{{
 prompt_for_mirror()
 {
+  trap "error_handler" ERR
   [ -n "$ISO" ] && DEFAULT_MIRROR='local' || DEFAULT_MIRROR='net'
 
   CHOOSE_MIRROR=$(dialog --stdout --title "$PN" --default-item $DEFAULT_MIRROR \
@@ -592,6 +639,8 @@ prompt_for_mirror()
 # software raid setup {{{
 config_swraid_setup()
 {
+trap "error_handler" ERR
+
 TMPFILE=$(mktemp)
 
 # Currently we support only raid1:
@@ -665,6 +714,7 @@ fi
 
 prompt_for_swraid()
 {
+trap "error_handler" ERR
 if dialog --stdout --title "$PN" \
           --defaultno --yesno "Do you want to configure Software RAID?
 
@@ -677,6 +727,7 @@ fi
 # user should recheck his configuration {{{
 # support full automatic installation:
 checkforrun() {
+   trap "error_handler" ERR
    dialog --timeout 10 --title "$PN" \
           --yesno "Do you want to stop at this stage?
 
@@ -691,6 +742,7 @@ Do you want to stop now?" 0 0 2>/dev/null
 # make sure the user is aware of the used configuration {{{
 checkconfiguration()
 {
+trap "error_handler" ERR
 if [ -n "$AUTOINSTALL" ] ; then
    if checkforrun ; then
       eerror "Exiting as requested" ; eend 0
@@ -776,6 +828,8 @@ fi
 # interactive mode {{{
 interactive_mode()
 {
+  trap "error_handler" ERR
+
   check4progs dialog || bailout 1
 
   welcome_dialog
@@ -855,6 +909,7 @@ PARTITION=''
 DIRECTORY=''
 
 set_target_directory(){
+    trap "error_handler" ERR
     # assume we are installing into a directory, don't run mkfs and grub related stuff therefore
     DIRECTORY=1
     MNTPOINT="$TARGET"
@@ -896,6 +951,7 @@ fi
 
 # create filesystem {{{
 mkfs() {
+  trap "error_handler" ERR
   if [ -n "$DIRECTORY" ] ; then
      einfo "Running grml-debootstrap on a directory, skipping mkfs stage."
   else
@@ -943,6 +999,7 @@ mkfs() {
 
 # modify filesystem settings {{{
 tunefs() {
+  trap "error_handler" ERR
   if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
      $TUNE2FS $TARGET
@@ -953,6 +1010,7 @@ tunefs() {
 
 # mount the new partition or if it's a directory do nothing at all {{{
 mount_target() {
+  trap "error_handler" ERR
   if [ -n "$DIRECTORY" ] ; then
      einfo "Running grml-debootstrap on a directory, nothing to mount."
   else
@@ -979,6 +1037,7 @@ mount_target() {
 
 # prepare VM image for usage with debootstrap {{{
 prepare_vm() {
+  trap "error_handler" ERR
   if [ -z "$VIRTUAL" ] ; then
      return 0 # be quiet by intention
   fi
@@ -1053,6 +1112,7 @@ prepare_vm() {
 
 # make VM image bootable and unmount it {{{
 finalize_vm() {
+  trap "error_handler" ERR
   if [ -z "${VIRTUAL}" ] ; then
      return 0
   fi
@@ -1100,6 +1160,7 @@ finalize_vm() {
 
 # install main chroot {{{
 debootstrap_system() {
+  trap "error_handler" ERR
   if [ "$_opt_nodebootstrap" ]; then
      einfo "Skipping debootstrap as requested."
      return
@@ -1139,6 +1200,7 @@ debootstrap_system() {
 
 # prepare chroot via chroot-script {{{
 preparechroot() {
+  trap "error_handler" ERR
   einfo "Preparing chroot system"
 
   # provide variables to chroot system
@@ -1186,6 +1248,8 @@ preparechroot() {
   [ -n "$TIMEZONE" ]            && echo "TIMEZONE=\"$TIMEZONE\""                       >> $CHROOT_VARIABLES
   [ -n "$TUNE2FS" ]             && echo "TUNE2FS=\"$TUNE2FS\""                         >> $CHROOT_VARIABLES
   [ -n "$VMSIZE" ]              && echo "VMSIZE=\"$VMSIZE\""                           >> $CHROOT_VARIABLES
+  [ -n "$REPORT_TRAP_ERR" ]     && echo "REPORT_TRAP_ERR=\"$REPORT_TRAP_ERR\""         >> $CHROOT_VARIABLES
+  [ -n "$FAIL_TRAP_ERR" ]       && echo "FAIL_TRAP_ERR=\"$FAIL_TRAP_ERR\""             >> $CHROOT_VARIABLES
 
   cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
   chmod 755 $MNTPOINT/bin/chroot-script
@@ -1292,6 +1356,7 @@ iface eth0 inet dhcp
 
 # execute all scripts in /etc/debootstrap/pre-scripts/ {{{
 execute_pre_scripts() {
+   trap "error_handler" ERR
    # make sure we have $MNTPOINT available for our scripts
    export MNTPOINT
    if [ -d "$_opt_pre_scripts" ] || [ "$PRE_SCRIPTS" = 'yes' ] ; then
@@ -1308,6 +1373,7 @@ execute_pre_scripts() {
 
 # execute all scripts in /etc/debootstrap/scripts/ {{{
 execute_scripts() {
+   trap "error_handler" ERR
    # make sure we have $MNTPOINT available for our scripts
    export MNTPOINT
    if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
@@ -1324,6 +1390,7 @@ execute_scripts() {
 
 # execute chroot-script {{{
 chrootscript() {
+  trap "error_handler" ERR
   if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
     mount_target
   fi
@@ -1335,7 +1402,7 @@ chrootscript() {
     einfo "Executing chroot-script now"
     mount --bind /dev "$MNTPOINT"/dev
     if [ "$DEBUG" = "true" ] ; then
-      chroot "$MNTPOINT" /bin/sh -x /bin/chroot-script ; RC=$?
+      chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script ; RC=$?
     else
       chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
     fi
@@ -1358,6 +1425,7 @@ chrootscript() {
 
 # unmount $MNTPOINT {{{
 umount_chroot() {
+  trap "error_handler" ERR
 
   # display installation notes:
   if [ -n "$INSTALL_NOTES" ] ; then
@@ -1384,6 +1452,7 @@ umount_chroot() {
 
 # execute filesystem check {{{
 fscktool() {
+ trap "error_handler" ERR
  if [ -n "$VIRTUAL" ] ; then
    einfo "Skipping filesystem check because we deploy a virtual machine."
    return 0
