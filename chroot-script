@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Filename:      /etc/debootstrap/chroot-script
 # Purpose:       script executed in chroot when installing Debian via grml-debootstrap
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
@@ -8,6 +8,8 @@
 # GRML_CHROOT_SCRIPT_MARKER - do not remove this line unless you want to keep
 # this script as /bin/chroot-script on your new installed system
 ################################################################################
+
+trap "error_handler" ERR
 
 . /etc/debootstrap/config    || exit 1
 . /etc/debootstrap/variables || exit 1
@@ -41,6 +43,7 @@ fi
 
 # helper functions {{{
 stage() {
+  trap "error_handler" ERR
   if [ -n "$2" ] ; then
      echo "$2" > "$STAGES/$1"
      return 0
@@ -53,6 +56,7 @@ stage() {
 }
 
 askpass() {
+  trap "error_handler" ERR
   # read -s emulation for dash. result is in $resp.
   set -o noglob
   [ -t 0 ] && stty -echo
@@ -64,6 +68,7 @@ askpass() {
 
 # define chroot mirror {{{
 chrootmirror() {
+  trap "error_handler" ERR
   if [ -n "$KEEP_SRC_LIST" ] ; then
     echo "KEEP_SRC_LIST has been set, skipping chrootmirror stage."
     return
@@ -99,6 +104,7 @@ chrootmirror() {
 
 # remove local chroot mirror {{{
 remove_chrootmirror() {
+  trap "error_handler" ERR
   if [ -n "$KEEP_SRC_LIST" ] ; then
     echo "KEEP_SRC_LIST has been set, skipping remove_chrootmirror stage."
     return
@@ -122,6 +128,7 @@ remove_chrootmirror() {
 
 # set up grml repository {{{
 grmlrepos() {
+  trap "error_handler" ERR
   if [ -n "$GRMLREPOS" ] ; then
      # user might have provided their own apt sources.list
      if ! grep -q grml /etc/apt/sources.list.d/grml.list 2>/dev/null ; then
@@ -167,12 +174,14 @@ EOF
 
 # check available backports release version {{{
 checkbackports() {
+  trap "error_handler" ERR
   wget -q -O/dev/null http://backports.debian.org/debian-backports/dists/${1}-backports/Release
 }
 # }}}
 
 # feature to provide Debian backports repos {{{
 backportrepos() {
+    trap "error_handler" ERR
     if [ -n "$BACKPORTREPOS" ] ; then
         if ! checkbackports $RELEASE ; then
             echo "Backports for ${RELEASE} are not available." >&2
@@ -193,6 +202,7 @@ EOF
 
 # set up kernel-img.conf {{{
 kernelimg_conf() {
+  trap "error_handler" ERR
   if ! [ -r /etc/kernel-img.conf ] ; then
      echo "Setting up /etc/kernel-img.conf"
      cat > /etc/kernel-img.conf << EOF
@@ -207,6 +217,7 @@ EOF
 
 # make sure services do not start up {{{
 install_policy_rcd() {
+  trap "error_handler" ERR
   if ! [ -r /usr/sbin/policy-rc.d ] ; then
      export POLICYRCD=1
      cat > /usr/sbin/policy-rc.d << EOF
@@ -220,6 +231,7 @@ EOF
 
 # make sure we have an up2date system {{{
 upgrade_system() {
+  trap "error_handler" ERR
   if [ "$UPGRADE_SYSTEM" = "yes" ] ; then
     echo "Running update + upgrade"
     $APTUPDATE
@@ -232,6 +244,7 @@ upgrade_system() {
 # }}}
 # remove now useless apt cache {{{
 remove_apt_cache() {
+  trap "error_handler" ERR
   if [ "$RM_APTCACHE" = 'yes' ] ; then
     echo "Cleaning apt cache."
     apt-get clean $DPKG_OPTIONS
@@ -243,6 +256,7 @@ remove_apt_cache() {
 
 # install additional packages {{{
 packages() {
+  trap "error_handler" ERR
   # Pre-seed the debconf database with answers. Each question will be marked
   # as seen to prevent debconf from asking the question interactively.
   [ -f /etc/debootstrap/debconf-selections ] && {
@@ -264,6 +278,7 @@ packages() {
 
 # install extra packages {{{
 extrapackages() {
+    trap "error_handler" ERR
     if [ "$EXTRAPACKAGES" = 'yes' ] ; then
         PACKAGELIST=$(find /etc/debootstrap/extrapackages -type f -name '*.deb')
         if [ -n "$PACKAGELIST" ]; then
@@ -277,6 +292,7 @@ extrapackages() {
 
 # check if the specified Debian package exists
 package_exists() {
+  trap "error_handler" ERR
   output=$(apt-cache show "$1" 2>/dev/null)
   [ -n "$output" ]
   return $?
@@ -285,6 +301,7 @@ package_exists() {
 
 # determine the kernel version postfix
 get_kernel_version() {
+  trap "error_handler" ERR
   # do not override $KERNEL if set via config file
   if [ -n "$KERNEL" ] ; then
     echo "$KERNEL"
@@ -311,6 +328,7 @@ get_kernel_version() {
 
 # install kernel packages {{{
 kernel() {
+  trap "error_handler" ERR
   if [ -n "$NOKERNEL" ] ; then
     echo "Skipping installation of kernel packages as requested via --nokernel"
     return 0
@@ -330,6 +348,7 @@ kernel() {
 
 # reconfigure packages {{{
 reconfigure() {
+  trap "error_handler" ERR
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
          if dpkg --list $package >/dev/null 2>&1 | grep -q '^ii' ; then
@@ -344,6 +363,7 @@ reconfigure() {
 # set password of user root {{{
 passwords()
 {
+  trap "error_handler" ERR
   if [ -n "$NOPASSWORD" ] ; then
     echo "Skip setting root password as requested."
     return 0
@@ -391,6 +411,7 @@ passwords()
 
 # set up /etc/hosts {{{
 hosts() {
+  trap "error_handler" ERR
   if [ -f /etc/hosts ] ; then
      sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
      [ -n "$HOSTNAME" ] && sed -i "s/grml/$HOSTNAME/g" /etc/hosts
@@ -416,6 +437,7 @@ EOF
 
 # set default locales {{{
 default_locales() {
+  trap "error_handler" ERR
   if [ -n "$DEFAULT_LOCALES" ] ; then
     if ! [ -x /usr/sbin/update-locale ] ; then
       echo "Warning: update-locale executable not available (no locales package installed?)"
@@ -430,6 +452,7 @@ default_locales() {
 
 # adjust timezone {{{
 timezone() {
+  trap "error_handler" ERR
   if [ -n "$TIMEZONE" ] ; then
      echo "Adjusting /etc/localtime"
      ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
@@ -439,6 +462,7 @@ timezone() {
 
 # helper function for fstab() {{{
 createfstab(){
+     trap "error_handler" ERR
      echo "Setting up /etc/fstab"
 if [ -n "$TARGET_UUID" ] ; then
    echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
@@ -462,6 +486,7 @@ EOF
 
 # generate /etc/fstab {{{
 fstab() {
+  trap "error_handler" ERR
   # set up /etc/fstab if file is not present (cdebootstrap)
   if [ ! -f /etc/fstab  ] ; then
      createfstab
@@ -476,6 +501,7 @@ fstab() {
 
 # set up hostname {{{
 hostname() {
+  trap "error_handler" ERR
   if [ -n "$HOSTNAME" ] ; then
      echo "Setting hostname to ${HOSTNAME}."
      echo "$HOSTNAME" > /etc/hostname
@@ -509,6 +535,7 @@ hostname() {
 
 # generate initrd/initramfs {{{
 initrd() {
+  trap "error_handler" ERR
   # assume the first available kernel as our main kernel
   KERNELIMG=$(ls -1 /boot/vmlinuz-* 2>/dev/null | head -1)
   if [ -z "$KERNELIMG" ] ; then
@@ -528,6 +555,7 @@ initrd() {
 
 # grub configuration/installation {{{
 grub_install() {
+  trap "error_handler" ERR
 
   if [ -z "$GRUB" ] ; then
     echo "Notice: \$GRUB not defined, will not install grub inside chroot at this stage."
@@ -573,6 +601,7 @@ grub_install() {
 
 # execute all scripts present in /etc/debootstrap/chroot-scripts/ {{{
 custom_scripts() {
+  trap "error_handler" ERR
   [ -d /etc/debootstrap/chroot-scripts/ ] || return 0
 
   for script in /etc/debootstrap/chroot-scripts/* ; do
@@ -584,6 +613,7 @@ custom_scripts() {
 
 # make sure we don't have any running processes left {{{
 services() {
+  trap "error_handler" ERR
   for service in ssh mdadm mdadm-raid ; do
     if [ -x /etc/init.d/"$service" ] ; then
        /etc/init.d/"$service" stop || true
@@ -594,6 +624,7 @@ services() {
 
 # unmount /proc and make sure nothing is left {{{
 finalize() {
+  trap "error_handler" ERR
   # make sure we don't leave any sensible data
   rm -f /etc/debootstrap/variables
 
@@ -605,6 +636,7 @@ finalize() {
 
 # signal handler {{{
 signal_handler() {
+  trap "error_handler" ERR
   finalize
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
   exit "$EXIT"
