@@ -12,7 +12,7 @@ Build-Depends-Indep: asciidoc,
                      mksh,
                      shunit2,
                      xsltproc
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: http://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
 Vcs-Browser: http://git.grml.org/?p=grml-debootstrap.git
