@@ -41,6 +41,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$UPGRADE_SYSTEM" ] || UPGRADE_SYSTEM='yes'
 [ -n "$VMSIZE" ] || VMSIZE="2G"
 [ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
+[ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
 
 # inside the chroot system locales might not be available, so use minimum:
 export LANG=C
@@ -914,8 +915,8 @@ mkfs() {
            eend 1
            bailout 1
          else
-           einfo "Changing disk uuid for $TARGET to fixed (non-random) value using tune2fs"
-           tune2fs "$TARGET" -U 26ada0c0-1165-4098-884d-aafd2220c2c6
+           einfo "Changing disk uuid for $TARGET to fixed (non-random) value $DISK_IDENTIFIER using tune2fs"
+           tune2fs "$TARGET" -U "$DISK_IDENTIFIER"
            eend $?
          fi
        fi
