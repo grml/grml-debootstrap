@@ -1036,7 +1036,7 @@ prepare_vm() {
     fi
   fi
 
-  DEVINFO=$(kpartx -av "$TARGET") # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
+  DEVINFO=$(kpartx -asv "$TARGET") # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
     bailout 1
