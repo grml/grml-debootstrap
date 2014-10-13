@@ -511,13 +511,14 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='wheezy'
+  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='jessie'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 4 \
+            0 50 5 \
             lenny    Debian/5.0 \
             squeeze  Debian/6.0 \
             wheezy   Debian/7.0 \
+            jessie   Debian/8.0 \
             sid      Debian/unstable)"
   [ $? -eq 0 ] || bailout
 }
