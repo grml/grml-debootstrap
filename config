@@ -154,6 +154,10 @@
 # Default: 'mkfs.ext4'
 # MKFS=''
 
+# Command line options for file system creation tool.
+# Default: no default.
+# MKFS_OPTS=''
+
 # Filesystem tuning tool to apply on $TARGET.
 # If empty, the created file system will not be tuned.
 # Default: 'tune2fs -c0 -i0' if ext* filesystem is used, no default otherwise.

@@ -29,6 +29,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$LOCALES" ] || LOCALES='yes'
 [ -n "$MIRROR" ] || MIRROR="$FALLBACK_MIRROR"
 [ -n "$MKFS" ] || MKFS='mkfs.ext4'
+[ -n "$MKFS_OPTS" ] || MKFS_OPTS=''
 [ -n "$PACKAGES" ] || PACKAGES='yes'
 [ -n "$PRE_SCRIPTS" ] || PRE_SCRIPTS='yes'
 [ -n "$RECONFIGURE" ] || RECONFIGURE='console-data'
@@ -899,45 +900,57 @@ fi
 mkfs() {
   if [ -n "$DIRECTORY" ] ; then
      einfo "Running grml-debootstrap on a directory, skipping mkfs stage."
-  else
-    if grep -q "$TARGET" /proc/mounts ; then
-      eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
-      bailout 1
+     return 0
+  fi
+
+  if grep -q "$TARGET" /proc/mounts ; then
+    eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
+    bailout 1
+  fi
+
+  # mkfs.ext* might prompt with "/dev/sdX# contains a ext* file system
+  # created on ... Proceed anyway? (y,n)" which we want to skip in force mode
+  if [ -n "$MKFS" ] && [ -n "$FORCE" ] ; then
+    case "$MKFS" in
+      mkfs.ext*)
+        einfo "Enabling force option (-F) for mkfs.ext* tool as requested via --force switch."
+        MKFS_OPTS="$MKFS_OPTS -F"
+        eend 0
+        ;;
+    esac
+  fi
+
+  if [ -n "$MKFS" ] ; then
+    einfo "Running $MKFS $MKFS_OPTS on $TARGET"
+    $MKFS $MKFS_OPTS $TARGET ; RC=$?
+
+    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+      if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
+        eerror "Not changing disk uuid for $TARGET because $MKFS doesn't seem to match for ext{2,3,4} file system"
+        eend 1
+        bailout 1
+      else
+        einfo "Changing disk uuid for $TARGET to fixed (non-random) value using tune2fs"
+        tune2fs "$TARGET" -U 26ada0c0-1165-4098-884d-aafd2220c2c6
+        eend $?
+      fi
     fi
 
-    if [ -n "$MKFS" ] ; then
-       einfo "Running $MKFS on $TARGET"
-       $MKFS $TARGET ; RC=$?
-
-       if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-         if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
-           eerror "Not changing disk uuid for $TARGET because $MKFS doesn't seem to match for ext{2,3,4} file system"
-           eend 1
-           bailout 1
-         else
-           einfo "Changing disk uuid for $TARGET to fixed (non-random) value using tune2fs"
-           tune2fs "$TARGET" -U 26ada0c0-1165-4098-884d-aafd2220c2c6
-           eend $?
-         fi
-       fi
-
-       # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
-       # will fail to detect the uuid in the chroot
-       if echo "$TARGET" | grep -q "/dev/md" ; then
-         blockdev --rereadpt "${TARGET}"
-       elif ! [ -n "$VIRTUAL" ] ; then
-         blockdev --rereadpt "${TARGET%%[0-9]*}"
-       fi
-       # give the system 2 seconds, otherwise we might run into
-       # race conditions :-/
-       sleep 2
-
-       eval $(blkid -o udev $TARGET 2>/dev/null)
-       [ -n "$ID_FS_UUID" ] && TARGET_UUID="$ID_FS_UUID" || TARGET_UUID=""
-
-       eend $RC
+    # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
+    # will fail to detect the uuid in the chroot
+    if echo "$TARGET" | grep -q "/dev/md" ; then
+      blockdev --rereadpt "${TARGET}"
+    elif ! [ -n "$VIRTUAL" ] ; then
+      blockdev --rereadpt "${TARGET%%[0-9]*}"
     fi
+    # give the system 2 seconds, otherwise we might run into
+    # race conditions :-/
+    sleep 2
 
+    eval $(blkid -o udev $TARGET 2>/dev/null)
+    [ -n "$ID_FS_UUID" ] && TARGET_UUID="$ID_FS_UUID" || TARGET_UUID=""
+
+    eend $RC
   fi
 }
 # }}}
