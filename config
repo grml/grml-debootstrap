@@ -211,8 +211,8 @@
 
 # Use fixed disk identifiers for Virtual Machine builds.
 # Useful for reproducible builds.
-# Default: 'yes'
-# FIXED_DISK_IDENTIFIERS='no'
+# Default: 'no'
+# FIXED_DISK_IDENTIFIERS='yes'
 
 # Disk identifier when using FIXED_DISK_IDENTIFIERS='yes'.
 # Use uuid-runtime's uuidgen tool to generate random UUIDs on demand.
