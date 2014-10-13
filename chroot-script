@@ -304,9 +304,19 @@ get_kernel_version() {
     return 0
   fi
 
-  case $ARCH in
-    i386)   KARCH=686   ;;
-    amd64)  KARCH=amd64 ;;
+  local KARCH
+
+  case "$ARCH" in
+    i386)
+      case "$RELEASE" in
+        lenny|squeeze|wheezy) KARCH='686' ;;
+        # since jessie the linux-image-686 image doesn't exist any longer
+        *) KARCH='686-pae' ;;
+      esac
+      ;;
+    amd64)
+      KARCH='amd64'
+      ;;
     *)
       echo "Only i386 and amd64 are currently supported" >&2
       return 1
