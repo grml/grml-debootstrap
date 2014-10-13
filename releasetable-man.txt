@@ -1,4 +1,4 @@
-Current status (as of 2014-04-19):
+Current status (as of 2014-10-13):
 
   +----------------+-------------+
   | Release / Tool | debootstrap |
@@ -9,7 +9,7 @@ Current status (as of 2014-04-19):
   +----------------+-------------+
   | wheezy         |  works      |
   +----------------+-------------+
-  | jessie         |  works [2]  |
+  | jessie         |  works      |
   +----------------+-------------+
   | sid            |  works [2]  |
   +----------------+-------------+

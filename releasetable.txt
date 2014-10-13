@@ -1,11 +1,10 @@
 .Current status
-[grid="all"]
-'---------.-----------------.---------------
-Release / Tool  debootstrap   cdebootstrap
---------------------------------------------
-Lenny           works [1]     works [1]
-Squeeze         works         works
-Wheezy          works         works
-Jessie          works         works
-Sid             works [2]     works [2]
---------------------------------------------
+[width="40%",frame="topbot",options="header"]
+|======================
+|Release  |Status
+|lenny    |works[1]
+|squeeze  |works
+|wheezy   |works
+|jessie   |works
+|sid      |works[2]
+|======================
