@@ -18,7 +18,8 @@ doc_man: man-stamp
 man-stamp: grml-debootstrap.8.txt
 	sed -i 's/^include::releasetable.txt\[\]/include::releasetable-man.txt\[\]/' grml-debootstrap.8.txt
 	asciidoc -d manpage -b docbook grml-debootstrap.8.txt
-	xsltproc /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-debootstrap.8.xml
+	xsltproc --stringparam man.base.url.for.relative.links http://grml.org/grml-debootstrap/ \
+		/usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-debootstrap.8.xml
 	touch man-stamp
 
 shellcheck:
