@@ -1089,18 +1089,16 @@ finalize_vm() {
   fi
   chroot "${MNTPOINT}" update-grub
 
+  case "$RELEASE" in
+    lenny|squeeze|wheezy)
+      einfo "Adjusting grub.cfg for successful boot sequence."
+      sed -i "s;root=[^ ]\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
+      ;;
+  esac
+
   umount "${MNTPOINT}"/proc
   umount "${MNTPOINT}"/sys
   umount "${MNTPOINT}"/dev
-
-  einfo "Adjusting grub.cfg for successful boot sequence."
-  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ]; then
-    sed -i "s;root=[^ ]\+;root=UUID=$DISK_IDENTIFIER;" /boot/grub/grub.cfg
-  else
-    sed -i "s;set root=.*;set root='(hd0,msdos1)';" "${MNTPOINT}"/boot/grub/grub.cfg
-    sed -i "s;root=[^ ]\+;root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
-  fi
-
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
 }
