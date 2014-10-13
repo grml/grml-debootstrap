@@ -214,4 +214,8 @@
 # Default: 'no'
 # FIXED_DISK_IDENTIFIERS='yes'
 
+# Disk identifier when using FIXED_DISK_IDENTIFIERS='yes'.
+# Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
+# DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
+
 ## END OF FILE #################################################################
