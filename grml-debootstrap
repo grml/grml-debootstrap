@@ -23,7 +23,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://http.debian.net/debian'
-[ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
+[ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="yes"
 [ -n "$FORCE" ] || FORCE=''
 [ -n "$HOSTNAME" ] || HOSTNAME='grml'
 [ -n "$INITRD" ] || INITRD='yes'
@@ -1104,9 +1104,12 @@ finalize_vm() {
   umount "${MNTPOINT}"/dev
 
   einfo "Adjusting grub.cfg for successful boot sequence."
-  # ugly but needed to boot grub acordingly
-  sed -i "s;set root=.*;set root='(hd0,msdos1)';" "${MNTPOINT}"/boot/grub/grub.cfg
-  sed -i "s;root=[^ ]\+;root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
+  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ]; then
+    sed -i "s;root=[^ ]\+;root=UUID=$DISK_IDENTIFIER;" /boot/grub/grub.cfg
+  else
+    sed -i "s;set root=.*;set root='(hd0,msdos1)';" "${MNTPOINT}"/boot/grub/grub.cfg
+    sed -i "s;root=[^ ]\+;root=/dev/sda1;" "${MNTPOINT}"/boot/grub/grub.cfg
+  fi
 
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null

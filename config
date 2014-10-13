@@ -211,8 +211,8 @@
 
 # Use fixed disk identifiers for Virtual Machine builds.
 # Useful for reproducible builds.
-# Default: 'no'
-# FIXED_DISK_IDENTIFIERS='yes'
+# Default: 'yes'
+# FIXED_DISK_IDENTIFIERS='no'
 
 # Disk identifier when using FIXED_DISK_IDENTIFIERS='yes'.
 # Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
