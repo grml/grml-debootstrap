@@ -253,15 +253,15 @@ any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default debian release (jessie) in a Virtual Machine file with
-3GB disk size (including Grub as bootmanager in MBR of the virtual disk file):
+Install default Debian release (jessie) on /dev/sda3 and install bootmanager
+Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
+Use specified mirror instead of the default (http://http.debian.net/debian) one.
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default Debian release (jessie) on /dev/sda3 and install bootmanager
-Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
-Use specified mirror instead of the default (ftp://ftp.debian.de/debian) one.
+Install default debian release (jessie) in a Virtual Machine file with
+3GB disk size (including Grub as bootmanager in MBR of the virtual disk file):
 
   mount -o loop /mnt/sda6/debian-CD-1.iso /mnt/iso
   grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso file:/mnt/iso/debian/
