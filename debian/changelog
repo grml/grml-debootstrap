@@ -1,3 +1,43 @@
+grml-debootstrap (0.67) unstable; urgency=medium
+
+  The "[✔] ready for jessie" release
+
+  [ Michael Prokop ]
+  * [add7aab] Update documentation for upcoming stable release
+    Debian/jessie
+  * [486fa51] Use jessie as new default release
+  * [0f66ed4] Add support for jessie in dialog based user interface
+  * [bda9f3a] package selection: replace dhcp3-client with isc-dhcp-client
+  * [18ee5ea] Support MKFS_OPTS variable + use -F option in mkfs.ext* when
+    running in force mode
+  * [491c75a] Add sources.list support for squeeze-lts
+  * [75be5c3] docs: simplify table of supported releases, mention lenny
+    issue
+  * [86c5325] Make disk identifier configurable via DISK_IDENTIFIER
+    variable. Thanks to Patrick Schleizer <adrelanos@riseup.net> for the
+    initial patch
+  * [bd598a0] Fix some minor issues identified by shellcheck
+  * [37d7df7] config: use uuidgen tool for DISK_IDENTIFIER usage example
+  * [ca32c51] Fix some further issues identified by shellcheck
+  * [a2b19f1] Do not use fixed disk identifiers by default
+  * [af35272] Always use UUIDs for GRUB booting in VMs instead of
+    hardcoding values
+  * [a227187] docs: fix wrong usage example description. Thanks to Florian
+    Klien for the bug report
+  * [092274d] Execute kpartx in sync mode to avoid race conditions
+  * [86b25a4] Support GRUB as present in Debian/jessie in VM builds
+  * [e0b0b8b] docs: set man.base.url.for.relative.links option when
+    generating man-page
+  * [5adf8f6] Fix linux-image package check for Debian/jessie 32bit.
+    Thanks to Patrick Schleizer <adrelanos@riseup.net> for the bug report
+  * [6dde1bd] Fix check for available /dev/md* devices
+
+  [ Patrick Schleizer ]
+  * [ba9ff1f] Use UUIDs in /boot/grub/grub.cfg for VM builds rather than
+    hardcoding /dev/sda
+
+ -- Michael Prokop <mika@grml.org>  Mon, 13 Oct 2014 21:16:04 +0200
+
 grml-debootstrap (0.66) unstable; urgency=medium
 
   [ Michael Prokop ]
