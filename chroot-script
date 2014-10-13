@@ -44,7 +44,7 @@ stage() {
   if [ -n "$2" ] ; then
      echo "$2" > "$STAGES/$1"
      return 0
-  elif grep -q done "$STAGES/$1" 2>/dev/null ; then
+  elif grep -q 'done' "$STAGES/$1" 2>/dev/null ; then
      echo "   [*] Notice: stage $1 has been executed already, skipping execution therefore.">&2
      return 1
   fi
@@ -77,8 +77,11 @@ chrootmirror() {
   if [ -n "$ISO" ] ; then
     echo "Adjusting sources.list for ISO (${ISO})."
     echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
-    echo "Adding mirror entry (${MIRROR}) to sources.list."
-    [ -n "$MIRROR" ] && echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list || true
+
+    if [ -n "$MIRROR" ] ; then
+      echo "Adding mirror entry (${MIRROR}) to sources.list."
+      echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
+    fi
   else
     if [ -n "$MIRROR" ] ; then
       echo "Adjusting sources.list for mirror (${MIRROR})."
@@ -119,7 +122,7 @@ remove_chrootmirror() {
     TMP_ISO=$(echo "$ISO" |sed 's#/#\\/#g')
     sed -i "/deb $TMP_ISO $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
   else
-    if [ -n "$MIRROR" -a -n "$(echo $MIRROR|grep file:)" ] ; then
+    if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
       echo "Removing local mirror (${MIRROR}) from sources.list."
       TMP_MIRROR=$(echo "$MIRROR" |sed 's#/#\\/#g')
       sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
@@ -177,14 +180,14 @@ EOF
 
 # check available backports release version {{{
 checkbackports() {
-  wget -q -O/dev/null http://backports.debian.org/debian-backports/dists/${1}-backports/Release
+  wget -q -O/dev/null "http://backports.debian.org/debian-backports/dists/${1}-backports/Release"
 }
 # }}}
 
 # feature to provide Debian backports repos {{{
 backportrepos() {
     if [ -n "$BACKPORTREPOS" ] ; then
-        if ! checkbackports $RELEASE ; then
+        if ! checkbackports "$RELEASE" ; then
             echo "Backports for ${RELEASE} are not available." >&2
             exit 1
         else
@@ -257,7 +260,7 @@ packages() {
   # as seen to prevent debconf from asking the question interactively.
   [ -f /etc/debootstrap/debconf-selections ] && {
     echo "Preseeding the debconf database, some lines might be skipped..."
-    cat /etc/debootstrap/debconf-selections | debconf-set-selections
+    debconf-set-selections < /etc/debootstrap/debconf-selections
   }
 
   if [ "$PACKAGES" = 'yes' ] ; then
@@ -375,12 +378,12 @@ passwords()
     b='2'
      echo "Setting password for user root:"
      while [ "$a" != "$b" ] ; do
-       echo -n "Enter new UNIX password for user root: "
+       printf "Enter new UNIX password for user root: "
        askpass
        a="$resp"
        unset resp
        echo
-       echo -n "Retype new UNIX password for user root: "
+       printf "Retype new UNIX password for user root: "
        askpass
        b="$resp"
        unset resp
@@ -442,7 +445,7 @@ default_locales() {
 timezone() {
   if [ -n "$TIMEZONE" ] ; then
      echo "Adjusting /etc/localtime"
-     ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+     ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
   fi
 }
 # }}}
@@ -531,7 +534,7 @@ initrd() {
   # generate initrd
   if [ -n "$INITRD" ] ; then
      echo "Generating initrd."
-     update-initramfs -c -t -k $KERNELVER
+     update-initramfs -c -t -k "$KERNELVER"
   fi
 }
 # }}}
@@ -636,7 +639,7 @@ trap signal_handler HUP INT QUIT TERM
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
      if stage $i ; then
-       $i && stage $i done || exit 1
+       $i && stage $i 'done' || exit 1
      fi
   done
   # always execute the finalize stage:
