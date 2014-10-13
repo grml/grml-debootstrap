@@ -1078,7 +1078,14 @@ finalize_vm() {
      bailout 1
   fi
 
-  cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
+  case "$RELEASE" in
+    lenny|squeeze|wheezy)
+      cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
+      ;;
+    *)
+      cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
+      ;;
+  esac
   chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
   dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=4
   rm -f "${MNTPOINT}/tmp/core.img"
