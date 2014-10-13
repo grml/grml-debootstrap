@@ -86,6 +86,16 @@ chrootmirror() {
     fi
   fi
 
+  # LTS support
+  case "$RELEASE" in
+    squeeze)
+      if [ -n "$MIRROR" ] ; then
+        echo "Release matching $RELEASE - enabling LTS support in sources.list"
+        echo "deb $MIRROR ${RELEASE}-lts $COMPONENTS" >> /etc/apt/sources.list
+      fi
+      ;;
+  esac
+
   # add security.debian.org:
   case "$RELEASE" in
     unstable|sid|lenny) ;;  # no security pool available
