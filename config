@@ -215,7 +215,8 @@
 # FIXED_DISK_IDENTIFIERS='no'
 
 # Disk identifier when using FIXED_DISK_IDENTIFIERS='yes'.
+# Use uuid-runtime's uuidgen tool to generate random UUIDs on demand.
 # Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
-# DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
+# DISK_IDENTIFIER="$(uuidgen)"
 
 ## END OF FILE #################################################################
