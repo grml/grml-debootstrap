@@ -7,7 +7,7 @@
 ################################################################################
 
 # variables {{{
-PN="$(basename $0)"
+PN="$(basename "$0")"
 VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 VERSION="${VERSION:-unknown}"
 MNTPOINT="/mnt/debootstrap.$$"
@@ -137,11 +137,8 @@ fi
 
 # early helper functions {{{
 GOOD='[32;01m'
-WARN='[33;01m'
 BAD='[31;01m'
 NORMAL='[0m'
-HILITE='[36;01m'
-BRACKET='[34;01m'
 
 einfo() {
   einfon "$1\n"
@@ -165,10 +162,10 @@ eerror() {
 eend() {
   local retval="${1:-0}"
   shift
-  if [ $retval -gt 0 ]; then
+  if [ "$retval" -gt 0 ]; then
     printf " ${BAD}-> Failed (rc=${retval})${NORMAL}\n"
   fi
-  return $retval
+  return "$retval"
 }
 
 check4root(){
@@ -179,8 +176,8 @@ check4root(){
 
 check4progs(){
   local RC=''
-  for arg in $* ; do
-    which $arg >/dev/null 2>&1 || RC="$arg"
+  for arg in "$@" ; do
+    which "$arg" >/dev/null 2>&1 || RC="$arg"
   done
   if [ -n "$RC" ] ; then
      echo "$RC not installed"
@@ -234,7 +231,7 @@ cleanup() {
 
       if [ -n "$STAGES" ] ; then
         echo -n "Removing stages directory ${STAGES}: "
-        rm -rf "$STAGES" && echo done
+        rm -rf "$STAGES" && echo 'done'
       fi
 
       # remove directory only if we used the default with process id inside the name
@@ -269,7 +266,7 @@ stage() {
   if [ -n "$2" ] ; then
      echo "$2" > "${STAGES}/${1}"
      return 0
-  elif grep -q done "${STAGES}/${1}" 2>/dev/null ; then
+  elif grep -q 'done' "${STAGES}/${1}" 2>/dev/null ; then
      ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
      ewarn "  To reexecute it clean up the according directory inside $STAGES" ; eend 0
      return 1
@@ -340,7 +337,7 @@ fi
 [ "$_opt_hostname" ]            && HOSTNAME=$_opt_hostname
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
-[ "$_opt_defaultinterfaces" ]   && DEFAULTINTERFACES="true"
+[ "$_opt_defaultinterfaces" ]   && USE_DEFAULT_INTERFACES="true"
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
@@ -432,8 +429,8 @@ prompt_for_target()
      bailout 1
   fi
 
-  PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
-                       echo "$i $(blkid -s TYPE -o value $i 2>/dev/null || echo [no_filesystem_yet])"
+  PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
+                     echo "$i $(blkid -s TYPE -o value "$i" 2>/dev/null || echo '[no_filesystem_yet]')"
                    done)
 
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
@@ -455,16 +452,16 @@ prompt_for_bootmanager()
      found=
      for device in /dev/disk/by-id/*
      do
-        [ $(readlink -f $device) = ${TARGET} ] || continue
+        [ "$(readlink -f "$device")" = "${TARGET}" ] || continue
         found=1
         break
      done
-     [ -n "$found" ] && MBRDISK=$(echo ${device}|sed -e 's/-part[0-9][0-9]*$//')
+     [ -n "$found" ] && MBRDISK=$(echo "${device}" |sed -e 's/-part[0-9][0-9]*$//')
      if [ -e "$MBRDISK" ]; then
-        MBRDISK=$(readlink -f $MBRDISK)
+        MBRDISK=$(readlink -f "$MBRDISK")
      else
         # fall back to old behaviour
-        MBRDISK=$(echo ${TARGET} | sed -e 's/[0-9][0-9]*$//')
+        MBRDISK=$(echo "${TARGET}" | sed -e 's/[0-9][0-9]*$//')
      fi
 
      MBRPART="MBR of $MBRDISK"
@@ -531,7 +528,7 @@ prompt_for_hostname()
 {
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
-            0 0 $HOSTNAME)"
+            0 0 "$HOSTNAME")"
   [ $? -eq 0 ] || bailout
 }
 # }}}
@@ -550,14 +547,15 @@ prompt_for_password()
     ROOTPW1=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
     "Please enter the password for the root account:" 10 60)
     [ $? -eq 0 ] || bailout
+
     ROOTPW2=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
     "Please enter the password for the root account again for \
     confirmation:" 10 60)
     [ $? -eq 0 ] || bailout
 
     if [ "$ROOTPW1" != "$ROOTPW2" ]; then
-      $(dialog --stdout --title "${PN}" --ok-label \
-      "Retry" --msgbox "Passwords do not match!" 10 60)
+      dialog --stdout --title "${PN}" --ok-label \
+        "Retry" --msgbox "Passwords do not match!" 10 60
     fi
   done
   ROOTPASSWORD="$ROOTPW1"
@@ -600,14 +598,8 @@ TMPFILE=$(mktemp)
 # Currently we support only raid1:
 RAIDLEVEL='raid1'
 
-#RAIDLEVEL=$(dialog --stdout --title "$PN" --default-item raid1 \
-#                   --menu "Which RAID level do you want to use?" 0 0 0 \
-#                     raid1 "Software RAID level 1" \
-#                     raid5 "Software RAID level 5")
-#[ $? -eq 0 ] || bailout 20
-
 MD_LIST=$(for i in $(seq 0 9) ; do
-            awk '{print $4}' /proc/partitions | grep -q md$i || \
+            awk '{print $4}' /proc/partitions | grep -q "md$i" || \
             echo "/dev/md$i /dev/md$i"
           done)
 
@@ -622,26 +614,25 @@ AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
              sed 's/*//' | \
              grep -v 'Extended$' | \
              gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
-[ -n "$AVAILABLE_PARTITIONS" ] || echo "FIXME: no partitions available?"
-PARTITION_LIST=$(for i in $(echo $AVAILABLE_PARTITIONS) ; do
-                     echo "$i $(blkid -s TYPE -o value $i 2>/dev/null || echo [no_filesystem_yet]) off"
+[ -n "$AVAILABLE_PARTITIONS" ] || echo "Fatal error: no partitions available?"
+PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
+                     echo "$i $(blkid -s TYPE -o value "$i" 2>/dev/null || echo '[no_filesystem_yet]') off"
                  done)
 
 dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
-       $PARTITION_LIST 2>$TMPFILE
+       $PARTITION_LIST 2>"$TMPFILE"
 [ $? -eq 0 ] || bailout
-RETVAL=$?
-SELECTED_PARTITIONS="$(cat $TMPFILE)"
+SELECTED_PARTITIONS="$(cat "$TMPFILE")"
 
 NUM_PARTITIONS=0
-for i in $(cat $TMPFILE) ; do
-   NUM_PARTITIONS=$((${NUM_PARTITIONS}+1))
+for i in $(cat "$TMPFILE") ; do
+   NUM_PARTITIONS=$(( NUM_PARTITIONS + 1 ))
 done
 
 # force metadata version 0.90 for lenny so old grub can boot from this array.
 METADATA_VERSION=""
-if [ $RELEASE = "lenny" ]; then
+if [ "$RELEASE" = "lenny" ]; then
    METADATA_VERSION="-e0"
 fi
 
@@ -657,7 +648,7 @@ else
    dialog --title "$PN" --msgbox \
    "There was an error setting up $TARGET:
 
-$(cat $ERRORFILE)
+$(cat "$ERRORFILE")
 
 Exiting." 0 0
    rm -f "$TMPFILE" "$ERRORFILE"
@@ -846,7 +837,7 @@ if [ -z "$STAGES" ] ; then
 fi
 
 if [ -r "$STAGES"/grml-debootstrap ] ; then
-   if grep -q done $STAGES/grml-debootstrap ; then
+   if grep -q 'done' "${STAGES}/grml-debootstrap" ; then
       eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
       eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
    fi
@@ -867,7 +858,7 @@ set_target_directory(){
     # make sure we normalise the path to an absolute directory name so something like:
     #  mkdir -p foo/a bar/a; (cd foo; grml-debootstrap -t a)&; (cd bar; grml-debootstrap -t a)&; wait
     # works
-    TARGET="$(readlink -f $TARGET)"
+    TARGET="$(readlink -f "$TARGET")"
 }
 
 if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
@@ -923,7 +914,7 @@ mkfs() {
 
   if [ -n "$MKFS" ] ; then
     einfo "Running $MKFS $MKFS_OPTS on $TARGET"
-    $MKFS $MKFS_OPTS $TARGET ; RC=$?
+    "$MKFS" $MKFS_OPTS "$TARGET" ; RC=$?
 
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
       if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
@@ -948,7 +939,7 @@ mkfs() {
     # race conditions :-/
     sleep 2
 
-    eval $(blkid -o udev $TARGET 2>/dev/null)
+    eval "$(blkid -o udev "$TARGET" 2>/dev/null)"
     [ -n "$ID_FS_UUID" ] && TARGET_UUID="$ID_FS_UUID" || TARGET_UUID=""
 
     eend $RC
@@ -960,7 +951,7 @@ mkfs() {
 tunefs() {
   if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
-     $TUNE2FS $TARGET
+     $TUNE2FS "$TARGET"
      eend $?
   fi
 }
@@ -971,7 +962,7 @@ mount_target() {
   if [ -n "$DIRECTORY" ] ; then
      einfo "Running grml-debootstrap on a directory, nothing to mount."
   else
-     if grep -q $TARGET /proc/mounts ; then
+     if grep -q "$TARGET" /proc/mounts ; then
         ewarn "$TARGET already mounted, continuing anyway." ; eend 0
      else
        if ! [ -d "${MNTPOINT}" ] ; then
@@ -979,7 +970,7 @@ mount_target() {
        fi
        einfo "Mounting $TARGET to $MNTPOINT"
        mkdir -p "$MNTPOINT"
-       mount -o rw,suid,dev $TARGET $MNTPOINT
+       mount -o rw,suid,dev "$TARGET" "$MNTPOINT"
        eend $?
      fi
   fi
@@ -1028,7 +1019,7 @@ prepare_vm() {
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
-  if ! kpartx -av $TARGET >/dev/null 2>&1 || ! grep -q device-mapper /proc/misc >/dev/null 2>&1 ; then
+  if ! kpartx -av "$TARGET" >/dev/null 2>&1 || ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
     einfo "Device-mapper not ready yet, trying to load dm-mod module."
     modprobe dm-mod ; eend $?
   fi
@@ -1045,16 +1036,15 @@ prepare_vm() {
     fi
   fi
 
-  DEVINFO=$(kpartx -av $TARGET) # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
+  DEVINFO=$(kpartx -av "$TARGET") # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
     bailout 1
   fi
 
   # hopefully this always works as expected
-  LOOP=$(echo ${DEVINFO} | sed 's/.* linear //; s/ [[:digit:]]*//') # '/dev/loop1'
-  BLOCKDEV=$(echo "${DEVINFO}" | sed -e 's/.* (\(.*:.*\)).*/\1/')   # '253:0'
-  LOOP_PART="$(echo ${DEVINFO##add map } | sed 's/ .*//')" # '/dev/loop1p1'
+  LOOP=$(echo "${DEVINFO}" | sed 's/.* linear //; s/ [[:digit:]]*//') # 'loop1'
+  LOOP_PART="$(echo "${DEVINFO##add map }" | sed 's/ .*//')" # 'loop1p1'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
 
   blockdev --rereadpt "${LOOP}"
@@ -1133,12 +1123,12 @@ debootstrap_system() {
   if [ -n "$ISO" ] ; then
     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${ISO}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
-    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO
+    "$DEBOOTSTRAP" $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$ISO"
     RC=$?
   else
     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
-    $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR
+    "$DEBOOTSTRAP" $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
     RC=$?
   fi
 
@@ -1146,7 +1136,7 @@ debootstrap_system() {
     if [ -r "$MNTPOINT/debootstrap/debootstrap.log" ] && \
       [ -s "$MNTPOINT/debootstrap/debootstrap.log" ] ; then
       einfo "Presenting last ten lines of debootstrap.log:"
-      tail -10 $MNTPOINT/debootstrap/debootstrap.log
+      tail -10 "${MNTPOINT}"/debootstrap/debootstrap.log
       einfo "End of debootstrap.log"
     fi
   fi
@@ -1161,109 +1151,109 @@ preparechroot() {
 
   # provide variables to chroot system
   CHROOT_VARIABLES="/var/cache/grml-debootstrap/variables_${SHORT_TARGET}"
-  touch $CHROOT_VARIABLES
-  chmod 600 $CHROOT_VARIABLES # make sure nobody except root can read it
-  echo "# Configuration of ${PN}"                              > $CHROOT_VARIABLES
-  [ -n "$ARCH" ]                && echo "ARCH=\"$ARCH\""                               >> $CHROOT_VARIABLES
-  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS=\"$BACKPORTREPOS\""             >> $CHROOT_VARIABLES
-  [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=\"$CHROOT_SCRIPTS\""           >> $CHROOT_VARIABLES
-  [ -n "$CONFFILES" ]           && echo "CONFFILES=\"$CONFFILES\""                     >> $CHROOT_VARIABLES
-  [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> $CHROOT_VARIABLES
-  [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\""         >> $CHROOT_VARIABLES
-  [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=\"$DEBOOTSTRAP\""                 >> $CHROOT_VARIABLES
-  [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES=\"$DEFAULT_LOCALES\""         >> $CHROOT_VARIABLES
-  [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE=\"$DEFAULT_LANGUAGE\""       >> $CHROOT_VARIABLES
-  [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=\"$EXTRAPACKAGES\""             >> $CHROOT_VARIABLES
-  [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR=\"$FALLBACK_MIRROR\""         >> $CHROOT_VARIABLES
-  [ -n "$FORCE" ]               && echo "FORCE=\"$FORCE\""                             >> $CHROOT_VARIABLES
-  [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS=\"$GRMLREPOS\""                     >> $CHROOT_VARIABLES
-  [ -n "$GRUB" ]                && echo "GRUB=\"$GRUB\""                               >> $CHROOT_VARIABLES
-  [ -n "$HOSTNAME" ]            && echo "HOSTNAME=\"$HOSTNAME\""                       >> $CHROOT_VARIABLES
-  [ -n "$INITRD" ]              && echo "INITRD=\"$INITRD\""                           >> $CHROOT_VARIABLES
-  [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES=\"$INSTALL_NOTES\""             >> $CHROOT_VARIABLES
-  [ -n "$ISODIR" ]              && echo "ISODIR=\"$ISO\""                              >> $CHROOT_VARIABLES
-  [ -n "$ISO" ]                 && echo "ISO=\"$ISO\""                                 >> $CHROOT_VARIABLES
-  [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST=\"$KEEP_SRC_LIST\""             >> $CHROOT_VARIABLES
-  [ -n "$LOCALES" ]             && echo "LOCALES=\"$LOCALES\""                         >> $CHROOT_VARIABLES
-  [ -n "$MIRROR" ]              && echo "MIRROR=\"$MIRROR\""                           >> $CHROOT_VARIABLES
-  [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> $CHROOT_VARIABLES
-  [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> $CHROOT_VARIABLES
-  [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                            >> $CHROOT_VARIABLES
-  [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> $CHROOT_VARIABLES
-  [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> $CHROOT_VARIABLES
-  [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=\"$RECONFIGURE\""                 >> $CHROOT_VARIABLES
-  [ -n "$RELEASE" ]             && echo "RELEASE=\"$RELEASE\""                         >> $CHROOT_VARIABLES
-  [ -n "$RM_APTCACHE" ]         && echo "RM_APTCACHE=\"$RM_APTCACHE\""                 >> $CHROOT_VARIABLES
-  [ -n "$ROOTPASSWORD" ]        && echo "ROOTPASSWORD=\"$ROOTPASSWORD\""               >> $CHROOT_VARIABLES
-  [ -n "$SCRIPTS" ]             && echo "SCRIPTS=\"$SCRIPTS\""                         >> $CHROOT_VARIABLES
-  [ -n "$SECURE" ]              && echo "SECURE=\"$SECURE\""                           >> $CHROOT_VARIABLES
-  [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS=\"$SELECTED_PARTITIONS\"" >> $CHROOT_VARIABLES
-  [ -n "$TARGET" ]              && echo "TARGET=\"$TARGET\""                           >> $CHROOT_VARIABLES
-  [ -n "$UPGRADE_SYSTEM" ]      && echo "UPGRADE_SYSTEM=\"$UPGRADE_SYSTEM\""           >> $CHROOT_VARIABLES
-  [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID=\"$TARGET_UUID\""                 >> $CHROOT_VARIABLES
-  [ -n "$TIMEZONE" ]            && echo "TIMEZONE=\"$TIMEZONE\""                       >> $CHROOT_VARIABLES
-  [ -n "$TUNE2FS" ]             && echo "TUNE2FS=\"$TUNE2FS\""                         >> $CHROOT_VARIABLES
-  [ -n "$VMSIZE" ]              && echo "VMSIZE=\"$VMSIZE\""                           >> $CHROOT_VARIABLES
+  touch "$CHROOT_VARIABLES"
+  chmod 600 "$CHROOT_VARIABLES" # make sure nobody except root can read it
+  echo "# Configuration of ${PN}"                              > "$CHROOT_VARIABLES"
+  [ -n "$ARCH" ]                && echo "ARCH=\"$ARCH\""                               >> "$CHROOT_VARIABLES"
+  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS=\"$BACKPORTREPOS\""             >> "$CHROOT_VARIABLES"
+  [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS=\"$CHROOT_SCRIPTS\""           >> "$CHROOT_VARIABLES"
+  [ -n "$CONFFILES" ]           && echo "CONFFILES=\"$CONFFILES\""                     >> "$CHROOT_VARIABLES"
+  [ -n "$DEBCONF" ]             && echo "DEBCONF=\"$DEBCONF\""                         >> "$CHROOT_VARIABLES"
+  [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND=\"$DEBIAN_FRONTEND\""         >> "$CHROOT_VARIABLES"
+  [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP=\"$DEBOOTSTRAP\""                 >> "$CHROOT_VARIABLES"
+  [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES=\"$DEFAULT_LOCALES\""         >> "$CHROOT_VARIABLES"
+  [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE=\"$DEFAULT_LANGUAGE\""       >> "$CHROOT_VARIABLES"
+  [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES=\"$EXTRAPACKAGES\""             >> "$CHROOT_VARIABLES"
+  [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR=\"$FALLBACK_MIRROR\""         >> "$CHROOT_VARIABLES"
+  [ -n "$FORCE" ]               && echo "FORCE=\"$FORCE\""                             >> "$CHROOT_VARIABLES"
+  [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS=\"$GRMLREPOS\""                     >> "$CHROOT_VARIABLES"
+  [ -n "$GRUB" ]                && echo "GRUB=\"$GRUB\""                               >> "$CHROOT_VARIABLES"
+  [ -n "$HOSTNAME" ]            && echo "HOSTNAME=\"$HOSTNAME\""                       >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD" ]              && echo "INITRD=\"$INITRD\""                           >> "$CHROOT_VARIABLES"
+  [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES=\"$INSTALL_NOTES\""             >> "$CHROOT_VARIABLES"
+  [ -n "$ISODIR" ]              && echo "ISODIR=\"$ISO\""                              >> "$CHROOT_VARIABLES"
+  [ -n "$ISO" ]                 && echo "ISO=\"$ISO\""                                 >> "$CHROOT_VARIABLES"
+  [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST=\"$KEEP_SRC_LIST\""             >> "$CHROOT_VARIABLES"
+  [ -n "$LOCALES" ]             && echo "LOCALES=\"$LOCALES\""                         >> "$CHROOT_VARIABLES"
+  [ -n "$MIRROR" ]              && echo "MIRROR=\"$MIRROR\""                           >> "$CHROOT_VARIABLES"
+  [ -n "$MKFS" ]                && echo "MKFS=\"$MKFS\""                               >> "$CHROOT_VARIABLES"
+  [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                          >> "$CHROOT_VARIABLES"
+  [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                            >> "$CHROOT_VARIABLES"
+  [ -n "$PACKAGES" ]            && echo "PACKAGES=\"$PACKAGES\""                       >> "$CHROOT_VARIABLES"
+  [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS=\"$PRE_SCRIPTS\""                 >> "$CHROOT_VARIABLES"
+  [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE=\"$RECONFIGURE\""                 >> "$CHROOT_VARIABLES"
+  [ -n "$RELEASE" ]             && echo "RELEASE=\"$RELEASE\""                         >> "$CHROOT_VARIABLES"
+  [ -n "$RM_APTCACHE" ]         && echo "RM_APTCACHE=\"$RM_APTCACHE\""                 >> "$CHROOT_VARIABLES"
+  [ -n "$ROOTPASSWORD" ]        && echo "ROOTPASSWORD=\"$ROOTPASSWORD\""               >> "$CHROOT_VARIABLES"
+  [ -n "$SCRIPTS" ]             && echo "SCRIPTS=\"$SCRIPTS\""                         >> "$CHROOT_VARIABLES"
+  [ -n "$SECURE" ]              && echo "SECURE=\"$SECURE\""                           >> "$CHROOT_VARIABLES"
+  [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS=\"$SELECTED_PARTITIONS\"" >> "$CHROOT_VARIABLES"
+  [ -n "$TARGET" ]              && echo "TARGET=\"$TARGET\""                           >> "$CHROOT_VARIABLES"
+  [ -n "$UPGRADE_SYSTEM" ]      && echo "UPGRADE_SYSTEM=\"$UPGRADE_SYSTEM\""           >> "$CHROOT_VARIABLES"
+  [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID=\"$TARGET_UUID\""                 >> "$CHROOT_VARIABLES"
+  [ -n "$TIMEZONE" ]            && echo "TIMEZONE=\"$TIMEZONE\""                       >> "$CHROOT_VARIABLES"
+  [ -n "$TUNE2FS" ]             && echo "TUNE2FS=\"$TUNE2FS\""                         >> "$CHROOT_VARIABLES"
+  [ -n "$VMSIZE" ]              && echo "VMSIZE=\"$VMSIZE\""                           >> "$CHROOT_VARIABLES"
 
-  cp $VERBOSE $CONFFILES/chroot-script $MNTPOINT/bin/chroot-script
-  chmod 755 $MNTPOINT/bin/chroot-script
+  cp $VERBOSE "${CONFFILES}"/chroot-script "${MNTPOINT}"/bin/chroot-script
+  chmod 755 "${MNTPOINT}"/bin/chroot-script
   [ -d "$MNTPOINT"/etc/debootstrap/ ] || mkdir "$MNTPOINT"/etc/debootstrap/
 
   # make sure we have our files for later use via chroot-script
-  cp $VERBOSE $CONFFILES/config    $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE "${CONFFILES}/config"           "${MNTPOINT}"/etc/debootstrap/
   # make sure we adjust the configuration variables accordingly:
-  sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" $MNTPOINT/etc/debootstrap/config
-  sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    $MNTPOINT/etc/debootstrap/config
-  sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          $MNTPOINT/etc/debootstrap/config
+  sed -i "s#RELEASE=.*#RELEASE=\"$RELEASE\"#" "${MNTPOINT}"/etc/debootstrap/config
+  sed -i "s#TARGET=.*#TARGET=\"$TARGET\"#"    "${MNTPOINT}"/etc/debootstrap/config
+  sed -i "s#GRUB=.*#GRUB=\"$GRUB\"#"          "${MNTPOINT}"/etc/debootstrap/config
 
   # install notes:
   if [ -n "$INSTALL_NOTES" ] ; then
-     [ -r "$INSTALL_NOTES" ] && cp "$INSTALL_NOTES" $MNTPOINT/etc/debootstrap/
+     [ -r "$INSTALL_NOTES" ] && cp "$INSTALL_NOTES" "${MNTPOINT}"/etc/debootstrap/
   fi
 
   # package selection:
-  cp $VERBOSE ${_opt_packages:-$CONFFILES/packages} \
-    $MNTPOINT/etc/debootstrap/packages
+  cp $VERBOSE "${_opt_packages:-$CONFFILES/packages}" \
+    "${MNTPOINT}"/etc/debootstrap/packages
 
   # debconf preseeding:
   _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
-  [ -f $_opt_debconf -a "$DEBCONF" = 'yes' ] && \
-    cp $VERBOSE $_opt_debconf $MNTPOINT/etc/debootstrap/debconf-selections
+  [ -f "${_opt_debconf}" ] && [ "$DEBCONF" = 'yes' ] && \
+    cp $VERBOSE "${_opt_debconf}" "${MNTPOINT}"/etc/debootstrap/debconf-selections
 
   # copy scripts that should be executed inside the chroot:
   _opt_chroot_scripts=${_opt_chroot_scripts:-$CONFFILES/chroot-scripts/}
-  [ -d $_opt_chroot_scripts -a "$CHROOT_SCRIPTS" = 'yes' ] && {
-    mkdir -p $MNTPOINT/etc/debootstrap/chroot-scripts
-    cp -a $VERBOSE $_opt_chroot_scripts/* $MNTPOINT/etc/debootstrap/chroot-scripts/
+  [ -d "$_opt_chroot_scripts" ] && [ "$CHROOT_SCRIPTS" = 'yes' ] && {
+    mkdir -p "${MNTPOINT}"/etc/debootstrap/chroot-scripts
+    cp -a $VERBOSE "${_opt_chroot_scripts}"/* "${MNTPOINT}"/etc/debootstrap/chroot-scripts/
   }
 
   # notice: do NOT use $CHROOT_VARIABLES inside chroot but statically file instead!
-  cp $VERBOSE $CHROOT_VARIABLES  $MNTPOINT/etc/debootstrap/variables
+  cp $VERBOSE "${CHROOT_VARIABLES}" "${MNTPOINT}"/etc/debootstrap/variables
 
-  cp $VERBOSE -a -L $CONFFILES/extrapackages/ $MNTPOINT/etc/debootstrap/
+  cp $VERBOSE -a -L "${CONFFILES}"/extrapackages/ "${MNTPOINT}"/etc/debootstrap/
 
   # make sure we can access network [relevant for cdebootstrap]
-  [ -f "$MNTPOINT/etc/resolv.conf" ] || cp $VERBOSE /etc/resolv.conf $MNTPOINT/etc/resolv.conf
+  [ -f "${MNTPOINT}"/etc/resolv.conf ] || cp $VERBOSE /etc/resolv.conf "${MNTPOINT}"/etc/resolv.conf
 
   # provide system's /etc/hosts to the target:
   if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
-     cp $VERBOSE /etc/hosts $MNTPOINT/etc/hosts
+     cp $VERBOSE /etc/hosts "${MNTPOINT}"/etc/hosts
   fi
 
   # setup default locales
-  [ -n "$LOCALES" ] && cp $VERBOSE $CONFFILES/locale.gen  $MNTPOINT/etc/locale.gen
+  [ -n "$LOCALES" ] && cp $VERBOSE "${CONFFILES}"/locale.gen "${MNTPOINT}"/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
-  ( cd $MNTPOINT/dev && tar zxf /etc/debootstrap/devices.tar.gz )
+  ( cd "${MNTPOINT}"/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
-  [ -d $CONFFILES/bin   ] && cp $VERBOSE -a -L $CONFFILES/bin/*   $MNTPOINT/bin/
-  [ -d $CONFFILES/boot  ] && cp $VERBOSE -a -L $CONFFILES/boot/*  $MNTPOINT/boot/
-  [ -d $CONFFILES/etc   ] && cp $VERBOSE -a -L $CONFFILES/etc/*   $MNTPOINT/etc/
-  [ -d $CONFFILES/sbin  ] && cp $VERBOSE -a -L $CONFFILES/sbin/*  $MNTPOINT/sbin/
-  [ -d $CONFFILES/share ] && cp $VERBOSE -a -L $CONFFILES/share/* $MNTPOINT/share/
-  [ -d $CONFFILES/usr   ] && cp $VERBOSE -a -L $CONFFILES/usr/*   $MNTPOINT/usr/
-  [ -d $CONFFILES/var   ] && cp $VERBOSE -a -L $CONFFILES/var/*   $MNTPOINT/var/
+  [ -d "${CONFFILES}"/bin   ] && cp $VERBOSE -a -L "${CONFFILES}"/bin/*   "${MNTPOINT}"/bin/
+  [ -d "${CONFFILES}"/boot  ] && cp $VERBOSE -a -L "${CONFFILES}"/boot/*  "${MNTPOINT}"/boot/
+  [ -d "${CONFFILES}"/etc   ] && cp $VERBOSE -a -L "${CONFFILES}"/etc/*   "${MNTPOINT}"/etc/
+  [ -d "${CONFFILES}"/sbin  ] && cp $VERBOSE -a -L "${CONFFILES}"/sbin/*  "${MNTPOINT}"/sbin/
+  [ -d "${CONFFILES}"/share ] && cp $VERBOSE -a -L "${CONFFILES}"/share/* "${MNTPOINT}"/share/
+  [ -d "${CONFFILES}"/usr   ] && cp $VERBOSE -a -L "${CONFFILES}"/usr/*   "${MNTPOINT}"/usr/
+  [ -d "${CONFFILES}"/var   ] && cp $VERBOSE -a -L "${CONFFILES}"/var/*   "${MNTPOINT}"/var/
 
   # network setup
   DEFAULT_INTERFACES="# /etc/network/interfaces - generated by grml-debootstrap
@@ -1281,7 +1271,7 @@ iface eth0 inet dhcp
 
   if [ -n "$NOINTERFACES" ] ; then
     einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
-  elif [ -n "$DEFAULT_INTERFACES" ] ; then
+  elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
@@ -1393,7 +1383,7 @@ umount_chroot() {
   if grep -q "$MNTPOINT" /proc/mounts ; then
      if [ -n "$PARTITION" ] ; then
         einfo "Unmount $MNTPOINT"
-        umount $MNTPOINT
+        umount "$MNTPOINT"
         eend $?
      fi
   fi
@@ -1410,7 +1400,7 @@ fscktool() {
  if [ "$FSCK" = 'yes' ] ; then
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
    einfo "Checking filesystem on $TARGET using $FSCKTOOL"
-   $FSCKTOOL $TARGET
+   "$FSCKTOOL" "$TARGET"
    eend $?
  fi
 }
@@ -1421,7 +1411,11 @@ for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_scripts \
          umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
-       $i && ( stage "${i}" done && rm -f "${STAGES}/${i}" ) || bailout 2 "$i"
+      if "$i" ; then
+        stage "${i}" 'done' && rm -f "${STAGES}/${i}"
+      else
+        bailout 2 "$i"
+      fi
     fi
 done
 
