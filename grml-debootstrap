@@ -821,6 +821,14 @@ if [ "$CURRENT_ARCH" != "x86_64" ] ; then
 fi
 # }}}
 
+# Support for generic release codenames is unavailable. {{{
+if [ "$RELEASE" = "stable" ] || [ "$RELEASE" = "testing" ] ; then
+   eerror "Generic release codenames (stable, testing) are unsupported. \
+Please use specific codenames such as lenny, squeeze, wheezy or jessie." ; eend 1
+   bailout 1
+fi
+# }}}
+
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
