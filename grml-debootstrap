@@ -1338,6 +1338,26 @@ execute_scripts() {
 }
 # }}}
 
+try_umount() {
+  local tries=$1
+  local mountpoint="$2"
+
+  for (( try=1; try<=tries; try++ )); do
+    if [[ ${try} -eq ${tries} ]]; then
+      # Last time, show errors this time
+      umount "${mountpoint}" && return 0
+    else
+      # Not last time, hide errors until fatal
+      if umount "${mountpoint}" 2>/dev/null ; then
+        return 0
+      else
+        sleep 1
+      fi
+    fi
+  done
+  return 1  # Tried enough
+}
+
 # execute chroot-script {{{
 chrootscript() {
   if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
@@ -1355,7 +1375,7 @@ chrootscript() {
     else
       chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
     fi
-    umount "$MNTPOINT"/dev
+    try_umount 3 "$MNTPOINT"/dev
     eend $RC
   fi
 
