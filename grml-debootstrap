@@ -430,7 +430,10 @@ prompt_for_target()
   fi
 
   PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
-                     echo "$i $(blkid -s TYPE -o value "$i" 2>/dev/null || echo '[no_filesystem_yet]')"
+                     fs="$(blkid -s TYPE -o value "$i" 2>/dev/null)"
+                     [ -n "$fs" ] || fs='[no_filesystem_yet]'
+                     echo "$i" "$fs"
+                     unset fs
                    done)
 
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
