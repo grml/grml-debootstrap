@@ -1,3 +1,10 @@
+grml-debootstrap (0.68) unstable; urgency=medium
+
+  * [8a4a3c8] Adjust filesystem check for new blkid behaviour
+    (Closes: #772849)
+
+ -- Michael Prokop <mika@grml.org>  Thu, 11 Dec 2014 18:38:06 +0100
+
 grml-debootstrap (0.67) unstable; urgency=medium
 
   The "[✔] ready for jessie" release
