@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Filename:      /etc/debootstrap/chroot-script
 # Purpose:       script executed in chroot when installing Debian via grml-debootstrap
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
@@ -8,6 +8,14 @@
 # GRML_CHROOT_SCRIPT_MARKER - do not remove this line unless you want to keep
 # this script as /bin/chroot-script on your new installed system
 ################################################################################
+
+# error_handler {{{
+if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
+   set -E
+   set -o pipefail
+   trap "error_handler" ERR
+fi
+# }}}
 
 . /etc/debootstrap/config    || exit 1
 . /etc/debootstrap/variables || exit 1
