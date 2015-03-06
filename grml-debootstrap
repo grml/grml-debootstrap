@@ -286,8 +286,9 @@ fi
 
 # cmdline handling {{{
 # source external command line parameter-processing script
-if [ -r ./cmdlineopts.clp ] ; then
-   . ./cmdlineopts.clp
+self_dir="$(dirname "$(which "$0")")"
+if [ -r "${self_dir}"/cmdlineopts.clp ] ; then
+   . "${self_dir}"/cmdlineopts.clp
 elif [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
    . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
 else
