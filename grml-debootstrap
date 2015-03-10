@@ -142,6 +142,7 @@ fi
 # early helper functions {{{
 GOOD='[32;01m'
 BAD='[31;01m'
+WARN='[33;01m'
 NORMAL='[0m'
 
 einfo() {
@@ -153,6 +154,11 @@ einfon() {
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
   printf " ${GOOD}*${NORMAL} $*"
   LAST_E_CMD=einfon
+  return 0
+}
+
+ewarn() {
+  printf " ${WARN}*${NORMAL} $*\n"
   return 0
 }
 
