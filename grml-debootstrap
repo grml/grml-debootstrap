@@ -204,10 +204,6 @@ cleanup() {
   # make sure $TARGET is not mounted when exiting grml-debootstrap
   if [ -n "$MNTPOINT" ] ; then
     if grep -q "$MNTPOINT" /proc/mounts ; then
-      # make sure nothing is left inside chroot so we can unmount it
-      [ -x "$MNTPOINT"/etc/init.d/ssh   ] && "$MNTPOINT"/etc/init.d/ssh stop
-      [ -x "$MNTPOINT"/etc/init.d/mdadm ] && "$MNTPOINT"/etc/init.d/mdadm stop
-
       [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1
 
       # ugly, but make sure we really don't leave anything (/proc /proc and
