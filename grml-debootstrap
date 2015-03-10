@@ -8,7 +8,11 @@
 
 # variables {{{
 PN="$(basename "$0")"
-VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
+if [[ -d "$(dirname "$(which "$0")")"/.git ]]; then
+  VERSION="$(git describe | sed 's|^v||')"
+else
+  VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
+fi
 VERSION="${VERSION:-unknown}"
 MNTPOINT="/mnt/debootstrap.$$"
 
