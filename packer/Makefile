@@ -1,5 +1,9 @@
-compile:
+compile: fake-uname.so
+
+fake-uname.so:
 	gcc -shared -fPIC -ldl fake-uname.c -o fake-uname.so
 
-packer:
+packer: fake-uname.so
 	packer build debian64_wheezy.json
+
+.PHONY: compile packer
