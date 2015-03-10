@@ -25,6 +25,7 @@ Depends: debian-archive-keyring,
          ${misc:Depends},
          ${shlibs:Depends}
 Recommends: dialog,
+            grub-common,
             kpartx,
             mksh,
             parted,
