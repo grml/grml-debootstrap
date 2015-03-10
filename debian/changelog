@@ -1,3 +1,19 @@
+grml-debootstrap (0.68.1) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [52e9bbf] Do not stop hosts' SSH + mdadm services in cleanup
+    procedure. Thanks to Sebastian Pipping for debugging and bug report
+    (Closes: #779913)
+  * [1690a3c] Define ewarn function to properly display warning messages
+    (Closes: #780204)
+
+  [ Sebastian Pipping ]
+  * [75c3aab] Source cmdlineopts.clp from same folder as grml-debootstrap
+    file (Closes: #776502) [CVE-2015-1378]
+  * [0d9be2b] Add missing escaping of user input (Closes: #779925)
+
+ -- Michael Prokop <mika@grml.org>  Tue, 10 Mar 2015 15:48:08 +0100
+
 grml-debootstrap (0.68) unstable; urgency=medium
 
   * [8a4a3c8] Adjust filesystem check for new blkid behaviour
