@@ -1,3 +1,32 @@
+grml-debootstrap (0.69) unstable; urgency=medium
+
+  The "jessie partyyyyyy ♫♫♫" release
+
+  [ Sebastian Pipping ]
+  * [ccba9a8] Try unmounting [..]/dev harder
+  * [e5e71bc] Delete binary packer/fake-uname.so
+  * [be32888] Initialize packer/.gitignore
+  * [762d9ef] Fix packer/Makefile dependencies
+  * [d945d99] Check for grub-mkimage when creating virtual machine images
+  * [9d3d538] Add grub-common to recommended dependencies for grub-mkimage
+  * [b3cddce] Fixed version reported when run from Git
+  * [7b07013] Source cmdlineopts.clp from same folder as grml-debootstrap
+    file (Closes: #776502) [CVE-2015-1378]
+  * [92b1de2] Add missing escaping of user input (Closes: #779925)
+
+  [ Patrick Schleizer ]
+  * [3aa7301] Break when using unsupported generic codenames "stable" or
+    "testing"
+
+  [ Michael Prokop ]
+  * [f992b13] Do not stop hosts' SSH + mdadm services in cleanup
+    procedure. Thanks to Sebastian Pipping for debugging and bug report
+    (Closes: #779913)
+  * [dae518d] Define ewarn function to properly display warning messages
+    (Closes: #780204)
+
+ -- Michael Prokop <mika@grml.org>  Fri, 24 Apr 2015 18:12:55 +0200
+
 grml-debootstrap (0.68) unstable; urgency=medium
 
   * [8a4a3c8] Adjust filesystem check for new blkid behaviour
