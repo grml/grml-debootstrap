@@ -68,9 +68,9 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: lenny, squeeze, wheezy, sid
-# Default: 'wheezy'
-# RELEASE='wheezy'
+# Supported values: lenny, squeeze, wheezy, jessie, sid
+# Default: 'jessie'
+# RELEASE='jessie'
 
 # Define components that should be used within sources.list.
 # Default: 'main contrib non-free'

@@ -337,7 +337,7 @@ Where do you want to install grub to? Usage example: grub=/dev/sda
   release=...
 
 Specify release of new Debian system. Defaults to Debian jessie. Supported
-relases: lenny, squeeze, wheezy, jessie and sid. Usage example: release=sid
+releases: lenny, squeeze, wheezy, jessie and sid. Usage example: release=sid
 
   mirror=...
 
