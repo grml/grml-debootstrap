@@ -1036,7 +1036,7 @@ prepare_vm() {
     einfo "Adjusting disk signature to a fixed (non-random) value"
     MBRTMPFILE=$(mktemp)
     dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-    echo -en "\x41\x41\x41\x41\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
+    echo -en "\x41\x41\x41\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
     dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
     eend $?
   fi
