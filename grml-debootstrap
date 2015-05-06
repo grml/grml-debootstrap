@@ -1092,6 +1092,9 @@ finalize_vm() {
     bailout 1
   fi
 
+# Has chroot-script installed GRUB using grub-install (successfully), already?
+# chroot-script skips installation for unset ${GRUB}
+if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | fgrep -q GRUB; then
   einfo "Installing Grub as bootloader."
   mount -t proc none "${MNTPOINT}"/proc
   mount -t sysfs none "${MNTPOINT}"/sys
@@ -1114,6 +1117,7 @@ finalize_vm() {
   chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
   dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=4
   rm -f "${MNTPOINT}/tmp/core.img"
+fi
 
   einfo "Updating grub configuration file."
   if [ -n "$BOOT_APPEND" ] ; then
