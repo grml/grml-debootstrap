@@ -6,5 +6,6 @@
 |squeeze  |works
 |wheezy   |works
 |jessie   |works
+|stretch  |works
 |sid      |works[2]
 |======================

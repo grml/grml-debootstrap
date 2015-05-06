@@ -535,6 +535,7 @@ prompt_for_release()
             squeeze  Debian/6.0 \
             wheezy   Debian/7.0 \
             jessie   Debian/8.0 \
+            stretch  Debian/9.0 \
             sid      Debian/unstable)"
   [ $? -eq 0 ] || bailout
 }
@@ -838,7 +839,7 @@ fi
 # Support for generic release codenames is unavailable. {{{
 if [ "$RELEASE" = "stable" ] || [ "$RELEASE" = "testing" ] ; then
    eerror "Generic release codenames (stable, testing) are unsupported. \
-Please use specific codenames such as lenny, squeeze, wheezy or jessie." ; eend 1
+Please use specific codenames such as lenny, squeeze, wheezy, jessie or stretch." ; eend 1
    bailout 1
 fi
 # }}}
