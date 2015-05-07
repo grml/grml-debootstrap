@@ -1,7 +1,6 @@
 TODO list for grml-debootstrap
 ==============================
 
-* support Virtual Machine deployment in interactive mode(?)
 * support for LVM
 * support tarballs for customization/mirror source
   -> integrate/use 'fai dirinstall'?
@@ -15,7 +14,6 @@ TODO list for grml-debootstrap
 * support rpmstrap (bootstrap a basic RPM-based system)
   -> http://xen-tools.org/software/rinse/
 * support automatic installation of Gentoo
-* provide zsh-completion for grml-debootstrap's cmdline variables (in progress)
 * support installation on usb-pen (like grml2usb for Debian)
   -> http://blog.256bit.org/archives/172-Debian-in-der-Hosentasche.html#extended
 * support adduser for new user who has same permissions as an user created by d-i
