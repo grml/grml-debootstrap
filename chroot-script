@@ -162,8 +162,8 @@ EOF
        apt-get update $DPKG_OPTIONS
      else
        # make sure we have the keys available for aptitude
-       gpg --keyserver subkeys.pgp.net --recv-keys F61E2E7CECDEA787
-       gpg --export F61E2E7CECDEA787 | apt-key add - || true # not yet sure
+       gpg --keyserver subkeys.pgp.net --recv-keys 709BCE51568573EBC160E590F61E2E7CECDEA787
+       gpg --export 709BCE51568573EBC160E590F61E2E7CECDEA787 | apt-key add - || true # not yet sure
        # why it's necessary, sometimes we get an error even though it works [mika]
      fi
 
