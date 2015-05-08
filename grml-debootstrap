@@ -1133,7 +1133,7 @@ finalize_vm() {
   umount "${MNTPOINT}"/proc
   umount "${MNTPOINT}"/sys
   umount "${MNTPOINT}"/dev/pts
-  umount "${MNTPOINT}"/dev
+  try_umount 3 "${MNTPOINT}"/dev
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
 }
