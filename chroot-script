@@ -78,7 +78,7 @@ chrootmirror() {
   fi
 
   if [ -z "$COMPONENTS" ] ; then
-    COMPONENTS='main contrib non-free'
+    COMPONENTS='main'
   fi
   echo "Using repository components $COMPONENTS"
 

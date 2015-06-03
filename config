@@ -73,7 +73,7 @@
 # RELEASE='jessie'
 
 # Define components that should be used within sources.list.
-# Default: 'main contrib non-free'
+# Default: 'main'
 # COMPONENTS='main contrib non-free'
 
 # Set target architecture.

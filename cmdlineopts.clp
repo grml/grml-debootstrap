@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -133,6 +133,12 @@ while :; do
     ;;
   --grub)              # Target for grub installation. Use grub syntax for specifying
     shift; _opt_grub="$1"
+    ;;
+  --contrib)           # Add 'contrib' to list of components
+    _opt_contrib=T
+    ;;
+  --non-free)          # Add 'non-free' to list of components
+    _opt_non_free=T
     ;;
 
   # == Other options
