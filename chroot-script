@@ -351,7 +351,11 @@ kernel() {
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
      # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free firmware-linux"
+     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free"
+     # only add firmware-linux if we have non-free as a component
+     if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
+       KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
+     fi
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   else
      echo "Warning: Could not find a kernel for your system. Your system won't be able to boot itself!"
