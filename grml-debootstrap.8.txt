@@ -60,6 +60,11 @@ Options and environment variables
     are executed at the end of the chroot procedure.
     Default directory: /etc/debootstrap/chroot-scripts/
 
+*--contrib*::
+
+    Enable the 'contrib' repository in COMPONENTS. By default only
+    the 'main' repository is enabled.
+
 *-d*, *--confdir* _path_::
 
     Place of configuration files for debootstrap, defaults to /etc/debootstrap.
@@ -143,6 +148,11 @@ Options and environment variables
     interesting for you if you want a Debian system which doesn't
     need to provide regular boot, e.g. a system which provides
     ISOs for booting via GRUB using grml-rescueboot.
+
+*--non-free*::
+
+    Enable the 'non-free' repository in COMPONENTS. By default only
+    the 'main' repository is enabled.
 
 *--nopackages*::
 
