@@ -1,3 +1,19 @@
+grml-debootstrap (0.70) unstable; urgency=medium
+
+  The 'contrib' and 'non-free' repositories are no longer
+  enabled by default in COMPONENTS, so only 'main' is
+  active by default.
+
+  Please note that the firmware-linux package gets installed
+  only if the non-free component is enabled.
+
+  To re-enable the contrib and/or non-free repositories either
+  use the new command line options --contrib + --non-free
+  or set COMPONENTS='main contrib non-free' in grml-debootstrap's
+  configuration file /etc/debootstrap/config
+
+ -- Michael Prokop <mika@grml.org>  Wed, 03 Jun 2015 17:03:29 +0200
+
 grml-debootstrap (0.32) unstable; urgency=low
 
   Starting with this release support for the Debian/etch release

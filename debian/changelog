@@ -1,3 +1,37 @@
+grml-debootstrap (0.70) unstable; urgency=medium
+
+  [ Sebastian Pipping ]
+  * [d59e47c] Fix unmounting [..]/dev once more (issue #50)
+  * [d08be12] Mount and unmount /dev/pts for chrooting (issue #39)
+  * [e781fc5] No longer write too many disk ID bytes (issue #75)
+  * [a459d66] Fix current release-related texts before adding stretch
+    (issue #77)
+  * [7549cad] Add support for installation of Debian stretch (issue #77)
+  * [874b096] Revert "Check for grub-mkimage when creating virtual machine
+    images (issue #61)"
+  * [1adbe33] Revert "Add grub-common to recommended dependencies for
+    grub-mkimage (issue #61)"
+  * [4524757] Install GRUB once, at most (second take, issue #78)
+  * [c7c6cfd] Fix grub-install invocation for post-wheezy releases and sid
+    (issue #78)
+
+  [ Patrick Schleizer ]
+  * [cb71442] implemented trap ERR for grml-debootstrap and chroot-script;
+    changed chroot script from sh to bash script, because trap ERR is a
+    bashism
+
+  [ Michael Prokop ]
+  * [aba5a80] Use full fingerprint instead of short GPG key ids for Grml
+    repository. Thanks to Patrick Schleizer <adrelanos@riseup.net> for bug
+    report and feedback
+  * [831a5d8] Install firmware-linux only when non-free is among the
+    COMPONENTS. Thanks to Philip Hands <phil@hands.com> for the patch
+    (Closes: #786966)
+  * [15a1143] Drop contrib + non-free from default COMPONENTS, support
+    --contrib + -non-free cmdline options
+
+ -- Michael Prokop <mika@grml.org>  Wed, 03 Jun 2015 17:02:41 +0200
+
 grml-debootstrap (0.69) unstable; urgency=medium
 
   The "jessie partyyyyyy ♫♫♫" release
