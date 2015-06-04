@@ -1449,7 +1449,7 @@ execute_post_scripts() {
   # make sure we have $MNTPOINT available for our scripts
   export MNTPOINT
 
-  if [ -d "$_opt_scripts" ] || [ "$SCRIPTS"  = 'yes'] ; then
+  if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
     # legacy support for /etc/debootstrap/scripts/
     [ -d "$_opt_scripts" ] && post_scripts="$_opt_scripts" || post_scripts="${CONFFILES}/scripts/"
     ewarn "Deprecation NOTE: --scripts/SCRIPTS are deprecated, please switch to --post-scripts/POST_SCRIPTS instead."
