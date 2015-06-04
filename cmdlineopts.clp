@@ -12,7 +12,7 @@
 # should be handled in the main script, where it belongs.
 ################################################################################
 
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free
 
 _opt_temp=`getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
     $CMDLINE_OPTS -- "$@"`
@@ -93,9 +93,13 @@ while :; do
     shift; _opt_pre_scripts="$1"
     _opt_pre_scripts_set=T
     ;;
-  --scripts)           # Execute scripts from specified directory
+  --scripts)           # Execute scripts from specified directory [NOTE: deprecated, replaced via --post-scripts]
     shift; _opt_scripts="$1"
     _opt_scripts_set=T
+    ;;
+  --post-scripts)       # Execute scripts from specified directory
+    shift; _opt_post_scripts="$1"
+    _opt_post_scripts_set=T
     ;;
   --chroot-scripts)   # Execute chroot scripts from specified directory
     shift; _opt_chroot_scripts="$1"

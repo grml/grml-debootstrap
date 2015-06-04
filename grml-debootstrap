@@ -69,6 +69,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$MKFS" ] || MKFS='mkfs.ext4'
 [ -n "$MKFS_OPTS" ] || MKFS_OPTS=''
 [ -n "$PACKAGES" ] || PACKAGES='yes'
+[ -n "$POST_SCRIPTS" ] || POST_SCRIPTS='yes'
 [ -n "$PRE_SCRIPTS" ] || PRE_SCRIPTS='yes'
 [ -n "$RECONFIGURE" ] || RECONFIGURE='console-data'
 [ -n "$RELEASE" ] || RELEASE='jessie'
@@ -378,7 +379,13 @@ fi
 [ "$_opt_packages_set" ]        && PACKAGES='yes'
 [ "$_opt_nopackages" ]          && PACKAGES=''
 [ "$_opt_debconf_set" ]         && DEBCONF='yes'
-[ "$_opt_scripts_set" ]         && SCRIPTS='yes'
+
+if [ "$_opt_scripts_set" ] ; then
+  ewarn "Deprecation NOTE: --scripts option is deprecated, please switch to --post-scripts instead."
+  SCRIPTS='yes' # deprecated since grml-debootstrap >=0.71
+fi
+
+[ "$_opt_post_scripts_set" ]    && POST_SCRIPTS='yes'
 [ "$_opt_pre_scripts_set" ]     && PRE_SCRIPTS='yes'
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
 [ "$_opt_keep_src_list" ]       && KEEP_SRC_LIST='yes'
@@ -1276,6 +1283,7 @@ preparechroot() {
   [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                                                      >> "$CHROOT_VARIABLES"
   [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                                                        >> "$CHROOT_VARIABLES"
   [ -n "$PACKAGES" ]            && echo "PACKAGES='$(sed "s,','\\\\'',g" <<<"${PACKAGES}")'"                       >> "$CHROOT_VARIABLES"
+  [ -n "$POST_SCRIPTS" ]        && echo "POST_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${POST_SCRIPTS}")'"               >> "$CHROOT_VARIABLES"
   [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${PRE_SCRIPTS}")'"                 >> "$CHROOT_VARIABLES"
   [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE='$(sed "s,','\\\\'',g" <<<"${RECONFIGURE}")'"                 >> "$CHROOT_VARIABLES"
   [ -n "$RELEASE" ]             && echo "RELEASE='$(sed "s,','\\\\'',g" <<<"${RELEASE}")'"                         >> "$CHROOT_VARIABLES"
@@ -1412,19 +1420,27 @@ execute_pre_scripts() {
 }
 # }}}
 
-# execute all scripts in /etc/debootstrap/scripts/ {{{
-execute_scripts() {
-   # make sure we have $MNTPOINT available for our scripts
-   export MNTPOINT
-   if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
-      [ -d "$_opt_scripts" ] && scripts="$_opt_scripts" || scripts="$CONFFILES/scripts/"
-      for script in ${scripts}/* ; do
-         if [ -x "$script" ] ; then
-            einfo "Executing script $script"
-            $script ; eend $?
-         fi
-      done
-   fi
+# execute all scripts in /etc/debootstrap/post-scripts/ {{{
+execute_post_scripts() {
+  # make sure we have $MNTPOINT available for our scripts
+  export MNTPOINT
+
+  if [ -d "$_opt_scripts" ] || [ "$SCRIPTS"  = 'yes'] ; then
+    # legacy support for /etc/debootstrap/scripts/
+    [ -d "$_opt_scripts" ] && post_scripts="$_opt_scripts" || post_scripts="${CONFFILES}/scripts/"
+    ewarn "Deprecation NOTE: --scripts/SCRIPTS are deprecated, please switch to --post-scripts/POST_SCRIPTS instead."
+  elif [ -d "$_opt_post_scripts" ] || [ "$POST_SCRIPTS" = 'yes' ] ; then
+    [ -d "$_opt_post_scripts" ] && post_scripts="$_opt_post_scripts" || post_scripts="${CONFFILES}/post-scripts/"
+  fi
+
+  if [ -n "$post_scripts" ] ; then
+    for script in "${post_scripts}"/* ; do
+      if [ -x "$script" ] ; then
+        einfo "Executing post-script $script"
+        "$script" ; eend $?
+      fi
+    done
+  fi
 }
 # }}}
 
@@ -1528,7 +1544,7 @@ fscktool() {
 
 # now execute all the functions {{{
 for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
-         preparechroot execute_pre_scripts chrootscript execute_scripts \
+         preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
       if "$i" ; then

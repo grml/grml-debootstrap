@@ -133,9 +133,9 @@
 # Default: 'yes'
 # CHROOT_SCRIPTS='no'
 
-# Run scripts from /etc/debootstrap/scripts/ after setting up chroot.
+# Run scripts from /etc/debootstrap/post-scripts/ after setting up chroot.
 # Default: 'yes'
-# SCRIPTS='no'
+# POST_SCRIPTS='no'
 
 # Install *.deb packages from /etc/debootstrap/extrapackages/
 # Default: 'yes'

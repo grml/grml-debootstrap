@@ -182,11 +182,13 @@ Options and environment variables
     command line might be visible in the process list and the shell history.
     It's meant for automatic installation only.
 
-*-r*, *--release* _releasename_::
+*--post-scripts* _directory_::
 
-    Specify release of new Debian system. Supported releases names: lenny,
-    squeeze, wheezy, jessie, stretch (note: requires a recent version of debootstrap)
-    and sid. Corresponding with configuration variable RELEASE.
+    Execute scripts from specified directory after executing the chroot script.
+    This allows customisation of the system after the chroot has been set up.
+    The environment variable $MNTPOINT is available inside the scripts for
+    direct access of the chroot.
+    Default directory: /etc/debootstrap/post-scripts/
 
 *--pre-scripts* _directory_::
 
@@ -196,12 +198,11 @@ Options and environment variables
     scripts for direct access of the chroot.
     Default directory: /etc/debootstrap/pre-scripts/
 
-*--scripts* _directory_::
+*-r*, *--release* _releasename_::
 
-    Execute scripts from specified directory. This allows customisation of
-    the system after the chroot has been set up. The environment variable
-    $MNTPOINT is available inside the scripts for direct access of the chroot.
-    Default directory: /etc/debootstrap/scripts/
+    Specify release of new Debian system. Supported releases names: lenny,
+    squeeze, wheezy, jessie, stretch (note: requires a recent version of debootstrap)
+    and sid. Corresponding with configuration variable RELEASE.
 
 *-t*, *--target* _target_::
 
