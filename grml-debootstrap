@@ -1201,7 +1201,7 @@ fi
 
   case "$RELEASE" in
     lenny|squeeze|wheezy)
-      if grep -q '^GRUB_DISABLE_LINUX_UUID=true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
+      if grep -q '^GRUB_DISABLE_LINUX_UUID=.*true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
         ewarn "GRUB_DISABLE_LINUX_UUID is set to true in /etc/default/grub, not adjusting root= in grub.cfg."
         ewarn "Please note that your system might NOT be able to properly boot."
       else
