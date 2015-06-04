@@ -1,6 +1,7 @@
 BASH_SCRIPTS = grml-debootstrap
 SHELL_SCRIPTS = chroot-script
 MKSH_SCRIPTS = bootgrub.mksh
+DOCBOOK_XML=/usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
 all: doc
 
@@ -19,7 +20,7 @@ man-stamp: grml-debootstrap.8.txt
 	sed -i 's/^include::releasetable.txt\[\]/include::releasetable-man.txt\[\]/' grml-debootstrap.8.txt
 	asciidoc -d manpage -b docbook grml-debootstrap.8.txt
 	xsltproc --stringparam man.base.url.for.relative.links http://grml.org/grml-debootstrap/ \
-		/usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl grml-debootstrap.8.xml
+		$(DOCBOOK_XML) grml-debootstrap.8.xml
 	touch man-stamp
 
 shellcheck:
@@ -40,6 +41,22 @@ shellcheck:
 		echo -n "."; \
 	done; \
 	echo " done."
+
+install:
+	mkdir -p $(DESTDIR)/etc/debootstrap/
+	mkdir -p $(DESTDIR)/etc/debootstrap/extrapackages
+	mkdir -p $(DESTDIR)/usr/sbin/
+	mkdir -p $(DESTDIR)/etc/zsh/completion.d/
+	mkdir -p $(DESTDIR)/usr/share/grml-debootstrap/functions/
+	install -m 644 config           $(DESTDIR)/etc/debootstrap/
+	install -m 644 devices.tar.gz   $(DESTDIR)/etc/debootstrap/
+	install -m 644 locale.gen       $(DESTDIR)/etc/debootstrap/
+	install -m 644 packages         $(DESTDIR)/etc/debootstrap/
+	install -m 755 chroot-script    $(DESTDIR)/etc/debootstrap/
+	install -m 755 grml-debootstrap $(DESTDIR)/usr/sbin/
+	install -m 644 zsh-completion   $(DESTDIR)/etc/zsh/completion.d/_grml-debootstrap
+	install -m 644 cmdlineopts.clp  $(DESTDIR)/usr/share/grml-debootstrap/functions/cmdlineopts.clp
+	install -m 755 bootgrub.mksh    $(DESTDIR)/usr/share/grml-debootstrap/bootgrub.mksh
 
 clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp

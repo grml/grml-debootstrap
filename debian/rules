@@ -9,64 +9,11 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-build: build-arch build-indep
+%:
+	dh $@
 
-build-arch: build-stamp
-
-build-indep: build-stamp
-
-build-stamp:
-	dh_testdir
+override_dh_auto_test:
 	(cd tests && ./run_tests.sh)
 	make shellcheck
 	make
-	touch $@
 
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-	make clean
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs etc/debootstrap usr/sbin etc/debootstrap/extrapackages etc/zsh/completion.d \
-	  usr/share/grml-debootstrap/functions
-
-	# Add here commands to install the package into debian/grml-debootstrap.
-	install -m 644 config           debian/grml-debootstrap/etc/debootstrap/
-	install -m 644 devices.tar.gz   debian/grml-debootstrap/etc/debootstrap/
-	install -m 644 locale.gen       debian/grml-debootstrap/etc/debootstrap/
-	install -m 644 packages         debian/grml-debootstrap/etc/debootstrap/
-	install -m 755 chroot-script    debian/grml-debootstrap/etc/debootstrap/
-	install -m 755 grml-debootstrap debian/grml-debootstrap/usr/sbin/
-	install -m 644 zsh-completion   debian/grml-debootstrap/etc/zsh/completion.d/_grml-debootstrap
-	install -m 644 cmdlineopts.clp  debian/grml-debootstrap/usr/share/grml-debootstrap/functions/cmdlineopts.clp
-	install -m 755 bootgrub.mksh    debian/grml-debootstrap/usr/share/grml-debootstrap/bootgrub.mksh
-
-# Build architecture-dependent files here.
-binary-arch: build install
-# We have nothing to do by default.
-
-# Build architecture-independent files here.
-binary-indep: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs TODO THANKS
-	dh_installman grml-debootstrap.8
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
