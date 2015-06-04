@@ -1566,7 +1566,7 @@ remove_configs() {
     return 0
   fi
 
-  if ! mountpoint "${MNTPOINT}" ; then
+  if ! mountpoint "${MNTPOINT}" >/dev/null 2>&1 ; then
     ewarn "Target ${MNTPOINT} doesn't seem to be mounted, can't remove configuration files." ; eend 0
     return 0
   fi
