@@ -1308,8 +1308,10 @@ preparechroot() {
   fi
 
   # package selection:
-  cp $VERBOSE "${_opt_packages:-$CONFFILES/packages}" \
-    "${MNTPOINT}"/etc/debootstrap/packages
+  if [ "$PACKAGES" = 'yes' ] ; then
+    cp $VERBOSE "${_opt_packages:-$CONFFILES/packages}" \
+      "${MNTPOINT}"/etc/debootstrap/packages
+  fi
 
   # debconf preseeding:
   _opt_debconf=${_opt_debconf:-$CONFFILES/debconf-selections}
