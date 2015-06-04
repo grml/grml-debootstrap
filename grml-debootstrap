@@ -995,10 +995,19 @@ mkfs() {
 
     # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
     # will fail to detect the uuid in the chroot
-    if echo "$TARGET" | grep -q "/dev/md" ; then
+    if [ -n "$VIRTUAL" ] ; then
+      einfo "Virtual environment doesn't require blockdev --rereadpt, skipping therefore"
+    elif echo "$TARGET" | grep -q "/dev/md" ; then
       blockdev --rereadpt "${TARGET}"
-    elif ! [ -n "$VIRTUAL" ] ; then
-      blockdev --rereadpt "${TARGET%%[0-9]*}"
+    else
+      # if we deploy to /dev/sdX# then let's see if /dev/sdX exists
+      local main_device="${TARGET%%[0-9]*}"
+      # sanity check to not try to e.g. access /dev/loop if we get /dev/loop0
+      if [ -f "/sys/block/$(basename ${main_device})/$(basename ${TARGET})/dev" ] ; then
+        blockdev --rereadpt "$main_device"
+      else
+        einfo "No underlying block device for $TARGET identified, skipping blockdev --rereadpt."
+      fi
     fi
     # give the system 2 seconds, otherwise we might run into
     # race conditions :-/
