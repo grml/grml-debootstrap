@@ -1121,8 +1121,6 @@ prepare_vm() {
   LOOP_PART="$(echo "${DEVINFO##add map }" | sed 's/ .*//')" # 'loop1p1'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
 
-  blockdev --rereadpt "${LOOP}"
-
   if [ -z "$TARGET" ] ; then
      eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
      bailout 1
