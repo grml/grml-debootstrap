@@ -245,12 +245,6 @@ cleanup() {
     einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
   fi
 
-  if [ "$REMOVE_CONFIGS" = "yes" ] ; then
-    einfo "Removing configuration files from installed system as requested via --remove-configs / REMOVE_CONFIGS."
-    rm -rf "${MNTPOINT}"/etc/debootstrap/
-    eend $?
-  fi
-
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
     rmdir "$MNTPOINT" 2>/dev/null
@@ -1566,10 +1560,27 @@ fscktool() {
 }
 # }}}
 
+# get rid of grml-debootstrap config files {{{
+remove_configs() {
+  if [ "$REMOVE_CONFIGS" != "yes" ] ; then
+    return 0
+  fi
+
+  if ! mountpoint "${MNTPOINT}" ; then
+    ewarn "Target ${MNTPOINT} doesn't seem to be mounted, can't remove configuration files." ; eend 0
+    return 0
+  fi
+
+  einfo "Removing configuration files from installed system as requested via --remove-configs / REMOVE_CONFIGS."
+  rm -rf "${MNTPOINT}"/etc/debootstrap/
+  eend $?
+}
+# }}}
+
 # now execute all the functions {{{
 for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
-         umount_chroot finalize_vm fscktool ; do
+         remove_configs umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
       if "$i" ; then
         stage "${i}" 'done' && rm -f "${STAGES}/${i}"
