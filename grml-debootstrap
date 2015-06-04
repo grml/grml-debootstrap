@@ -1427,7 +1427,7 @@ iface eth0 inet dhcp
 # execute all scripts in /etc/debootstrap/pre-scripts/ {{{
 execute_pre_scripts() {
   # make sure hostname is set even before chroot-script get executed
-  echo "$HOSTNAME" > /etc/hostname
+  echo "$HOSTNAME" > "$MNTPOINT"/etc/hostname
 
   # make sure we have $MNTPOINT available for our scripts
   export MNTPOINT
