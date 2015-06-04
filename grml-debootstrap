@@ -157,6 +157,7 @@ Configuration options:
       --chroot-scripts <d> Execute chroot scripts from specified directory.
       --pre-scripts <dir>  Execute scripts from specified directory (before chroot-scripts).
       --scripts <dir>      Execute scripts from specified directory (after chroot-scripts).
+      --remove-configs     Delete grml-debootstrap configuration files from installed system.
 
 Other options:
 
@@ -242,6 +243,12 @@ cleanup() {
 
   if [ -n "$STAGES" ] ; then
     einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+  fi
+
+  if [ "$REMOVE_CONFIGS" = "yes" ] ; then
+    einfo "Removing configuration files from installed system as requested via --remove-configs / REMOVE_CONFIGS."
+    rm -rf "${MNTPOINT}"/etc/debootstrap/
+    eend $?
   fi
 
   # Remove temporary mountpoint again
@@ -405,6 +412,7 @@ fi
 [ "$_opt_force" ]               && FORCE=$_opt_force
 [ "$_opt_verbose" ]             && VERBOSE="-v"
 [ "$_opt_debug" ]               && DEBUG="true"
+[ "$_opt_remove_configs" ]      && REMOVE_CONFIGS="yes"
 
 # make sure main is always included
 [ -z "$COMPONENTS" ]            && COMPONENTS="main"

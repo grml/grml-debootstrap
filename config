@@ -219,4 +219,9 @@
 # Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
 # DISK_IDENTIFIER="$(uuidgen)"
 
+# Delete grml-debootstrap configuration files from installed system.
+# Useful for reproducible builds or if you don't want to leak information.
+# Default: 'no'
+# REMOVE_CONFIGS='yes'
+
 ## END OF FILE #################################################################

@@ -204,6 +204,11 @@ Options and environment variables
     squeeze, wheezy, jessie, stretch (note: requires a recent version of debootstrap)
     and sid. Corresponding with configuration variable RELEASE.
 
+*--remove-configs*::
+
+    Delete grml-debootstrap configuration files (/etc/debootstrap/*) from installed
+    system. Useful for reproducible builds or if you don't want to leak information.
+
 *-t*, *--target* _target_::
 
     Target partition (/dev/...) or directory (anything else without /dev at the
