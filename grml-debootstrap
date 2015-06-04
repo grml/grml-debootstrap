@@ -84,6 +84,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 # inside the chroot system locales might not be available, so use minimum:
 export LANG=C
 export LC_ALL=C
+export LANGUAGE=C
 
 # make sure interactive mode is only executed when
 # using an empty configuration file or option --interactive
