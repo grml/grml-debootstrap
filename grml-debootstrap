@@ -1407,17 +1407,21 @@ iface eth0 inet dhcp
 
 # execute all scripts in /etc/debootstrap/pre-scripts/ {{{
 execute_pre_scripts() {
-   # make sure we have $MNTPOINT available for our scripts
-   export MNTPOINT
-   if [ -d "$_opt_pre_scripts" ] || [ "$PRE_SCRIPTS" = 'yes' ] ; then
-      [ -d "$_opt_pre_scripts" ] && pre_scripts="$_opt_pre_scripts" || pre_scripts="$CONFFILES/pre-scripts/"
-      for script in ${pre_scripts}/* ; do
-         if [ -x "$script" ] ; then
-            einfo "Executing pre-script $script"
-            $script ; eend $?
-         fi
-      done
-   fi
+  # make sure hostname is set even before chroot-script get executed
+  echo "$HOSTNAME" > /etc/hostname
+
+  # make sure we have $MNTPOINT available for our scripts
+  export MNTPOINT
+
+  if [ -d "$_opt_pre_scripts" ] || [ "$PRE_SCRIPTS" = 'yes' ] ; then
+    [ -d "$_opt_pre_scripts" ] && pre_scripts="$_opt_pre_scripts" || pre_scripts="${CONFFILES}/pre-scripts/"
+    for script in "${pre_scripts}"/* ; do
+      if [ -x "$script" ] ; then
+        einfo "Executing pre-script $script"
+        "$script" ; eend $?
+      fi
+    done
+  fi
 }
 # }}}
 
