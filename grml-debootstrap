@@ -1176,6 +1176,14 @@ fi
   chroot "${MNTPOINT}" update-grub
 
   case "$RELEASE" in
+    jessie)
+      einfo "Applying workaround for GRUB font path bug in jessie (Debian #787685)."
+      mkdir -p "${MNTPOINT}/boot/grub/fonts/"
+      cp "${MNTPOINT}/usr/share/grub/unicode.pf2" "${MNTPOINT}/boot/grub/fonts/"
+      ;;
+  esac
+
+  case "$RELEASE" in
     lenny|squeeze|wheezy)
       einfo "Adjusting grub.cfg for successful boot sequence."
       sed -i "s;root=[^ ]\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
