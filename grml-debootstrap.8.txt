@@ -222,9 +222,10 @@ Options and environment variables
 
 *--vmfile*::
 
-    Set up a Virtual Machine instead of installing to a partition or directory.
-    This allows deployment of a Virtual Machine. The options needs to be
-    combined with the --target option.
+    Set up a Virtual Machine using a regular file instead of installing to a
+    partition/block device or directory. This allows deployment of a Virtual
+    Machine. The options needs to be combined with the --target option
+    ('qemu-img create -f raw ...' is executed on the specified target).
     Usage example: --vmfile --target /mnt/sda1/qemu.img
 
 *--vmsize* _size_::

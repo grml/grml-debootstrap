@@ -116,10 +116,12 @@ Bootstrap options:
 
 Options for Virtual Machine deployment:
 
-      --vm               Set up a Virtual Machine, instead of plainly installing
-                         to a partition or directory, to be combined with --target,
-                         like: --vm --target /dev/mapper/your-vm-disk
-      --vmfile           Like --vm, but install into a file (raw format).
+      --vm               Set up a Virtual Machine on an existing block device
+                         instead of plainly installing to a partition or
+                         directory. Needs to be combined with --target.
+                         Example: --vm --target /dev/mapper/your-vm-disk
+      --vmfile           Like --vm, but install into a regular file (created by
+                         'qemu-img create -f raw ...') instead.
                          Example: --vmfile --target /mnt/sda1/qemu.img
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
