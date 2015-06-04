@@ -1158,6 +1158,12 @@ finalize_vm() {
 # chroot-script skips installation for unset ${GRUB}
 if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | fgrep -q GRUB; then
   einfo "Installing Grub as bootloader."
+
+  if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
+    echo "Notice: grub-pc package not present yet, installing it therefore."
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y install $DPKG_OPTIONS grub-pc
+  fi
+
   mkdir -p "${MNTPOINT}/boot/grub"
   if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
      eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
