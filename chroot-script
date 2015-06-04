@@ -585,11 +585,13 @@ grub_install() {
         echo "Installing grub on ${GRUB}:"
         grub-install --no-floppy "$GRUB"
      done
+     rm -f /boot/grub/device.map
   else
      echo "Installing grub on ${GRUB}:"
      case "$RELEASE" in
        lenny|squeeze|wheezy)
          grub-install --no-floppy "$(readlink -f "${GRUB}")"
+         rm -f /boot/grub/device.map
          ;;
        *)
          echo "(hd0) ${GRUB}" > /boot/grub/device.map
