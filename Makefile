@@ -62,7 +62,7 @@ clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp
 
 testrun:
-	cd ./packer && $(MAKE) compile && $(MAKE) packer
+	cd ./packer && $(MAKE) compile && $(MAKE) jessie
 
 vagrant:
 	vagrant up
