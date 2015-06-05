@@ -1,35 +1,34 @@
-This package was debianized by Michael Prokop <mika@grml.org> on
-Fri,  3 Nov 2006 01:10:52 +0100.
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: grml-debootstrap
+Upstream-Contact: Michael Prokop <mika@grml.org>
+Source: http://git.grml.org/?p=grml-debootstrap.git;a=summary
 
-It was downloaded from http://deb.grml.org/
-
-Upstream Author: Michael Prokop <mika@grml.org>
-
-Copyright: 2006-2012 Michael Prokop <mika@grml.org>,
-  Alexander Wirt <formorer@grml.org>,
-  Christian Hofstaedtler <ch@grml.org>,
-  Michael Gebetsroither <michael@mgeb.org>,
-  Tong Sun <suntong@cpan.org>,
-  Ulrich Dangel <mru@grml.org>
-
-License:
-
-   This package is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This package is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this package; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-
-On Debian systems, the complete text of the GNU General Public License,
-version 2 can be found in `/usr/share/common-licenses/GPL-2'.
-
-The Debian packaging is Copyright 2006-2012, Michael Prokop <mika@grml.org> and
-is licensed under the GPL, see above.
+Files: *
+Copyright: 2006-2015, Michael Prokop <mika@grml.org>
+           2014, 2015, Sebastian Pipping <sebastian@pipping.org>
+           2014, Patrick Schleizer <adrelanos@riseup.net>
+           2013, 2014, Markus Rekkenbeil <mre@mobi4friends.de>
+           2012, 2013, Evgeni Golov <evgeni@grml.org>
+           2012, Darshaka Pathirana <dpat@syn-net.org>
+           2010, 2011, 2013, 2014, Christian Hofstaedtler <christian@hofstaedtler.name>
+           2009, 2010, 2011, Ulrich Dangel <mru@grml.org>
+           2009, Michael Gebetsroither <michael@mgeb.org>
+           2008, 2010, Tong Sun <suntong@cpan.org>
+           2007, Alexander Wirt <formorer@grml.org>
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this package; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the complete text of the GNU General Public License,
+ version 2 can be found in `/usr/share/common-licenses/GPL-2'.
