@@ -392,13 +392,17 @@ include::releasetable.txt[]
 ================================================================================
 [1] Please notice that lenny is an unsupported release within Debian nowadays.
 grml-debootstrap can handle the release but you really should not use lenny
-anymore unless you really know what you are doing. Choose Debian 7.0 (wheezy) or
+anymore unless you really know what you are doing. Choose Debian 8.0 (jessie) or
 something newer instead.
 
 Notice that you need to specify a mirror providing the lenny release, the
 default (http://http.debian.net/debian) doesn't provide it any longer nowadays.
 Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have
 your own lenny mirror.
+
+You also need to specify a filesystem that's supported by lenny, e.g.
+'--filesystem ext3' since grml-debootstrap's current default (ext4) isn't
+supported by lenny.
 
 Also when debootstrapping lenny on a live system with a kernel version
 like "3.16-1-grml-amd64" lenny's libc will fail to install with:
