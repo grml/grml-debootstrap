@@ -1,3 +1,52 @@
+grml-debootstrap (0.71) unstable; urgency=medium
+
+  The "monster kill ▬█████████" release
+
+  * [3814da0] Improve check for identifying underlying block device
+    (Closes: #771192)
+  * [0de1bb1] Provide workaround for GRUB font path bug in jessie (Debian
+    #787685)
+  * [2aa17c1] Always remove /boot/grub/device.map to avoid leaking host
+    data. Thanks to Patrick Schleizer <adrelanos@riseup.net> for bug
+    report and feedback
+  * [4a2c2d8] Don't try to re-read partition table when building VMs using
+    loop devices
+  * [9288199] Improve --vm and --vmfile usage instructions
+  * [dd7fd0a] Do not copy `packages` file if --nopackages option is
+    present
+  * [bc38eda] Make it more friendly to install on non-Debian
+    distributions. Thanks to Sebastian Pipping <sebastian@pipping.org> for
+    feature request
+  * [9f5825a] Include HTML documentation in Debian package
+  * [91f2e99] Rename --scripts to --post-scripts for consistency
+  * [6f2677c] Explicitly set LANGUAGE=C to avoid possible locale issues
+  * [bedb409] Provide hostname to pre-scripts by setting up /etc/hostname
+  * [f42f932] Ensure that grub-pc is installed in VMs even when using
+    --nopackages
+  * [a8c2e5f] Honor GRUB_DISABLE_LINUX_UUID=true and don't set root=UUID
+    then
+  * [8b67587] Provide new option --remove-configs to delete grml-
+    debootstrap configuration files from installed system
+  * [598b19a] Fix syntax error for introduced in 91f2e990ca65aa367
+  * [2a43ef7] Write hostname to installed system (fix for bedb4090) Thanks
+    to Sebastian Pipping <sebastian@pipping.org> for catching this issue
+  * [9d9ec2d] Run code for --remove-configs before unmounting chroot
+  * [d5528b0] Make check for GRUB_DISABLE_LINUX_UUID more stable. Thanks
+    to Patrick Schleizer <adrelanos@riseup.net> for the feedback
+  * [0064269] Disable SCRIPTS by default, replaced by POST_SCRIPTS
+  * [bfb0afb] Make mountpoint output silent
+  * [1e8339d] Display error message if --vmfile and --grub are used in
+    same cmdline
+  * [45b4746] packer: support different Debian + grml-debootstrap releases
+  * [21658d3] packer/Vagrant: make jessie the new default Debian release
+  * [7b776cd] config: change from GPL-2 to GPL-2+
+  * [c9caef4] Add stretch to release-table and update lenny installation
+    instructions
+  * [2370b8a] Drop unmaintained THANKS file
+  * [aee9c5f] Update debian/copyright + move to dep5 style
+
+ -- Michael Prokop <mika@grml.org>  Sat, 06 Jun 2015 01:33:17 +0200
+
 grml-debootstrap (0.70) unstable; urgency=medium
 
   [ Sebastian Pipping ]
