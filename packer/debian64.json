@@ -1,8 +1,10 @@
 {
   "variables": {
     "grml_type": "grml64-full",
-    "grml_version": "2014.03",
-    "grml_iso_checksum": "1d3a0adfa3d395746e9e7f8748faec536f5c7b84"
+    "grml_version": "2014.11",
+    "grml_iso_checksum": "120bfa48b096691797a73fa2f464c7c71fac1587",
+    "debian_version": "jessie",
+    "grml_debootstrap_version": "latest"
   },
 
   "builders": [
@@ -44,6 +46,10 @@
     },
     {
       "type": "shell",
+      "environment_vars": [
+	"GRML_DEBOOTSTRAP_VERSION={{ user `grml_debootstrap_version` }}",
+	"DEBIAN_VERSION={{ user `debian_version` }}"
+      ],
       "scripts": [
         "debian64_provision.sh"
         ]
@@ -55,7 +61,7 @@
       "compression_level": 5,
       "override": {
         "virtualbox": {
-          "output": "debian64_wheezy.box"
+          "output": "debian64_{{ user `debian_version` }}.box"
         }
       }
     }

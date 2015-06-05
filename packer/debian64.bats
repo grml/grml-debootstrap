@@ -14,10 +14,10 @@ teardown() {
 }
 
 # tests
-@test "debian_version exists" {
+@test "debian_version exists and is valid version" {
   run cat "${mountpath}/etc/debian_version"
   [ "$status" -eq 0 ]
-  [[ "$output" == [0-9].[0-9] ]]
+  [[ "$output" == [0-9].[0-9]* ]] || [[ "$output" == 'stretch/sid' ]]
 }
 
 @test "kernel exists" {
@@ -61,7 +61,7 @@ teardown() {
 }
 
 @test "kernel entry in grub config" {
-  run grep "Debian GNU/Linux, with Linux" "${mountpath}/boot/grub/grub.cfg"
+  run grep "Debian GNU/Linux" "${mountpath}/boot/grub/grub.cfg"
   [ "$status" -eq 0 ]
 }
 
@@ -81,12 +81,14 @@ teardown() {
 }
 
 @test "sudo setup for user vagrant" {
-  run grep -q '^vagrant ALL=(ALL) NOPASSWD: ALL' "${mountpath}/etc/sudoers.d/vagrant"
+  run grep -q '^vagrant ALL=(ALL) NOPASSWD: ALL' "${mountpath}/etc/sudoers.d/vagrant" "${mountpath}/etc/sudoers"
   [ "$status" -eq 0 ]
 }
 
 @test "check for GRUB in MBR" {
-  regex='^00000180.*GRUB.*'
+  # note: ^00000170 for lenny
+  # note: ^00000180 for >=wheezy
+  regex='^000001[78]0.*GRUB.*'
   grub_string=$(dd if=${device} bs=512 count=1 2>/dev/null | hexdump -C | egrep "$regex")
   run echo "$grub_string"
   echo "debug: grub_string = $grub_string"
