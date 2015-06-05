@@ -381,12 +381,6 @@ fi
 [ "$_opt_packages_set" ]        && PACKAGES='yes'
 [ "$_opt_nopackages" ]          && PACKAGES=''
 [ "$_opt_debconf_set" ]         && DEBCONF='yes'
-
-if [ "$_opt_scripts_set" ] ; then
-  ewarn "Deprecation NOTE: --scripts option is deprecated, please switch to --post-scripts instead."
-  SCRIPTS='yes' # deprecated since grml-debootstrap >=0.71
-fi
-
 [ "$_opt_post_scripts_set" ]    && POST_SCRIPTS='yes'
 [ "$_opt_pre_scripts_set" ]     && PRE_SCRIPTS='yes'
 [ "$_opt_chroot_scripts_set" ]  && CHROOT_SCRIPTS='yes'
@@ -412,6 +406,20 @@ fi
 [ -z "$COMPONENTS" ]            && COMPONENTS="main"
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 [ "$_opt_non_free" ]            && COMPONENTS="$COMPONENTS non-free"
+
+# command line option checks
+if [ "$_opt_scripts_set" ] ; then
+  ewarn "Deprecation NOTE: --scripts option is deprecated, please switch to --post-scripts instead."
+  SCRIPTS='yes' # deprecated since grml-debootstrap >=0.71
+fi
+
+if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
+  eerror "The --grub option is incompatible with --vmfile, please drop it from your command line."
+  eerror "The --grub option is unneeded as GRUB will be installed automatically."
+  eend 1
+  bailout 1
+fi
+
 
 if [ "$DEBUG" = "true" ] ; then
   set -x
