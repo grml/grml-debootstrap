@@ -36,9 +36,9 @@ if [ -x /usr/bin/aptitude ] ; then
       APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
    fi
 else
-   APTINSTALL="apt-get --force-yes -y --no-install-recommends install $DPKG_OPTIONS"
+   APTINSTALL="apt-get -y --no-install-recommends install $DPKG_OPTIONS"
    APTUPDATE="apt-get update $DPKG_OPTIONS"
-   APTUPGRADE="apt-get --force-yes -y upgrade $DPKG_OPTIONS"
+   APTUPGRADE="apt-get -y upgrade $DPKG_OPTIONS"
 fi
 
 if [ -z "$STAGES" ] ; then
