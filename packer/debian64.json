@@ -4,7 +4,8 @@
     "grml_version": "2014.11",
     "grml_iso_checksum": "120bfa48b096691797a73fa2f464c7c71fac1587",
     "debian_version": "jessie",
-    "grml_debootstrap_version": "latest"
+    "grml_debootstrap_version": "latest",
+    "grml_debootstrap_local_path": "doesnotexist"
   },
 
   "builders": [
@@ -40,9 +41,13 @@
       "destination": "/tmp/debian64.bats"
     },
     {
+      "type": "shell",
+      "inline": "mkdir -vp /tmp/grml-debootstrap/"
+    },
+    {
       "type": "file",
-      "source": "../grml-debootstrap",
-      "destination": "/tmp/grml-debootstrap"
+      "source": "{{ user `grml_debootstrap_local_path` }}/",
+      "destination": "/tmp/grml-debootstrap/"
     },
     {
       "type": "shell",

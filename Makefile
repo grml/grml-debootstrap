@@ -59,7 +59,7 @@ install:
 	install -m 755 bootgrub.mksh    $(DESTDIR)/usr/share/grml-debootstrap/bootgrub.mksh
 
 clean:
-	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp
+	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp packer/local_dir/
 
 testrun:
 	cd ./packer && $(MAKE) compile && $(MAKE) jessie

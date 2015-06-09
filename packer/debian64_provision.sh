@@ -184,11 +184,13 @@ EOF
     echo "** Using grml-debootstrap from Git repository"
     git clone git://git.grml.org/grml-debootstrap.git
     cd grml-debootstrap
-    GRML_DEBOOTSTRAP="$(pwd)/grml-debootstrap"
+    GRML_DEBOOTSTRAP="CONFFILES=$(pwd) $(pwd)/grml-debootstrap"
   elif [ "$GRML_DEBOOTSTRAP_VERSION" = "local" ] ; then
     echo "** GRML_DEBOOTSTRAP_VERSION is set to '$GRML_DEBOOTSTRAP_VERSION'"
-    echo "** Using /tmp/grml-debootstrap derived from local system as grml-deboostrap script"
-    GRML_DEBOOTSTRAP="bash /tmp/grml-debootstrap"
+    echo "** Using /tmp/grml-debootstrap derived from local system"
+    cd /tmp/grml-debootstrap
+    export CONFFILES=$(pwd)/etc/debootstrap
+    GRML_DEBOOTSTRAP="bash $(pwd)/usr/sbin/grml-debootstrap"
   elif [ "$GRML_DEBOOTSTRAP_VERSION" = "iso" ] ; then
     echo "** GRML_DEBOOTSTRAP_VERSION is set to '$GRML_DEBOOTSTRAP_VERSION'"
     echo "** Using grml-debootstrap as provided on ISO"
