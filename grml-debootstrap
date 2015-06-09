@@ -785,6 +785,8 @@ elif [ -n "$INTERACTIVE" ] ; then
    Using ISO:       $ISO"
    [ -n "$ARCH" ]  && INFOTEXT="$INFOTEXT
    Using arch:      $ARCH"
+   [ -n "$CONFFILES" ] && INFOTEXT="$INFOTEXT
+   Config files:    $CONFFILES"
 
    INFOTEXT="$INFOTEXT
 
@@ -808,11 +810,12 @@ else # if not running automatic installation display configuration and prompt fo
      [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
    fi
 
-   [ -n "$RELEASE" ]  && echo "   Using release:   $RELEASE"
-   [ -n "$HOSTNAME" ] && echo "   Using hostname:  $HOSTNAME"
-   [ -n "$MIRROR" ]   && echo "   Using mirror:    $MIRROR"
-   [ -n "$ISO" ]      && echo "   Using ISO:       $ISO"
-   [ -n "$ARCH" ]     && echo "   Using arch:      $ARCH"
+   [ -n "$RELEASE" ]   && echo "   Using release:   $RELEASE"
+   [ -n "$HOSTNAME" ]  && echo "   Using hostname:  $HOSTNAME"
+   [ -n "$MIRROR" ]    && echo "   Using mirror:    $MIRROR"
+   [ -n "$ISO" ]       && echo "   Using ISO:       $ISO"
+   [ -n "$ARCH" ]      && echo "   Using arch:      $ARCH"
+   [ -n "$CONFFILES" ] && echo "   Config files:    $CONFFILES"
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
       if [ -n "$VMSIZE" -a -n "$VMFILE" ]; then
