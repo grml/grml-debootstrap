@@ -1,3 +1,12 @@
+grml-debootstrap (0.72) unstable; urgency=medium
+
+  * [1cf8447] packer: improve support for testing local grml-debootstrap
+    version
+  * [0592c21] Drop --force-yes option from chroot-scripts' apt-get usage
+  * [3e504ef] Report CONFFILES usage in config overview
+
+ -- Michael Prokop <mika@grml.org>  Tue, 16 Jun 2015 11:19:26 +0200
+
 grml-debootstrap (0.71) unstable; urgency=medium
 
   The "monster kill ▬█████████" release
