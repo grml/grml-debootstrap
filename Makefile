@@ -1,6 +1,5 @@
 BASH_SCRIPTS = grml-debootstrap
 SHELL_SCRIPTS = chroot-script
-MKSH_SCRIPTS = bootgrub.mksh
 DOCBOOK_XML=/usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
 all: doc
@@ -35,11 +34,6 @@ shellcheck:
 		bash -n $${SCRIPT} || exit ; \
 		echo -n "."; \
 	done; \
-	for SCRIPT in $(MKSH_SCRIPTS) ; do \
-		test -r $${SCRIPT} || continue ; \
-		mksh -n $${SCRIPT} || exit ; \
-		echo -n "."; \
-	done; \
 	echo " done."
 
 install:
@@ -56,7 +50,6 @@ install:
 	install -m 755 grml-debootstrap $(DESTDIR)/usr/sbin/
 	install -m 644 zsh-completion   $(DESTDIR)/etc/zsh/completion.d/_grml-debootstrap
 	install -m 644 cmdlineopts.clp  $(DESTDIR)/usr/share/grml-debootstrap/functions/cmdlineopts.clp
-	install -m 755 bootgrub.mksh    $(DESTDIR)/usr/share/grml-debootstrap/bootgrub.mksh
 
 clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp packer/local_dir/
