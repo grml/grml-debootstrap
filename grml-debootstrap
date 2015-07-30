@@ -1102,8 +1102,7 @@ prepare_vm() {
   if [ -n "$VMFILE" ]; then
     qemu-img create -f raw "${TARGET}" "${VMSIZE}"
   fi
-  echo 4 66 | /usr/share/grml-debootstrap/bootgrub.mksh -A | dd of="$TARGET" conv=notrunc
-  dd if=/dev/zero bs=1 conv=notrunc count=64 seek=446 of="$TARGET"
+  parted -s "${TARGET}" 'mklabel msdos'
   if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
     einfo "Adjusting disk signature to a fixed (non-random) value"
     MBRTMPFILE=$(mktemp)
