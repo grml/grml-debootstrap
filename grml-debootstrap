@@ -1191,8 +1191,9 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
       cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
       ;;
   esac
+  dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
   chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
-  dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=4
+  dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
   rm -f "${MNTPOINT}/tmp/core.img"
 fi
 
