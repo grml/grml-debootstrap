@@ -1112,6 +1112,7 @@ prepare_vm() {
     eend $?
   fi
   parted -s "${TARGET}" 'mkpart primary ext4 2M -1'
+  parted -s "${TARGET}" 'set 1 boot on'
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
