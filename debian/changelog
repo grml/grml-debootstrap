@@ -1,3 +1,17 @@
+grml-debootstrap (0.73) unstable; urgency=medium
+
+  The "DebConf15" release
+
+  [ Paul Menzel ]
+  * [4a9077a] Use official redirector address httpredir.debian.org
+
+  [ Michael Prokop ]
+  * [395bf71] Add kmod to Depends, required for modprobe(8) for loop
+    device handling
+  * [1239389] Docker setup for automated builds + environment for testing
+
+ -- Michael Prokop <mika@grml.org>  Tue, 18 Aug 2015 13:30:49 +0200
+
 grml-debootstrap (0.72) unstable; urgency=medium
 
   * [1cf8447] packer: improve support for testing local grml-debootstrap
