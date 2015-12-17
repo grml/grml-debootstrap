@@ -892,7 +892,7 @@ fi
 CURRENT_ARCH="$(uname -m)"
 if [ "$CURRENT_ARCH" != "x86_64" ] ; then
    if [ "$ARCH" = "amd64" ] ; then
-      eerror "It is not possible to build amd64 on $CURRENT_ARCH." ; eend 1
+      eerror "It is not possible to build amd64 on $CURRENT_ARCH. Consider installing and booting the 'linux-image-amd64' kernel or using '--arch i386' instead." ; eend 1
       bailout 1
    fi
 fi
