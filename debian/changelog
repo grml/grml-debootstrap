@@ -1,3 +1,24 @@
+grml-debootstrap (0.74) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  * [c83de43] improved amd64 on i386 build attempt bailout msg
+
+  [ Sebastian Pipping ]
+  * [1ba6bfd] Use parted to create partition table (issue #90)
+  * [034a2e9] Resolve now unused bootgrub.mksh (issue #90)
+  * [3fec01e] Mark first partition bootable (issue #92)
+  * [8a2c552] Ensure that MBR jumping to GRUB's core.img code
+    (issue #92)
+
+  [ Michael Prokop ]
+  * [813cdab] Ensure that grub-pc/install_devices is pointing to the
+    requested device (related to #711019)
+  * [7e3c788] No longer depend on mksh + drop check for mksh
+  * [71b39fa] Bump Standards-Version to 3.9.7
+  * [758f563] Update copyright year information
+
+ -- Michael Prokop <mika@grml.org>  Mon, 22 Feb 2016 22:21:29 +0100
+
 grml-debootstrap (0.73) unstable; urgency=medium
 
   The "DebConf15" release
