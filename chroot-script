@@ -569,6 +569,11 @@ grub_install() {
     return 0
   fi
 
+  # make sure this is pre-defined so we have sane settings for automated
+  # upgrades, see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=711019
+  echo "Setting grub-pc debconf configuration for install device to $GRUB"
+  echo "grub-pc grub-pc/install_devices multiselect $GRUB" | debconf-set-selections
+
   if ! dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
     echo "Notice: grub option set but no grub-pc package, installing it therefore."
     DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL grub-pc
