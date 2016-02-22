@@ -448,7 +448,7 @@ fi
 
 # make sure we have what we need {{{
 if [ -n "$VIRTUAL" ] ; then
-  check4progs kpartx mksh parted qemu-img || bailout 1
+  check4progs kpartx parted qemu-img || bailout 1
 fi
 # }}}
 

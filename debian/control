@@ -9,7 +9,6 @@ Uploaders: Michael Prokop <mika@debian.org>,
 Build-Depends: debhelper (>= 5)
 Build-Depends-Indep: asciidoc,
                      docbook-xsl,
-                     mksh,
                      shunit2,
                      xsltproc
 Standards-Version: 3.9.6
@@ -27,7 +26,6 @@ Depends: debian-archive-keyring,
          ${shlibs:Depends}
 Recommends: dialog,
             kpartx,
-            mksh,
             parted,
             qemu-utils
 Description: wrapper around debootstrap for installing pure Debian
