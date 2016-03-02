@@ -83,6 +83,16 @@ Options and environment variables
    Execute in very verbose way. Useful for debugging possible problems
    with grml-debootstrap or identify what's actually executed.
 
+*--efi* _device_::
+
+    Partition where EFI boot manager should be installed to. If the
+    specified device doesn't use a FAT filesystem yet grml-debootstrap
+    automatically creates the filesystem. If a FAT filesystem is already
+    present the filesystem creation is skipped. Please ensure that it's
+    a valid FAT32 filesystem and the partition has the 'boot' and 'esp'
+    flags enabled. This option requires EFI support on the running system
+    and the option is NOT supported for Virtual Machine deployments.
+
 *--filesystem* _filesystem_::
 
     Filesystem that should be created when installing to a partition.

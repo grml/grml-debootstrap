@@ -21,6 +21,7 @@ fi
 . /etc/debootstrap/variables || exit 1
 
 [ -r /proc/1 ] || mount -t proc none /proc
+[ -r /sys/kernel ] || mount -t sysfs none /sys
 
 # variable checks {{{
 
@@ -481,6 +482,10 @@ else
    echo "${TARGET} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
 fi
 
+if [ -n "$EFI" ] ; then
+  echo "UUID=$(blkid -o value -s UUID $EFI)  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
+fi
+
 cat >> /etc/fstab << EOF
 proc           /proc        proc    defaults                      0   0
 /dev/cdrom     /mnt/cdrom0  iso9660 ro,user,noauto                0   0
@@ -561,6 +566,24 @@ initrd() {
 }
 # }}}
 
+efi_setup() {
+  if [ -z "$EFI" ] ; then
+    return 0
+  fi
+
+  if ! dpkg --list efibootmgr 2>/dev/null | grep -q '^ii' ; then
+    echo "Notice: efi option set but no efibootmgr package, installing it therefore."
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL efibootmgr
+  fi
+
+  mkdir -p /boot/efi
+  echo "Mounting $EFI on /boot/efi"
+  mount "$EFI" /boot/efi || return 1
+
+  echo "Invoking efibootmgr"
+  efibootmgr || return 1
+}
+
 # grub configuration/installation {{{
 grub_install() {
 
@@ -569,14 +592,22 @@ grub_install() {
     return 0
   fi
 
+  efi_setup || return 1
+
+  if [ -n "$EFI" ] ; then
+    GRUB_PACKAGE=grub-efi-amd64
+  else
+    GRUB_PACKAGE=grub-pc
+  fi
+
   # make sure this is pre-defined so we have sane settings for automated
   # upgrades, see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=711019
-  echo "Setting grub-pc debconf configuration for install device to $GRUB"
-  echo "grub-pc grub-pc/install_devices multiselect $GRUB" | debconf-set-selections
+  echo "Setting ${GRUB_PACKAGE} debconf configuration for install device to $GRUB"
+  echo "${GRUB_PACKAGE} ${GRUB_PACKAGE}/install_devices multiselect $GRUB" | debconf-set-selections
 
-  if ! dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
-    echo "Notice: grub option set but no grub-pc package, installing it therefore."
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL grub-pc
+  if ! dpkg --list ${GRUB_PACKAGE} 2>/dev/null | grep -q '^ii' ; then
+    echo "Notice: grub option set but no ${GRUB_PACKAGE} package, installing it therefore."
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL ${GRUB_PACKAGE}
   fi
 
   if ! [ -x "$(which grub-install)" ] ; then
@@ -618,6 +649,8 @@ grub_install() {
     return 1
   fi
 
+  mountpoint /boot/efi >/dev/null && umount /boot/efi
+
   $UPDATEGRUB
 }
 # }}}
@@ -650,6 +683,7 @@ finalize() {
 
   [ -n "$POLICYRCD" ] && rm -f /usr/sbin/policy-rc.d
 
+  umount /sys >/dev/null 2>/dev/null || true
   umount /proc >/dev/null 2>/dev/null || true
 }
 # }}}

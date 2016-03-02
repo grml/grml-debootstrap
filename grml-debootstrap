@@ -111,6 +111,7 @@ Bootstrap options:
       --interactive      Use interactive mode (frontend).
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
+      --efi <device>     Target for EFI installation. Usage example: /dev/sda1
       --arch <arch>      Set target architecture, use for installing i386 on amd64.
       --filesystem <fs>  Filesystem that should be used when target is a partition
                          or Virtual Machine (see --vmfile).
@@ -395,6 +396,7 @@ fi
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
+[ "$_opt_efi" ]                 && EFI=$_opt_efi
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_insecure" ]            && echo "Warning: --insecure is deprecated, continuing anyway."
 [ "$_opt_force" ]               && FORCE=$_opt_force
@@ -759,9 +761,63 @@ Do you want to stop now?" 0 0 2>/dev/null
 }
 # }}}
 
+format_efi_partition() {
+  if [ -z "$EFI" ] ; then
+    return 0
+  fi
+
+  if ! [ -b "$EFI" ] ; then
+    eerror "Specified efi argument [$EFI] not a valid block device."
+    bailout 1
+  fi
+
+  if fsck.vfat -bn "$EFI" >/dev/null; then
+    einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying." ; eend 0
+  else
+    einfo "EFI partition $EFI doesn't seem to be formated, creating filesystem."
+    mkfs.fat -F32 -n "EFI System Partition" "$EFI"
+    RC=$?
+    if [ $RC -eq 0 ] ; then
+      eend 0
+    else
+      eerror "Error while creating filesystem on ${EFI}."
+      eend 1
+      bailout 1
+    fi
+  fi
+}
+
+# check for EFI support or try to enable it {{{
+efi_support() {
+  if lsmod | grep -q efivars ; then
+    einfo "EFI support detected." ; eend 0
+    return 0
+  fi
+
+  if modprobe efivars ; then
+    einfo "EFI support enabled now." ; eend 0
+    return 0
+  fi
+
+  return 1
+}
+# }}}
+
 # make sure the user is aware of the used configuration {{{
 checkconfiguration()
 {
+
+if efi_support ; then
+  if [ -z "$_opt_efi" ] ; then
+    ewarn "EFI support detected but no --efi option given, please consider enabling it." ; eend 0
+  fi
+else
+  if [ -n "$_opt_efi" ] ; then
+     eerror "EFI option used but no EFI support detected." ; eend 0
+     bailout 1
+  fi
+fi
+
 if [ -n "$AUTOINSTALL" ] ; then
    if checkforrun ; then
       eerror "Exiting as requested" ; eend 0
@@ -775,6 +831,8 @@ elif [ -n "$INTERACTIVE" ] ; then
    Target:          $TARGET"
    [ -n "$GRUB" ]    && INFOTEXT="$INFOTEXT
    Install grub:    $GRUB"
+   [ -n "$EFI" ]    && INFOTEXT="$INFOTEXT
+   Install efi:     $EFI"
    [ -n "$RELEASE" ] && INFOTEXT="$INFOTEXT
    Using release:   $RELEASE"
    [ -n "$HOSTNAME" ] && INFOTEXT="$INFOTEXT
@@ -808,6 +866,7 @@ else # if not running automatic installation display configuration and prompt fo
       echo "   Install grub:    yes"
    else
      [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
+     [ -n "$EFI" ]      && echo "   Install efi:     $EFI"  || echo "   Install efi:     no"
    fi
 
    [ -n "$RELEASE" ]   && echo "   Using release:   $RELEASE"
@@ -1293,6 +1352,7 @@ preparechroot() {
   [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LOCALES}")'"         >> "$CHROOT_VARIABLES"
   [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LANGUAGE}")'"       >> "$CHROOT_VARIABLES"
   [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES='$(sed "s,','\\\\'',g" <<<"${EXTRAPACKAGES}")'"             >> "$CHROOT_VARIABLES"
+  [ -n "$EFI" ]                 && echo "EFI='$(sed "s,','\\\\'',g" <<<"${EFI}")'"                                 >> "$CHROOT_VARIABLES"
   [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR='$(sed "s,','\\\\'',g" <<<"${FALLBACK_MIRROR}")'"         >> "$CHROOT_VARIABLES"
   [ -n "$FORCE" ]               && echo "FORCE='$(sed "s,','\\\\'',g" <<<"${FORCE}")'"                             >> "$CHROOT_VARIABLES"
   [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS='$(sed "s,','\\\\'',g" <<<"${GRMLREPOS}")'"                     >> "$CHROOT_VARIABLES"
@@ -1590,7 +1650,7 @@ remove_configs() {
 # }}}
 
 # now execute all the functions {{{
-for i in prepare_vm mkfs tunefs mount_target debootstrap_system \
+for i in format_efi_partition prepare_vm mkfs tunefs mount_target debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          remove_configs umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
