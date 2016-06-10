@@ -1,3 +1,10 @@
+grml-debootstrap (0.75) unstable; urgency=medium
+
+  * [10ad469] Add EFI support via --efi <device> option. Thanks to
+    Darshaka Pathirana <dpat@syn-net.org> for the pair programming session
+
+ -- Michael Prokop <mika@grml.org>  Fri, 10 Jun 2016 11:21:01 +0200
+
 grml-debootstrap (0.74) unstable; urgency=medium
 
   [ Patrick Schleizer ]
