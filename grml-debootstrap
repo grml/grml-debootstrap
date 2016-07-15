@@ -794,7 +794,7 @@ efi_support() {
     return 0
   fi
 
-  if modprobe efivars ; then
+  if modprobe efivars &>/dev/null ; then
     einfo "EFI support enabled now." ; eend 0
     return 0
   fi
