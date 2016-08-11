@@ -225,6 +225,29 @@ grml_debootstrap_execution() {
   $GRML_DEBOOTSTRAP --hostname "${DEBIAN_VERSION}" --release "${DEBIAN_VERSION}" --target "${INSTALL_TARGET}" --grub "${GRUB_TARGET}" --password grml --force $GRML_DEB_OPTIONS 2>&1 | tee -a /tmp/grml-debootstrap.log
 }
 
+apply_nic_workaround() {
+  # release specific stuff
+  case "$DEBIAN_VERSION" in
+    stretch|buster|bullseye|unstable|sid)
+      ;;
+    *)
+      echo "* Debian $DEBIAN_VERSION doesn't require NIC workaround"
+      return 0
+      ;;
+  esac
+
+  if ! mountpoint "${TARGET}" &>/dev/null ; then
+    echo "* Mounting target system"
+    mount "${INSTALL_TARGET}" "${TARGET}"
+  fi
+
+  echo "* Disabling predictable network interface names for Debian $DEBIAN_VERSION"
+  ln -s /dev/null "${TARGET}/etc/udev/rules.d/80-net-setup-link.rules"
+
+  echo "* Rebuilding initramfs to include udev configuration change"
+  chroot "${TARGET}" update-initramfs -u -k all
+}
+
 log_system_information() {
   if ! mountpoint "${TARGET}" &>/dev/null ; then
     echo "* Mounting target system"
@@ -290,6 +313,7 @@ grml_debootstrap_setup
 grml_debootstrap_execution
 virtualbox_setup
 vagrant_setup
+apply_nic_workaround
 log_system_information
 clean_apt_files
 automated_tests
