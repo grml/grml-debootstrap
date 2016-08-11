@@ -100,7 +100,7 @@ vagrant_setup() {
   chroot ${TARGET} apt-get -y install sudo
 
   echo "* Adding Vagrant user"
-  chroot ${TARGET} useradd -d /home/vagrant -m -u 1000 vagrant
+  chroot ${TARGET} useradd -d /home/vagrant -m -u 1000 vagrant -s /bin/bash
 
   echo "* Installing Vagrant ssh key"
   mkdir -m 0700 -p ${TARGET}/home/vagrant/.ssh
