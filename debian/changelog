@@ -1,3 +1,19 @@
+grml-debootstrap (0.76) unstable; urgency=medium
+
+  * [12f4a35] Hide errors during loading of efivars module
+  * [5e6671f] packer: explicitly set Bash as default shell for Vagrant
+    user
+  * [8609e64] packer: apply predictable network interface workaround for
+    Debian/stretch and newer
+  * [ff11fa2] Disable ^metadata_csum' feature when creating ext fs for
+    releases <= jessie [Closes: issue2178]
+  * [b12a2ae] Ignore packer/packer_cache during dpkg-source generation.
+    Thanks to Guillem Jover for the hint
+  * [987bf63] Switch Homepage + Vcs-Browser fields to https
+  * [6a665b1] Bump Standards-Version to 3.9.8
+
+ -- Michael Prokop <mika@grml.org>  Thu, 22 Sep 2016 14:25:51 +0200
+
 grml-debootstrap (0.75) unstable; urgency=medium
 
   * [10ad469] Add EFI support via --efi <device> option. Thanks to
