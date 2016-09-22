@@ -1,0 +1,2 @@
+tar-ignore
+tar-ignore=packer/packer_cache
