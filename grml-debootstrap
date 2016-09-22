@@ -1055,6 +1055,24 @@ mkfs() {
         einfo "Enabling force option (-F) for mkfs.ext* tool as requested via --force switch."
         MKFS_OPTS="$MKFS_OPTS -F"
         eend 0
+
+        ;;
+    esac
+  fi
+
+  # starting with e2fsprogs 1.43~WIP.2015.05.18-1 mkfs.ext4 enables the metadata_csum feature
+  # by default, which requires a recent version of tune2fs on the target system then,
+  # so disable this feature for older Debian releases where it's known to be unsupported
+  if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
+    case "$RELEASE" in
+      lenny|squeeze|wheezy|jessie)
+        # assume a more recent version if we can't identify the version via dpkg-query
+        local e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
+        if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
+          einfo "Disabling metadata_csum feature for $MKFS as $RELEASE doesn't support it."
+          MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum"
+          eend 0
+        fi
         ;;
     esac
   fi
