@@ -1530,8 +1530,9 @@ execute_pre_scripts() {
 
 # execute all scripts in /etc/debootstrap/post-scripts/ {{{
 execute_post_scripts() {
-  # make sure we have $MNTPOINT available for our scripts
+  # make sure we have $MNTPOINT and HOSTNAME available for our scripts
   export MNTPOINT
+  export TARGET_HOSTNAME=$HOSTNAME
 
   if [ -d "$_opt_scripts" ] || [ "$SCRIPTS" = 'yes' ] ; then
     # legacy support for /etc/debootstrap/scripts/
