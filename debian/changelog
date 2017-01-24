@@ -1,3 +1,19 @@
+grml-debootstrap (0.77) unstable; urgency=medium
+
+  [ Stefan Schlesinger ]
+  * [4b7bcd8] Export TARGET_HOSTNAME before running post-scripts
+
+  [ Christian Hofstaedtler ]
+  * [1cfa51e] Update my email address
+  * [d8960ba] Bump debhelper compat level to 10
+  * [b22ae35] Forbid xsltproc to use network for building
+
+  [ Michael Prokop ]
+  * [900df89] Honor GRUB_DISABLE_LINUX_UUID=true for all Debian releases.
+    Thanks to hex2a for the initial patch (see PR #96)
+
+ -- Michael Prokop <mika@grml.org>  Tue, 24 Jan 2017 21:36:55 +0100
+
 grml-debootstrap (0.76) unstable; urgency=medium
 
   * [12f4a35] Hide errors during loading of efivars module
