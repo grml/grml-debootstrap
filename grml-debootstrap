@@ -1441,11 +1441,6 @@ preparechroot() {
   # make sure we can access network [relevant for cdebootstrap]
   [ -f "${MNTPOINT}"/etc/resolv.conf ] || cp $VERBOSE /etc/resolv.conf "${MNTPOINT}"/etc/resolv.conf
 
-  # provide system's /etc/hosts to the target:
-  if ! [ -f "$MNTPOINT/etc/hosts" ] ; then
-     cp $VERBOSE /etc/hosts "${MNTPOINT}"/etc/hosts
-  fi
-
   # setup default locales
   [ -n "$LOCALES" ] && cp $VERBOSE "${CONFFILES}"/locale.gen "${MNTPOINT}"/etc/locale.gen
 

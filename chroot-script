@@ -427,24 +427,12 @@ passwords()
 
 # set up /etc/hosts {{{
 hosts() {
-  if [ -f /etc/hosts ] ; then
-     sed -i "s#127.0.0.1 .*#127.0.0.1       localhost  $HOSTNAME#" /etc/hosts
-     [ -n "$HOSTNAME" ] && sed -i "s/grml/$HOSTNAME/g" /etc/hosts
-  else
+  if ! [ -f /etc/hosts ] ; then
      cat > /etc/hosts << EOF
-127.0.0.1       localhost $HOSTNAME
-
-#127.0.0.1       localhost
-#127.0.1.1       $HOSTNAME.example.org $HOSTNAME
-
-# The following lines are desirable for IPv6 capable hosts
-#::1     ip6-localhost ip6-loopback $HOSTNAME
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-ff02::3 ip6-allhosts
+127.0.0.1       localhost
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
 EOF
   fi
 }
