@@ -463,12 +463,12 @@ timezone() {
 
 # helper function for fstab() {{{
 createfstab(){
-     echo "Setting up /etc/fstab"
-if [ -n "$TARGET_UUID" ] ; then
-   echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
-else
-   echo "${TARGET} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
-fi
+  echo "Setting up /etc/fstab"
+  if [ -n "$TARGET_UUID" ] ; then
+    echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults,errors=remount-ro 0   1" > /etc/fstab
+  else
+    echo "Warning: couldn't identify target UUID for rootfs, your /etc/fstab might be incomplete."
+  fi
 
 if [ -n "$EFI" ] ; then
   echo "UUID=$(blkid -o value -s UUID $EFI)  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
