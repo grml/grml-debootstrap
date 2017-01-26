@@ -1,3 +1,19 @@
+grml-debootstrap (0.78) unstable; urgency=medium
+
+  The "hello vienna, hello stretch" release
+
+  [ Evgeni Golov ]
+  * [36a961d] don't fiddle around with /etc/hosts
+
+  [ Michael Prokop ]
+  * [fdf85c6] Drop sysfsutils from default software package list
+    [Closes: issue2240]
+  * [622fa87] Don't generate rootfs entry in /etc/fstab if we
+    don't know its UUID [Closes: issue2182]
+  * [afccc8e] Debian stretch is the new default release
+
+ -- Michael Prokop <mika@grml.org>  Thu, 26 Jan 2017 01:18:07 +0100
+
 grml-debootstrap (0.77) unstable; urgency=medium
 
   [ Stefan Schlesinger ]
