@@ -1,11 +1,11 @@
-Current status (as of 2015-06-06):
+Current status (as of 2017-01-26):
 
   +----------------+-------------+
   | Release / Tool | debootstrap |
   +----------------+-------------+
   | lenny          |  works [1]  |
   +----------------+-------------+
-  | squeeze        |  works      |
+  | squeeze        |  works [1]  |
   +----------------+-------------+
   | wheezy         |  works      |
   +----------------+-------------+

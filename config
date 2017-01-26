@@ -69,8 +69,8 @@
 
 # Debian release that should be installed.
 # Supported values: lenny, squeeze, wheezy, jessie, stretch, sid
-# Default: 'jessie'
-# RELEASE='jessie'
+# Default: 'stretch'
+# RELEASE='stretch'
 
 # Define components that should be used within sources.list.
 # Default: 'main'

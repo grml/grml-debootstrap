@@ -3,7 +3,7 @@
 |======================
 |Release  |Status
 |lenny    |works[1]
-|squeeze  |works
+|squeeze  |works[1]
 |wheezy   |works
 |jessie   |works
 |stretch  |works
