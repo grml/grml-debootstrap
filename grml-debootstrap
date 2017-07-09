@@ -1241,8 +1241,8 @@ finalize_vm() {
 
   mount -t proc none "${MNTPOINT}"/proc
   mount -t sysfs none "${MNTPOINT}"/sys
-  mount --bind /dev "${MNTPOINT}"/dev
-  mount --bind /dev/pts "${MNTPOINT}"/dev/pts
+  mount -t devtmpfs udev "${MNTPOINT}"/dev
+  mount -t devpts devpts "${MNTPOINT}"/dev/pts
 
 # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
 # chroot-script skips installation for unset ${GRUB}
@@ -1575,8 +1575,8 @@ chrootscript() {
     eend 1
   else
     einfo "Executing chroot-script now"
-    mount --bind /dev "$MNTPOINT"/dev
-    mount --bind /dev/pts "$MNTPOINT"/dev/pts
+    mount -t devtmpfs udev "${MNTPOINT}"/dev
+    mount -t devpts devpts "${MNTPOINT}"/dev/pts
     if [ "$DEBUG" = "true" ] ; then
       chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script ; RC=$?
     else
