@@ -20,6 +20,7 @@ Package: grml-debootstrap
 Architecture: all
 Depends: debian-archive-keyring,
          debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16),
+         fdisk | util-linux (<< 2.29.2-3~),
          gawk,
          kmod,
          ${misc:Depends},
