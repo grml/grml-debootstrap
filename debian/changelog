@@ -1,3 +1,19 @@
+grml-debootstrap (0.79) unstable; urgency=medium
+
+  [ Bigo ]
+  * [d0cd2dd] Update /dev and /dev/pts mount from --bind to proper fs type
+
+  [ Darshaka Pathirana ]
+  * [263c465] Add documentation for --defaultinterfaces command line
+    option
+
+  [ Michael Prokop ]
+  * [1fba2a2] Depend on fdisk | util-linux (<< 2.29.2-3~) Thanks to
+    Andreas Henriksson <andreas@fatal.se> (Closes: #872219)
+  * [f56ca7d] Bump Standards-Version to 4.0.1
+
+ -- Michael Prokop <mika@grml.org>  Thu, 17 Aug 2017 14:42:01 +0200
+
 grml-debootstrap (0.78) unstable; urgency=medium
 
   The "hello vienna, hello stretch" release
