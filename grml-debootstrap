@@ -463,7 +463,7 @@ if [ -n "$CONFIGFILE" ] ; then
 fi
 # }}}
 
-# backwards compability checks {{{
+# backwards compatibility checks {{{
 if [ -n "$GROOT" ] ; then
    eerror "Error: you seem to have \$GROOT configured."
    eerror "This variable is no longer supported, please visit the"
@@ -774,7 +774,7 @@ format_efi_partition() {
   if fsck.vfat -bn "$EFI" >/dev/null; then
     einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying." ; eend 0
   else
-    einfo "EFI partition $EFI doesn't seem to be formated, creating filesystem."
+    einfo "EFI partition $EFI doesn't seem to be formatted, creating filesystem."
     mkfs.fat -F32 -n "EFI System Partition" "$EFI"
     RC=$?
     if [ $RC -eq 0 ] ; then

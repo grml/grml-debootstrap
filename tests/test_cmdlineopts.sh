@@ -17,7 +17,7 @@ test_cmdlineopts() {
         if [[ $CMD == *:: ]] ; then
             DELIM="="
         fi
-        # CMD expects addional parameter
+        # CMD expects additional parameter
         if [[ $CMD == *: ]] ; then
             PARAM=$RANDOM
         fi

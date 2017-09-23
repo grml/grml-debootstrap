@@ -44,7 +44,7 @@ Use grml-debootstrap inside the container, e.g.:
 # grml-debootstrap --target /srv/debian --password grml --hostname docker [--force]
 ````
 
-*TIP:* to speed up the build prepend `eatmydata` in the the grml-debootstrap command line
+*TIP:* to speed up the build prepend `eatmydata` in the grml-debootstrap command line
 
 *TIP:* if you want to have access to the generated Debian systems after exiting the container make sure to share your working directory as `/srv` via adding `-v $PWD:/srv/` to your `docker run` command line
 
