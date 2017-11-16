@@ -1,9 +1,9 @@
 {
   "variables": {
     "grml_type": "grml64-full",
-    "grml_version": "2014.11",
-    "grml_iso_checksum": "120bfa48b096691797a73fa2f464c7c71fac1587",
-    "debian_version": "jessie",
+    "grml_version": "2017.05",
+    "grml_iso_checksum": "9a6d788879699e2e1dce8edd4556e07f63d19c14",
+    "debian_version": "stretch",
     "grml_debootstrap_version": "latest",
     "grml_debootstrap_local_path": "doesnotexist"
   },
