@@ -67,7 +67,13 @@ virtualbox_setup() {
   mountpoint "${TARGET}/media/cdrom" >/dev/null && umount "${TARGET}/media/cdrom"
   mount -t iso9660 $isofile "${TARGET}/media/cdrom/"
   UTS_RELEASE=$KERNELVERSION LD_PRELOAD=/tmp/fake-uname.so grml-chroot "$TARGET" /media/cdrom/VBoxLinuxAdditions.run --nox11 || true
-  tail -10 "${TARGET}/var/log/VBoxGuestAdditions.log"
+  if grep -q "make: .*vboxguest.*Error 2" "${TARGET}/var/log/vboxadd-install.log" ; then
+    echo "Error: looks like a fatal error happened during installation of VirtualBox Guest Additions." >&2
+    exit 1
+  fi
+  [ -r "${TARGET}/var/log/VBoxGuestAdditions.log" ] && tail -10 "${TARGET}/var/log/VBoxGuestAdditions.log"
+  [ -r "${TARGET}/var/log/vboxadd-install.log" ]    && tail -10 "${TARGET}/var/log/vboxadd-install.log"
+  [ -r "${TARGET}/var/log/vboxadd-setup.log" ]      && tail -10 "${TARGET}/var/log/vboxadd-setup.log"
   umount "${TARGET}/media/cdrom/"
 
   # work around bug in VirtualBox 4.3.18 which leaves process behind,
