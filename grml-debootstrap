@@ -1113,13 +1113,51 @@ mkfs() {
     # race conditions :-/
     sleep 2
 
-    eval "$(blkid -o udev "$TARGET" 2>/dev/null)"
-    [ -n "$ID_FS_UUID" ] && TARGET_UUID="$ID_FS_UUID" || TARGET_UUID=""
-
     eend $RC
   fi
 }
 # }}}
+
+identify_target_uuid() {
+  local device="$1"
+
+  if ! [ -b "$device" ] ; then
+    return 1
+  fi
+
+  eval "$(blkid -o udev "$1" 2>/dev/null)"
+
+  if [ -n "$ID_FS_UUID" ] ; then
+    echo "$ID_FS_UUID"
+  else
+    return 1
+  fi
+}
+
+mountpoint_to_blockdevice() {
+  TARGET_UUID=''
+
+  TARGET_UUID=$(identify_target_uuid "$TARGET" 2>/dev/null || true)
+  if [ -n "$TARGET_UUID" ] ; then
+    einfo "Identified UUID $TARGET_UUID for $TARGET"
+    return 0
+  fi
+
+  # $TARGET might be a mountpoint and not a blockdevice, search for according entry
+  for file in /sys/block/*/*/dev ; do
+    if grep -q "^$(mountpoint -d "${TARGET}")$" "$file" ; then
+      local dev
+      dev="${file%/dev}"
+      dev="/dev/${dev##*/}"
+      TARGET_UUID=$(identify_target_uuid "$dev" 2>/dev/null || true)
+
+      if [ -n "$TARGET_UUID" ] ; then
+        einfo "Identified UUID $TARGET_UUID for $TARGET (via $file)"
+        return 0
+      fi
+    fi
+  done
+}
 
 # modify filesystem settings {{{
 tunefs() {
@@ -1660,7 +1698,8 @@ remove_configs() {
 # }}}
 
 # now execute all the functions {{{
-for i in format_efi_partition prepare_vm mkfs tunefs mount_target debootstrap_system \
+for i in format_efi_partition prepare_vm mkfs tunefs \
+         mount_target mountpoint_to_blockdevice debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          remove_configs umount_chroot finalize_vm fscktool ; do
     if stage "${i}" ; then
