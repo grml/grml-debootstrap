@@ -1,3 +1,15 @@
+grml-debootstrap (0.80) unstable; urgency=medium
+
+  * [351237a] Fix a bunch of typos
+  * [7803bf3] packer: add support for building Debian/buster
+  * [ecff5b9] packer: use current Grml release 2017.05 for building
+  * [3314417] packer: use latest VirtualBox Guest Additions ISO
+  * [05ed1a4] Identify UUID of target system even if it's SWRAID or a
+    mountpoint. Thanks to hex2a for reporting and testing
+  * [d8de50b] Bump Standards-Version to 4.1.2
+
+ -- Michael Prokop <mika@grml.org>  Fri, 08 Dec 2017 12:54:17 +0100
+
 grml-debootstrap (0.79) unstable; urgency=medium
 
   [ Bigo ]
