@@ -1,3 +1,11 @@
+grml-debootstrap (0.81) unstable; urgency=medium
+
+  * [0617fa8] Add e2fsprogs to Depends. Thanks to Helmut Grohne
+    <helmut@subdivi.de> for the bugreport (Closes: #887224)
+  * [9bdd7a1] Bump Standards-Version to 4.1.3
+
+ -- Michael Prokop <mika@grml.org>  Mon, 15 Jan 2018 10:58:37 +0100
+
 grml-debootstrap (0.80) unstable; urgency=medium
 
   * [351237a] Fix a bunch of typos
