@@ -1,3 +1,14 @@
+grml-debootstrap (0.82) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  * [7f3e2b0] one package per line
+
+  [ Michael Prokop ]
+  * [81879b2] Sort packages files
+  * [8e06486] Bump Standards-Version to 4.1.4
+
+ -- Michael Prokop <mika@grml.org>  Fri, 25 May 2018 13:48:21 +0200
+
 grml-debootstrap (0.81) unstable; urgency=medium
 
   * [0617fa8] Add e2fsprogs to Depends. Thanks to Helmut Grohne
