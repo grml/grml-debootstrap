@@ -637,7 +637,7 @@ grub_install() {
     return 1
   fi
 
-  mountpoint /boot/efi >/dev/null && umount /boot/efi
+  mountpoint /boot/efi &>/dev/null && umount /boot/efi
 
   $UPDATEGRUB
 }
