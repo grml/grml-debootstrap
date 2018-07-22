@@ -925,6 +925,7 @@ Do you want to stop now?" 0 0 2>/dev/null
 }
 # }}}
 
+# format efi partition {{{
 format_efi_partition() {
   if [ -z "$EFI" ] ; then
     return 0
@@ -950,6 +951,7 @@ format_efi_partition() {
     fi
   fi
 }
+# }}}
 
 # check for EFI support or try to enable it {{{
 efi_support() {
@@ -1284,6 +1286,7 @@ mkfs() {
 }
 # }}}
 
+# retrieve ID_FS_UUID {{{
 identify_target_uuid() {
   local device="$1"
 
@@ -1299,7 +1302,9 @@ identify_target_uuid() {
     return 1
   fi
 }
+# }}}
 
+# identify TARGET_UUID {{{
 mountpoint_to_blockdevice() {
   TARGET_UUID=''
 
@@ -1324,6 +1329,7 @@ mountpoint_to_blockdevice() {
     fi
   done
 }
+# }}}
 
 # modify filesystem settings {{{
 tunefs() {
@@ -1751,6 +1757,7 @@ execute_post_scripts() {
 }
 # }}}
 
+# unmount mountpoint {{{
 try_umount() {
   local tries=$1
   local mountpoint="$2"
@@ -1770,6 +1777,7 @@ try_umount() {
   done
   return 1  # Tried enough
 }
+# }}}
 
 # execute chroot-script {{{
 chrootscript() {
