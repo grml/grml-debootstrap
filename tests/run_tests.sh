@@ -10,13 +10,13 @@
 GLOBRETVAL=0
 
 for FILE in test_*.sh ; do
-  if [ -x ${FILE} ] ; then
+  if [ -x "${FILE}" ] ; then
      pretty_name="${FILE##test_}"
      pretty_name="${pretty_name/.sh/}"
 
      echo "Running test for: ${pretty_name}"
 
-     ./${FILE}
+     ./"${FILE}"
      RETVAL=$?
 
      [ "$RETVAL" -ne 0 ] && GLOBRETVAL=$RETVAL

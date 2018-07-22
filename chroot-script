@@ -17,7 +17,9 @@ if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
 fi
 # }}}
 
+# shellcheck disable=SC1091
 . /etc/debootstrap/config    || exit 1
+# shellcheck disable=SC1091
 . /etc/debootstrap/variables || exit 1
 
 [ -r /proc/1 ] || mount -t proc none /proc
@@ -65,7 +67,7 @@ askpass() {
   # read -s emulation for dash. result is in $resp.
   set -o noglob
   [ -t 0 ] && stty -echo
-  read resp
+  read -r resp
   [ -t 0 ] && stty echo
   set +o noglob
 }
@@ -128,12 +130,12 @@ remove_chrootmirror() {
 
   if [ -n "$ISO" ] ; then
     echo "Removing ISO (${ISO}) from sources.list."
-    TMP_ISO=$(echo "$ISO" |sed 's#/#\\/#g')
+    TMP_ISO="${ISO//\//\\\/}"
     sed -i "/deb $TMP_ISO $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
   else
     if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
       echo "Removing local mirror (${MIRROR}) from sources.list."
-      TMP_MIRROR=$(echo "$MIRROR" |sed 's#/#\\/#g')
+      TMP_MIRROR="${MIRROR//\//\\\/}"
       sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
       echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
       echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
@@ -158,8 +160,11 @@ grmlrepos() {
 EOF
      fi
 
+     # shellcheck disable=SC2086
      if apt-get update $DPKG_OPTIONS; then
+       # shellcheck disable=SC2086
        apt-get -y --allow-unauthenticated install grml-debian-keyring $DPKG_OPTIONS
+       # shellcheck disable=SC2086
        apt-get update $DPKG_OPTIONS
      else
        # make sure we have the keys available for aptitude
@@ -256,6 +261,7 @@ upgrade_system() {
 remove_apt_cache() {
   if [ "$RM_APTCACHE" = 'yes' ] ; then
     echo "Cleaning apt cache."
+    # shellcheck disable=SC2086
     apt-get clean $DPKG_OPTIONS
   else
     echo "Not cleaning apt cache as \$RM_APTCACHE is unset."
@@ -278,6 +284,7 @@ packages() {
        exit 1
      else
        $APTUPDATE
+       # shellcheck disable=SC2086,SC2046
        DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(grep -v '^#' /etc/debootstrap/packages) $GRMLPACKAGES
      fi
   fi
@@ -289,6 +296,7 @@ extrapackages() {
     if [ "$EXTRAPACKAGES" = 'yes' ] ; then
         PACKAGELIST=$(find /etc/debootstrap/extrapackages -type f -name '*.deb')
         if [ -n "$PACKAGELIST" ]; then
+            # shellcheck disable=SC2086
             dpkg -i $PACKAGELIST
             # run apt again to resolve any deps
             DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL
@@ -315,6 +323,7 @@ get_kernel_version() {
 
   local KARCH
 
+  # shellcheck disable=SC2153
   case "$ARCH" in
     i386)
       case "$RELEASE" in
@@ -357,6 +366,7 @@ kernel() {
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
        KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
      fi
+     # shellcheck disable=SC2086
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   else
      echo "Warning: Could not find a kernel for your system. Your system won't be able to boot itself!"
@@ -368,8 +378,8 @@ kernel() {
 reconfigure() {
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
-         if dpkg --list $package >/dev/null 2>&1 | grep -q '^ii' ; then
-           DEBIAN_FRONTEND=$DEBIAN_FRONTEND dpkg-reconfigure $package || \
+         if dpkg --list "$package" >/dev/null 2>&1 | grep -q '^ii' ; then
+           DEBIAN_FRONTEND=$DEBIAN_FRONTEND dpkg-reconfigure "$package" || \
            echo "Warning: $package does not exist, can not reconfigure it."
          fi
      done
@@ -471,6 +481,7 @@ createfstab(){
   fi
 
 if [ -n "$EFI" ] ; then
+  # shellcheck disable=SC2086
   echo "UUID=$(blkid -o value -s UUID $EFI)  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
 fi
 
@@ -519,7 +530,8 @@ hostname() {
      fi
      if [ -r /etc/mailname ] ; then
         # adjust /etc/mailname
-        local etc_mail_domain=$(/bin/dnsdomainname 2>/dev/null || echo localdomain)
+        local etc_mail_domain
+        etc_mail_domain=$(/bin/dnsdomainname 2>/dev/null || echo localdomain)
         case "$HOSTNAME" in
           *.*)
             local mailname="$HOSTNAME"
@@ -538,6 +550,7 @@ hostname() {
 # generate initrd/initramfs {{{
 initrd() {
   # assume the first available kernel as our main kernel
+  # shellcheck disable=SC2012
   KERNELIMG=$(ls -1 /boot/vmlinuz-* 2>/dev/null | head -1)
   if [ -z "$KERNELIMG" ] ; then
      echo 'No kernel image found, skipping initrd stuff.'>&2
@@ -598,7 +611,7 @@ grub_install() {
     DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL ${GRUB_PACKAGE}
   fi
 
-  if ! [ -x "$(which grub-install)" ] ; then
+  if ! [ -x "$(command -v grub-install)" ] ; then
      echo "Error: grub-install not available. (Error while installing grub package?)" >&2
      return 1
   fi

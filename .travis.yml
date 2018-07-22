@@ -1,0 +1,16 @@
+language: generic
+sudo: required
+
+services:
+  - docker
+  - bash -c 'shellcheck grml-debootstrap chroot-script'
+
+before-install:
+  - docker pull koalaman/shellcheck:stable
+
+script:
+  - docker run koalaman/shellcheck --version
+  - docker run -v "$(pwd)":/code koalaman/shellcheck -e SC2181 /code/chroot-script /code/grml-debootstrap
+
+matrix:
+  fast_finish: true
