@@ -40,7 +40,7 @@ fi
 
 # variables {{{
 PN="$(basename "$0")"
-if [[ -d "$(dirname "$(which "$0")")"/.git ]]; then
+if [[ -d "$(dirname "$(command -v "$0")")"/.git ]]; then
   VERSION="$(git describe | sed 's|^v||')"
 else
   VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
@@ -186,7 +186,7 @@ WARN='[33;01m'
 NORMAL='[0m'
 
 einfo() {
-  einfon "$1\n"
+  einfon "$1\\n"
   return 0
 }
 
@@ -198,13 +198,13 @@ einfon() {
 }
 
 ewarn() {
-  printf " %s*%s $*\n" "${WARN}" "${NORMAL}"
+  printf " %s*%s $*\\n" "${WARN}" "${NORMAL}"
   return 0
 }
 
 eerror() {
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
-  printf " %s*%s $*\n" "${BAD}" "${NORMAL}" >&2
+  printf " %s*%s $*\\n" "${BAD}" "${NORMAL}" >&2
   LAST_E_CMD=eerror
   return 0
 }
@@ -213,7 +213,7 @@ eend() {
   local retval="${1:-0}"
   shift
   if [ "$retval" -gt 0 ]; then
-    printf " %s-> Failed (rc=%s)%s\n" "${BAD}" "${retval}" "${NORMAL}"
+    printf " %s-> Failed (rc=%s)%s\\n" "${BAD}" "${retval}" "${NORMAL}"
   fi
   return "$retval"
 }
@@ -227,7 +227,7 @@ check4root(){
 check4progs(){
   local RC=''
   for arg in "$@" ; do
-    which "$arg" >/dev/null 2>&1 || RC="$arg"
+    command -v "$arg" >/dev/null 2>&1 || RC="$arg"
   done
   if [ -n "$RC" ] ; then
      echo "$RC not installed"
@@ -480,8 +480,11 @@ while :; do
 
   # == Other options
   --verbose|-v)        # Increase verbosity
-    if [ "$_opt_verbose" ]; then _opt_verbose=`expr $_opt_verbose + 1`
-    else _opt_verbose=1; fi
+    if [ "$_opt_verbose" ]; then
+      _opt_verbose=$( _opt_verbose + 1 )
+    else
+      _opt_verbose=1
+    fi
     ;;
   --debug)             # Execute in debug mode
     _opt_debug=T
@@ -1394,7 +1397,7 @@ prepare_vm() {
     einfo "Adjusting disk signature to a fixed (non-random) value"
     MBRTMPFILE=$(mktemp)
     dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-    echo -en "\x41\x41\x41\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
+    echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
     dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
     eend $?
   fi
@@ -1456,7 +1459,7 @@ finalize_vm() {
 
 # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
 # chroot-script skips installation for unset ${GRUB}
-if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | fgrep -q GRUB; then
+if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
   einfo "Installing Grub as bootloader."
 
   if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
@@ -1504,7 +1507,7 @@ fi
     ewarn "Please note that your system might NOT be able to properly boot."
   else
     einfo "Adjusting grub.cfg for successful boot sequence."
-    sed -i "s;root=[^ ]\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
+    sed -i "s;root=[^ ]\\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
   fi
 
   umount "${MNTPOINT}"/proc
