@@ -14,7 +14,7 @@ error_handler() {
    last_exit_code="$?"
    last_bash_command="$BASH_COMMAND"
    if [ "$REPORT_TRAP_ERR" = "yes" ]; then
-      echo "Unexpected non-zero exit code $last_exit_code in $BASH_SOURCE at line $BASH_LINENO detected!
+      echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
 last bash command: $last_bash_command"
    fi
    if [ ! "$FAIL_TRAP_ERR" = "yes" ]; then
@@ -192,19 +192,19 @@ einfo() {
 
 einfon() {
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
-  printf " ${GOOD}*${NORMAL} $*"
+  printf " %s*%s $*" "${GOOD}" "${NORMAL}"
   LAST_E_CMD=einfon
   return 0
 }
 
 ewarn() {
-  printf " ${WARN}*${NORMAL} $*\n"
+  printf " %s*%s $*\n" "${WARN}" "${NORMAL}"
   return 0
 }
 
 eerror() {
   [ "${RC_ENDCOL}" != "yes" ] && [ "${LAST_E_CMD}" = "ebegin" ] && echo
-  printf " ${BAD}*${NORMAL} $*\n" >&2
+  printf " %s*%s $*\n" "${BAD}" "${NORMAL}" >&2
   LAST_E_CMD=eerror
   return 0
 }
@@ -213,7 +213,7 @@ eend() {
   local retval="${1:-0}"
   shift
   if [ "$retval" -gt 0 ]; then
-    printf " ${BAD}-> Failed (rc=${retval})${NORMAL}\n"
+    printf " %s-> Failed (rc=%s)%s\n" "${BAD}" "${retval}" "${NORMAL}"
   fi
   return "$retval"
 }
@@ -333,6 +333,7 @@ check4progs debootstrap || bailout 1
 
 # source main configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
+  # shellcheck disable=SC1091
   . /etc/debootstrap/config
 fi
 # }}}
@@ -341,13 +342,15 @@ fi
 # source external command line parameter-processing script
 self_dir="$(dirname "$(which "$0")")"
 if [ -r "${self_dir}"/cmdlineopts.clp ] ; then
-   . "${self_dir}"/cmdlineopts.clp
+  # shellcheck source=cmdlineopts.clp
+  . "${self_dir}"/cmdlineopts.clp
 elif [ -r /usr/share/grml-debootstrap/functions/cmdlineopts.clp ] ; then
-   . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
+  # shellcheck source=cmdlineopts.clp
+  . /usr/share/grml-debootstrap/functions/cmdlineopts.clp
 else
-   eerror "Error: cmdline function file not found, exiting."
-   eend 1
-   bailout 1
+  eerror "Error: cmdline function file not found, exiting."
+  eend 1
+  bailout 1
 fi
 
 # == business-logic of command line parameter-processing
@@ -359,6 +362,7 @@ fi
   if ! [ -r "$CONFFILES/config" ] ; then
     eerror "Error: config file $CONFFILES/config not found."; eend 1; bailout 1
   fi
+  # shellcheck disable=SC1091 source=config
   if ! . "$CONFFILES/config" ; then
     eerror "Error reading config file $CONFFILES/config" ; eend 1 ; bailout 1
   fi
@@ -456,10 +460,11 @@ fi
 
 # source specified configuration file {{{
 if [ -n "$CONFIGFILE" ] ; then
-   einfo "Reading specified config file $CONFIGFILE."
-   if ! . "$CONFIGFILE" ; then
-      eerror "Error reading config file $CONFIGFILE" ; eend 1 ; bailout 1
-   fi
+  einfo "Reading specified config file $CONFIGFILE."
+  # shellcheck disable=SC1091 source=config
+  if ! . "$CONFIGFILE" ; then
+    eerror "Error reading config file $CONFIGFILE" ; eend 1 ; bailout 1
+  fi
 fi
 # }}}
 
@@ -511,6 +516,7 @@ prompt_for_target()
                      unset fs
                    done)
 
+  # shellcheck disable=SC2086
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
          --menu "Please select the target partition:" 0 0 0 \
          $PARTITION_LIST)
@@ -534,11 +540,13 @@ prompt_for_bootmanager()
         found=1
         break
      done
-     [ -n "$found" ] && MBRDISK=$(echo "${device}" |sed -e 's/-part[0-9][0-9]*$//')
+     # shellcheck disable=SC2001
+     [ -n "$found" ] && MBRDISK=$(echo "${device}" | sed -e 's/-part[0-9][0-9]*$//')
      if [ -e "$MBRDISK" ]; then
         MBRDISK=$(readlink -f "$MBRDISK")
      else
         # fall back to old behaviour
+        # shellcheck disable=SC2001
         MBRDISK=$(echo "${TARGET}" | sed -e 's/[0-9][0-9]*$//')
      fi
 
@@ -555,6 +563,7 @@ prompt_for_bootmanager()
 
   OIFS="$IFS"; IFS=:
 
+  # shellcheck disable=SC2086
   GETMBR=$(dialog --stdout --title "$PN" --default-item mbr \
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
             mbr       "install bootmanager into $MBRPART" \
@@ -682,6 +691,7 @@ MD_LIST=$(for i in $(seq 0 9) ; do
             echo "/dev/md$i /dev/md$i"
           done)
 
+# shellcheck disable=SC2086
 TARGET=$(dialog --stdout --title "$PN" --default-item /dev/md0 \
 --menu "Which device do you want to use for ${RAIDLEVEL}?
 
@@ -698,6 +708,7 @@ PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
                      echo "$i $(blkid -s TYPE -o value "$i" 2>/dev/null || echo '[no_filesystem_yet]') off"
                  done)
 
+# shellcheck disable=SC2086
 dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
        $PARTITION_LIST 2>"$TMPFILE"
@@ -705,9 +716,9 @@ dialog --title "$PN" --separate-output \
 SELECTED_PARTITIONS="$(cat "$TMPFILE")"
 
 NUM_PARTITIONS=0
-for i in $(cat "$TMPFILE") ; do
-   NUM_PARTITIONS=$(( NUM_PARTITIONS + 1 ))
-done
+while IFS= read -r i; do
+  NUM_PARTITIONS=$(( NUM_PARTITIONS + 1 ))
+done < "$TMPFILE"
 
 # force metadata version 0.90 for lenny so old grub can boot from this array.
 METADATA_VERSION=""
@@ -716,6 +727,7 @@ if [ "$RELEASE" = "lenny" ]; then
 fi
 
 ERRORFILE=$(mktemp)
+# shellcheck disable=SC2086
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
       --raid-devices="${NUM_PARTITIONS}" ${METADATA_VERSION} ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
@@ -877,12 +889,12 @@ else # if not running automatic installation display configuration and prompt fo
    [ -n "$CONFFILES" ] && echo "   Config files:    $CONFFILES"
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
-      if [ -n "$VMSIZE" -a -n "$VMFILE" ]; then
+      if [ -n "$VMSIZE" ] && [ -n "$VMFILE" ]; then
          echo "   Using Virtual Disk file with size of ${VMSIZE}."
       fi
    fi
 
-   if [ ! -t 0 -a -z "$ROOTPASSWORD" -a -z "$NOPASSWORD" ] ; then
+   if [ ! -t 0 ] && [ -z "$ROOTPASSWORD" ] && [ -z "$NOPASSWORD" ] ; then
       echo
       echo "   You do not have a TTY allocated, your password will be shown in"
       echo "   plaintext on the terminal! If you are using SSH, try its -t option!"
@@ -896,8 +908,8 @@ else # if not running automatic installation display configuration and prompt fo
    else
      echo
      einfon "Is this ok for you? [y/N] "
-     read a
-     if ! [ "$a" = 'y' -o "$a" = 'Y' ] ; then
+     read -r a
+     if ! [ "$a" = 'y' ] || [ "$a" = 'Y' ] ; then
         eerror "Exiting as requested." ; eend 1
         bailout 1
      fi
@@ -929,7 +941,7 @@ interactive_mode()
 }
 
 # run interactive mode if we didn't get the according configuration yet
-if [ -z "$TARGET" -o -n "$INTERACTIVE" ] ; then
+if [ -z "$TARGET" ] || [ -n "$INTERACTIVE" ] ; then
    # only target might be unset, so make sure the INTERACTIVE flag is set as well
    INTERACTIVE=1
    interactive_mode
@@ -1067,7 +1079,8 @@ mkfs() {
     case "$RELEASE" in
       lenny|squeeze|wheezy|jessie)
         # assume a more recent version if we can't identify the version via dpkg-query
-        local e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
+        local e2fsprogs_version
+        e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
         if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
           einfo "Disabling metadata_csum feature for $MKFS as $RELEASE doesn't support it."
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum"
@@ -1079,6 +1092,7 @@ mkfs() {
 
   if [ -n "$MKFS" ] ; then
     einfo "Running $MKFS $MKFS_OPTS on $TARGET"
+    # shellcheck disable=SC2086
     "$MKFS" $MKFS_OPTS "$TARGET" ; RC=$?
 
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
@@ -1103,7 +1117,7 @@ mkfs() {
       # if we deploy to /dev/sdX# then let's see if /dev/sdX exists
       local main_device="${TARGET%%[0-9]*}"
       # sanity check to not try to e.g. access /dev/loop if we get /dev/loop0
-      if [ -f "/sys/block/$(basename ${main_device})/$(basename ${TARGET})/dev" ] ; then
+      if [ -f "/sys/block/$(basename "${main_device}")/$(basename "${TARGET}")/dev" ] ; then
         blockdev --rereadpt "$main_device"
       else
         einfo "No underlying block device for $TARGET identified, skipping blockdev --rereadpt."
@@ -1201,12 +1215,12 @@ prepare_vm() {
      return 0 # be quiet by intention
   fi
 
-  if [ -b "$TARGET" -a -n "$VMFILE" ] ; then
+  if [ -b "$TARGET" ] && [ -n "$VMFILE" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
      eend 1
      bailout 1
   fi
-  if [ ! -b "$TARGET" -a -z "$VMFILE" ] ; then
+  if [ ! -b "$TARGET" ] && [ -z "$VMFILE" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) does not exist yet."
      eend 1
      bailout 1
@@ -1248,15 +1262,15 @@ prepare_vm() {
     fi
   fi
 
-  DEVINFO=$(kpartx -asv "$TARGET") # 'add map loop1p1 (253:0): 0 6289408 linear /dev/loop1 2048'
+  DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
     bailout 1
   fi
 
   # hopefully this always works as expected
-  LOOP=$(echo "${DEVINFO}" | sed 's/.* linear //; s/ [[:digit:]]*//') # 'loop1'
-  LOOP_PART="$(echo "${DEVINFO##add map }" | sed 's/ .*//')" # 'loop1p1'
+  LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
+  LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
 
   if [ -z "$TARGET" ] ; then
@@ -1289,6 +1303,7 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
 
   if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
     echo "Notice: grub-pc package not present yet, installing it therefore."
+    # shellcheck disable=SC2086
     DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y install $DPKG_OPTIONS grub-pc
   fi
 
@@ -1360,11 +1375,13 @@ debootstrap_system() {
   if [ -n "$ISO" ] ; then
     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${ISO}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
+    # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$ISO"
     RC=$?
   else
     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+    # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $KEYRING $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
     RC=$?
   fi
@@ -1529,7 +1546,7 @@ iface eth0 inet dhcp
   fi
 
   # install config file providing some example entries
-  if [ -r /etc/network/interfaces.examples -a ! -r "$MNTPOINT/etc/network/interfaces.examples" ] ; then
+  if [ -r /etc/network/interfaces.examples ] && [ ! -r "$MNTPOINT/etc/network/interfaces.examples" ] ; then
      cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
   fi
 
