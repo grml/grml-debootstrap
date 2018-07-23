@@ -287,7 +287,7 @@ any bootloader).
 
 Install default Debian release (stretch) on /dev/sda3 and install bootmanager
 Grub in MBR (master boot record) of /dev/sda and use /dev/sda3 as system partition.
-Use specified mirror instead of the default (http://httpredir.debian.org/debian) one.
+Use specified mirror instead of the default (http://deb.debian.org/debian) one.
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
@@ -374,7 +374,7 @@ releases: lenny, squeeze, wheezy, jessie, stretch and sid. Usage example: releas
   mirror=...
 
 Specify mirror which should be used for apt-get/aptitude instead
-of the default one (http://httpredir.debian.org/debian).
+of the default one (http://deb.debian.org/debian).
 Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
 
   password=...
@@ -411,7 +411,7 @@ anymore unless you really know what you are doing. Choose the current Debian
 stable version instead.
 
 Notice that you need to specify a mirror providing the lenny/squeeze releases, the
-default (http://httpredir.debian.org/debian) doesn't provide it any longer nowadays.
+default (http://deb.debian.org/debian) doesn't provide it any longer nowadays.
 Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have
 your own lenny/squeeze mirror.
 
