@@ -49,7 +49,6 @@ install:
 	install -m 755 chroot-script    $(DESTDIR)/etc/debootstrap/
 	install -m 755 grml-debootstrap $(DESTDIR)/usr/sbin/
 	install -m 644 zsh-completion   $(DESTDIR)/etc/zsh/completion.d/_grml-debootstrap
-	install -m 644 cmdlineopts.clp  $(DESTDIR)/usr/share/grml-debootstrap/functions/cmdlineopts.clp
 
 clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp packer/local_dir/
