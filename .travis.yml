@@ -3,14 +3,15 @@ sudo: required
 
 services:
   - docker
-  - bash -c 'shellcheck grml-debootstrap chroot-script'
 
-before-install:
-  - docker pull koalaman/shellcheck:stable
+env:
+  - TRAVIS_DEBIAN_DISTRIBUTION=stretch
+  - TRAVIS_DEBIAN_DISTRIBUTION=unstable TRAVIS_DEBIAN_INCREMENT_VERSION_NUMBER=true
 
 script:
-  - docker run koalaman/shellcheck --version
-  - docker run -v "$(pwd)":/code koalaman/shellcheck -e SC2181 /code/chroot-script /code/grml-debootstrap
+  - docker run koalaman/shellcheck:stable --version
+  - docker run -v "$(pwd)":/code koalaman/shellcheck:stable -e SC2181 /code/chroot-script /code/grml-debootstrap
+  - wget -O- http://travis.debian.net/script.sh | sh -
 
 matrix:
   fast_finish: true
