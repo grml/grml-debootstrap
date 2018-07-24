@@ -1387,6 +1387,33 @@ prepare_vm() {
      bailout 1
   fi
 
+  # make sure loop module is present and an usable loop device exists
+  if ! losetup -f >/dev/null 2>&1; then
+    einfo "Can not find a usable loop device, retrying after loading loop module."
+    if ! modprobe loop > /dev/null 2>&1; then
+      eerror "Error loading loop module" ; eend 1
+      bailout 1
+    fi
+    eend $?
+    if losetup -f >/dev/null 2>&1; then
+      einfo "Found a usable loop device now, continuing."
+    else
+      eerror "Error finding usable loop device" ; eend 1
+      bailout 1
+    fi
+  fi
+
+  # if dm-mod isn't available then kpartx will fail with
+  # "Is device-mapper driver missing from kernel? [...]"
+  if ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
+    einfo "Device-mapper not ready yet, trying to load dm-mod module."
+    if ! modprobe dm-mod > /dev/null 2>&1; then
+      eerror "Error loading dm-mod module" ; eend 1
+      bailout 1
+    fi
+    eend $?
+  fi
+
   ORIG_TARGET="$TARGET" # store for later reuse
 
   if [ -n "$VMFILE" ]; then
@@ -1403,25 +1430,6 @@ prepare_vm() {
   fi
   parted -s "${TARGET}" 'mkpart primary ext4 2M -1'
   parted -s "${TARGET}" 'set 1 boot on'
-
-  # if dm-mod isn't available then kpartx will fail with
-  # "Is device-mapper driver missing from kernel? [...]"
-  if ! kpartx -av "$TARGET" >/dev/null 2>&1 || ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
-    einfo "Device-mapper not ready yet, trying to load dm-mod module."
-    modprobe dm-mod ; eend $?
-  fi
-
-  # make sure loop module is present
-  if ! losetup -f >/dev/null 2>&1; then
-    einfo "Can not find a usable loop device, retrying after loading loop module."
-    modprobe loop
-    if losetup -f >/dev/null 2>&1; then
-      einfo "Found a usable loop device now, continuing."
-    else
-      eerror "Error finding usable loop device" ; eend 1
-      bailout 1
-    fi
-  fi
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
   if [ -z "${DEVINFO}" ] ; then
