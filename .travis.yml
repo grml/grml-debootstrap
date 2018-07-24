@@ -9,9 +9,7 @@ env:
   - TRAVIS_DEBIAN_DISTRIBUTION=unstable TRAVIS_DEBIAN_INCREMENT_VERSION_NUMBER=true
 
 script:
-  - docker run koalaman/shellcheck:stable --version
-  - docker run -v "$(pwd)":/code koalaman/shellcheck:stable -e SC2181 /code/chroot-script /code/grml-debootstrap
-  - wget -O- http://travis.debian.net/script.sh | sh -
+  - ./travis/execute.sh
 
 matrix:
   fast_finish: true
