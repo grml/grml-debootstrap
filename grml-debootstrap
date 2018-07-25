@@ -298,7 +298,13 @@ cleanup() {
 
   if [ -n "${ORIG_TARGET}" ] ; then
     einfo "Removing loopback mount of file ${ORIG_TARGET}."
-    kpartx -d "${ORIG_TARGET}" ; eend $?
+    kpartx -d "${ORIG_TARGET}"
+    # Workaround for a bug in kpartx which doesn't clean up properly,
+    # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
+    if dmsetup ls | grep -q "^${LOOP_PART} "; then
+      kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+    fi
+    eend $?
   fi
 }
 
@@ -1432,6 +1438,7 @@ prepare_vm() {
   # hopefully this always works as expected
   LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
+  LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
 
   if [ -z "$TARGET" ] ; then
@@ -1516,6 +1523,11 @@ fi
   try_umount 3 "${MNTPOINT}"/dev
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
+  # Workaround for a bug in kpartx which doesn't clean up properly,
+  # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
+  if dmsetup ls | grep -q "^${LOOP_PART} "; then
+    kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+  fi
 }
 # }}}
 
