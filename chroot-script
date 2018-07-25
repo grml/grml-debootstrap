@@ -465,8 +465,12 @@ default_locales() {
 # adjust timezone {{{
 timezone() {
   if [ -n "$TIMEZONE" ] ; then
-     echo "Adjusting /etc/localtime"
-     ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+    echo "Adjusting /etc/localtime"
+    ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+
+    echo "Setting /etc/timezone to $TIMEZONE"
+    printf '%s\n' "$TIMEZONE"  > /etc/timezone
+
   fi
 }
 # }}}
