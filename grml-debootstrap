@@ -1388,30 +1388,18 @@ prepare_vm() {
   fi
 
   # make sure loop module is present and an usable loop device exists
+  modprobe -q loop
   if ! losetup -f >/dev/null 2>&1; then
-    einfo "Can not find a usable loop device, retrying after loading loop module."
-    if ! modprobe loop > /dev/null 2>&1; then
-      eerror "Error loading loop module" ; eend 1
-      bailout 1
-    fi
-    eend $?
-    if losetup -f >/dev/null 2>&1; then
-      einfo "Found a usable loop device now, continuing."
-    else
-      eerror "Error finding usable loop device" ; eend 1
-      bailout 1
-    fi
+    eerror "Error finding usable loop device" ; eend 1
+    bailout 1
   fi
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
+  modprobe -q dm-mod
   if ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
-    einfo "Device-mapper not ready yet, trying to load dm-mod module."
-    if ! modprobe dm-mod > /dev/null 2>&1; then
-      eerror "Error loading dm-mod module" ; eend 1
-      bailout 1
-    fi
-    eend $?
+    einfo "Device-mapper support missing in kernel."
+    bailout 1
   fi
 
   ORIG_TARGET="$TARGET" # store for later reuse
