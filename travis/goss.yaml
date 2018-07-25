@@ -1,5 +1,3 @@
-command:
-  grep -qe "Debian GNU/Linux .* {{ .Env.RELEASE }} ttyS0" qemu.log:
-    exit-status: 0
-  grep -qe "{{ .Env.RELEASE }} login:" qemu.log:
-    exit-status: 0
+process:
+  sshd:
+    running: true
