@@ -143,8 +143,7 @@ Configuration options:
                              /etc/debootstrap/packages
       --nokernel           Skip installation of default kernel images.
       --nointerfaces       Skip installation of default network configuration.
-      --defaultinterfaces  Install a default /etc/systemd/network/80-dhcp.network file
-                           (enabling DHCP for all network devices). (default)
+      --defaultinterfaces  Install default network configuration. (default)
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
@@ -1762,7 +1761,7 @@ iface ${interface} inet dhcp
   fi
 
   if [ -n "$NOINTERFACES" ] ; then
-    einfo "Not installing /etc/systemd/network/80-dhcp.network as requested via --nointerfaces option"
+    einfo "Not installing default network configuration as requested via --nointerfaces option"
     eend 0
   elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."

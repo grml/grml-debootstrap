@@ -155,9 +155,12 @@ Options and environment variables
 
     Skip debootstrap, only do configuration to the target.
 
+
 *--nointerfaces*::
 
-    Do not copy /etc/network/interfaces from host system to the target.
+    Skip installation of a default network configuration.
+    Does not provide a default /etc/systemd/network/80-dhcp.network and
+    /etc/network/interfaces on the target system.
 
 *--nokernel*::
 
@@ -255,7 +258,7 @@ Options and environment variables
 
     Set up a Virtual Machine using a regular file instead of installing to a
     partition/block device or directory. This allows deployment of a Virtual
-    Machine. The options needs to be combined with the --target option
+    Machine.
     ('qemu-img create -f raw ...' is executed on the specified target).
     This option automatically enables the --defaultinterfaces option.
     Usage example: --vmfile --target /mnt/sda1/qemu.img
