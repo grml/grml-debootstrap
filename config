@@ -24,6 +24,10 @@
 # TARGET='/mnt/grml' # install into directory /mnt/grml
 
 # Install the grub bootloader?
+# Default: 'yes'
+# Usage example:
+# GRUB_INSTALL='no' # Do not install the grub bootloader.
+
 # Specify the device where grub will be installed.
 # Note: grub can not be installed into a partition.
 # Default: no default. (Grub will not be installed.)

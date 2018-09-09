@@ -1447,8 +1447,9 @@ grub_install() {
   if [ -z "${VIRTUAL}" ] ; then
      return 0
   fi
-  if [ ! "$GRUB_INSTALL" = "yes" ]; then
-     return 0
+  if [ "${GRUB_INSTALL}" != "yes" ] ; then
+    einfo "Not installing GRUB as requested via \$GRUB_INSTALL=$GRUB_INSTALL"
+    return 0
   fi
 
   if ! mount "${TARGET}" "${MNTPOINT}" ; then
