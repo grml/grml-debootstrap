@@ -80,6 +80,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$TUNE2FS" ] || TUNE2FS='tune2fs -c0 -i0'
 [ -n "$UPGRADE_SYSTEM" ] || UPGRADE_SYSTEM='yes'
 [ -n "$VMSIZE" ] || VMSIZE="2G"
+[ -n "$GRUB_INSTALL" ] || GRUB_INSTALL='yes'
 
 # inside the chroot system locales might not be available, so use minimum:
 export LANG=C
@@ -1444,10 +1445,14 @@ prepare_vm() {
 }
 # }}}
 
-# make VM image bootable and unmount it {{{
-finalize_vm() {
+# make VM image bootable {{{
+grub_install() {
   if [ -z "${VIRTUAL}" ] ; then
      return 0
+  fi
+  if [ "${GRUB_INSTALL}" != "yes" ] ; then
+    einfo "Not installing GRUB as requested via \$GRUB_INSTALL=$GRUB_INSTALL"
+    return 0
   fi
 
   if ! mount "${TARGET}" "${MNTPOINT}" ; then
@@ -1517,6 +1522,16 @@ fi
   umount "${MNTPOINT}"/sys
   umount "${MNTPOINT}"/dev/pts
   try_umount 3 "${MNTPOINT}"/dev
+
+}
+# }}}
+
+# unmount VM image {{{
+umount_target() {
+  if [ -z "${VIRTUAL}" ] ; then
+     return 0
+  fi
+
   umount "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
   # Workaround for a bug in kpartx which doesn't clean up properly,
@@ -1889,7 +1904,7 @@ remove_configs() {
 for i in format_efi_partition prepare_vm mkfs tunefs \
          mount_target mountpoint_to_blockdevice debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
-         remove_configs umount_chroot finalize_vm fscktool ; do
+         remove_configs umount_chroot grub_install umount_target fscktool ; do
     if stage "${i}" ; then
       if "$i" ; then
         stage "${i}" 'done' && rm -f "${STAGES}/${i}"
