@@ -41,7 +41,6 @@ install:
 	mkdir -p $(DESTDIR)/etc/debootstrap/extrapackages
 	mkdir -p $(DESTDIR)/usr/sbin/
 	mkdir -p $(DESTDIR)/etc/zsh/completion.d/
-	mkdir -p $(DESTDIR)/usr/share/grml-debootstrap/functions/
 	install -m 644 config           $(DESTDIR)/etc/debootstrap/
 	install -m 644 devices.tar.gz   $(DESTDIR)/etc/debootstrap/
 	install -m 644 locale.gen       $(DESTDIR)/etc/debootstrap/
