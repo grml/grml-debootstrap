@@ -1,3 +1,41 @@
+grml-debootstrap (0.83) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [be3f819] Suppress message if /boot/efi isn't considered a mountpoint
+  * [eb121b8] Initial travis integration, running shellcheck
+  * [e426be2] Fix shellcode issues
+  * [98b48d4] Integrate cmdlineopts.clp into grml-debootstrap
+  * [0095b9c] Add missing vim folding markers
+  * [dc30725] Further fixes for shellcheck v0.5.0
+  * [a8eeda3] Drop cmdlineopts.sh references from build system
+  * [1fcd407] Switch default mirror from httpredir.debian.org to
+    deb.debian.org
+  * [242470a] Use travis.debian.net for travis builds
+  * [3618656] Initial VM test builds on TravisCI
+  * [b8f3c83] travis: run tests from inside VM + support test execution
+    outside of Travis CI. Thanks to Christian Hofstaedtler
+    <zeha@debian.org> for helping me with the serial console handling
+  * [3eede4f] Ensure /etc/timezone also includes the TIMEZONE setting.
+    Thanks to Guillem Jover <gjover@sipwise.com> (Closes: #904607)
+  * [de7962e] Makefile: drop functions directory, no longer being relevant
+  * [c570da4] Report "Device-mapper support missing in kernel." as error
+    message
+
+  [ Darshaka Pathirana ]
+  * [2df0d24] Improve checks to make sure loop and dm-mod module are
+    present
+  * [33d0e7f] Improve cleanup of loop devices
+
+  [ Chris Hofstaedtler ]
+  * [fc0a6d8] Simplify module loading
+
+  [ Patrick Schleizer ]
+  * [0b1b798] support skipping installation of grub using
+    GRUB_INSTALL='no'
+  * [3104633] code style; einfo GRUB_INSTALL; document GRUB_INSTALL
+
+ -- Michael Prokop <mika@grml.org>  Wed, 14 Nov 2018 22:28:54 +0100
+
 grml-debootstrap (0.82) unstable; urgency=medium
 
   [ Patrick Schleizer ]
