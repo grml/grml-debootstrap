@@ -1187,6 +1187,12 @@ set_target_directory(){
 if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
     PARTITION=1
 else
+    # $TARGET was not detected as block device, but we do not want to create target directory in /dev/
+    if [[ $TARGET == "/dev/"* ]]; then
+      eerror "Error: Will not create target directory $TARGET in /dev."
+      eerror "  Please check the partition(s) of the blockdevice."; eend 1
+      bailout 1
+    fi
     set_target_directory
 fi
 # }}}
