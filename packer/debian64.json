@@ -27,8 +27,8 @@
       "<tab> ssh=grml <enter>"
     ],
     "shutdown_command": "shutdown -h now",
-    "guest_additions_url": "https://www.virtualbox.org/download/testcase/VBoxGuestAdditions_5.2.1-118918.iso",
-    "guest_additions_sha256": "5023b5b6314593c092d2680fbbfe37870977b1d7fa790af9bdd4a75944ca0603",
+    "guest_additions_url": "https://download.virtualbox.org/virtualbox/5.2.22/VBoxGuestAdditions_5.2.22.iso",
+    "guest_additions_sha256": "e51e33500a265b5c2d7bb2d03d32208df880523dfcb1e2dde2c78a0e0daa0603",
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "1024"]
     ]
