@@ -1,3 +1,13 @@
+grml-debootstrap (0.84) unstable; urgency=medium
+
+  [ Darshaka Pathirana ]
+  * [c21df0e] Do not create target directory in /dev
+
+  [ Michael Prokop ]
+  * [4e2e332] packer: Update VirtualBox Guest Additions to 5.2.22
+
+ -- Michael Prokop <mika@grml.org>  Wed, 19 Dec 2018 10:43:47 +0100
+
 grml-debootstrap (0.83) unstable; urgency=medium
 
   [ Michael Prokop ]
