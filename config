@@ -72,9 +72,9 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: lenny, squeeze, wheezy, jessie, stretch, sid
-# Default: 'stretch'
-# RELEASE='stretch'
+# Supported values: lenny, squeeze, wheezy, jessie, stretch, buster, sid
+# Default: 'buster'
+# RELEASE='buster'
 
 # Define components that should be used within sources.list.
 # Default: 'main'

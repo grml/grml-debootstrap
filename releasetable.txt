@@ -4,8 +4,9 @@
 |Release  |Status
 |lenny    |works[1]
 |squeeze  |works[1]
-|wheezy   |works
+|wheezy   |works[1]
 |jessie   |works
 |stretch  |works
+|buster   |works
 |sid      |works[2]
 |======================
