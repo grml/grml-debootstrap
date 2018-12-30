@@ -192,29 +192,15 @@ EOF
 }
 # }}}
 
-# check available backports release version {{{
-checkbackports() {
-  wget -q -O/dev/null "http://backports.debian.org/debian-backports/dists/${1}-backports/Release"
-}
-# }}}
-
 # feature to provide Debian backports repos {{{
 backportrepos() {
-    if [ -n "$BACKPORTREPOS" ] ; then
-        if ! checkbackports "$RELEASE" ; then
-            echo "Backports for ${RELEASE} are not available." >&2
-            exit 1
-        else
-            # user might have provided their own apt sources.list
-            if ! grep -q backports /etc/apt/sources.list.d/backports.list 2>/dev/null ; then
-                cat >> /etc/apt/sources.list.d/backports.list << EOF
+  if [ -n "$BACKPORTREPOS" ] ; then
+    cat >> /etc/apt/sources.list.d/backports.list << EOF
 # debian backports: ${RELEASE}-backports repository:
-deb     http://backports.debian.org/debian-backports ${RELEASE}-backports main
-deb-src http://backports.debian.org/debian-backports ${RELEASE}-backports main
+deb     ${MIRROR} ${RELEASE}-backports main
+deb-src ${MIRROR} ${RELEASE}-backports main
 EOF
-            fi
-        fi
-    fi
+  fi
 }
 # }}}
 
