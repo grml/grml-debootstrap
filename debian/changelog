@@ -1,3 +1,14 @@
+grml-debootstrap (0.85) unstable; urgency=medium
+
+  * [218bf66] Rework backports.debian.org usage (`--backportrepos` option)
+  * [b013449] Support and default to Debian/buster release,
+    update docs accordingly
+  * [070010f] Add preliminary support for Debian/bullseye
+    (AKA Debian v11.0)
+  * [1decfd6] Bump Standards-Version to 4.3.0
+
+ -- Michael Prokop <mika@grml.org>  Sun, 30 Dec 2018 11:48:14 +0100
+
 grml-debootstrap (0.84) unstable; urgency=medium
 
   [ Darshaka Pathirana ]
