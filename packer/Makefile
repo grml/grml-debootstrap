@@ -12,6 +12,10 @@ clean:
 fake-uname.so:
 	gcc -shared -fPIC -ldl fake-uname.c -o fake-uname.so
 
+# Debian 11
+bullseye: fake-uname.so clean install
+	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
+
 # Debian 10
 buster: fake-uname.so clean install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
@@ -36,4 +40,4 @@ squeeze: fake-uname.so clean install
 lenny: fake-uname.so clean install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
 
-.PHONY: compile buster stretch jessie wheezy squeeze lenny
+.PHONY: compile bullseye buster stretch jessie wheezy squeeze lenny

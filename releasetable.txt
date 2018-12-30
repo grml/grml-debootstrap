@@ -8,5 +8,6 @@
 |jessie   |works
 |stretch  |works
 |buster   |works
+|bullseye |works[2]
 |sid      |works[2]
 |======================

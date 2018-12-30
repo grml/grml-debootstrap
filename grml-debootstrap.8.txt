@@ -216,7 +216,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names: lenny,
-    squeeze, wheezy, jessie, stretch, buster and sid. Corresponding with configuration
+    squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Corresponding with configuration
     variable RELEASE. Default release: buster
 
 *--remove-configs*::
@@ -375,7 +375,7 @@ Where do you want to install grub to? Usage example: grub=/dev/sda
   release=...
 
 Specify release of new Debian system. Defaults to Debian buster. Supported
-releases: lenny, squeeze, wheezy, jessie, stretch, buster and sid. Usage example: release=stretch
+releases: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Usage example: release=stretch
 
   mirror=...
 

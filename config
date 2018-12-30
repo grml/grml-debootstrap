@@ -72,7 +72,7 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: lenny, squeeze, wheezy, jessie, stretch, buster, sid
+# Supported values: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye, sid
 # Default: 'buster'
 # RELEASE='buster'
 
