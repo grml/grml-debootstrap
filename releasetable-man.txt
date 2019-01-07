@@ -1,4 +1,4 @@
-Current status (as of 2018-12-30):
+Current status (as of 2018-01-07):
 
   +----------------+-------------+
   | Release / Tool | debootstrap |
@@ -12,6 +12,8 @@ Current status (as of 2018-12-30):
   | jessie         |  works      |
   +----------------+-------------+
   | stretch        |  works      |
+  +----------------+-------------+
+  | buster         |  works      |
   +----------------+-------------+
   | bullseye       |  works [2]  |
   +----------------+-------------+
