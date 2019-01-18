@@ -1,3 +1,10 @@
+grml-debootstrap (0.86) unstable; urgency=medium
+
+  * [430abb1] Bind-mount /run/udev in target system as workaround for lvm2
+    issue #918590
+
+ -- Michael Prokop <mika@grml.org>  Fri, 18 Jan 2019 14:15:40 +0100
+
 grml-debootstrap (0.85) unstable; urgency=medium
 
   * [218bf66] Rework backports.debian.org usage (`--backportrepos` option)
