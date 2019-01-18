@@ -266,7 +266,7 @@ cleanup() {
 
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
-      for ARG in /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
+      for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
         [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1
       done
@@ -1742,6 +1742,13 @@ iface eth0 inet dhcp
      cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
   fi
 
+  if [ -d /run/udev ] ; then
+    einfo "Setting up bind-mount /run/udev"
+    mkdir -p "${MNTPOINT}"/run/udev
+    mount --bind /run/udev "${MNTPOINT}"/run/udev
+    eend $?
+  fi
+
   eend 0
 }
 # }}}
@@ -1866,6 +1873,12 @@ umount_chroot() {
   fi
 
   if grep -q "$MNTPOINT" /proc/mounts ; then
+    if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
+      einfo "Unmounting bind-mount /run/udev"
+      umount "${MNTPOINT}"/run/udev
+      eend $?
+    fi
+
      if [ -n "$PARTITION" ] ; then
         einfo "Unmount $MNTPOINT"
         umount "$MNTPOINT"
