@@ -2,7 +2,7 @@
 # Filename:      grml-debootstrap
 # Purpose:       wrapper around debootstrap for installing plain Debian via Grml
 # Authors:       grml-team (grml.org), (c) Michael Prokop <mika@grml.org>
-# Bug-Reports:   see http://grml.org/bugs/
+# Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2+
 ################################################################################
 
@@ -169,7 +169,7 @@ Other options:
   -V, --version            Show summary of options and exit.
 
 Usage examples can be found in the grml-debootstrap manpage.
-Send bugreports to the grml-team: bugs (at) grml.org || http://grml.org/bugs/
+Send bugreports to the grml-team: bugs (at) grml.org || https://grml.org/bugs/
 "
 }
 

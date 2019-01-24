@@ -12,8 +12,8 @@ This directory provides configurations and scripts to
 Required software
 -----------------
 
-* [Packer](http://packer.io/) binary in $PATH
-* [Vagrant](http://vagrantup.com/)
+* [Packer](https://packer.io/) binary in $PATH
+* [Vagrant](https://vagrantup.com/)
 * [Virtualbox](https://www.virtualbox.org/)
 
 Usage instructions

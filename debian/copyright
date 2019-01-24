@@ -1,10 +1,10 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: grml-debootstrap
 Upstream-Contact: Michael Prokop <mika@grml.org>
-Source: http://git.grml.org/?p=grml-debootstrap.git;a=summary
+Source: https://git.grml.org/?p=grml-debootstrap.git;a=summary
 
 Files: *
-Copyright: 2006-2016, Michael Prokop <mika@grml.org>
+Copyright: 2006-2019, Michael Prokop <mika@grml.org>
            2014, 2015, Sebastian Pipping <sebastian@pipping.org>
            2014, Patrick Schleizer <adrelanos@riseup.net>
            2013, 2014, Markus Rekkenbeil <mre@mobi4friends.de>

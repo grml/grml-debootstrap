@@ -3,7 +3,7 @@
 # Filename:      /etc/zsh/completion.d/_grml-debootstrap
 # Purpose:       zsh completion for grml-debootstrap
 # Authors:       grml-team (grml.org), (c) Frank Terbeck <ft@grml.org>, (c) Michael Prokop <mika@grml.org>
-# Bug-Reports:   see http://grml.org/bugs/
+# Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
 ################################################################################
 

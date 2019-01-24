@@ -2,7 +2,7 @@
 # Filename:      run_tests
 # Purpose:       run unit tests for grml-autoconfig
 # Authors:       grml-team (grml.org), (c) Ulrich Dangel <mru@grml.org>
-# Bug-Reports:   see http://grml.org/bugs/
+# Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2.
 ################################################################################
 
