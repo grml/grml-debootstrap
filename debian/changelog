@@ -1,3 +1,21 @@
+grml-debootstrap (0.87) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [dc11403] Makefile: use https version of website as
+    man.base.url.for.relative.links
+  * [b956f72] Support mmdebstrap via DEBOOTSTRAP=mmdebstrap
+  * [ec05bcf] Drop no longer relevant releasetable-man.txt
+  * [7291d05] Replace http with https where possible
+  * [7827bce] grml-debootstrap man page: point users towards github
+    instead of private mail
+  * [fc76b63] Install zsh-completion in /usr/share/zsh/vendor-completions
+  * [83408f3] zsh-completion: improve wording and list of available
+    options to better match reality
+  * [3929d57] debian/rules: support nocheck in DEB_BUILD_OPTIONS
+  * [33e362a] docs: add further and improve existing usage examples
+
+ -- Michael Prokop <mika@grml.org>  Thu, 24 Jan 2019 10:21:34 +0100
+
 grml-debootstrap (0.86) unstable; urgency=medium
 
   * [430abb1] Bind-mount /run/udev in target system as workaround for lvm2
