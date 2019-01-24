@@ -8,15 +8,15 @@
 ################################################################################
 
 _arguments -s                                                                                   \
-  '(-h --help)'{-h,--help}'[this help text]:'                                                   \
+  '(-h --help)'{-h,--help}'[display usage information]:'                                        \
   '(-v --version)'{-v,--version}'[display version information]:'                                \
-  '(-m --mirror)'{-m,--mirror}'[specify mirror for apt{-get,itude}]:mirror'                     \
-  '(-p --mntpoint)'{-p,--mntpoint}'[mountpoint for the target system]:mount point:_path_files'  \
+  '(-m --mirror)'{-m,--mirror}'[specify Debian mirror]:mirror'                                  \
   '(-r --release)'{-r,--release}'[specify the release name of the new system]:release'          \
   '(-t --target)'{-t,--target}'[target partition or directory]:device or directory:_path_files' \
-  '--grub[installation device for grub]'                                                        \
-  '--password[specify password for root user]'							\
-  '--bootappend[appendline for kernel]'
+  '--hostname[specify hostname for target system]:hostname'                                     \
+  '--grub[installation device for grub]:device or directory:_path_files'                        \
+  '--password[specify password for root user]:password'                                         \
+  '--bootappend[appendline for kernel]:kernel-options'
 
 ## END OF FILE #################################################################
 # vim:ft=zsh
