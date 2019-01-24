@@ -1,6 +1,6 @@
 #compdef grml-debootstrap
 
-# Filename:      /etc/zsh/completion.d/_grml-debootstrap
+# Filename:      /usr/share/zsh/vendor-completions/_grml-debootstrap
 # Purpose:       zsh completion for grml-debootstrap
 # Authors:       grml-team (grml.org), (c) Frank Terbeck <ft@grml.org>, (c) Michael Prokop <mika@grml.org>
 # Bug-Reports:   see https://grml.org/bugs/
