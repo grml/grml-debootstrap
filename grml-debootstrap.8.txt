@@ -462,7 +462,7 @@ deploying a stable release and upgrade it after installation finished.
 Bugs
 ----
 
-Probably. Please send bugreports to Michael Prokop <mika@grml.org>.
+Please report bugs towards https://github.com/grml/grml-debootstrap/issues
 
 See also
 --------
