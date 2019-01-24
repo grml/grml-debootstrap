@@ -9,14 +9,12 @@ doc: doc_man doc_html
 doc_html: html-stamp
 
 html-stamp: grml-debootstrap.8.txt
-	sed -i 's/^include::releasetable-man.txt\[\]/include::releasetable.txt\[\]/' grml-debootstrap.8.txt
 	asciidoc -b xhtml11 -a icons grml-debootstrap.8.txt
 	touch html-stamp
 
 doc_man: man-stamp
 
 man-stamp: grml-debootstrap.8.txt
-	sed -i 's/^include::releasetable.txt\[\]/include::releasetable-man.txt\[\]/' grml-debootstrap.8.txt
 	asciidoc -d manpage -b docbook grml-debootstrap.8.txt
 	xsltproc --nonet --stringparam man.base.url.for.relative.links https://grml.org/grml-debootstrap/ \
 		$(DOCBOOK_XML) grml-debootstrap.8.xml
