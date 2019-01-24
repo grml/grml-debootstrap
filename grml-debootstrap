@@ -335,7 +335,7 @@ stage() {
 # }}}
 
 # make sure we have what we need {{{
-check4progs debootstrap || bailout 1
+check4progs "${DEBOOTSTRAP}" || bailout 1
 # }}}
 
 # source main configuration file {{{
@@ -588,6 +588,12 @@ if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   bailout 1
 fi
 
+if [ -n "$ISO" ] && [[ "$DEBOOTSTRAP" =~ mmdebstrap$ ]] ; then
+  eerror "The ISO option is incompatible with usage of mmdebstrap for bootstrapping."
+  eerror "Either drop the --iso ... option or use plain debootstrap instead."
+  eend 1
+  bailout 1
+fi
 
 if [ "$DEBUG" = "true" ] ; then
   set -x
@@ -1685,7 +1691,7 @@ preparechroot() {
 
   cp $VERBOSE -a -L "${CONFFILES}"/extrapackages/ "${MNTPOINT}"/etc/debootstrap/
 
-  # make sure we can access network [relevant for cdebootstrap]
+  # make sure we can access network [relevant for cdebootstrap/mmdebstrap]
   [ -f "${MNTPOINT}"/etc/resolv.conf ] || cp $VERBOSE /etc/resolv.conf "${MNTPOINT}"/etc/resolv.conf
 
   # setup default locales
