@@ -12,8 +12,8 @@
 %:
 	dh $@
 
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
 override_dh_auto_test:
 	(cd tests && ./run_tests.sh)
 	make shellcheck
-	make
-
+endif
