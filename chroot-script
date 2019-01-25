@@ -115,7 +115,7 @@ chrootmirror() {
     unstable|sid|lenny) ;;  # no security pool available
     *)
       echo "Adding security.debian.org to sources.list."
-      echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
+      echo "deb https://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
   esac
 }
@@ -151,12 +151,12 @@ grmlrepos() {
      if ! grep -q grml /etc/apt/sources.list.d/grml.list 2>/dev/null ; then
         cat >> /etc/apt/sources.list.d/grml.list << EOF
 # grml: stable repository:
-  deb     http://deb.grml.org/ grml-stable  main
-  deb-src http://deb.grml.org/ grml-stable  main
+  deb     https://deb.grml.org/ grml-stable  main
+  deb-src https://deb.grml.org/ grml-stable  main
 
 # grml: testing/development repository:
-  deb     http://deb.grml.org/ grml-testing main
-  deb-src http://deb.grml.org/ grml-testing main
+  deb     https://deb.grml.org/ grml-testing main
+  deb-src https://deb.grml.org/ grml-testing main
 EOF
      fi
 
