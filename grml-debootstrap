@@ -58,7 +58,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
 [ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
-[ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://deb.debian.org/debian'
+[ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='https://deb.debian.org/debian'
 [ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
 [ -n "$FORCE" ] || FORCE=''
 [ -n "$HOSTNAME" ] || HOSTNAME='grml'
@@ -833,7 +833,7 @@ prompt_for_mirror()
   [ $? -eq 0 ] || bailout
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
-     [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
+     [ -n "$MIRROR" ] || MIRROR='https://deb.debian.org/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
                0 0 $MIRROR)"
