@@ -607,7 +607,7 @@ fi
 
 [ "$_opt_version" ] && {
   einfo "$PN - version $VERSION"
-  einfo "Send bug reports to bugs@grml.org or http://grml.org/bugs/"
+  einfo "Send bug reports to bugs@grml.org or https://grml.org/bugs/"
   eend 0
   exit 0
 }
