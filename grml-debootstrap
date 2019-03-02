@@ -155,6 +155,7 @@ Configuration options:
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
       --password <pwd>     Use specified password as password for user root.
+      --sshcopyid          Use locally available public keys to authorise root login on the target system.
       --bootappend <line>  Add specified appendline to kernel whilst booting.
       --chroot-scripts <d> Execute chroot scripts from specified directory.
       --pre-scripts <dir>  Execute scripts from specified directory (before chroot-scripts).
@@ -346,7 +347,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid
 
 _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@")
@@ -460,6 +461,9 @@ while :; do
   --nopassword)        # Skip password dialog
     _opt_nopassword=T
     ;;
+  --sshcopyid)         # Use locally available public keys to authorise root login on the target system
+    _opt_sshcopyid=T
+    ;;
   --grmlrepos)         # Enable Grml repository
     _opt_grmlrepos=T
     ;;
@@ -560,6 +564,7 @@ done
 [ "$_opt_defaultinterfaces" ]   && USE_DEFAULT_INTERFACES="true"
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
+[ "$_opt_sshcopyid" ]           && SSHCOPYID="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_efi" ]                 && EFI=$_opt_efi
@@ -1746,6 +1751,20 @@ iface eth0 inet dhcp
   # install config file providing some example entries
   if [ -r /etc/network/interfaces.examples ] && [ ! -r "$MNTPOINT/etc/network/interfaces.examples" ] ; then
      cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
+  fi
+
+  if [ -n "${SSHCOPYID}" ] ; then
+    ssh-add -L > /dev/null 2>&1 ; RC=$?
+    if [ $RC -eq 0 ] ; then
+      einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option."
+      mkdir "${MNTPOINT}"/root/.ssh
+      chmod 0700 "${MNTPOINT}"/root/.ssh
+      ssh-add -L > "${MNTPOINT}"/root/.ssh/authorized_keys
+      eend 0
+    else
+      ewarn "Could not open a connection to your authentication agent or the agent has no identites."
+      eend $?
+    fi
   fi
 
   if [ -d /run/udev ] ; then
