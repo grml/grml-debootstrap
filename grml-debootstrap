@@ -1764,16 +1764,21 @@ iface ${interface} inet dhcp
   fi
 
   if [ -n "${SSHCOPYID}" ] ; then
-    ssh-add -L > /dev/null 2>&1 ; RC=$?
-    if [ $RC -eq 0 ] ; then
+    if ssh-add -L >/dev/null 2>&1 ; then
       einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option."
-      mkdir "${MNTPOINT}"/root/.ssh
+      mkdir -p "${MNTPOINT}"/root/.ssh
       chmod 0700 "${MNTPOINT}"/root/.ssh
-      ssh-add -L > "${MNTPOINT}"/root/.ssh/authorized_keys
-      eend 0
+      if ssh-add -L >> "${MNTPOINT}"/root/.ssh/authorized_keys ; then
+        eend 0
+      else
+        eerror "Error: executing 'ssh-add -L' failed."
+        eend 1
+        bailout 1
+      fi
     else
-      ewarn "Could not open a connection to your authentication agent or the agent has no identites."
-      eend $?
+      eerror "Could not open a connection to your authentication agent or the agent has no identites."
+      eend 1
+      bailout 1
     fi
   fi
 
