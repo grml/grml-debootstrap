@@ -85,8 +85,11 @@ Options and environment variables
 
 *--defaultinterfaces*::
 
-   Install a default /etc/network/interfaces file (enabling DHCP for eth0)
+   Install a default /etc/network/interfaces file (enabling DHCP for all local
+   Ethernet, WLAN and WWAN interfaces using predictable network interface names
+   and using eth0 as tradtition interface name for backward compatibility)
    instead of taking over config from host system.
+   This option is automatically enabled when using --vm or --vmfile.
 
 *--efi* _device_::
 
@@ -155,7 +158,6 @@ Options and environment variables
 *--nointerfaces*::
 
     Do not copy /etc/network/interfaces from host system to the target.
-    This option is automatically enabled when using --vm or --vmfile.
 
 *--nokernel*::
 
@@ -239,6 +241,7 @@ Options and environment variables
     partitioned.
     This allows deployment of a Virtual Machine. The options needs to be
     combined with the --target option.
+    This option automatically enables the --defaultinterfaces option.
     Usage example: --vm --target /dev/mapper/your-vm-disk
 
 *--vmfile*::
@@ -247,6 +250,7 @@ Options and environment variables
     partition/block device or directory. This allows deployment of a Virtual
     Machine. The options needs to be combined with the --target option
     ('qemu-img create -f raw ...' is executed on the specified target).
+    This option automatically enables the --defaultinterfaces option.
     Usage example: --vmfile --target /mnt/sda1/qemu.img
 
 *--vmsize* _size_::
@@ -263,6 +267,13 @@ Options and environment variables
 WARNING: the command line parsing of grml-debootstrap usually does not validate
 the provided arguments for the command line options. Please be careful and check
 docs and /etc/debootstrap/config for further information.
+
+Networking
+----------
+
+By default (that is, if none of the options *--nointerfaces*,
+*--defaultinterfaces*, *--vmfile* or *--vm* are given) /etc/network/interfaces
+will be copied from the host to the target system.
 
 Usage examples
 ---------------

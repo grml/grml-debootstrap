@@ -1723,6 +1723,16 @@ allow-hotplug eth0
 iface eth0 inet dhcp
 "
 
+  # add dhcp setting for Predictable Network Interface Names
+  if [ -x /bin/udevadm ]; then
+    for interface in $(udevadm info -e | sed -n -e 's/E: ID_NET_NAME_PATH=\([^$*]\)/\1/p'); do
+      DEFAULT_INTERFACES="${DEFAULT_INTERFACES}
+allow-hotplug ${interface}
+iface ${interface} inet dhcp
+"
+    done
+  fi
+
   if [ -n "$NOINTERFACES" ] ; then
     einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
   elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
