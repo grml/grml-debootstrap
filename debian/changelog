@@ -1,3 +1,16 @@
+grml-debootstrap (0.88) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [4f2362b] Update bug report instructions. Thanks to Patrick Schleizer
+  * [de2ad0f] sshcopyid option: exit if `ssh-add -L` fails to execute
+  * [eb7cb8d] docs: fix typo
+
+  [ Darshaka Pathirana ]
+  * [9a8bfee] Add DHCP setting for Predictable Network Interface Names
+  * [0b1d982] Add option --sshcopyid to authorise root login
+
+ -- Michael Prokop <mika@grml.org>  Sat, 02 Mar 2019 11:27:00 +0100
+
 grml-debootstrap (0.87) unstable; urgency=medium
 
   [ Michael Prokop ]
