@@ -226,6 +226,13 @@ Options and environment variables
     Delete grml-debootstrap configuration files (/etc/debootstrap/*) from installed
     system. Useful for reproducible builds or if you don't want to leak information.
 
+*--sshcopyid*::
+
+    Use locally available public keys to authorise root login on the target system.
+    Similar to ssh-copy-id(1) (without the -i option) it checks if `ssh-add -L`
+    provides any output, and if so those keys are appended to
+    _/root/.ssh/authorized_keys_ (creating the file and directory (with mode 0700)).
+
 *-t*, *--target* _target_::
 
     Target partition (/dev/...) or directory (anything else without /dev at the
