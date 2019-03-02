@@ -87,7 +87,7 @@ Options and environment variables
 
    Install a default /etc/network/interfaces file (enabling DHCP for all local
    Ethernet, WLAN and WWAN interfaces using predictable network interface names
-   and using eth0 as tradtition interface name for backward compatibility)
+   and using eth0 as traditional interface name for backward compatibility)
    instead of taking over config from host system.
    This option is automatically enabled when using --vm or --vmfile.
 
