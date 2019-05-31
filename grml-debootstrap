@@ -1730,12 +1730,28 @@ iface eth0 inet dhcp
 
   # add dhcp setting for Predictable Network Interface Names
   if [ -x /bin/udevadm ]; then
-    for interface in $(udevadm info -e | sed -n -e 's/E: ID_NET_NAME_PATH=\([^$*]\)/\1/p'); do
-      DEFAULT_INTERFACES="${DEFAULT_INTERFACES}
+    tmpfile=$(mktemp)
+    for interface in /sys/class/net/*; do
+      udevadm info --query=all --path="${interface}" > "${tmpfile}"
+      # skip virtual devices, like bridges, vboxnet,...
+      if grep -q 'P: /devices/virtual/net/' "${tmpfile}" ; then
+        continue
+      fi
+
+      # iterate over possible naming policies by precedence (see udev/net/link-config.c),
+      # use and stop on first match to have same behavior as udev's link_config_apply()
+      for property in ID_NET_NAME_FROM_DATABASE ID_NET_NAME_ONBOARD ID_NET_NAME_SLOT ID_NET_NAME_PATH ID_NET_NAME_MAC ; do
+        if grep -q "${property}" "${tmpfile}" ; then
+          interface=$(grep "${property}" "${tmpfile}" | sed -n -e "s/E: ${property}=\([^\$*]\)/\1/p")
+          DEFAULT_INTERFACES="${DEFAULT_INTERFACES}
 allow-hotplug ${interface}
 iface ${interface} inet dhcp
 "
+          break
+        fi
+      done
     done
+    rm -f "${tmpfile}"
   fi
 
   if [ -n "$NOINTERFACES" ] ; then
