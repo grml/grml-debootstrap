@@ -1758,25 +1758,30 @@ iface ${interface} inet dhcp
     einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
   elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
+    mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
+    mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
+    mkdir -p "${MNTPOINT}/etc/network"
     cp $VERBOSE /etc/network/interfaces "${MNTPOINT}/etc/network/interfaces"
     eend $?
   else
     ewarn "Couldn't read /etc/network/interfaces, installing default /etc/network/interfaces"
+    mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
   fi
 
   # install config file providing some example entries
   if [ -r /etc/network/interfaces.examples ] && [ ! -r "$MNTPOINT/etc/network/interfaces.examples" ] ; then
-     cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
+    mkdir -p "${MNTPOINT}/etc/network"
+    cp /etc/network/interfaces.examples "$MNTPOINT/etc/network/interfaces.examples"
   fi
 
   if [ -n "${SSHCOPYID}" ] ; then
