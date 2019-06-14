@@ -1,3 +1,12 @@
+grml-debootstrap (0.89) unstable; urgency=medium
+
+  * [2860f13] Fix detection of predictable network interface names
+    (Closes: #929810)
+  * [7a11723] Ensure /etc/network exists before setting up
+    /etc/network/interfaces (Closes: #930468)
+
+ -- Michael Prokop <mika@grml.org>  Fri, 14 Jun 2019 14:47:02 +0200
+
 grml-debootstrap (0.88) unstable; urgency=medium
 
   [ Michael Prokop ]
