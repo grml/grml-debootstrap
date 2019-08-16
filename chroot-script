@@ -646,6 +646,11 @@ grub_install() {
     return 1
   fi
 
+  if [ -n "${BOOT_APPEND}" ] ; then
+    echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
+    sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" /etc/default/grub
+  fi
+
   mountpoint /boot/efi &>/dev/null && umount /boot/efi
 
   $UPDATEGRUB
