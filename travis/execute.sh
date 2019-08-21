@@ -53,7 +53,7 @@ trap bailout 1 2 3 6 14 15
 
 # run shellcheck tests
 docker run koalaman/shellcheck:stable --version
-docker run --rm -v "$(pwd)":/code koalaman/shellcheck:stable -e SC2181 /code/chroot-script /code/grml-debootstrap
+docker run --rm -v "$(pwd)":/code koalaman/shellcheck:stable -e SC2181 -e SC2001 /code/chroot-script /code/grml-debootstrap
 
 # build Debian package
 if [ -z "${TRAVIS:-}" ] ; then
