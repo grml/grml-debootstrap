@@ -347,10 +347,6 @@ line arguments.
 The script executed within the new Debian system as soon as the main system
 has been installed via [c]debootstrap.
 
-  /etc/debootstrap/locale.gen
-
-Defines the default locales used for generating locales via locale-gen.
-
   /etc/debootstrap/packages
 
 Defines the software packages which should be installed in the new

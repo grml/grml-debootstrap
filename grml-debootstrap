@@ -54,8 +54,6 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEBCONF" ] || DEBCONF='yes'
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
 [ -n "$DEBOOTSTRAP" ] || DEBOOTSTRAP='debootstrap'
-[ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
-[ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
 [ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://deb.debian.org/debian'
@@ -64,7 +62,6 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$HOSTNAME" ] || HOSTNAME='grml'
 [ -n "$INITRD" ] || INITRD='yes'
 [ -n "$INSTALL_NOTES" ] || INSTALL_NOTES='/etc/debootstrap/install_notes'
-[ -n "$LOCALES" ] || LOCALES='yes'
 [ -n "$MIRROR" ] || MIRROR="$FALLBACK_MIRROR"
 [ -n "$MKFS" ] || MKFS='mkfs.ext4'
 [ -n "$MKFS_OPTS" ] || MKFS_OPTS=''
@@ -579,6 +576,23 @@ done
 [ -z "$COMPONENTS" ]            && COMPONENTS="main"
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 [ "$_opt_non_free" ]            && COMPONENTS="$COMPONENTS non-free"
+
+# variable checks
+if [ -n "${LOCALES:-}" ] ; then
+  ewarn "Deprecation NOTE: LOCALES handling is deprecated, please customize locale handling via post scripts instead."
+fi
+
+if [ -n "${DEFAULT_LOCALES:-}" ] ; then
+  ewarn "Deprecation NOTE: DEFAULT_LOCALES handling is deprecated, please customize locale handling via post scripts instead."
+fi
+
+if [ -n "${DEFAULT_DEFAULT_LANGUAGE:-}" ] ; then
+  ewarn "Deprecation NOTE: DEFAULT_DEFAULT_LANGUAGE handling is deprecated, please customize locale handling via post scripts instead."
+fi
+
+if [ -r "${CONFFILES:-}"/locale.gen ] ; then
+  ewarn "Deprecation NOTE: ${CONFFILES}/locale.gen handling is deprecated, please customize locale handling via post scripts instead."
+fi
 
 # command line option checks
 if [ "$_opt_scripts_set" ] ; then
@@ -1621,8 +1635,6 @@ preparechroot() {
   [ -n "$DEBCONF" ]             && echo "DEBCONF='$(sed "s,','\\\\'',g" <<<"${DEBCONF}")'"                         >> "$CHROOT_VARIABLES"
   [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND='$(sed "s,','\\\\'',g" <<<"${DEBIAN_FRONTEND}")'"         >> "$CHROOT_VARIABLES"
   [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP='$(sed "s,','\\\\'',g" <<<"${DEBOOTSTRAP}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LOCALES}")'"         >> "$CHROOT_VARIABLES"
-  [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LANGUAGE}")'"       >> "$CHROOT_VARIABLES"
   [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES='$(sed "s,','\\\\'',g" <<<"${EXTRAPACKAGES}")'"             >> "$CHROOT_VARIABLES"
   [ -n "$EFI" ]                 && echo "EFI='$(sed "s,','\\\\'',g" <<<"${EFI}")'"                                 >> "$CHROOT_VARIABLES"
   [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR='$(sed "s,','\\\\'',g" <<<"${FALLBACK_MIRROR}")'"         >> "$CHROOT_VARIABLES"
@@ -1635,7 +1647,6 @@ preparechroot() {
   [ -n "$ISODIR" ]              && echo "ISODIR='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                              >> "$CHROOT_VARIABLES"
   [ -n "$ISO" ]                 && echo "ISO='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                                 >> "$CHROOT_VARIABLES"
   [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST='$(sed "s,','\\\\'',g" <<<"${KEEP_SRC_LIST}")'"             >> "$CHROOT_VARIABLES"
-  [ -n "$LOCALES" ]             && echo "LOCALES='$(sed "s,','\\\\'',g" <<<"${LOCALES}")'"                         >> "$CHROOT_VARIABLES"
   [ -n "$MIRROR" ]              && echo "MIRROR='$(sed "s,','\\\\'',g" <<<"${MIRROR}")'"                           >> "$CHROOT_VARIABLES"
   [ -n "$MKFS" ]                && echo "MKFS='$(sed "s,','\\\\'',g" <<<"${MKFS}")'"                               >> "$CHROOT_VARIABLES"
   [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                                                      >> "$CHROOT_VARIABLES"
@@ -1698,9 +1709,6 @@ preparechroot() {
 
   # make sure we can access network [relevant for cdebootstrap/mmdebstrap]
   [ -f "${MNTPOINT}"/etc/resolv.conf ] || cp $VERBOSE /etc/resolv.conf "${MNTPOINT}"/etc/resolv.conf
-
-  # setup default locales
-  [ -n "$LOCALES" ] && cp $VERBOSE "${CONFFILES}"/locale.gen "${MNTPOINT}"/etc/locale.gen
 
   # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
   ( cd "${MNTPOINT}"/dev && tar zxf /etc/debootstrap/devices.tar.gz )

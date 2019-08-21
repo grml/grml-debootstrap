@@ -1,1 +1,2 @@
 rm_conffile /etc/zsh/completion.d/_grml-debootstrap 0.86~
+rm_conffile /etc/debootstrap/locale.gen 0.89~

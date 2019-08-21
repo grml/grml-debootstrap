@@ -442,15 +442,15 @@ EOF
 
 # set default locales {{{
 default_locales() {
-  if [ -n "$DEFAULT_LOCALES" ] ; then
-    if ! [ -x /usr/sbin/update-locale ] ; then
-      echo "Warning: update-locale executable not available (no locales package installed?)"
-      echo "Ignoring request to run update-locale for $DEFAULT_LOCALES therefore"
-      return 0
-    fi
-
-    /usr/sbin/update-locale LANGUAGE="$DEFAULT_LANGUAGE" LANG="$DEFAULT_LOCALES"
+  if ! [ -x "$(command -v update-locale)" ] ; then
+    echo "Warning: update-locale executable not available (no locales package installed?)"
+    echo "Ignoring request to run update-locale for C.UTF-8 therefore"
+    return 0
   fi
+
+  echo "Setting C.UTF-8 as default LANG"
+  /usr/sbin/update-locale LANG='C.UTF-8'
+  echo 'locales locales/default_environment_locale select C.UTF-8' | debconf-set-selections
 }
 # }}}
 
