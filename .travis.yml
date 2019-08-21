@@ -5,7 +5,7 @@ services:
   - docker
 
 env:
-  - TRAVIS_DEBIAN_DISTRIBUTION=stretch
+  - TRAVIS_DEBIAN_DISTRIBUTION=buster
   - TRAVIS_DEBIAN_DISTRIBUTION=unstable TRAVIS_DEBIAN_INCREMENT_VERSION_NUMBER=true
 
 script:
