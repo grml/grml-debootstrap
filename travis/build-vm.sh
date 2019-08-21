@@ -3,7 +3,7 @@
 set -eu -o pipefail
 
 TARGET="${TARGET:-/code/qemu.img}"
-RELEASE="${RELEASE:-stretch}"
+RELEASE="${RELEASE:-buster}"
 
 cd "$(dirname "$TARGET")"
 apt update
