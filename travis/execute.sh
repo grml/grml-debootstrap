@@ -69,7 +69,7 @@ else
 fi
 
 # we need to run in privileged mode to be able to use loop devices
-docker run --privileged -v "$(pwd)":/code --rm -i -t debian:buster /code/travis/build-vm.sh
+docker run --cap-add=SYS_ADMIN --security-opt apparmor:unconfined --privileged -v "$(pwd)":/code --rm -i -t debian:buster /code/travis/build-vm.sh
 
 [ -x ./goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)" sh
 
