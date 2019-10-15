@@ -1516,9 +1516,6 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
 fi
 
   einfo "Updating grub configuration file."
-  if [ -n "$BOOT_APPEND" ] ; then
-     sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" "${MNTPOINT}"/etc/default/grub
-  fi
   chroot "${MNTPOINT}" update-grub
 
   case "$RELEASE" in
@@ -1615,6 +1612,7 @@ preparechroot() {
   #   e.g. not with 4.2.37(1)-release (a.k.a 4.2+dfsg-0.1+deb7u3) of Debian wheezy
   [ -n "$ARCH" ]                && echo "ARCH='$(sed "s,','\\\\'',g" <<<"${ARCH}")'"                               >> "$CHROOT_VARIABLES"
   [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS='$(sed "s,','\\\\'',g" <<<"${BACKPORTREPOS}")'"             >> "$CHROOT_VARIABLES"
+  [ -n "$BOOT_APPEND" ]         && echo "BOOT_APPEND='$(sed "s,','\\\\'',g" <<<"${BOOT_APPEND}")'"                 >> "$CHROOT_VARIABLES"
   [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${CHROOT_SCRIPTS}")'"           >> "$CHROOT_VARIABLES"
   [ -n "$COMPONENTS" ]          && echo "COMPONENTS='$(sed "s,','\\\\'',g" <<<"${COMPONENTS}")'"                   >> "$CHROOT_VARIABLES"
   [ -n "$CONFFILES" ]           && echo "CONFFILES='$(sed "s,','\\\\'',g" <<<"${CONFFILES}")'"                     >> "$CHROOT_VARIABLES"
