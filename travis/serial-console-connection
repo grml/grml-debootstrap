@@ -13,9 +13,9 @@ parser = argparse.ArgumentParser(description='Connect to serial console ' +
 parser.add_argument('--port', required=True,
                     help='serial console device to connect ' +
                     'to (e.g. /dev/pts/X)')
-parser.add_argument('--hostname', default="stretch",
+parser.add_argument('--hostname', default="buster",
                     help='hostname of the system for login process ' +
-                    '(default: stretch)')
+                    '(default: buster)')
 parser.add_argument('--pipefile', default="./serial0",
                     help='file name for named pipe file (for ' +
                     'interacting between host + VM via QEMU ' +
