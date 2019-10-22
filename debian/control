@@ -6,7 +6,7 @@ Uploaders: Michael Prokop <mika@debian.org>,
            Alexander Wirt <formorer@debian.org>,
            Christian Hofstaedtler <zeha@debian.org>,
            Ulrich Dangel <mru@spamt.net>
-Build-Depends: debhelper (>= 10~)
+Build-Depends: debhelper-compat (= 12),
 Build-Depends-Indep: asciidoc,
                      docbook-xsl,
                      shunit2,
