@@ -1,3 +1,24 @@
+grml-debootstrap (0.90) unstable; urgency=medium
+
+  * [2891924] packer: Update VBoxGuestAdditions to v5.2.24
+  * [c7ddca2] packer: support Debian 10.0 in tests
+  * [e92841f] Use new security.debian.org repository layout for bullseye
+    and newer
+  * [5e77963] packer: make buster the new default Debian release
+  * [2b7cd25] packer: update to grml64-full 2018.12
+  * [6839f3b] travis: ignore SC2001 which doesn't work for
+    $CHROOT_VARIABLES handling
+  * [52c01f7] Properly exit if GRUB installation fails
+  * [c8f145c] Support BOOT_APPEND usage outside of VMs
+  * [2ee78ca] /etc/fstab: provide header comment, pointing to man pages
+    and systemctl daemon-reload
+  * [c3a7715] travis: default to buster and also use debian:buster as
+    docker container
+  * [d62f187] Drop debian/compat, replace with debhelper-compat
+  * [f423157] Bump Standards-Version to 4.4.1
+
+ -- Michael Prokop <mika@grml.org>  Tue, 22 Oct 2019 15:57:49 +0200
+
 grml-debootstrap (0.89) unstable; urgency=medium
 
   * [2860f13] Fix detection of predictable network interface names
