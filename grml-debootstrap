@@ -144,6 +144,7 @@ Configuration options:
       --nokernel           Skip installation of default kernel images.
       --nointerfaces       Skip installation of default network configuration.
       --defaultinterfaces  Install default network configuration. (default)
+      --hostinterfaces     Copy host network configuration from host to target system.
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
@@ -345,7 +346,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,hostinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid
 
 _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@")
@@ -447,8 +448,11 @@ while :; do
   --password)          # Use specified password as password for user root
     shift; _opt_password="$1"
     ;;
-  --defaultinterfaces) # Install a default /etc/systemd/network/80-dhcp.network file
+  --defaultinterfaces) # Install a default network configuration
     _opt_defaultinterfaces=T
+    ;;
+  --hostinterfaces)    # Copy host network configuration from host to target system
+    _opt_hostinterfaces=T
     ;;
   --nointerfaces)      # Skip installation of default network configuration.
     _opt_nointerfaces=T
@@ -560,6 +564,7 @@ done
 [ "$_opt_password" ]            && ROOTPASSWORD=$_opt_password
 [ "$_opt_nopassword" ]          && NOPASSWORD='yes'
 [ "$_opt_defaultinterfaces" ]   && USE_DEFAULT_INTERFACES="true"
+[ "$_opt_hostinterfaces" ]      && USE_HOST_INTERFACES="true"
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_sshcopyid" ]           && SSHCOPYID="true"
@@ -594,6 +599,24 @@ fi
 if [ -n "$ISO" ] && [[ "$DEBOOTSTRAP" =~ mmdebstrap$ ]] ; then
   eerror "The ISO option is incompatible with usage of mmdebstrap for bootstrapping."
   eerror "Either drop the --iso ... option or use plain debootstrap instead."
+  eend 1
+  bailout 1
+fi
+
+if [ "$_opt_defaultinterfaces" ] && [ "$_opt_hostinterfaces" ] ; then
+  eerror "The options --defaultinterfaces and --hostinterfaces conflict with each other, please drop one option from your command line."
+  eend 1
+  bailout 1
+fi
+
+if [ "$_opt_defaultinterfaces" ] && [ "$_opt_nointerfaces" ] ; then
+  eerror "The options --defaultinterfaces and --nointerfaces conflict with each other, please drop one option from your command line."
+  eend 1
+  bailout 1
+fi
+
+if [ "$_opt_nointerfaces" ] && [ "$_opt_hostinterfaces" ] ; then
+  eerror "The options --nointerfaces and --hostinterfaces conflict with each other, please drop one option from your command line."
   eend 1
   bailout 1
 fi
@@ -1764,18 +1787,30 @@ iface ${interface} inet dhcp
     einfo "Not installing default network configuration as requested via --nointerfaces option"
     eend 0
   elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
-    einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
+    einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces option"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
     eend $?
-    einfo "Installing default /etc/systemd/network/80-dhcp.network as requested via --defaultinterfaces options."
+    einfo "Installing default /etc/systemd/network/80-dhcp.network as requested via --defaultinterfaces option"
+    mkdir -p "${MNTPOINT}/etc/systemd/network"
     echo "$DEFAULT_SYSTEMD_NETWORKD" > "${MNTPOINT}/etc/systemd/network/80-dhcp.network"
+    eend $?
+  elif [ -n "$USE_HOST_INTERFACES" ] ; then
+    if [ -r /etc/network/interfaces ] ; then
+      einfo "Copying /etc/network/interfaces from host to target system as requested via --hostinterfaces option"
+      mkdir -p "${MNTPOINT}/etc/network"
+      cp $VERBOSE /etc/network/interfaces "${MNTPOINT}/etc/network/interfaces"
+    elif ls /etc/systemd/network/* &>/dev/null ; then
+      einfo "Copy /etc/systemd/network/* from host to target system as requested via --hostinterfaces option"
+      mkdir -p "${MNTPOINT}/etc/systemd/network"
+      cp $VERBOSE /etc/systemd/network/* "${MNTPOINT}/etc/systemd/network"
+    fi
     eend $?
   fi
 
   if [ -n "${SSHCOPYID}" ] ; then
     if ssh-add -L >/dev/null 2>&1 ; then
-      einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option."
+      einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option"
       mkdir -p "${MNTPOINT}"/root/.ssh
       chmod 0700 "${MNTPOINT}"/root/.ssh
       if ssh-add -L >> "${MNTPOINT}"/root/.ssh/authorized_keys ; then

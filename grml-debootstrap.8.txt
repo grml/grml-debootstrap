@@ -80,16 +80,16 @@ Options and environment variables
 
 *--debug*::
 
-   Execute in very verbose way. Useful for debugging possible problems
-   with grml-debootstrap or identify what's actually executed.
+    Execute in very verbose way. Useful for debugging possible problems
+    with grml-debootstrap or identify what's actually executed.
 
 *--defaultinterfaces*::
 
-   Install a default /etc/network/interfaces file (enabling DHCP for all local
-   Ethernet, WLAN and WWAN interfaces using predictable network interface names
-   and using eth0 as traditional interface name for backward compatibility)
-   instead of taking over config from host system.
-   This option is automatically enabled when using --vm or --vmfile.
+    Install a default network configuration, that is a default
+    /etc/network/interfaces file (enabling DHCP for the first detected Ethernet
+    interfaces using predictable network interface names and using eth0 as
+    traditional interface name for backward compatibility).
+    This is the default and conflicts with --hostinterfaces and --nointerfaces.
 
 *--efi* _device_::
 
@@ -130,6 +130,13 @@ Options and environment variables
 
     Show summary of options and exit.
 
+*--hostinterfaces*::
+
+    Copy host network configuration from host to target system, copying
+    /etc/network/interfaces and/or /etc/systemd/network/* if they exists.
+    This behavior used to be the default till grml-debootstrap v0.90.
+    Conflicts with --defaultinterfaces and --nointerfaces.
+
 *--hostname* _hostname_::
 
     Use specified hostname instead of the default (being $HOSTNAME or if unset 'grml').
@@ -155,12 +162,12 @@ Options and environment variables
 
     Skip debootstrap, only do configuration to the target.
 
-
 *--nointerfaces*::
 
     Skip installation of a default network configuration.
-    Does not provide a default /etc/systemd/network/80-dhcp.network and
+    Does neither provide a default /etc/systemd/network/80-dhcp.network nor
     /etc/network/interfaces on the target system.
+    Conflicts with --defaultinterfaces and --hostinterfaces.
 
 *--nokernel*::
 
@@ -251,7 +258,6 @@ Options and environment variables
     partitioned.
     This allows deployment of a Virtual Machine. The options needs to be
     combined with the --target option.
-    This option automatically enables the --defaultinterfaces option.
     Usage example: --vm --target /dev/mapper/your-vm-disk
 
 *--vmfile*::
@@ -260,7 +266,6 @@ Options and environment variables
     partition/block device or directory. This allows deployment of a Virtual
     Machine.
     ('qemu-img create -f raw ...' is executed on the specified target).
-    This option automatically enables the --defaultinterfaces option.
     Usage example: --vmfile --target /mnt/sda1/qemu.img
 
 *--vmsize* _size_::
@@ -281,9 +286,8 @@ docs and /etc/debootstrap/config for further information.
 Networking
 ----------
 
-By default (that is, if none of the options *--nointerfaces*,
-*--defaultinterfaces*, *--vmfile* or *--vm* are given) /etc/network/interfaces
-will be copied from the host to the target system.
+By default a default network configuration is installed, see *--defaultinterfaces*.
+To change the behavior, see *--nointerfaces* and *--hostinterfaces*.
 
 Usage examples
 ---------------
