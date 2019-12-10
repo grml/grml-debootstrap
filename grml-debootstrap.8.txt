@@ -307,7 +307,7 @@ Use mmdebstrap instead of default debootstrap tool for bootstrapping.
 
 Install default Debian release (buster) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  grml-debootstrap --efi /dev/sda1 --target /dev/sda2 --grub /dev/sda --efi
+  grml-debootstrap --efi /dev/sda1 --target /dev/sda2 --grub /dev/sda
 
 Install default Debian release (buster) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use /dev/sda1 as EFI partition (requires EFI support in booted system).
