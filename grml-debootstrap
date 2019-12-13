@@ -1515,6 +1515,15 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
   rm -f "${MNTPOINT}/tmp/core.img"
 fi
 
+  # workaround for Debian bug #918590 with lvm + udev:
+  # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
+  if [ -d /run/udev ] ; then
+    einfo "Setting up bind-mount /run/udev"
+    mkdir -p "${MNTPOINT}"/run/udev
+    mount --bind /run/udev "${MNTPOINT}"/run/udev
+    eend $?
+  fi
+
   einfo "Updating grub configuration file."
   chroot "${MNTPOINT}" update-grub
 
@@ -1532,6 +1541,14 @@ fi
   else
     einfo "Adjusting grub.cfg for successful boot sequence."
     sed -i "s;root=[^ ]\\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
+  fi
+
+  # workaround for Debian bug #918590 with lvm + udev:
+  # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
+  if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
+    einfo "Unmounting bind-mount /run/udev"
+    umount "${MNTPOINT}"/run/udev
+    eend $?
   fi
 
   umount "${MNTPOINT}"/proc
