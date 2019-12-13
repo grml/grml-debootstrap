@@ -335,10 +335,6 @@ stage() {
 }
 # }}}
 
-# make sure we have what we need {{{
-check4progs "${DEBOOTSTRAP}" || bailout 1
-# }}}
-
 # source main configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
   # shellcheck disable=SC1091
@@ -626,6 +622,8 @@ fi
 # }}}
 
 # make sure we have what we need {{{
+check4progs "${DEBOOTSTRAP}" || bailout 1
+
 if [ -n "$VIRTUAL" ] ; then
   check4progs kpartx parted qemu-img || bailout 1
 fi
