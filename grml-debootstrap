@@ -1798,6 +1798,8 @@ iface ${interface} inet dhcp
   fi
 
   if [ -n "${SSHCOPYID}" ] ; then
+    AUTHORIZED_KEYS_SOURCE=${AUTHORIZED_KEYS_SOURCE:-$HOME/.ssh/authorized_keys}
+    AUTHORIZED_KEYS_TARGET=${AUTHORIZED_KEYS_TARGET:-$MNTPOINT/root/.ssh/}
     if ssh-add -L >/dev/null 2>&1 ; then
       einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option."
       mkdir -p "${MNTPOINT}"/root/.ssh
@@ -1806,6 +1808,17 @@ iface ${interface} inet dhcp
         eend 0
       else
         eerror "Error: executing 'ssh-add -L' failed."
+        eend 1
+        bailout 1
+      fi
+    elif [ -f "$AUTHORIZED_KEYS_SOURCE" ]; then
+      einfo "copying '$AUTHORIZED_KEYS_SOURCE' to '$AUTHORIZED_KEYS_TARGET' as requested via --sshcopyid option."
+      mkdir -p "$AUTHORIZED_KEYS_TARGET"
+      chmod 0700 "$AUTHORIZED_KEYS_TARGET"
+      if cp "$AUTHORIZED_KEYS_SOURCE" "$AUTHORIZED_KEYS_TARGET" ; then
+        eend 0
+      else
+        eerror "Error: copying '$AUTHORIZED_KEYS_SOURCE' to '$AUTHORIZED_KEYS_TARGET' failed"
         eend 1
         bailout 1
       fi
