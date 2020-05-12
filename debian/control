@@ -2,15 +2,18 @@ Source: grml-debootstrap
 Section: admin
 Priority: optional
 Maintainer: Grml Team <team@grml.org>
-Uploaders: Michael Prokop <mika@debian.org>,
-           Alexander Wirt <formorer@debian.org>,
-           Christian Hofstaedtler <zeha@debian.org>,
-           Ulrich Dangel <mru@spamt.net>
-Build-Depends: debhelper-compat (= 12),
-Build-Depends-Indep: asciidoc,
-                     docbook-xsl,
-                     shunit2,
-                     xsltproc
+Uploaders:
+ Michael Prokop <mika@debian.org>,
+ Alexander Wirt <formorer@debian.org>,
+ Christian Hofstaedtler <zeha@debian.org>,
+ Ulrich Dangel <mru@spamt.net>,
+Build-Depends:
+ debhelper-compat (= 12),
+Build-Depends-Indep:
+ asciidoc,
+ docbook-xsl,
+ shunit2,
+ xsltproc,
 Standards-Version: 4.5.0
 Homepage: https://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
@@ -18,18 +21,20 @@ Vcs-Browser: https://git.grml.org/?p=grml-debootstrap.git
 
 Package: grml-debootstrap
 Architecture: all
-Depends: debian-archive-keyring,
-         debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16),
-         e2fsprogs,
-         fdisk | util-linux (<< 2.29.2-3~),
-         gawk,
-         kmod,
-         ${misc:Depends},
-         ${shlibs:Depends}
-Recommends: dialog,
-            kpartx,
-            parted,
-            qemu-utils
+Depends:
+ debian-archive-keyring,
+ debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16),
+ e2fsprogs,
+ fdisk | util-linux (<< 2.29.2-3~),
+ gawk,
+ kmod,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ dialog,
+ kpartx,
+ parted,
+ qemu-utils,
 Description: wrapper around debootstrap for installing pure Debian
  Provides a wrapper suite around debootstrap and cdebootstrap
  to ease installation of a pure Debian system.
