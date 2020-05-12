@@ -1,3 +1,15 @@
+grml-debootstrap (0.91) unstable; urgency=medium
+
+  * [ef76531] docs: fix duplicated --efi option in usage examples
+  * [22cdc9f] Provide workaround for Debian bug #918590 with lvm + udev in
+    VM installations
+  * [5d3fdc8] Check for existence of debootstrap binary after command line
+    processing
+  * [eb667bc] Bump Standards-Version to 4.5.0
+  * [8002a17] Execute 'wrap-and-sort -a -t -s' on debian/
+
+ -- Michael Prokop <mika@grml.org>  Tue, 12 May 2020 17:23:59 +0200
+
 grml-debootstrap (0.90) unstable; urgency=medium
 
   * [2891924] packer: Update VBoxGuestAdditions to v5.2.24
