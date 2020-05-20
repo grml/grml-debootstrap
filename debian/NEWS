@@ -1,3 +1,16 @@
+grml-debootstrap (0.82+nmu1) UNRELEASED; urgency=medium
+
+  Starting with this release grml-debootstrap enables systemd-networkd by
+  default on Debian/stretch systems.
+
+  The old default behaviour where the host /etc/network/interfaces was used to
+  deploy the target network configuration was dropped in favor of using the
+  --defaultinterfaces option where all ethernet devices are configured to use
+  DHCP via systemd-networkd. For legacy reasons we also provide a
+  /etc/network/interfaces where `eth0` is configured to use DHCP.
+
+ -- Darshaka Pathirana <dpat@syn-net.org>  Wed, 25 Jul 2018 11:02:01 +0200
+
 grml-debootstrap (0.70) unstable; urgency=medium
 
   The 'contrib' and 'non-free' repositories are no longer
