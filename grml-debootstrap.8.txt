@@ -226,6 +226,13 @@ Options and environment variables
     Delete grml-debootstrap configuration files (/etc/debootstrap/*) from installed
     system. Useful for reproducible builds or if you don't want to leak information.
 
+*--sshcopyauth*::
+
+    Use locally available _$HOME/.ssh/authorized_keys_ to authorise root login on the target system.
+    This installs _$HOME/.ssh/authorized_keys_ as _/root/.ssh/authorized_keys_ on
+    the target system. If a different file than _$HOME/.ssh/authorized_keys_ should
+    be used, the environment variable _AUTHORIZED_KEYS_SOURCE_ can be used.
+
 *--sshcopyid*::
 
     Use locally available public keys to authorise root login on the target system.

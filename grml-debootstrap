@@ -155,6 +155,7 @@ Configuration options:
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
       --password <pwd>     Use specified password as password for user root.
+      --sshcopyauth        Use ${HOME}/.ssh/authorized_keys to authorise root login on the target system.
       --sshcopyid          Use locally available public keys to authorise root login on the target system.
       --bootappend <line>  Add specified appendline to kernel whilst booting.
       --chroot-scripts <d> Execute chroot scripts from specified directory.
@@ -343,7 +344,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
 _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@")
@@ -460,6 +461,9 @@ while :; do
   --sshcopyid)         # Use locally available public keys to authorise root login on the target system
     _opt_sshcopyid=T
     ;;
+  --sshcopyauth)       # Use .ssh/authorized_keys to authorise root login on the target system
+    _opt_sshcopyauth=T
+    ;;
   --grmlrepos)         # Enable Grml repository
     _opt_grmlrepos=T
     ;;
@@ -561,6 +565,7 @@ done
 [ "$_opt_nointerfaces" ]        && NOINTERFACES="true"
 [ "$_opt_nokernel" ]            && NOKERNEL="true"
 [ "$_opt_sshcopyid" ]           && SSHCOPYID="true"
+[ "$_opt_sshcopyauth" ]         && SSHCOPYAUTH="true"
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_efi" ]                 && EFI=$_opt_efi
@@ -585,6 +590,12 @@ fi
 if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   eerror "The --grub option is incompatible with --vmfile, please drop it from your command line."
   eerror "The --grub option is unneeded as GRUB will be installed automatically."
+  eend 1
+  bailout 1
+fi
+
+if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
+  eerror "The --sshcopyid option is incompatible with --sshcopyauth, please drop either of them from your command line."
   eend 1
   bailout 1
 fi
@@ -1810,7 +1821,28 @@ iface ${interface} inet dhcp
         bailout 1
       fi
     else
-      eerror "Could not open a connection to your authentication agent or the agent has no identites."
+      eerror "Error: Could not open a connection to your authentication agent or the agent has no identities."
+      eend 1
+      bailout 1
+    fi
+  fi
+
+  if [ -n "${SSHCOPYAUTH}" ] ; then
+    AUTHORIZED_KEYS_SOURCE=${AUTHORIZED_KEYS_SOURCE:-${HOME}/.ssh/authorized_keys}
+
+    if ! [ -f "${AUTHORIZED_KEYS_SOURCE}" ]; then
+      eerror "Error: could not read '${AUTHORIZED_KEYS_SOURCE}' for setting up SSH key login."
+      eend 1
+      bailout 1
+    fi
+
+    AUTHORIZED_KEYS_TARGET="${MNTPOINT}/root/.ssh/"
+    einfo "Copying '${AUTHORIZED_KEYS_SOURCE}' to '${AUTHORIZED_KEYS_TARGET}' as requested via --sshcopyauth option."
+    mkdir -m 0700 -p "${AUTHORIZED_KEYS_TARGET}"
+    if cp "${AUTHORIZED_KEYS_SOURCE}" "${AUTHORIZED_KEYS_TARGET}" ; then
+      eend 0
+    else
+      eerror "Error: copying '${AUTHORIZED_KEYS_SOURCE}' to '${AUTHORIZED_KEYS_TARGET}' failed."
       eend 1
       bailout 1
     fi
