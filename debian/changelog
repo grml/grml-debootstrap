@@ -1,3 +1,14 @@
+grml-debootstrap (0.92) unstable; urgency=medium
+
+  [ Antoine Beaupré ]
+  * [07e835e] add .ssh/authorized_keys support for --sshcopyid
+
+  [ Michael Prokop ]
+  * [3865f3e] Refactor new --sshcopyid behavior into separate cmdline
+    option --sshcopyauth
+
+ -- Michael Prokop <mika@grml.org>  Wed, 03 Jun 2020 16:53:06 +0200
+
 grml-debootstrap (0.91) unstable; urgency=medium
 
   * [ef76531] docs: fix duplicated --efi option in usage examples
