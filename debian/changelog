@@ -1,3 +1,9 @@
+grml-debootstrap (0.93) unstable; urgency=medium
+
+  * New release (without code changes) to fix Debian policy issue
+
+ -- Michael Prokop <mika@grml.org>  Fri, 05 Jun 2020 14:14:44 +0200
+
 grml-debootstrap (0.92) unstable; urgency=medium
 
   [ Antoine Beaupré ]
