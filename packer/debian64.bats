@@ -75,7 +75,7 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
-@test "home directory for user vagrant" {
+@test "ssh key for user vagrant" {
   run grep -q ssh-rsa "$mountpath"/home/vagrant/.ssh/authorized_keys
   [ "$status" -eq 0 ]
 }
