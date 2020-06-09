@@ -1,8 +1,8 @@
 {
   "variables": {
     "grml_type": "grml64-full",
-    "grml_version": "2018.12",
-    "grml_iso_checksum": "e98c7f42fce1d28c7fdb88999067516a952d30ad",
+    "grml_version": "2020.06-rc1",
+    "grml_iso_checksum": "b28b54e55fc5fe1569e0201e918da49be0885646",
     "debian_version": "buster",
     "grml_debootstrap_version": "latest",
     "grml_debootstrap_local_path": "doesnotexist"
@@ -14,7 +14,7 @@
     "vm_name": "{{ user `grml_type` }}_{{ user `grml_version` }}",
     "guest_os_type": "Debian_64",
     "hard_drive_interface": "sata",
-    "iso_url": "http://download.grml.org/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
+    "iso_url": "http://download.grml.org/devel/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
     "iso_checksum": "{{ user `grml_iso_checksum` }}",
     "iso_checksum_type": "sha1",
     "ssh_wait_timeout": "20m",
@@ -27,8 +27,8 @@
       "<tab> ssh=grml <enter>"
     ],
     "shutdown_command": "shutdown -h now",
-    "guest_additions_url": "https://download.virtualbox.org/virtualbox/5.2.24/VBoxGuestAdditions_5.2.24.iso",
-    "guest_additions_sha256": "cb217dbc3a34862d36ee0a5f5a6b0756e7b639c4852e675eeec7c4422dc02599",
+    "guest_additions_url": "https://download.virtualbox.org/virtualbox/6.1.10/VBoxGuestAdditions_6.1.10.iso",
+    "guest_additions_sha256": "62a0c6715bee164817a6f58858dec1d60f01fd0ae00a377a75bbf885ddbd0a61",
     "vboxmanage": [
       ["modifyvm", "{{.Name}}", "--memory", "1024"]
     ]
@@ -68,7 +68,6 @@
     "post-processors": [
     {
       "type": "vagrant",
-      "compression_level": 5,
       "override": {
         "virtualbox": {
           "output": "debian64_{{ user `debian_version` }}.box"
