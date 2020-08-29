@@ -15,6 +15,7 @@ Build-Depends-Indep:
  shunit2,
  xsltproc,
 Standards-Version: 4.5.0
+Rules-Requires-Root: no
 Homepage: https://grml.org/grml-debootstrap/
 Vcs-git: git://git.grml.org/grml-debootstrap.git
 Vcs-Browser: https://git.grml.org/?p=grml-debootstrap.git
