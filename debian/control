@@ -5,18 +5,19 @@ Maintainer: Grml Team <team@grml.org>
 Uploaders:
  Michael Prokop <mika@debian.org>,
  Alexander Wirt <formorer@debian.org>,
- Christian Hofstaedtler <zeha@debian.org>,
+ Chris Hofstaedtler <zeha@debian.org>,
  Ulrich Dangel <mru@spamt.net>,
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
 Build-Depends-Indep:
  asciidoc,
  docbook-xsl,
  shunit2,
  xsltproc,
 Standards-Version: 4.5.0
+Rules-Requires-Root: no
 Homepage: https://grml.org/grml-debootstrap/
-Vcs-git: git://git.grml.org/grml-debootstrap.git
+Vcs-Git: git://git.grml.org/grml-debootstrap.git
 Vcs-Browser: https://git.grml.org/?p=grml-debootstrap.git
 
 Package: grml-debootstrap
