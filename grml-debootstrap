@@ -987,14 +987,18 @@ format_efi_partition() {
 
 # check for EFI support or try to enable it {{{
 efi_support() {
-  if lsmod | grep -q efivars ; then
+  local efivars_loaded=false
+  if modprobe efivars &>/dev/null ; then
+    efivars_loaded=true
+  fi
+
+  if [ -d /sys/firmware/efi ] ; then
     einfo "EFI support detected." ; eend 0
     return 0
   fi
 
-  if modprobe efivars &>/dev/null ; then
-    einfo "EFI support enabled now." ; eend 0
-    return 0
+  if ! [ -d /sys/firmware/efi ] && [ "${efivars_loaded:-}" = "true" ] ; then
+    einfo "EFI support detected, but system seems to be running in BIOS mode."
   fi
 
   return 1
