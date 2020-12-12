@@ -1,78 +1,82 @@
 {
-  "variables": {
-    "grml_type": "grml64-full",
-    "grml_version": "2020.06-rc1",
-    "grml_iso_checksum": "b28b54e55fc5fe1569e0201e918da49be0885646",
-    "debian_version": "buster",
-    "grml_debootstrap_version": "latest",
-    "grml_debootstrap_local_path": "doesnotexist"
-  },
-
   "builders": [
-  {
-    "type": "virtualbox-iso",
-    "vm_name": "{{ user `grml_type` }}_{{ user `grml_version` }}",
-    "guest_os_type": "Debian_64",
-    "hard_drive_interface": "sata",
-    "iso_url": "http://download.grml.org/devel/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
-    "iso_checksum": "{{ user `grml_iso_checksum` }}",
-    "iso_checksum_type": "sha1",
-    "ssh_wait_timeout": "20m",
-    "ssh_username": "root",
-    "ssh_password": "grml",
-    "output_directory": "{{ user `grml_type` }}_output",
-    "headless": false,
-    "boot_wait": "5s",
-    "boot_command": [
-      "<tab> ssh=grml <enter>"
-    ],
-    "shutdown_command": "shutdown -h now",
-    "guest_additions_url": "https://download.virtualbox.org/virtualbox/6.1.10/VBoxGuestAdditions_6.1.10.iso",
-    "guest_additions_sha256": "62a0c6715bee164817a6f58858dec1d60f01fd0ae00a377a75bbf885ddbd0a61",
-    "vboxmanage": [
-      ["modifyvm", "{{.Name}}", "--memory", "1024"]
-    ]
-  }
-  ],
-    "provisioners": [
     {
-      "type": "file",
-      "source": "fake-uname.so",
-      "destination": "/tmp/fake-uname.so"
-    },
-    {
-      "type": "file",
-      "source": "debian64.bats",
-      "destination": "/tmp/debian64.bats"
-    },
-    {
-      "type": "shell",
-      "inline": "mkdir -vp /tmp/grml-debootstrap/"
-    },
-    {
-      "type": "file",
-      "source": "{{ user `grml_debootstrap_local_path` }}/",
-      "destination": "/tmp/grml-debootstrap/"
-    },
-    {
-      "type": "shell",
-      "environment_vars": [
-	"GRML_DEBOOTSTRAP_VERSION={{ user `grml_debootstrap_version` }}",
-	"DEBIAN_VERSION={{ user `debian_version` }}"
+      "boot_command": [
+        "<tab> ssh=grml <enter>"
       ],
-      "scripts": [
-        "debian64_provision.sh"
+      "boot_wait": "5s",
+      "guest_additions_sha256": "62a0c6715bee164817a6f58858dec1d60f01fd0ae00a377a75bbf885ddbd0a61",
+      "guest_additions_url": "https://download.virtualbox.org/virtualbox/6.1.10/VBoxGuestAdditions_6.1.10.iso",
+      "guest_os_type": "Debian_64",
+      "hard_drive_interface": "sata",
+      "headless": false,
+      "iso_checksum": "sha1:{{ user `grml_iso_checksum` }}",
+      "iso_url": "http://download.grml.org/devel/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
+      "output_directory": "{{ user `grml_type` }}_output",
+      "shutdown_command": "shutdown -h now",
+      "ssh_password": "grml",
+      "ssh_timeout": "20m",
+      "ssh_username": "root",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "1024"
         ]
+      ],
+      "vm_name": "{{ user `grml_type` }}_{{ user `grml_version` }}"
     }
   ],
-    "post-processors": [
+  "post-processors": [
     {
-      "type": "vagrant",
       "override": {
         "virtualbox": {
           "output": "debian64_{{ user `debian_version` }}.box"
         }
-      }
+      },
+      "type": "vagrant"
     }
-  ]
+  ],
+  "provisioners": [
+    {
+      "destination": "/tmp/fake-uname.so",
+      "source": "fake-uname.so",
+      "type": "file"
+    },
+    {
+      "destination": "/tmp/debian64.bats",
+      "source": "debian64.bats",
+      "type": "file"
+    },
+    {
+      "inline": "mkdir -vp /tmp/grml-debootstrap/",
+      "type": "shell"
+    },
+    {
+      "destination": "/tmp/grml-debootstrap/",
+      "source": "{{ user `grml_debootstrap_local_path` }}/",
+      "type": "file"
+    },
+    {
+      "environment_vars": [
+        "GRML_DEBOOTSTRAP_VERSION={{ user `grml_debootstrap_version` }}",
+        "DEBIAN_VERSION={{ user `debian_version` }}"
+      ],
+      "scripts": [
+        "debian64_provision.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "debian_version": "buster",
+    "grml_debootstrap_local_path": "doesnotexist",
+    "grml_debootstrap_version": "latest",
+    "grml_iso_checksum": "b28b54e55fc5fe1569e0201e918da49be0885646",
+    "grml_type": "grml64-full",
+    "grml_version": "2020.06-rc1"
+  }
 }
+
