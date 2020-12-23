@@ -71,7 +71,7 @@
     }
   ],
   "variables": {
-    "debian_version": "buster",
+    "debian_version": "bullseye",
     "grml_debootstrap_local_path": "doesnotexist",
     "grml_debootstrap_version": "latest",
     "grml_iso_checksum": "80ccb1bc1eb6116e9094a332d58a3715f2160ab1",

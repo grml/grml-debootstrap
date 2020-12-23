@@ -73,8 +73,8 @@
 
 # Debian release that should be installed.
 # Supported values: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye, sid
-# Default: 'buster'
-# RELEASE='buster'
+# Default: 'bullseye'
+# RELEASE='bullseye'
 
 # Define components that should be used within sources.list.
 # Default: 'main'

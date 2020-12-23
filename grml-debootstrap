@@ -72,7 +72,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$POST_SCRIPTS" ] || POST_SCRIPTS='yes'
 [ -n "$PRE_SCRIPTS" ] || PRE_SCRIPTS='yes'
 [ -n "$RECONFIGURE" ] || RECONFIGURE='console-data'
-[ -n "$RELEASE" ] || RELEASE='buster'
+[ -n "$RELEASE" ] || RELEASE='bullseye'
 [ -n "$RM_APTCACHE" ] || RM_APTCACHE='yes'
 [ -n "$SCRIPTS" ] || SCRIPTS='no' # deprecated, replaced by POST_SCRIPTS
 [ -n "$SECURE" ] || SECURE='yes'
@@ -103,7 +103,7 @@ Bootstrap options:
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
   -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
                          instead of fetching packages from a mirror.
-  -r, --release <name>   Release of new Debian system (default: buster).
+  -r, --release <name>   Release of new Debian system (default: bullseye).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
@@ -779,7 +779,7 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='buster'
+  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='bullseye'
   RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 8 \
@@ -1162,7 +1162,7 @@ fi
 # Support for generic release codenames is unavailable. {{{
 if [ "$RELEASE" = "stable" ] || [ "$RELEASE" = "testing" ] ; then
    eerror "Generic release codenames (stable, testing) are unsupported. \
-Please use specific codenames such as stretch or buster." ; eend 1
+Please use specific codenames such as buster or bullseye." ; eend 1
    bailout 1
 fi
 # }}}

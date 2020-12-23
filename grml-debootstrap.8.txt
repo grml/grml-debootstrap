@@ -219,7 +219,7 @@ Options and environment variables
 
     Specify release of new Debian system. Supported releases names: lenny,
     squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Corresponding with configuration
-    variable RELEASE. Default release: buster
+    variable RELEASE. Default release: bullseye
 
 *--remove-configs*::
 
@@ -294,7 +294,7 @@ Usage examples
 
   grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (buster) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bullseye) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
   grml-debootstrap --release stretch --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
 
@@ -307,32 +307,32 @@ Install Debian unstable/sid on /dev/sda6 and install bootmanager GRUB in MBR (ma
 
   DEBOOTSTRAP=mmdebstrap grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (buster) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bullseye) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use mmdebstrap instead of default debootstrap tool for bootstrapping.
 
   grml-debootstrap --target /dev/mapper/vg0-rootfs --grub /dev/sda
 
-Install default Debian release (buster) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bullseye) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
   grml-debootstrap --efi /dev/sda1 --target /dev/sda2 --grub /dev/sda
 
-Install default Debian release (buster) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bullseye) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use /dev/sda1 as EFI partition (requires EFI support in booted system).
 
   mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
 
-Install default Debian release (buster) in directory /data/chroot (without any bootloader).
+Install default Debian release (bullseye) in directory /data/chroot (without any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default Debian release (buster) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bullseye) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use specified mirror instead of the default (http://deb.debian.org/debian) one.
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default debian release (buster) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
+Install default debian release (bullseye) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
 
   mount -o loop ./debian-CD-1.iso /media/cdrom
   grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso /media/cdrom
@@ -404,7 +404,7 @@ Where do you want to install grub to? Usage example: grub=/dev/sda
 
   release=...
 
-Specify release of new Debian system. Defaults to Debian buster. Supported
+Specify release of new Debian system. Defaults to Debian bullseye. Supported
 releases: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Usage example: release=stretch
 
   mirror=...
