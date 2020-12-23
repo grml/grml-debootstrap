@@ -1,3 +1,24 @@
+grml-debootstrap (0.94) unstable; urgency=medium
+
+  The "waiting for bullseye, 2021 + vaccinations" release
+
+  [ Chris Hofstaedtler ]
+  * [5c7f7fa] d/control: Set Rules-Requires-Root: no
+  * [2617a47] d/control: fix Vcs-Git field name
+  * [2e6b03e] d/rules: remove dh_make template header
+
+  [ Michael Prokop ]
+  * [8f673fa] Fix shellcheck issue SC2174
+  * [622ca58] Improve EFI detection by checking for /sys/firmware/efi.
+    Thanks to Darshaka Pathirana for reporting and feedback
+  * [1475b08] packer: make template compatible with recent packer
+    versions. Thanks to Darshaka Pathirana for reporting
+  * [208a600] packer: use latest VBoxGuestAdditions (6.1.16) + Grml stable
+    release (2020.06)
+  * [9506ba5] Use bullseye as default Debian release
+
+ -- Michael Prokop <mika@grml.org>  Wed, 23 Dec 2020 17:34:26 +0100
+
 grml-debootstrap (0.93) unstable; urgency=medium
 
   * New release (without code changes) to fix Debian policy issue
