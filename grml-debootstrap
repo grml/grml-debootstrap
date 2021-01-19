@@ -394,7 +394,7 @@ while :; do
     shift; _opt_debopt="$1"
     ;;
   --filesystem)        # Filesystem that should be used
-    shift; _opt_filesystem="$1"
+    shift; _opt_filesystem="$1" ; FILESYSTEM="${_opt_filesystem}"
     ;;
   --interactive)       # Use interactive mode (frontend)
     _opt_interactive=T
@@ -1671,6 +1671,7 @@ preparechroot() {
   [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES='$(sed "s,','\\\\'',g" <<<"${EXTRAPACKAGES}")'"             >> "$CHROOT_VARIABLES"
   [ -n "$EFI" ]                 && echo "EFI='$(sed "s,','\\\\'',g" <<<"${EFI}")'"                                 >> "$CHROOT_VARIABLES"
   [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR='$(sed "s,','\\\\'',g" <<<"${FALLBACK_MIRROR}")'"         >> "$CHROOT_VARIABLES"
+  [ -n "$FILESYSTEM" ]          && echo "FILESYSTEM='$(sed "s,','\\\\'',g" <<<"${FILESYSTEM}")'"                   >> "$CHROOT_VARIABLES"
   [ -n "$FORCE" ]               && echo "FORCE='$(sed "s,','\\\\'',g" <<<"${FORCE}")'"                             >> "$CHROOT_VARIABLES"
   [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS='$(sed "s,','\\\\'',g" <<<"${GRMLREPOS}")'"                     >> "$CHROOT_VARIABLES"
   [ -n "$GRUB" ]                && echo "GRUB='$(sed "s,','\\\\'',g" <<<"${GRUB}")'"                               >> "$CHROOT_VARIABLES"
