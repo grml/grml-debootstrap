@@ -481,7 +481,15 @@ createfstab(){
 EOF
 
   if [ -n "$TARGET_UUID" ] ; then
-    echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults,errors=remount-ro 0   1" >> /etc/fstab
+    local rootfs_mount_options=",errors=remount-ro"
+    case "${FILESYSTEM}" in
+      f2fs)
+        # errors=remount-ro is unsupported, see https://github.com/grml/grml-debootstrap/issues/163
+        rootfs_mount_options=""
+        ;;
+    esac
+
+    echo "/dev/disk/by-uuid/${TARGET_UUID} /  auto    defaults${rootfs_mount_options} 0   1" >> /etc/fstab
   else
     echo "Warning: couldn't identify target UUID for rootfs, your /etc/fstab might be incomplete."
   fi
