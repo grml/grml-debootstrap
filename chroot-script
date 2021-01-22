@@ -75,8 +75,8 @@ askpass() {
 
 # define chroot mirror {{{
 chrootmirror() {
-  if [ -n "$KEEP_SRC_LIST" ] ; then
-    echo "KEEP_SRC_LIST has been set, skipping chrootmirror stage."
+  if [ "$KEEP_SRC_LIST" = "yes" ] ; then
+    echo "KEEP_SRC_LIST has been enabled, skipping chrootmirror stage."
     return
   fi
 
@@ -129,8 +129,8 @@ chrootmirror() {
 
 # remove local chroot mirror {{{
 remove_chrootmirror() {
-  if [ -n "$KEEP_SRC_LIST" ] ; then
-    echo "KEEP_SRC_LIST has been set, skipping remove_chrootmirror stage."
+  if [ "$KEEP_SRC_LIST" = "yes" ] ; then
+    echo "KEEP_SRC_LIST has been enabled, skipping remove_chrootmirror stage."
     return
   fi
 
