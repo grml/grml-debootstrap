@@ -1,3 +1,14 @@
+grml-debootstrap (0.95) unstable; urgency=medium
+
+  * [3f28b11] Properly handle KEEP_SRC_LIST option when set to 'no'
+  * [fa2ce1b] Do not enable escape characters on dumb terminals
+  * [01b5b0f] Support F2FS in VMs by including f2fs driver in grub-
+    mkimage. Thanks to Paul Menzel for bugreport and bugfix
+  * [1537613] F2FS filesystem doesn't support errors=remount-ro mount
+    option
+
+ -- Michael Prokop <mika@grml.org>  Fri, 22 Jan 2021 11:56:34 +0100
+
 grml-debootstrap (0.94) unstable; urgency=medium
 
   The "waiting for bullseye, 2021 + vaccinations" release
