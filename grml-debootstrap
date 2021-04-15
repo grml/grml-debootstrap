@@ -980,7 +980,7 @@ format_efi_partition() {
     einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying." ; eend 0
   else
     einfo "EFI partition $EFI doesn't seem to be formatted, creating filesystem."
-    mkfs.fat -F32 -n "EFI System Partition" "$EFI"
+    mkfs.fat -F32 -n "EFI" "$EFI"
     RC=$?
     if [ $RC -eq 0 ] ; then
       eend 0
