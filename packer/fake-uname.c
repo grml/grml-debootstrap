@@ -17,28 +17,45 @@
 #define RTLD_NEXT      ((void *) -1l)
 #endif
 
-typedef int (*uname_t) (struct utsname * buf);
+#define SYMBOL_EXPORT __attribute__((visibility("default")))
+
+typedef int uname_func(struct utsname *buf);
 
 static void *get_libc_func(const char *funcname)
 {
   void *func;
   char *error;
 
+  /* Clear any previous errors. */
+  dlerror();
   func = dlsym(RTLD_NEXT, funcname);
-  if ((error = dlerror()) != NULL) {
-    fprintf(stderr, "Can't locate libc function `%s' error: %s", funcname, error);
+  error = dlerror();
+  if (error != NULL) {
+    fprintf(stderr, "Cannot locate libc function '%s' error: %s",
+            funcname, error);
     _exit(EXIT_FAILURE);
   }
   return func;
 }
 
-int uname(struct utsname *buf)
+int SYMBOL_EXPORT uname(struct utsname *buf)
 {
+  static uname_func *real_uname;
+  const char *release;
   int ret;
-  char *env = NULL;
-  uname_t real_uname = (uname_t) get_libc_func("uname");
 
-  ret = real_uname((struct utsname *) buf);
-  strncpy(buf->release, ((env = getenv("UTS_RELEASE")) == NULL) ? UTS_RELEASE : env, 65);
+  if (real_uname == NULL)
+    real_uname = (uname_func *)get_libc_func("uname");
+
+  ret = real_uname(buf);
+  if (ret < 0)
+    return ret;
+
+  release = getenv("UTS_RELEASE");
+  if (release == NULL)
+    release = UTS_RELEASE;
+  strncpy(buf->release, release, sizeof(buf->release) - 1);
+  buf->release[sizeof(buf->release) - 1] = '\0';
+
   return ret;
 }
