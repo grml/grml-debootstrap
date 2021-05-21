@@ -1519,7 +1519,7 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
   if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
     echo "Notice: grub-pc package not present yet, installing it therefore."
     # shellcheck disable=SC2086
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y install $DPKG_OPTIONS grub-pc
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
   fi
 
   mkdir -p "${MNTPOINT}/boot/grub"
