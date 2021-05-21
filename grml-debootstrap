@@ -1155,6 +1155,12 @@ else
    ARCHCMD="--arch $ARCH"
    ARCHINFO=" (${ARCH})"
 fi
+
+if [ -z "${ARCH:-}" ] ; then
+  eerror 'Architecture neither set (environment variable ARCH), nor could be automatically identified (using dpkg).'
+  eerror 'Consider setting the --arch ... option.' ; eend 1
+  bailout 1
+fi
 # }}}
 
 # It is not possible to build amd64 on i686. {{{
