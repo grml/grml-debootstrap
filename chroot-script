@@ -595,8 +595,18 @@ efi_setup() {
   echo "Mounting $EFI on /boot/efi"
   mount "$EFI" /boot/efi || return 1
 
+  # if efivarfs kernel module is loaded, but efivars isn't,
+  # then we need to mount efivarfs for efibootmgr usage
+  if ! ls /sys/firmware/efi/efivars/* &>/dev/null ; then
+    echo "Mounting efivarfs on /sys/firmware/efi/efivars"
+    mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+  fi
+
   echo "Invoking efibootmgr"
   efibootmgr || return 1
+
+  umount /sys/firmware/efi/efivars &>/dev/null || true
+
 }
 
 # grub configuration/installation {{{
