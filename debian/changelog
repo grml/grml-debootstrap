@@ -1,3 +1,16 @@
+grml-debootstrap (0.97) unstable; urgency=medium
+
+  * [72ce6b6] packer: update VBoxGuestAdditions to v6.1.20
+  * [4d625ea] fake-uname: fix gcc argument order and improve preloaded
+    shared library. Thanks to Guillem Jover
+  * [360e057] Bail out if architecture isn't set nor can be identified
+    automatically
+  * [9ae6b12] Avoid installation of os-proper in VM environments
+  * [d91d9f3] EFI support: check + mount efivarfs to support Debian
+    kernels >=5.10
+
+ -- Michael Prokop <mika@grml.org>  Tue, 01 Jun 2021 07:44:46 +0200
+
 grml-debootstrap (0.96) unstable; urgency=medium
 
   * [181ec9a] Use shorter fs label for EFI partition to not break with
