@@ -1546,6 +1546,9 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
     f2fs)
       chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
       ;;
+    xfs)
+      chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
+      ;;
     # NOTE - we might need to distinguish between further filesystems
     *)
       chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
