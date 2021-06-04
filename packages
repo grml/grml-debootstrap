@@ -16,7 +16,6 @@ lsof
 lvm2
 mdadm
 most
-os-prober
 pciutils
 postfix
 resolvconf
