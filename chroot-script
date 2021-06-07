@@ -350,19 +350,38 @@ kernel() {
   fi
 
   $APTUPDATE
-  KVER=$(get_kernel_version)
-  if [ -n "$KVER" ] ; then
-     # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free"
-     # only add firmware-linux if we have non-free as a component
-     if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
-       KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
-     fi
-     # shellcheck disable=SC2086
-     DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
-  else
-     echo "Warning: Could not find a kernel for your system. Your system won't be able to boot itself!"
+
+  local kernel_version
+  kernel_version=$(get_kernel_version)
+
+  if [ -z "${kernel_version}" ] ; then
+    echo "Error: could not find a kernel for your system. Your system won't be able to boot itself!" >&2
+    exit 1
   fi
+
+  # defaults (note: install busybox to be able to debug initramfs)
+  KERNELPACKAGES="linux-image-${kernel_version} linux-headers-${kernel_version} busybox firmware-linux-free"
+
+  # only add firmware-linux if we have non-free as a component
+  if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
+    KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
+  fi
+
+  # when installing into a VM using buster or newer, install only
+  # linux-image-cloud-amd64 (and no headers and firmware packages)
+  if [ -n "${VMSIZE}" ] && [ "${ARCH:-}" = "amd64" ] ; then
+    case "${RELEASE}" in
+      lenny|squeeze|wheezy|jessie|stretch)
+        ;;
+      *)
+        echo "Note: installing into VM, choosing linux-image-cloud-amd64 kernel package"
+        KERNELPACKAGES="linux-image-cloud-amd64"
+        ;;
+    esac
+  fi
+
+  # shellcheck disable=SC2086
+  DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
 }
 # }}}
 
