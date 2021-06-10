@@ -80,6 +80,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$TUNE2FS" ] || TUNE2FS='tune2fs -c0 -i0'
 [ -n "$UPGRADE_SYSTEM" ] || UPGRADE_SYSTEM='yes'
 [ -n "$VMSIZE" ] || VMSIZE="2G"
+[ -n "$VMTYPE" ] || VMTYPE="raw"
 [ -n "$GRUB_INSTALL" ] || GRUB_INSTALL='yes'
 
 # inside the chroot system locales might not be available, so use minimum:
@@ -129,6 +130,7 @@ Options for Virtual Machine deployment:
                          Example: --vmfile --target /mnt/sda1/qemu.img
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
+      --vmtype <raw|qcow2> Use specified type for for VM file (default: raw).
 
 Configuration options:
 
@@ -308,14 +310,19 @@ cleanup() {
   fi
 
   if [ -n "${ORIG_TARGET}" ] ; then
-    einfo "Removing loopback mount of file ${ORIG_TARGET}."
-    kpartx -d "${ORIG_TARGET}"
-    # Workaround for a bug in kpartx which doesn't clean up properly,
-    # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
-    if dmsetup ls | grep -q "^${LOOP_PART} "; then
-      kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+    if [ "$VMTYPE" = "raw" ]; then
+      einfo "Removing loopback mount of file ${ORIG_TARGET}."
+      kpartx -d "${ORIG_TARGET}"
+      # Workaround for a bug in kpartx which doesn't clean up properly,
+      # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
+      if dmsetup ls | grep -q "^${LOOP_PART} "; then
+        kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+      fi
+      eend $?
+    else
+      einfo "Removing loopback mount of file ${ORIG_TARGET}."
+      qemu-nbd -d /dev/nbd0
     fi
-    eend $?
   fi
 }
 
@@ -352,7 +359,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmtype:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
 _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@")
@@ -386,6 +393,9 @@ while :; do
     ;;
   --vmsize)            # size of Virtual machine file
     shift; _opt_vmsize="$1"
+    ;;
+  --vmtype)            # type of Virtual machine file
+    shift; _opt_vmtype="$1"
     ;;
   --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
@@ -552,6 +562,7 @@ done
 [ "$_opt_vm" ]                  && VIRTUAL=1
 [ "$_opt_vmfile" ]              && VMFILE=1 && VIRTUAL=1
 [ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
+[ "$_opt_vmtype" ]              && VMTYPE=$_opt_vmtype
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
@@ -1093,7 +1104,7 @@ else # if not running automatic installation display configuration and prompt fo
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
       if [ -n "$VMSIZE" ] && [ -n "$VMFILE" ]; then
-         echo "   Using Virtual Disk file with size of ${VMSIZE}."
+         echo "   Using Virtual Disk file with size of ${VMSIZE} with type ${VMTYPE}."
       fi
    fi
 
@@ -1460,10 +1471,22 @@ prepare_vm() {
     bailout 1
   fi
 
+  if [ "$VMTYPE" = "qcow2" ]; then
+    modprobe -q nbd
+    if [ -c "/dev/nbd0" ]; then
+      eerror "Error finding /dev/nbd0" ; eend 1
+      bailout 1
+    fi
+  fi
+
   ORIG_TARGET="$TARGET" # store for later reuse
 
   if [ -n "$VMFILE" ]; then
-    qemu-img create -f raw "${TARGET}" "${VMSIZE}"
+    qemu-img create -f ${VMTYPE} "${TARGET}" "${VMSIZE}"
+  fi
+  if [ "$VMTYPE" = "qcow2" ]; then
+    qemu-nbd -c /dev/nbd0 -f qcow2 "$TARGET"
+    export TARGET=/dev/nbd0
   fi
   parted -s "${TARGET}" 'mklabel msdos'
   if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
@@ -1616,6 +1639,9 @@ umount_target() {
   if dmsetup ls | grep -q "^${LOOP_PART} "; then
     kpartx -d "/dev/${LOOP_DISK}" >/dev/null
   fi
+  if [ "$VMTYPE" = "qcow2" ] ; then
+    qemu-nbd -d /dev/nbd0
+  fi
 }
 # }}}
 
@@ -1716,6 +1742,7 @@ preparechroot() {
   [ -n "$TIMEZONE" ]            && echo "TIMEZONE='$(sed "s,','\\\\'',g" <<<"${TIMEZONE}")'"                       >> "$CHROOT_VARIABLES"
   [ -n "$TUNE2FS" ]             && echo "TUNE2FS='$(sed "s,','\\\\'',g" <<<"${TUNE2FS}")'"                         >> "$CHROOT_VARIABLES"
   [ -n "$VMSIZE" ]              && echo "VMSIZE='$(sed "s,','\\\\'',g" <<<"${VMSIZE}")'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$VMTYPE" ]              && echo "VMTYPE='$(sed "s,','\\\\'',g" <<<"${VMTYPE}")'"                           >> "$CHROOT_VARIABLES"
 
   cp $VERBOSE "${CONFFILES}"/chroot-script "${MNTPOINT}"/bin/chroot-script
   chmod 755 "${MNTPOINT}"/bin/chroot-script
