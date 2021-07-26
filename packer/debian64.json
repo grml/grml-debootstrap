@@ -5,8 +5,8 @@
         "<tab> ssh=grml <enter>"
       ],
       "boot_wait": "5s",
-      "guest_additions_sha256": "65d22a9f1fcf690d77be99d549149ec9129e2a728ddd9202df436ed9593ba520",
-      "guest_additions_url": "https://download.virtualbox.org/virtualbox/6.1.20/VBoxGuestAdditions_6.1.20.iso",
+      "guest_additions_sha256": "bffc316a7b8d5ed56d830e9f6aef02b4e5ffc28674032142e96ffbedd905f8c9",
+      "guest_additions_url": "https://download.virtualbox.org/virtualbox/6.1.22/VBoxGuestAdditions_6.1.22.iso",
       "guest_os_type": "Debian_64",
       "hard_drive_interface": "sata",
       "headless": false,
@@ -74,9 +74,9 @@
     "debian_version": "bullseye",
     "grml_debootstrap_local_path": "doesnotexist",
     "grml_debootstrap_version": "latest",
-    "grml_iso_checksum": "80ccb1bc1eb6116e9094a332d58a3715f2160ab1",
+    "grml_iso_checksum": "c1d94bb237d75ec326fb9a3b2bb980c93b1eb23c",
     "grml_type": "grml64-full",
-    "grml_version": "2020.06"
+    "grml_version": "2021.07"
   }
 }
 
