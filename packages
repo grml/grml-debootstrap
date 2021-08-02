@@ -4,6 +4,7 @@ bzip2
 console-common
 console-data
 cryptsetup
+dbus
 file
 grub-pc
 ifenslave
