@@ -604,9 +604,6 @@ efi_setup() {
 
   echo "Invoking efibootmgr"
   efibootmgr || return 1
-
-  umount /sys/firmware/efi/efivars &>/dev/null || true
-
 }
 
 # grub configuration/installation {{{
@@ -724,6 +721,8 @@ finalize() {
   rm -f /etc/debootstrap/variables
 
   [ -n "$POLICYRCD" ] && rm -f /usr/sbin/policy-rc.d
+
+  umount /sys/firmware/efi/efivars &>/dev/null || true
 
   umount /sys >/dev/null 2>/dev/null || true
   umount /proc >/dev/null 2>/dev/null || true
