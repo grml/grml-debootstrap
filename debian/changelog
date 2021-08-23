@@ -1,3 +1,13 @@
+grml-debootstrap (0.99) unstable; urgency=medium
+
+  * [0d4c089] packer: update VBoxGuestAdditions to v6.1.22 + Grml ISO to
+    latest stable release (2021.07)
+  * [86f83aa] Install dbus by default
+  * [1ca3ec5] EFI support: fix for grub-install usage with efivarfs
+  * [b45ae94] Bump Standards-Version to 4.6.0
+
+ -- Michael Prokop <mika@grml.org>  Mon, 23 Aug 2021 16:21:44 +0200
+
 grml-debootstrap (0.98) unstable; urgency=medium
 
   [ Paul Menzel ]
