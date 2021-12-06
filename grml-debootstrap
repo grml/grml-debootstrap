@@ -1474,7 +1474,7 @@ prepare_vm() {
     dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
     eend $?
   fi
-  parted -s "${TARGET}" 'mkpart primary ext4 2M -1'
+  parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
   parted -s "${TARGET}" 'set 1 boot on'
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
