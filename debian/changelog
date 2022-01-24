@@ -1,3 +1,15 @@
+grml-debootstrap (0.100) unstable; urgency=medium
+
+  * [43ea7e2] Drop leftover KEYRING code
+  * [ea978f6] Fix Grml repository usage. Thanks to Karl Voit for the bug
+    report
+  * [7b2b4c8] VMs: create partition with alignment starting at 4MiB +
+    ending at 100%. Thanks to David Gnedt for the bug report and analysis,
+    Darshaka Pathirana and Chris Hofstaedtler for further information and
+    feedback
+
+ -- Michael Prokop <mika@grml.org>  Mon, 24 Jan 2022 17:17:29 +0100
+
 grml-debootstrap (0.99) unstable; urgency=medium
 
   * [0d4c089] packer: update VBoxGuestAdditions to v6.1.22 + Grml ISO to
