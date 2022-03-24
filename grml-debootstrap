@@ -1503,12 +1503,13 @@ prepare_vm() {
     bailout 1
   fi
 
+  # if we're building for arm64, we operate on the first line of $DEVINFO which is the EFI partition
   if [ "$ARCH" = 'arm64' ]; then
     LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
     LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
     LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
     export ARM_EFI_TARGET="/dev/mapper/$LOOP_PART"
-    DEVINFO=${DEVINFO##*$'\n'} # get last line which is the partition we care about
+    DEVINFO=${DEVINFO##*$'\n'} # now set $DEVINFO to the last line which is the OS partition
   fi
 
   # hopefully this always works as expected
