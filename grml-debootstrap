@@ -597,10 +597,11 @@ fi
 
 if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   eerror "The --grub option is incompatible with --vmfile, please drop it from your command line."
-  eerror "The --grub option is unneeded as GRUB will be installed automatically."
+  eerror "The --grub option is unneeded as GRUB will be installed automatically (unless GRUB_INSTALL='no')."
   eend 1
   bailout 1
 fi
+
 
 if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
   eerror "The --sshcopyid option is incompatible with --sshcopyauth, please drop either of them from your command line."
@@ -1077,7 +1078,7 @@ else # if not running automatic installation display configuration and prompt fo
    # do not display if MNTPOINT is the default one
    case "$MNTPOINT" in /mnt/debootstrap*) ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
 
-   if [ -n "$VIRTUAL" ] ; then
+   if [ -n "$VIRTUAL" ] && [ "$GRUB_INSTALL" = 'yes' ] ; then
       echo "   Install grub:    yes"
    else
      [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
@@ -1306,6 +1307,15 @@ mkfs() {
   fi
 
   if [ -n "$MKFS" ] ; then
+
+    if [ -n "$ARM_EFI_TARGET" ] ; then
+      einfo "Running mkfs.vfat $MKFS_OPTS on $ARM_EFI_TARGET"
+      mkfs.vfat -n "EFI" $MKFS_OPTS "$ARM_EFI_TARGET"
+      eend $?
+
+      MKFS_OPTS="$MKFS_OPTS -L LINUX"
+    fi
+
     einfo "Running $MKFS $MKFS_OPTS on $TARGET"
     # shellcheck disable=SC2086
     "$MKFS" $MKFS_OPTS "$TARGET" ; RC=$?
@@ -1465,29 +1475,47 @@ prepare_vm() {
   if [ -n "$VMFILE" ]; then
     qemu-img create -f raw "${TARGET}" "${VMSIZE}"
   fi
-  parted -s "${TARGET}" 'mklabel msdos'
-  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-    einfo "Adjusting disk signature to a fixed (non-random) value"
-    MBRTMPFILE=$(mktemp)
-    dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-    echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
-    dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-    eend $?
+  
+  # arm64 support largely only exists for GPT
+  if [ "$ARCH" = 'arm64' ]; then
+    einfo "Setting up GPT partitions for arm64"
+    parted -s "${TARGET}" 'mklabel gpt'
+    parted -s "${TARGET}" 'mkpart EFI fat32 1MiB 10MiB'
+    parted -s "${TARGET}" 'set 1 boot on'
+    parted -s "${TARGET}" 'mkpart LINUX ext4 10MiB 100%'
+  else
+    parted -s "${TARGET}" 'mklabel msdos'
+    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+      einfo "Adjusting disk signature to a fixed (non-random) value"
+      MBRTMPFILE=$(mktemp)
+      dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
+      echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
+      dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
+      eend $?
+    fi
+    parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
+    parted -s "${TARGET}" 'set 1 boot on'
   fi
-  parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
-  parted -s "${TARGET}" 'set 1 boot on'
 
-  DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
+  DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3' - will be multi-line for arm64
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
     bailout 1
+  fi
+
+  if [ "$ARCH" = 'arm64' ]; then
+    LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
+    LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
+    LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
+    export ARM_EFI_TARGET="/dev/mapper/$LOOP_PART"
+    DEVINFO=${DEVINFO##*$'\n'} # get last line which is the partition we care about
   fi
 
   # hopefully this always works as expected
   LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
-  export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
+  export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
 
   if [ -z "$TARGET" ] ; then
      eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
@@ -1511,14 +1539,38 @@ grub_install() {
     bailout 1
   fi
 
+  if [ -n "$ARM_EFI_TARGET" ]; then
+    mkdir -p "${MNTPOINT}/boot/efi"
+    if ! mount "${ARM_EFI_TARGET}" "${MNTPOINT}/boot/efi" ; then
+      eerror "Error: Mounting ${ARM_EFI_TARGET} failed, can not continue." ; eend 1
+      bailout 1
+    fi
+  fi
+
   mount -t proc none "${MNTPOINT}"/proc
   mount -t sysfs none "${MNTPOINT}"/sys
   mount -t devtmpfs udev "${MNTPOINT}"/dev
   mount -t devpts devpts "${MNTPOINT}"/dev/pts
 
+if [ -n "$ARM_EFI_TARGET" ]; then
+  einfo "Installing Grub as bootloader into EFI."
+
+  if ! chroot "${MNTPOINT}" dpkg --list grub2-common 2>/dev/null | grep -q '^ii' ; then
+    echo "Notice: grub2-common package not present yet, installing it therefore."
+    # shellcheck disable=SC2086
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub2-common
+  fi
+
+  if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64 2>/dev/null | grep -q '^ii' ; then
+    echo "Notice: grub-efi-arm64 package not present yet, installing it therefore."
+    # shellcheck disable=SC2086
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64
+  fi
+
+  chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
 # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
 # chroot-script skips installation for unset ${GRUB}
-if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
+elif [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
   einfo "Installing Grub as bootloader."
 
   if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
@@ -1570,6 +1622,8 @@ fi
 
   einfo "Updating grub configuration file."
   chroot "${MNTPOINT}" update-grub
+  chroot "${MNTPOINT}" sync
+  sleep 2
 
   case "$RELEASE" in
     jessie)
@@ -1582,7 +1636,7 @@ fi
   if grep -q '^GRUB_DISABLE_LINUX_UUID=.*true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
     ewarn "GRUB_DISABLE_LINUX_UUID is set to true in /etc/default/grub, not adjusting root= in grub.cfg."
     ewarn "Please note that your system might NOT be able to properly boot."
-  else
+  elif [ -z "$ARM_EFI_TARGET" ]; then
     einfo "Adjusting grub.cfg for successful boot sequence."
     sed -i "s;root=[^ ]\\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
   fi
@@ -1607,6 +1661,10 @@ fi
 umount_target() {
   if [ -z "${VIRTUAL}" ] ; then
      return 0
+  fi
+
+  if [ -n "$ARM_EFI_TARGET" ]; then
+    umount "${MNTPOINT}/boot/efi"
   fi
 
   umount "${MNTPOINT}"

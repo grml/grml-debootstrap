@@ -325,8 +325,11 @@ get_kernel_version() {
     amd64)
       KARCH='amd64'
       ;;
+    arm64)
+      KARCH='arm64'
+      ;;
     *)
-      echo "Only i386 and amd64 are currently supported" >&2
+      echo "Only i386, amd64 and arm64 are currently supported" >&2
       return 1
   esac
 
