@@ -574,7 +574,12 @@ initrd() {
   # generate initrd
   if [ -n "$INITRD" ] ; then
      echo "Generating initrd."
-     update-initramfs -c -t -k "$KERNELVER"
+     if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
+         DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
+         dracut -N --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force
+     else
+         update-initramfs -c -t -k "$KERNELVER"
+     fi
   fi
 }
 # }}}

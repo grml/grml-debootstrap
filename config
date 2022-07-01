@@ -203,9 +203,14 @@
 # Default: 'yes'
 # UPGRADE_SYSTEM='no'
 
-# Explicit generation of initrd via update-initramfs.
+# Explicit generation of initrd via selected initrd generator.
 # Default: 'yes'
 # INITRD='no'
+
+# Which generator to use for initrd creation.
+# Supported values: 'dracut', 'initramfs-tools'
+# Default: 'initramfs-tools'
+# INITRD_GENERATOR='initramfs-tools'
 
 # If the specified file exists its content will be displayed at the end of the
 # installation process.
