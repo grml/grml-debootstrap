@@ -576,7 +576,7 @@ initrd() {
      echo "Generating initrd."
      if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
          DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
-         dracut -N --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force $INITRD_GENERATOR_OPTS
+         dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
      else
          update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
      fi
