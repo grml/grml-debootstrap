@@ -17,7 +17,7 @@ teardown() {
 @test "debian_version exists and is valid version" {
   run cat "${mountpath}/etc/debian_version"
   [ "$status" -eq 0 ]
-  [[ "$output" == [0-9]*.[0-9]* ]] || [[ "$output" == 'bullseye/sid' ]]
+  [[ "$output" == [0-9]*.[0-9]* ]] || [[ "$output" == 'bookworm/sid' ]]
 }
 
 @test "kernel exists" {
