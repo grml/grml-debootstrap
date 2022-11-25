@@ -1,3 +1,21 @@
+grml-debootstrap (0.101) unstable; urgency=medium
+
+  [ Daniel Winzen ]
+  * [d60b372] Add dracut support
+  * [4deb6e8] Add option to pass extra options to initrd generator
+  * [79f5f42] Make dracut images reproducible and use long form of --no-
+    hostonly
+
+  [ Michael Prokop ]
+  * [78eb32c] packer: add support for Debian/bookworm
+  * [8b44fbb] packer: update Grml ISO to 2022.11-rc1
+  * [4c49de9] Ensure to have filesystem tools installed. Thanks to Chris
+    Hofstaedtler for the bug report
+  * [befae5a] Use "errors=remount-ro" fstab option only within supported
+    filesystems. Thanks to Chris Hofstaedtler for the bug report
+
+ -- Michael Prokop <mika@grml.org>  Fri, 25 Nov 2022 17:12:51 +0100
+
 grml-debootstrap (0.100) unstable; urgency=medium
 
   * [43ea7e2] Drop leftover KEYRING code
