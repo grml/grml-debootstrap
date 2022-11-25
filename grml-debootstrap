@@ -63,6 +63,8 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$FORCE" ] || FORCE=''
 [ -n "$HOSTNAME" ] || HOSTNAME='grml'
 [ -n "$INITRD" ] || INITRD='yes'
+[ -n "$INITRD_GENERATOR" ] || INITRD_GENERATOR='initramfs-tools'
+[ -n "$INITRD_GENERATOR_OPTS" ] || INITRD_GENERATOR_OPTS=''
 [ -n "$INSTALL_NOTES" ] || INSTALL_NOTES='/etc/debootstrap/install_notes'
 [ -n "$LOCALES" ] || LOCALES='yes'
 [ -n "$MIRROR" ] || MIRROR="$FALLBACK_MIRROR"
@@ -1691,6 +1693,8 @@ preparechroot() {
   [ -n "$GRUB" ]                && echo "GRUB='$(sed "s,','\\\\'',g" <<<"${GRUB}")'"                               >> "$CHROOT_VARIABLES"
   [ -n "$HOSTNAME" ]            && echo "HOSTNAME='$(sed "s,','\\\\'',g" <<<"${HOSTNAME}")'"                       >> "$CHROOT_VARIABLES"
   [ -n "$INITRD" ]              && echo "INITRD='$(sed "s,','\\\\'',g" <<<"${INITRD}")'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD_GENERATOR" ]    && echo "INITRD_GENERATOR='$(sed "s,','\\\\'',g" <<<"${INITRD_GENERATOR}")'"       >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD_GENERATOR_OPTS" ] && echo "INITRD_GENERATOR_OPTS='$(sed "s,','\\\\'',g" <<<"${INITRD_GENERATOR_OPTS}")'" >> "$CHROOT_VARIABLES"
   [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES='$(sed "s,','\\\\'',g" <<<"${INSTALL_NOTES}")'"             >> "$CHROOT_VARIABLES"
   [ -n "$ISODIR" ]              && echo "ISODIR='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                              >> "$CHROOT_VARIABLES"
   [ -n "$ISO" ]                 && echo "ISO='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                                 >> "$CHROOT_VARIABLES"
