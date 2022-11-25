@@ -525,6 +525,28 @@ fstab() {
 }
 # }}}
 
+# ensure we have according filesystem tools available {{{
+install_fs_tools() {
+  local pkg=""
+
+  # note: this is supposed to be coming either via command lines'
+  # $_opt_filesystem or via createfstab()
+  case "${FILESYSTEM}" in
+    jfs)
+      pkg="jfsutils"
+      ;;
+    xfs)
+      pkg="xfsprogs"
+      ;;
+  esac
+
+  if [ -n "${pkg:-}" ] && ! dpkg --list "${pkg}" 2>/dev/null | grep -q '^ii' ; then
+    echo "Filesystem package ${pkg} not present, installing now"
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${pkg}"
+  fi
+}
+# }}}
+
 # set up hostname {{{
 hostname() {
   if [ -n "$HOSTNAME" ] ; then
@@ -746,7 +768,8 @@ trap signal_handler HUP INT QUIT TERM
 
  for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages reconfigure hosts \
-     default_locales timezone fstab hostname initrd grub_install passwords \
+     default_locales timezone fstab install_fs_tools hostname \
+     initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
      if stage $i ; then
