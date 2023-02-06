@@ -219,8 +219,8 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names: lenny,
-    squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Corresponding with configuration
-    variable RELEASE. Default release: bullseye
+    squeeze, wheezy, jessie, stretch, buster, bullseye, bookworm and sid.
+    Corresponding with configuration variable RELEASE. Default release: bookworm
 
 *--remove-configs*::
 
@@ -295,7 +295,7 @@ Usage examples
 
   grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (bullseye) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
   grml-debootstrap --release stretch --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
 
@@ -308,32 +308,32 @@ Install Debian unstable/sid on /dev/sda6 and install bootmanager GRUB in MBR (ma
 
   DEBOOTSTRAP=mmdebstrap grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (bullseye) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use mmdebstrap instead of default debootstrap tool for bootstrapping.
 
   grml-debootstrap --target /dev/mapper/vg0-rootfs --grub /dev/sda
 
-Install default Debian release (bullseye) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bookworm) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
   grml-debootstrap --efi /dev/sda1 --target /dev/sda2 --grub /dev/sda
 
-Install default Debian release (bullseye) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bookworm) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use /dev/sda1 as EFI partition (requires EFI support in booted system).
 
   mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
 
-Install default Debian release (bullseye) in directory /data/chroot (without any bootloader).
+Install default Debian release (bookworm) in directory /data/chroot (without any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default Debian release (bullseye) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (bookworm) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use specified mirror instead of the default (http://deb.debian.org/debian) one.
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default debian release (bullseye) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
+Install default debian release (bookworm) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
 
   mount -o loop ./debian-CD-1.iso /media/cdrom
   grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso /media/cdrom
@@ -405,8 +405,9 @@ Where do you want to install grub to? Usage example: grub=/dev/sda
 
   release=...
 
-Specify release of new Debian system. Defaults to Debian bullseye. Supported
-releases: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye and sid. Usage example: release=stretch
+Specify release of new Debian system. Defaults to Debian bookworm.
+Supported releases: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye, bookworm and sid.
+Usage example: release=bullseye
 
   mirror=...
 
@@ -440,18 +441,16 @@ Supported Releases
 include::releasetable.txt[]
 
 [NOTE]
-.lenny/squeeze/wheezy release
+.lenny/squeeze/wheezy/jessie/stretch/buster release
 ================================================================================
-[1] Please notice that releases like lenny, squeeze and wheezy are unsupported releases within Debian nowadays.
+[1] Please notice that releases like lenny, squeeze, wheezy, jessie, stretch and buster are unsupported releases within Debian nowadays.
 grml-debootstrap can handle the releases but you really should not use them
 anymore unless you really know what you are doing.
 Choose the current Debian stable version instead.
 See https://wiki.debian.org/DebianReleases for the list of supported releases.
 
-Notice that you need to specify a mirror providing the lenny and squeeze releases, the
-default (http://deb.debian.org/debian) doesn't provide it any longer nowadays.
-Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have
-your own lenny/squeeze mirror.
+Notice that you need to specify a specific mirror providing old releases, the default (http://deb.debian.org/debian) doesn't provide them any longer.
+Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have your own Debian mirror.
 
 Older releases might also fail to install when running on top of recent kernel versions,
 throwing segfaults during debootstrap. This can be identified by the following messages inside kernel log (check with 'dmesg'):

@@ -5,9 +5,10 @@
 |lenny    |works[1]
 |squeeze  |works[1]
 |wheezy   |works[1]
-|jessie   |works
-|stretch  |works
-|buster   |works
-|bullseye |works[2]
+|jessie   |works[1]
+|stretch  |works[1]
+|buster   |works[1]
+|bullseye |works
+|bookworm |works
 |sid      |works[2]
 |======================
