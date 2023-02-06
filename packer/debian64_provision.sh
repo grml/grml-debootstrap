@@ -188,7 +188,7 @@ EOF
   elif [ "$GRML_DEBOOTSTRAP_VERSION" = "git" ] ; then
     echo "** GRML_DEBOOTSTRAP_VERSION is set to '$GRML_DEBOOTSTRAP_VERSION'"
     echo "** Using grml-debootstrap from Git repository"
-    git clone git://git.grml.org/grml-debootstrap.git
+    git clone https://github.com/grml/grml-debootstrap.git
     cd grml-debootstrap
     GRML_DEBOOTSTRAP="CONFFILES=$(pwd) $(pwd)/grml-debootstrap"
   elif [ "$GRML_DEBOOTSTRAP_VERSION" = "local" ] ; then
