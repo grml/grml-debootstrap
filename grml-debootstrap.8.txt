@@ -168,8 +168,9 @@ Options and environment variables
 
 *--non-free*::
 
-    Enable the 'non-free' repository in COMPONENTS. By default only
-    the 'main' repository is enabled.
+    Enable the 'non-free' repository in COMPONENTS.
+    For bookworm and newer Debian releases also the 'non-free-firmware' repository gets enabled.
+    By default only the 'main' repository is enabled.
 
 *--nopackages*::
 

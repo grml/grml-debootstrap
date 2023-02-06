@@ -153,7 +153,7 @@ Configuration options:
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
       --keep_src_list      Do not overwrite user provided apt sources.list.
       --contrib            Enable 'contrib' in COMPONENTS (defaults to 'main' only).
-      --non-free           Enable non-free in COMPONENTS (defaults to 'main' only).
+      --non-free           Enable non-free / non-free-firmware in COMPONENTS (defaults to 'main' only).
       --hostname <name>    Hostname of Debian system.
       --nopassword         Do not prompt for the root password.
       --password <pwd>     Use specified password as password for user root.
@@ -589,7 +589,15 @@ done
 # make sure main is always included
 [ -z "$COMPONENTS" ]            && COMPONENTS="main"
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
-[ "$_opt_non_free" ]            && COMPONENTS="$COMPONENTS non-free"
+
+case "${RELEASE}" in
+  lenny|squeeze|wheezy|jessie|stretch|buster|bullseye)
+    [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
+    ;;
+  *)
+    [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free-firmware non-free"
+    ;;
+esac
 
 # command line option checks
 if [ "$_opt_scripts_set" ] ; then
