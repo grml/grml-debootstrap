@@ -1,3 +1,18 @@
+grml-debootstrap (0.102) unstable; urgency=medium
+
+  The "¡hola bookworm!" release
+
+  * [97308cd] Support new non-free repository component for Debian
+    bookworm and newer
+  * [4a2a0b2] Use bookworm as new default release + update release list
+  * [d839c3c] Update copyright information
+  * [df8c043] Update Vcs-* headers + copyright source to use github.com
+  * [3a8d2b7] packer: clone git repository from github.com
+  * [594d9d1] docker: retrieve vimrc + zshrc from github
+  * [d71aaf4] Bump Standards-Version to 4.6.2
+
+ -- Michael Prokop <mika@grml.org>  Mon, 06 Feb 2023 18:32:46 +0100
+
 grml-debootstrap (0.101) unstable; urgency=medium
 
   [ Daniel Winzen ]
