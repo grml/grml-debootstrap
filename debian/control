@@ -14,7 +14,7 @@ Build-Depends-Indep:
  docbook-xsl,
  shunit2,
  xsltproc,
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Rules-Requires-Root: no
 Homepage: https://grml.org/grml-debootstrap/
 Vcs-Git: https://github.com/grml/grml-debootstrap.git
