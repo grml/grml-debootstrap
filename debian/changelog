@@ -1,3 +1,10 @@
+grml-debootstrap (0.103) unstable; urgency=medium
+
+  * [bbb2ea0] Disable ext4 metadata_csum_seed for Debian releases older
+    than bookworm (Closes: #1031416)
+
+ -- Michael Prokop <mika@grml.org>  Mon, 20 Feb 2023 11:40:07 +0100
+
 grml-debootstrap (0.102) unstable; urgency=medium
 
   The "¡hola bookworm!" release
