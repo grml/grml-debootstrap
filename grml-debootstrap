@@ -1560,18 +1560,6 @@ grub_install() {
 if [ -n "$ARM_EFI_TARGET" ]; then
   einfo "Installing Grub as bootloader into EFI."
 
-  if ! chroot "${MNTPOINT}" dpkg --list grub2-common 2>/dev/null | grep -q '^ii' ; then
-    echo "Notice: grub2-common package not present yet, installing it therefore."
-    # shellcheck disable=SC2086
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub2-common
-  fi
-
-  if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64 2>/dev/null | grep -q '^ii' ; then
-    echo "Notice: grub-efi-arm64 package not present yet, installing it therefore."
-    # shellcheck disable=SC2086
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64
-  fi
-
   chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
 # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
 # chroot-script skips installation for unset ${GRUB}
@@ -1798,8 +1786,14 @@ preparechroot() {
 
   # package selection:
   if [ "$PACKAGES" = 'yes' ] ; then
-    cp $VERBOSE "${_opt_packages:-$CONFFILES/packages}" \
-      "${MNTPOINT}"/etc/debootstrap/packages
+    PACKAGES_FILE="packages"
+
+    if [ "$ARCH" = 'arm64' ]; then
+      PACKAGES_FILE="packages-arm64"
+    fi
+
+    cp $VERBOSE "${_opt_packages:-$CONFFILES/$PACKAGES_FILE}" \
+      "${MNTPOINT}"/etc/debootstrap/$PACKAGES_FILE
   fi
 
   # debconf preseeding:
