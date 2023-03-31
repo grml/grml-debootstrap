@@ -637,6 +637,42 @@ efi_setup() {
 }
 
 # grub configuration/installation {{{
+
+# helper function to get relevant /dev/disk/by-id/* entries,
+# based on GRUB's postinst script
+available_ids() {
+  local path ids
+
+  [ -d /dev/disk/by-id ] || return
+  ids="$(
+    for path in /dev/disk/by-id/*; do
+      [ -e "${path}" ] || continue
+      printf '%s %s\n' "${path}" "$(readlink -f "${path}")"
+    done | sort -k2 -s -u | cut -d' ' -f1
+  )"
+  echo "${ids}"
+}
+
+# helper function to report corresponding /dev/disk/by-id/… for a given device name,
+# based on GRUB's postinst script
+device_to_id() {
+  local id
+
+  for id in $(available_ids); do
+    if [ "$(readlink -f "${id}")" = "$(readlink -f "$1")" ]; then
+      echo "${id}"
+      return 0
+    fi
+  done
+
+  # Fall back to the plain device name if there's no by-id link for it.
+  if [ -e "$1" ]; then
+    echo "$1"
+    return 0
+  fi
+  return 1
+}
+
 grub_install() {
 
   if [ -z "$GRUB" ] ; then
@@ -654,8 +690,15 @@ grub_install() {
 
   # make sure this is pre-defined so we have sane settings for automated
   # upgrades, see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=711019
+  local grub_device
+  grub_device=$(device_to_id "${GRUB}")
+  if [ -z "${grub_device:-}" ] ; then
+     echo "Warning: Could not identify /dev/disk/by-id/... for '${GRUB}', falling back to '${GRUB}'"
+     grub_device="${GRUB}"
+  fi
+
   echo "Setting ${GRUB_PACKAGE} debconf configuration for install device to $GRUB"
-  echo "${GRUB_PACKAGE} ${GRUB_PACKAGE}/install_devices multiselect $GRUB" | debconf-set-selections
+  echo "${GRUB_PACKAGE} ${GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
 
   if ! dpkg --list ${GRUB_PACKAGE} 2>/dev/null | grep -q '^ii' ; then
     echo "Notice: grub option set but no ${GRUB_PACKAGE} package, installing it therefore."
