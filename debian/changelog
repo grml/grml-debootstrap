@@ -1,3 +1,14 @@
+grml-debootstrap (0.104) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [b379e24] GRUB: use persistent device names under /dev/disk/by-id/ for
+    install_devices
+
+  [ Giovanni Rosa ]
+  * [64d4081] Fix for Dockerfile smell DL3059
+
+ -- Michael Prokop <mika@grml.org>  Fri, 08 Sep 2023 13:14:50 +0200
+
 grml-debootstrap (0.103) unstable; urgency=medium
 
   * [bbb2ea0] Disable ext4 metadata_csum_seed for Debian releases older
