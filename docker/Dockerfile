@@ -12,8 +12,8 @@ RUN apt-get install -y grml-debootstrap bats eatmydata
 RUN apt-get install -y curl less vim wget zsh
 
 # grml config
-RUN wget -O /root/.vimrc https://raw.githubusercontent.com/grml/grml-etc-core/master/etc/vim/vimrc
-RUN wget -O /root/.zshrc https://raw.githubusercontent.com/grml/grml-etc-core/master/etc/zsh/zshrc
+RUN wget -O /root/.vimrc https://raw.githubusercontent.com/grml/grml-etc-core/master/etc/vim/vimrc \
+    && wget -O /root/.zshrc https://raw.githubusercontent.com/grml/grml-etc-core/master/etc/zsh/zshrc
 
 # nice defaults
 ENV LANG C.UTF-8
@@ -23,7 +23,7 @@ ENV TERM xterm-256color
 RUN echo 'APT::Get::Show-Versions "1";' > /etc/apt/apt.conf.d/verbose
 
 # cleanup
-RUN apt-get clean
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/bin/zsh"]
