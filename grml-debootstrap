@@ -1313,8 +1313,8 @@ mkfs() {
   if [ -n "$MKFS" ] ; then
 
     if [ -n "$ARM_EFI_TARGET" ] ; then
-      einfo "Running mkfs.vfat $MKFS_OPTS on $ARM_EFI_TARGET"
-      mkfs.vfat -n "EFI" $MKFS_OPTS "$ARM_EFI_TARGET"
+      einfo "Running mkfs.fat $MKFS_OPTS on $ARM_EFI_TARGET"
+      mkfs.fat -n "EFI" "$ARM_EFI_TARGET"
       eend $?
 
       MKFS_OPTS="$MKFS_OPTS -L LINUX"
