@@ -275,6 +275,10 @@ Options and environment variables
    qemu-img(1) for details.
    Usage example: --vmsize 3G
 
+*--vmefi*::
+
+   Create an EFI boot partition for the VM.
+
 *-V*, *--version*::
 
     Show version of program and exit.

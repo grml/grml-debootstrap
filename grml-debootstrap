@@ -131,6 +131,7 @@ Options for Virtual Machine deployment:
                          Example: --vmfile --target /mnt/sda1/qemu.img
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
+      --vmefi            Create an EFI boot partition for the VM.
 
 Configuration options:
 
@@ -354,7 +355,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmefi,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
 _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@")
@@ -388,6 +389,9 @@ while :; do
     ;;
   --vmsize)            # size of Virtual machine file
     shift; _opt_vmsize="$1"
+    ;;
+  --vmefi)            # Create an EFI boot partition for the VM
+    _opt_vmefi="T"
     ;;
   --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
@@ -554,6 +558,7 @@ done
 [ "$_opt_vm" ]                  && VIRTUAL=1
 [ "$_opt_vmfile" ]              && VMFILE=1 && VIRTUAL=1
 [ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
+[ "$_opt_vmefi" ]               && VMEFI=1
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
@@ -1085,6 +1090,7 @@ else # if not running automatic installation display configuration and prompt fo
 
    if [ -n "$VIRTUAL" ] ; then
       echo "   Install grub:    yes"
+      [ -n "$VMEFI" ]   && echo "   Install efi:     yes"   || echo "   Install efi:     no"
    else
      [ -n "$GRUB" ]     && echo "   Install grub:    $GRUB" || echo "   Install grub:    no"
      [ -n "$EFI" ]      && echo "   Install efi:     $EFI"  || echo "   Install efi:     no"
@@ -1346,6 +1352,12 @@ mkfs() {
       fi
     fi
 
+    if [ -n "$VIRTUAL" ] && [ -n "$EFI_TARGET" ]; then
+      einfo "Creating FAT filesystem on $EFI_TARGET"
+      mkfs.fat -F32 -n "EFI" "$EFI_TARGET"
+      eend $?
+    fi
+
     # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
     # will fail to detect the uuid in the chroot
     if [ -n "$VIRTUAL" ] ; then
@@ -1489,16 +1501,23 @@ prepare_vm() {
   if [ -n "$VMFILE" ]; then
     qemu-img create -f raw "${TARGET}" "${VMSIZE}"
   fi
-  parted -s "${TARGET}" 'mklabel msdos'
-  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-    einfo "Adjusting disk signature to a fixed (non-random) value"
-    MBRTMPFILE=$(mktemp)
-    dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-    echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
-    dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-    eend $?
+  if [ -n "$VMEFI" ]; then
+    parted -s "${TARGET}" 'mklabel gpt'
+    parted -s "${TARGET}" 'mkpart ESP fat32 1MiB 101MiB'
+    parted -s "${TARGET}" 'set 1 boot on'
+    parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
+  else
+    parted -s "${TARGET}" 'mklabel msdos'
+    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+      einfo "Adjusting disk signature to a fixed (non-random) value"
+      MBRTMPFILE=$(mktemp)
+      dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
+      echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
+      dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
+      eend $?
+    fi
+    parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
   fi
-  parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
   parted -s "${TARGET}" 'set 1 boot on'
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
@@ -1510,6 +1529,10 @@ prepare_vm() {
   # hopefully this always works as expected
   LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
+  if [ -n "$VMEFI" ]; then
+    export EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
+    LOOP_PART="${LOOP_PART%p1}p2"
+  fi
   LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
 
@@ -1565,22 +1588,58 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
       cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
       ;;
   esac
-  dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
-  case "${_opt_filesystem}" in
-    f2fs)
-      chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
-      ;;
-    xfs)
-      chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
-      ;;
-    # NOTE - we might need to distinguish between further filesystems
-    *)
-      chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
-      ;;
-  esac
 
-  dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
-  rm -f "${MNTPOINT}/tmp/core.img"
+  if [ -n "$VMEFI" ]; then
+
+    mkdir -p "${MNTPOINT}"/boot/efi
+    mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
+
+    if ! chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
+      echo "Notice: shim-signed package not present yet, installing it therefore."
+      # shellcheck disable=SC2086
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
+    fi
+
+    if [ "$(dpkg --print-architecture)" = "arm64" ]; then
+      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
+      fi
+      chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+    elif [ "$(dpkg --print-architecture)" = "i386" ]; then
+      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
+      fi
+      chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+    else
+      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
+      fi
+      chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+    fi
+  else
+    dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
+    case "${_opt_filesystem}" in
+      f2fs)
+        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
+        ;;
+      xfs)
+        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
+        ;;
+      # NOTE - we might need to distinguish between further filesystems
+      *)
+        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+        ;;
+    esac
+
+    dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
+    rm -f "${MNTPOINT}/tmp/core.img"
+  fi
 fi
 
   # workaround for Debian bug #918590 with lvm + udev:
@@ -1623,6 +1682,10 @@ fi
   umount "${MNTPOINT}"/sys
   umount "${MNTPOINT}"/dev/pts
   try_umount 3 "${MNTPOINT}"/dev
+
+  if [ -n "$VMEFI" ]; then
+    umount "${MNTPOINT}"/boot/efi
+  fi
 
 }
 # }}}
