@@ -1505,7 +1505,10 @@ prepare_vm() {
     parted -s "${TARGET}" 'mklabel gpt'
     parted -s "${TARGET}" 'mkpart ESP fat32 1MiB 101MiB'
     parted -s "${TARGET}" 'set 1 boot on'
-    parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
+    parted -s "${TARGET}" 'mkpart bios_grub 101MiB 102MiB'
+    parted -s "${TARGET}" 'set 2 bios_grub on'
+    parted -s "${TARGET}" 'mkpart primary ext4 102MiB 100%'
+
   else
     parted -s "${TARGET}" 'mklabel msdos'
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
@@ -1517,8 +1520,8 @@ prepare_vm() {
       eend $?
     fi
     parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
+    parted -s "${TARGET}" 'set 1 boot on'
   fi
-  parted -s "${TARGET}" 'set 1 boot on'
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
   if [ -z "${DEVINFO}" ] ; then
@@ -1531,7 +1534,7 @@ prepare_vm() {
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   if [ -n "$VMEFI" ]; then
     export EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
-    LOOP_PART="${LOOP_PART%p1}p2"
+    LOOP_PART="${LOOP_PART%p1}p3"
   fi
   LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
@@ -1614,6 +1617,7 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
         DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
       fi
       chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+      chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
     else
       if ! chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
         echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
@@ -1621,6 +1625,7 @@ if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v |
         DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
       fi
       chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+      chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
     fi
   else
     dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
