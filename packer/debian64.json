@@ -11,7 +11,7 @@
       "hard_drive_interface": "sata",
       "headless": false,
       "iso_checksum": "sha1:{{ user `grml_iso_checksum` }}",
-      "iso_url": "http://download.grml.org/devel/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
+      "iso_url": "http://download.grml.org/{{ user `grml_type` }}_{{ user `grml_version` }}.iso",
       "output_directory": "{{ user `grml_type` }}_output",
       "shutdown_command": "shutdown -h now",
       "ssh_password": "grml",
@@ -71,12 +71,12 @@
     }
   ],
   "variables": {
-    "debian_version": "bullseye",
+    "debian_version": "bookworm",
     "grml_debootstrap_local_path": "doesnotexist",
     "grml_debootstrap_version": "latest",
-    "grml_iso_checksum": "813a999762a4b1ff20a3d7a757339d3ae822c547",
+    "grml_iso_checksum": "ac071ab44592568b05635ccdd881da4f2a90c3a8",
     "grml_type": "grml64-full",
-    "grml_version": "2022.11-rc1"
+    "grml_version": "2022.11"
   }
 }
 
