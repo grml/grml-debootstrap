@@ -260,6 +260,10 @@ cleanup() {
     einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
   fi
 
+  if [ -n "$ARM_EFI_TARGET" ]; then
+    umount "${MNTPOINT}/boot/efi" >/dev/null 2>&1
+  fi
+
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
     rmdir "$MNTPOINT" 2>/dev/null
@@ -612,7 +616,7 @@ fi
 
 if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   eerror "The --grub option is incompatible with --vmfile, please drop it from your command line."
-  eerror "The --grub option is unneeded as GRUB will be installed automatically."
+  eerror "The --grub option is unneeded as GRUB will be installed automatically (unless GRUB_INSTALL='no')."
   eend 1
   bailout 1
 fi
@@ -1088,7 +1092,7 @@ else # if not running automatic installation display configuration and prompt fo
    # do not display if MNTPOINT is the default one
    case "$MNTPOINT" in /mnt/debootstrap*) ;; *) echo "   Mount point:     $MNTPOINT" ;; esac
 
-   if [ -n "$VIRTUAL" ] ; then
+   if [ -n "$VIRTUAL" ] && [ "$GRUB_INSTALL" = 'yes' ] ; then
       echo "   Install grub:    yes"
       [ -n "$VMEFI" ]   && echo "   Install efi:     yes"   || echo "   Install efi:     no"
    else
@@ -1336,6 +1340,15 @@ mkfs() {
   fi
 
   if [ -n "$MKFS" ] ; then
+
+    if [ -n "${ARM_EFI_TARGET}" ] ; then
+      einfo "Running mkfs.fat $MKFS_OPTS on $ARM_EFI_TARGET"
+      mkfs.fat -n "EFI" "$ARM_EFI_TARGET"
+      eend $?
+
+      MKFS_OPTS="$MKFS_OPTS -L LINUX"
+    fi
+
     einfo "Running $MKFS $MKFS_OPTS on $TARGET"
     # shellcheck disable=SC2086
     "$MKFS" $MKFS_OPTS "$TARGET" ; RC=$?
@@ -1510,23 +1523,41 @@ prepare_vm() {
     parted -s "${TARGET}" 'mkpart primary ext4 102MiB 100%'
 
   else
-    parted -s "${TARGET}" 'mklabel msdos'
-    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-      einfo "Adjusting disk signature to a fixed (non-random) value"
-      MBRTMPFILE=$(mktemp)
-      dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-      echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
-      dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-      eend $?
+    # arm64 support largely only exists for GPT
+    if [ "$ARCH" = 'arm64' ]; then
+      einfo "Setting up GPT partitions for arm64"
+      parted -s "${TARGET}" 'mklabel gpt'
+      parted -s "${TARGET}" 'mkpart EFI fat32 1MiB 10MiB'
+      parted -s "${TARGET}" 'set 1 boot on'
+      parted -s "${TARGET}" 'mkpart LINUX ext4 10MiB 100%'
+    else
+      parted -s "${TARGET}" 'mklabel msdos'
+      if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+        einfo "Adjusting disk signature to a fixed (non-random) value"
+        MBRTMPFILE=$(mktemp)
+        dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
+        echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
+        dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
+        eend $?
+      fi
+      parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
+      parted -s "${TARGET}" 'set 1 boot on'
     fi
-    parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
-    parted -s "${TARGET}" 'set 1 boot on'
   fi
 
-  DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3'
+  DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3' - will be multi-line for arm64
   if [ -z "${DEVINFO}" ] ; then
     eerror "Error setting up loopback device." ; eend 1
     bailout 1
+  fi
+
+  # if we're building for arm64, we operate on the first line of $DEVINFO which is the EFI partition
+  if [ "$ARCH" = 'arm64' ]; then
+    LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
+    LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
+    LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
+    export ARM_EFI_TARGET="/dev/mapper/$LOOP_PART"
+    DEVINFO=${DEVINFO##*$'\n'} # now set $DEVINFO to the last line which is the OS partition
   fi
 
   # hopefully this always works as expected
@@ -1537,7 +1568,7 @@ prepare_vm() {
     LOOP_PART="${LOOP_PART%p1}p3"
   fi
   LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
-  export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop1p1'
+  export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
 
   if [ -z "$TARGET" ] ; then
      eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
@@ -1561,91 +1592,103 @@ grub_install() {
     bailout 1
   fi
 
+  if [ -n "${ARM_EFI_TARGET}" ]; then
+    mkdir -p "${MNTPOINT}/boot/efi"
+    if ! mount "${ARM_EFI_TARGET}" "${MNTPOINT}/boot/efi" ; then
+      eerror "Error: Mounting ${ARM_EFI_TARGET} failed, can not continue." ; eend 1
+      bailout 1
+    fi
+  fi
+
   mount -t proc none "${MNTPOINT}"/proc
   mount -t sysfs none "${MNTPOINT}"/sys
   mount -t devtmpfs udev "${MNTPOINT}"/dev
   mount -t devpts devpts "${MNTPOINT}"/dev/pts
 
-# Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
-# chroot-script skips installation for unset ${GRUB}
-if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
-  einfo "Installing Grub as bootloader."
+  if [ -n "$ARM_EFI_TARGET" ]; then
+    einfo "Installing Grub as bootloader into EFI."
 
-  if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
-    echo "Notice: grub-pc package not present yet, installing it therefore."
-    # shellcheck disable=SC2086
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
-  fi
+    chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
+  # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
+  # chroot-script skips installation for unset ${GRUB}
+  elif [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
+    einfo "Installing Grub as bootloader."
 
-  mkdir -p "${MNTPOINT}/boot/grub"
-  if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
-     eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
-     bailout 1
-  fi
-
-  case "$RELEASE" in
-    lenny|squeeze|wheezy)
-      cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
-      ;;
-    *)
-      cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
-      ;;
-  esac
-
-  if [ -n "$VMEFI" ]; then
-
-    mkdir -p "${MNTPOINT}"/boot/efi
-    mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
-
-    if ! chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
-      echo "Notice: shim-signed package not present yet, installing it therefore."
+    if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
+      echo "Notice: grub-pc package not present yet, installing it therefore."
       # shellcheck disable=SC2086
-      DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
     fi
 
-    if [ "$(dpkg --print-architecture)" = "arm64" ]; then
-      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
-      fi
-      chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
-    elif [ "$(dpkg --print-architecture)" = "i386" ]; then
-      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
-      fi
-      chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
-      chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
-    else
-      if ! chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
-      fi
-      chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
-      chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+    mkdir -p "${MNTPOINT}/boot/grub"
+    if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
+      eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
+      bailout 1
     fi
-  else
-    dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
-    case "${_opt_filesystem}" in
-      f2fs)
-        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
+
+    case "$RELEASE" in
+      lenny|squeeze|wheezy)
+        cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
         ;;
-      xfs)
-        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
-        ;;
-      # NOTE - we might need to distinguish between further filesystems
       *)
-        chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+        cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
         ;;
     esac
 
-    dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
-    rm -f "${MNTPOINT}/tmp/core.img"
+    if [ -n "$VMEFI" ]; then
+
+      mkdir -p "${MNTPOINT}"/boot/efi
+      mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
+
+      if ! chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: shim-signed package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
+      fi
+
+      if [ "$(dpkg --print-architecture)" = "arm64" ]; then
+        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
+          echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
+          # shellcheck disable=SC2086
+          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
+        fi
+        chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+      elif [ "$(dpkg --print-architecture)" = "i386" ]; then
+        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
+          echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
+          # shellcheck disable=SC2086
+          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
+        fi
+        chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+      else
+        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
+          echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
+          # shellcheck disable=SC2086
+          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
+        fi
+        chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+      fi
+    else
+      dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
+      case "${_opt_filesystem}" in
+        f2fs)
+          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
+          ;;
+        xfs)
+          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
+          ;;
+        # NOTE - we might need to distinguish between further filesystems
+        *)
+          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+          ;;
+      esac
+
+      dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
+      rm -f "${MNTPOINT}/tmp/core.img"
+    fi
   fi
-fi
 
   # workaround for Debian bug #918590 with lvm + udev:
   # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
@@ -1658,6 +1701,7 @@ fi
 
   einfo "Updating grub configuration file."
   chroot "${MNTPOINT}" update-grub
+  chroot "${MNTPOINT}" sync
 
   case "$RELEASE" in
     jessie)
@@ -1670,7 +1714,7 @@ fi
   if grep -q '^GRUB_DISABLE_LINUX_UUID=.*true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
     ewarn "GRUB_DISABLE_LINUX_UUID is set to true in /etc/default/grub, not adjusting root= in grub.cfg."
     ewarn "Please note that your system might NOT be able to properly boot."
-  else
+  elif [ -z "$ARM_EFI_TARGET" ]; then
     einfo "Adjusting grub.cfg for successful boot sequence."
     sed -i "s;root=[^ ]\\+;root=UUID=$TARGET_UUID;" "${MNTPOINT}"/boot/grub/grub.cfg
   fi
@@ -1699,6 +1743,10 @@ fi
 umount_target() {
   if [ -z "${VIRTUAL}" ] ; then
      return 0
+  fi
+
+  if [ -n "${ARM_EFI_TARGET}" ]; then
+    umount "${MNTPOINT}/boot/efi"
   fi
 
   umount "${MNTPOINT}"
@@ -1829,8 +1877,14 @@ preparechroot() {
 
   # package selection:
   if [ "$PACKAGES" = 'yes' ] ; then
-    cp $VERBOSE "${_opt_packages:-$CONFFILES/packages}" \
-      "${MNTPOINT}"/etc/debootstrap/packages
+    PACKAGES_FILE="packages"
+
+    if [ "$ARCH" = 'arm64' ]; then
+      PACKAGES_FILE="packages-arm64"
+    fi
+
+    cp $VERBOSE "${_opt_packages:-$CONFFILES/$PACKAGES_FILE}" \
+      "${MNTPOINT}/etc/debootstrap/${PACKAGES_FILE}"
   fi
 
   # debconf preseeding:

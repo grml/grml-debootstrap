@@ -269,14 +269,21 @@ packages() {
   }
 
   if [ "$PACKAGES" = 'yes' ] ; then
-     if ! [ -r /etc/debootstrap/packages ] ; then
-       echo "Error: /etc/debootstrap/packages (inside chroot) not found, exiting." >&2
-       exit 1
-     else
-       $APTUPDATE
-       # shellcheck disable=SC2086,SC2046
-       DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(grep -v '^#' /etc/debootstrap/packages) $GRMLPACKAGES
-     fi
+    PACKAGES_FILE="/etc/debootstrap/packages"
+
+    if [ "$ARCH" = 'arm64' ]; then
+      PACKAGES_FILE="/etc/debootstrap/packages-arm64"
+    fi
+
+    if ! [ -r "${PACKAGES_FILE}" ] ; then
+      echo "Error: ${PACKAGES_FILE} (inside chroot) not found, exiting." >&2
+      exit 1
+    else
+      $APTUPDATE
+
+      # shellcheck disable=SC2086,SC2046
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $(grep -v '^#' "${PACKAGES_FILE}") $GRMLPACKAGES
+    fi
   fi
 }
 # }}}
@@ -325,8 +332,11 @@ get_kernel_version() {
     amd64)
       KARCH='amd64'
       ;;
+    arm64)
+      KARCH='arm64'
+      ;;
     *)
-      echo "Only i386 and amd64 are currently supported" >&2
+      echo "Only i386, amd64 and arm64 are currently supported" >&2
       return 1
   esac
 
