@@ -24,7 +24,7 @@ Package: grml-debootstrap
 Architecture: all
 Depends:
  debian-archive-keyring,
- debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16),
+ debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16) | mmdebstrap,
  e2fsprogs,
  fdisk | util-linux (<< 2.29.2-3~),
  gawk,
@@ -37,7 +37,7 @@ Recommends:
  parted,
  qemu-utils,
 Description: wrapper around debootstrap for installing pure Debian
- Provides a wrapper suite around debootstrap and cdebootstrap
+ Provides a wrapper suite around debootstrap, cdebootstrap, mmdebstrap
  to ease installation of a pure Debian system.
  .
  Configuration can be done on the command line, in a dialog frontend
