@@ -108,6 +108,8 @@ Bootstrap options:
   -r, --release <name>   Release of new Debian system (default: bullseye).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
+      --mountboot <device> Target partition (/dev/...) or directory where the
+                         /boot should be mounted to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
                          has no effect if -t is given and represents a directory.
       --debopt <params>  Extra parameters passed to the debootstrap command.
@@ -381,6 +383,9 @@ while :; do
   --target|-t)         # Target partition (/dev/...) or directory
     shift; _opt_target="$1"
     ;;
+  --mountboot)         # Target partition (/dev/...) or directory
+    shift; _opt_mountboot="$1"
+    ;;
   --vm)                # Virtual machine image (no file)
     _opt_vm="T"
     ;;
@@ -584,6 +589,7 @@ done
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_efi" ]                 && EFI=$_opt_efi
+[ "$_opt_mountboot" ]           && MOUNT_BOOT=$_opt_mountboot
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_insecure" ]            && echo "Warning: --insecure is deprecated, continuing anyway."
 [ "$_opt_force" ]               && FORCE=$_opt_force
@@ -1464,6 +1470,26 @@ mount_target() {
 }
 # }}}
 
+# mount the new partition or if it's a directory do nothing at all {{{
+mount_boot_target() {
+  if [ -n "$MOUNT_BOOT" ] ; then
+     einfo "/boot is not on a separate partition, nothing to mount."
+  else
+     if grep -q "$MOUNT_BOOT" /proc/mounts ; then
+        ewarn "$MOUNT_BOOT already mounted, continuing anyway." ; eend 0
+     else
+       if ! [ -d "${MNTPOINT}/boot" ] ; then
+          [ -n "$VIRTUAL" ] || mkdir -p "${MNTPOINT}/boot"
+       fi
+       einfo "Mounting $MOUNT_BOOT to $MNTPOINT/boot"
+       mkdir -p "$MNTPOINT/boot"
+       mount -o rw,suid,dev "$MOUNT_BOOT" "$MNTPOINT/boot"
+       eend $?
+     fi
+  fi
+}
+# }}}
+
 # prepare VM image for usage with debootstrap {{{
 prepare_vm() {
   if [ -z "$VIRTUAL" ] ; then
@@ -1807,6 +1833,7 @@ preparechroot() {
   [ -n "$TARGET" ]              && echo "TARGET='$(sed "s,','\\\\'',g" <<<"${TARGET}")'"                           >> "$CHROOT_VARIABLES"
   [ -n "$UPGRADE_SYSTEM" ]      && echo "UPGRADE_SYSTEM='$(sed "s,','\\\\'',g" <<<"${UPGRADE_SYSTEM}")'"           >> "$CHROOT_VARIABLES"
   [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID='$(sed "s,','\\\\'',g" <<<"${TARGET_UUID}")'"                 >> "$CHROOT_VARIABLES"
+  [ -n "$BOOT_UUID" ]           && echo "BOOT_UUID='$(sed "s,','\\\\'',g" <<<"${BOOT_UUID}")'"                     >> "$CHROOT_VARIABLES"
   [ -n "$TIMEZONE" ]            && echo "TIMEZONE='$(sed "s,','\\\\'',g" <<<"${TIMEZONE}")'"                       >> "$CHROOT_VARIABLES"
   [ -n "$TUNE2FS" ]             && echo "TUNE2FS='$(sed "s,','\\\\'',g" <<<"${TUNE2FS}")'"                         >> "$CHROOT_VARIABLES"
   [ -n "$VMSIZE" ]              && echo "VMSIZE='$(sed "s,','\\\\'',g" <<<"${VMSIZE}")'"                           >> "$CHROOT_VARIABLES"
@@ -2074,6 +2101,7 @@ try_umount() {
 chrootscript() {
   if ! [ -r "$MNTPOINT/bin/chroot-script" ] ; then
     mount_target
+    mount_boot_target
   fi
 
   if ! [ -x "$MNTPOINT/bin/chroot-script" ] ; then
@@ -2173,7 +2201,7 @@ remove_configs() {
 
 # now execute all the functions {{{
 for i in format_efi_partition prepare_vm mkfs tunefs \
-         mount_target mountpoint_to_blockdevice debootstrap_system \
+         mount_target mount_boot_target mountpoint_to_blockdevice debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          remove_configs umount_chroot grub_install umount_target fscktool ; do
     if stage "${i}" ; then
