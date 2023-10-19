@@ -16,7 +16,7 @@
 # If you specify a string *without* /dev/ in the beginning, grml-debootstrap
 # assumes you want to install Debian into a directory. MKFS, TUNE2FS, GRUB and
 # FSCK will be ignored.
-# Make sure the TARGET-directory points to a filesystem which has the dev, exec
+# Make sure the TARGET-directory points to a filesystem which has the dev, exec
 # options enabled.
 # Default: no default.
 # Usage examples:
@@ -129,7 +129,7 @@
 # Default: 'yes' (if file exists)
 # DEBCONF='no'
 
-# Run scripts from /etc/debootstrap/pre-scripts/ before creating the chroot.
+# Run scripts from /etc/debootstrap/pre-scripts/ before creating the chroot.
 # Default: 'yes'
 # PRE_SCRIPTS='no'
 
