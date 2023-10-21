@@ -1347,7 +1347,7 @@ mkfs() {
         bailout 1
       else
         einfo "Changing disk uuid for $TARGET to fixed (non-random) value $DISK_IDENTIFIER using tune2fs"
-        tune2fs "$TARGET" -U "$DISK_IDENTIFIER"
+        tune2fs "$TARGET" -U "$DISK_IDENTIFIER" </dev/null
         eend $?
       fi
     fi
@@ -1432,7 +1432,7 @@ mountpoint_to_blockdevice() {
 tunefs() {
   if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
-     $TUNE2FS "$TARGET"
+     $TUNE2FS "$TARGET" </dev/null
      eend $?
   fi
 }
