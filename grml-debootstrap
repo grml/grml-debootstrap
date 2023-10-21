@@ -31,6 +31,7 @@ last bash command: $last_bash_command"
 }
 
 if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
+   set -e
    set -E
    set -o pipefail
    trap "error_handler" ERR
@@ -2177,7 +2178,8 @@ for i in format_efi_partition prepare_vm mkfs tunefs \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          remove_configs umount_chroot grub_install umount_target fscktool ; do
     if stage "${i}" ; then
-      if "$i" ; then
+      "$i"
+      if [ $? -eq 0 ]; then
         stage "${i}" 'done' && rm -f "${STAGES}/${i}"
       else
         bailout 2 "$i"
