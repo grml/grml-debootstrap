@@ -653,7 +653,7 @@ available_ids() {
   echo "${ids}"
 }
 
-# helper function to report corresponding /dev/disk/by-id/… for a given device name,
+# helper function to report corresponding /dev/disk/by-id/ for a given device name,
 # based on GRUB's postinst script
 device_to_id() {
   local id
