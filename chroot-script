@@ -619,7 +619,7 @@ efi_setup() {
 
   mkdir -p /boot/efi
   echo "Mounting $EFI on /boot/efi"
-  mount "$EFI" /boot/efi || return 1
+  mount "$EFI" /boot/efi
 
   # if efivarfs kernel module is loaded, but efivars isn't,
   # then we need to mount efivarfs for efibootmgr usage
@@ -629,7 +629,7 @@ efi_setup() {
   fi
 
   echo "Invoking efibootmgr"
-  efibootmgr || return 1
+  efibootmgr
 }
 
 # grub configuration/installation {{{
@@ -676,7 +676,7 @@ grub_install() {
     return 0
   fi
 
-  efi_setup || return 1
+  efi_setup
 
   if [ -n "$EFI" ] ; then
     GRUB_PACKAGE=grub-efi-amd64
