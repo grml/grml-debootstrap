@@ -244,11 +244,11 @@ check4progs(){
 # helper functions {{{
 cleanup() {
   if [ -n "$CHROOT_VARIABLES" ] ; then
-    einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+    einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" || eend $?
   fi
 
   if [ -n "$STAGES" ] ; then
-    einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+    einfo "Removing ${STAGES}" ; rmdir "$STAGES" || eend $?
   fi
 
   if [ -n "$ARM_EFI_TARGET" ]; then
