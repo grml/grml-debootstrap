@@ -804,7 +804,8 @@ trap signal_handler HUP INT QUIT TERM
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
      if stage $i ; then
-       $i && stage $i 'done' || exit 1
+       $i || exit 1
+       stage $i 'done'
      fi
   done
   # always execute the finalize stage:
