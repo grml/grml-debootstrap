@@ -700,8 +700,7 @@ prompt_for_target()
      dialog --title "$PN" --trim \
      --msgbox "Sorry, no partitions found. Please configure your
      harddisks (see /proc/partitions) using a tool like fdisk,
-     cfdisk, gpart, gparted,..." 0 0
-     bailout 1
+     cfdisk, gpart, gparted,..." 0 0 || bailout 1
   fi
 
   PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
@@ -714,8 +713,7 @@ prompt_for_target()
   # shellcheck disable=SC2086
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
          --menu "Please select the target partition:" 0 0 0 \
-         $PARTITION_LIST)
-  [ $? -eq 0 ] || bailout 1
+         $PARTITION_LIST) || bailout 1
 }
 # }}}
 
@@ -763,8 +761,7 @@ prompt_for_bootmanager()
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
             mbr       "install bootmanager into $MBRPART" \
             nowhere   "do not install bootmanager at all" \
-          ${ADDITIONAL_PARAMS})
-  [ $? -eq 0 ] || bailout 3
+          ${ADDITIONAL_PARAMS}) || bailout 3
   IFS="$OIFS"
 
   case "$GETMBR" in
@@ -799,8 +796,8 @@ prompt_for_release()
             buster   Debian/10 \
             bullseye Debian/11 \
             bookworm Debian/12 \
-            sid      Debian/unstable)"
-  [ $? -eq 0 ] || bailout
+            sid      Debian/unstable)" \
+            || bailout
 }
 # }}}
 
@@ -809,8 +806,7 @@ prompt_for_hostname()
 {
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
-            0 0 "$HOSTNAME")"
-  [ $? -eq 0 ] || bailout
+            0 0 "$HOSTNAME")" || bailout
 }
 # }}}
 
@@ -826,13 +822,11 @@ prompt_for_password()
   ROOTPW2='PW2'
   while [ "$ROOTPW1" != "$ROOTPW2" ]; do
     ROOTPW1=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
-    "Please enter the password for the root account:" 10 60)
-    [ $? -eq 0 ] || bailout
+    "Please enter the password for the root account:" 10 60) || bailout
 
     ROOTPW2=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
     "Please enter the password for the root account again for \
-    confirmation:" 10 60)
-    [ $? -eq 0 ] || bailout
+    confirmation:" 10 60) || bailout
 
     if [ "$ROOTPW1" != "$ROOTPW2" ]; then
       dialog --stdout --title "${PN}" --ok-label \
@@ -853,20 +847,18 @@ prompt_for_mirror()
             net   "install via network (downloading from mirror)" \
             local "install from local directory/mirror"
           )
-  [ $? -eq 0 ] || bailout
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
      [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
-               0 0 $MIRROR)"
-     [ $? -eq 0 ] || bailout
+               0 0 $MIRROR)" || bailout
+
   else # CHOOSE_MIRROR == local
      [ -n "$ISO" ] || ISO='/mnt/mirror'
      ISO="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter directory name you would like to use for installing packages." \
-               0 0 $ISO)"
-     [ $? -eq 0 ] || bailout
+               0 0 $ISO)" || bailout
   fi
 }
 # }}}
@@ -889,8 +881,7 @@ TARGET=$(dialog --stdout --title "$PN" --default-item /dev/md0 \
 --menu "Which device do you want to use for ${RAIDLEVEL}?
 
 Notice: activated devices will not be listed for security reasons. Anyway, please make sure the selected device is not in use already!" 0 0 0 \
-$MD_LIST)
-[ $? -eq 0 ] || bailout 20
+$MD_LIST) || bailout 20
 
 AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
              sed 's/*//' | \
@@ -904,8 +895,8 @@ PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
 # shellcheck disable=SC2086
 dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
-       $PARTITION_LIST 2>"$TMPFILE"
-[ $? -eq 0 ] || bailout
+       $PARTITION_LIST 2>"$TMPFILE" || bailout
+
 SELECTED_PARTITIONS="$(cat "$TMPFILE")"
 
 NUM_PARTITIONS=0
