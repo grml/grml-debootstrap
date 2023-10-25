@@ -43,6 +43,7 @@ install:
 	install -m 644 devices.tar.gz   $(DESTDIR)/etc/debootstrap/
 	install -m 644 locale.gen       $(DESTDIR)/etc/debootstrap/
 	install -m 644 packages         $(DESTDIR)/etc/debootstrap/
+	install -m 644 packages-arm64   $(DESTDIR)/etc/debootstrap/
 	install -m 755 chroot-script    $(DESTDIR)/etc/debootstrap/
 	install -m 755 grml-debootstrap $(DESTDIR)/usr/sbin/
 	install -m 644 zsh-completion   $(DESTDIR)/usr/share/zsh/vendor-completions/_grml-debootstrap
