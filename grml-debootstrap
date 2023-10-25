@@ -299,8 +299,10 @@ cleanup() {
 
       # remove directory only if we used the default with process id inside the name
       if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-        einfo "Removing directory ${MNTPOINT}"
-        rmdir "$MNTPOINT" || eend $?
+        if test -d "$MNTPOINT" ; then
+          einfo "Removing directory ${MNTPOINT}"
+          rmdir "$MNTPOINT" || eend $?
+        fi
       fi
     fi
   fi
