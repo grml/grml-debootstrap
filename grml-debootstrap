@@ -287,8 +287,7 @@ cleanup() {
         einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice."
       else
         einfo "Unmounting $MNTPOINT"
-        umount "$MNTPOINT"
-        eend $?
+        umount "$MNTPOINT" || eend $?
       fi
 
       if [ -n "$STAGES" ] ; then
@@ -299,21 +298,19 @@ cleanup() {
       # remove directory only if we used the default with process id inside the name
       if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
         einfo "Removing directory ${MNTPOINT}"
-        rmdir "$MNTPOINT"
-        eend $?
+        rmdir "$MNTPOINT" || eend $?
       fi
     fi
   fi
 
   if [ -n "${ORIG_TARGET}" ] ; then
     einfo "Removing loopback mount of file ${ORIG_TARGET}."
-    kpartx -d "${ORIG_TARGET}"
+    kpartx -d "${ORIG_TARGET}" || eend $?
     # Workaround for a bug in kpartx which doesn't clean up properly,
     # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
     if dmsetup ls | grep -q "^${LOOP_PART} "; then
-      kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+      kpartx -d "/dev/${LOOP_DISK}" >/dev/null || eend $?
     fi
-    eend $?
   fi
 }
 
