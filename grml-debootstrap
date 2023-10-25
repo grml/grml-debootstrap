@@ -1050,8 +1050,7 @@ elif [ -n "$INTERACTIVE" ] ; then
 Is this ok for you? Notice: selecting 'No' will exit ${PN}."
 
    dialog --title "$PN" --no-collapse \
-          --yesno "$INFOTEXT" 0 0
-   [ $? -eq 0 ] || bailout 0
+          --yesno "$INFOTEXT" 0 0 || bailout 0
 
 else # if not running automatic installation display configuration and prompt for execution:
    einfo "$PN [${VERSION}] - Please recheck configuration before execution:"
