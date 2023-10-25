@@ -10,12 +10,10 @@
 ################################################################################
 
 # error_handler {{{
-if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
-   set -e
-   set -E
-   set -o pipefail
-   trap "error_handler" ERR
-fi
+set -e
+set -E
+set -o pipefail
+trap "error_handler" ERR
 # }}}
 
 # shellcheck disable=SC1091
