@@ -31,7 +31,7 @@ export -f "error_handler"
 # variables {{{
 PN="$(basename "$0")"
 if [[ -d "$(dirname "$(command -v "$0")")"/.git ]]; then
-  VERSION="$(git --git-dir $(dirname "$(command -v "$0")")/.git describe | sed 's|^v||')"
+  VERSION="$(git --git-dir "$(dirname "$(command -v "$0")")"/.git describe | sed 's|^v||')"
 else
   VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 fi
