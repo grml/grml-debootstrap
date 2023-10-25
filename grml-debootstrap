@@ -259,7 +259,7 @@ cleanup() {
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
     if test -d "$MNTPOINT" ; then
       einfo "Removing directory ${MNTPOINT}"
-      rmdir "$MNTPOINT" 2>/dev/null
+      rmdir "$MNTPOINT"
     fi
   fi
 
