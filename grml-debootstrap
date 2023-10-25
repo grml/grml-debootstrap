@@ -294,7 +294,7 @@ cleanup() {
       fi
 
       if [ -n "$DIRECTORY" ] ; then
-        einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice." ; eend 0
+        einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice."
       else
         einfo "Unmounting $MNTPOINT"
         umount "$MNTPOINT"
@@ -345,8 +345,8 @@ stage() {
      echo "$2" > "${STAGES}/${1}"
      return 0
   elif grep -q 'done' "${STAGES}/${1}" 2>/dev/null ; then
-     ewarn "Notice: stage $1 has been executed already, skipping execution therefore." ; eend 0
-     ewarn "  To reexecute it clean up the according directory inside $STAGES" ; eend 0
+     ewarn "Notice: stage $1 has been executed already, skipping execution therefore."
+     ewarn "  To reexecute it clean up the according directory inside $STAGES"
      return 1
   fi
 }
@@ -640,15 +640,13 @@ if [ "$DEBUG" = "true" ] ; then
 fi
 
 [ "$_opt_help" ] && {
-  usage ; eend 0
-  eend 0
+  usage
   exit 0
 }
 
 [ "$_opt_version" ] && {
   einfo "$PN - version $VERSION"
   einfo "Report bugs via https://github.com/grml/grml-debootstrap/ or https://grml.org/bugs/"
-  eend 0
   exit 0
 }
 # }}}
@@ -993,14 +991,12 @@ format_efi_partition() {
   fi
 
   if fsck.vfat -bn "$EFI" >/dev/null; then
-    einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying." ; eend 0
+    einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying."
   else
     einfo "EFI partition $EFI doesn't seem to be formatted, creating filesystem."
     mkfs.fat -F32 -n "EFI" "$EFI"
     RC=$?
-    if [ $RC -eq 0 ] ; then
-      eend 0
-    else
+    if [ ! $RC -eq 0 ] ; then
       eerror "Error while creating filesystem on ${EFI}."
       eend 1
       bailout 1
@@ -1022,7 +1018,7 @@ efi_support() {
   fi
 
   if [ -d /sys/firmware/efi ] ; then
-    einfo "EFI support detected." ; eend 0
+    einfo "EFI support detected."
     return 0
   fi
 
@@ -1040,18 +1036,18 @@ checkconfiguration()
 
 if efi_support ; then
   if [ -z "$_opt_efi" ] ; then
-    ewarn "EFI support detected but no --efi option given, please consider enabling it." ; eend 0
+    ewarn "EFI support detected but no --efi option given, please consider enabling it."
   fi
 else
   if [ -n "$_opt_efi" ] ; then
-     eerror "EFI option used but no EFI support detected." ; eend 0
+     eerror "EFI option used but no EFI support detected."
      bailout 1
   fi
 fi
 
 if [ -n "$AUTOINSTALL" ] ; then
    if checkforrun ; then
-      eerror "Exiting as requested" ; eend 0
+      eerror "Exiting as requested"
       bailout 1
    fi
 elif [ -n "$INTERACTIVE" ] ; then
@@ -1298,8 +1294,6 @@ mkfs() {
       mkfs.ext*)
         einfo "Enabling force option (-F) for mkfs.ext* tool as requested via --force switch."
         MKFS_OPTS="$MKFS_OPTS -F"
-        eend 0
-
         ;;
     esac
   fi
@@ -1316,7 +1310,6 @@ mkfs() {
         if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
           einfo "Disabling metadata_csum feature for $MKFS as $RELEASE doesn't support it."
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum"
-          eend 0
         fi
         ;;
     esac
@@ -1334,7 +1327,6 @@ mkfs() {
         if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43' ; then
           einfo "Disabling metadata_csum_seed feature for $MKFS as $RELEASE doesn't support it."
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
-          eend 0
         fi
         ;;
     esac
@@ -1458,7 +1450,7 @@ mount_target() {
      einfo "Running grml-debootstrap on a directory, nothing to mount."
   else
      if grep -q "$TARGET" /proc/mounts ; then
-        ewarn "$TARGET already mounted, continuing anyway." ; eend 0
+        ewarn "$TARGET already mounted, continuing anyway."
      else
        if ! [ -d "${MNTPOINT}" ] ; then
           [ -n "$VIRTUAL" ] || mkdir -p "${MNTPOINT}"
@@ -1964,7 +1956,7 @@ iface ${interface} inet dhcp
   fi
 
   if [ -n "$NOINTERFACES" ] ; then
-    einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option" ; eend 0
+    einfo "Not installing /etc/network/interfaces as requested via --nointerfaces option"
   elif [ -n "$USE_DEFAULT_INTERFACES" ] ; then
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     mkdir -p "${MNTPOINT}/etc/network"
@@ -2000,9 +1992,7 @@ iface ${interface} inet dhcp
       einfo "Use locally available public keys to authorise root login on the target system as requested via --sshcopyid option."
       mkdir -p "${MNTPOINT}"/root/.ssh
       chmod 0700 "${MNTPOINT}"/root/.ssh
-      if ssh-add -L >> "${MNTPOINT}"/root/.ssh/authorized_keys ; then
-        eend 0
-      else
+      if ! ssh-add -L >> "${MNTPOINT}"/root/.ssh/authorized_keys ; then
         eerror "Error: executing 'ssh-add -L' failed."
         eend 1
         bailout 1
@@ -2011,9 +2001,7 @@ iface ${interface} inet dhcp
       einfo "copying '$AUTHORIZED_KEYS_SOURCE' to '$AUTHORIZED_KEYS_TARGET' as requested via --sshcopyid option."
       mkdir -p "$AUTHORIZED_KEYS_TARGET"
       chmod 0700 "$AUTHORIZED_KEYS_TARGET"
-      if cp "$AUTHORIZED_KEYS_SOURCE" "$AUTHORIZED_KEYS_TARGET" ; then
-        eend 0
-      else
+      if ! cp "$AUTHORIZED_KEYS_SOURCE" "$AUTHORIZED_KEYS_TARGET" ; then
         eerror "Error: copying '$AUTHORIZED_KEYS_SOURCE' to '$AUTHORIZED_KEYS_TARGET' failed"
         eend 1
         bailout 1
@@ -2038,9 +2026,7 @@ iface ${interface} inet dhcp
     einfo "Copying '${AUTHORIZED_KEYS_SOURCE}' to '${AUTHORIZED_KEYS_TARGET}' as requested via --sshcopyauth option."
     mkdir -p "${AUTHORIZED_KEYS_TARGET}"
     chmod 0700 "${AUTHORIZED_KEYS_TARGET}"
-    if cp "${AUTHORIZED_KEYS_SOURCE}" "${AUTHORIZED_KEYS_TARGET}" ; then
-      eend 0
-    else
+    if ! cp "${AUTHORIZED_KEYS_SOURCE}" "${AUTHORIZED_KEYS_TARGET}" ; then
       eerror "Error: copying '${AUTHORIZED_KEYS_SOURCE}' to '${AUTHORIZED_KEYS_TARGET}' failed."
       eend 1
       bailout 1
@@ -2053,8 +2039,6 @@ iface ${interface} inet dhcp
     mount --bind /run/udev "${MNTPOINT}"/run/udev
     eend $?
   fi
-
-  eend 0
 }
 # }}}
 
@@ -2156,7 +2140,6 @@ chrootscript() {
     eend $?
   else
     einfo "Keeping chroot-script as string GRML_CHROOT_SCRIPT_MARKER could not be found"
-    eend 0
   fi
 }
 # }}}
@@ -2216,7 +2199,7 @@ remove_configs() {
   fi
 
   if ! mountpoint "${MNTPOINT}" >/dev/null 2>&1 ; then
-    ewarn "Target ${MNTPOINT} doesn't seem to be mounted, can't remove configuration files." ; eend 0
+    ewarn "Target ${MNTPOINT} doesn't seem to be mounted, can't remove configuration files."
     return 0
   fi
 
@@ -2253,7 +2236,7 @@ Choose Cancel to skip rebooting." 10 60 10 ; then
      noeject noprompt reboot
   fi
 else
-   einfo "Finished execution of ${PN}. Enjoy your Debian system." ; eend 0
+   einfo "Finished execution of ${PN}. Enjoy your Debian system."
 fi
 # }}}
 
