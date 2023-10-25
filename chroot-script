@@ -803,9 +803,9 @@ trap signal_handler HUP INT QUIT TERM
      initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
-     if stage $i ; then
-       $i
-       stage $i 'done'
+     if stage "$i" ; then
+       "$i"
+       stage "$i" 'done'
      fi
   done
   # always execute the finalize stage:
