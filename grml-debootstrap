@@ -8,36 +8,25 @@
 # shellcheck disable=SC2001,SC2181
 
 # error_handler {{{
-[ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
-[ -n "$FAIL_TRAP_ERR" ] || FAIL_TRAP_ERR='no'
-
 error_handler() {
    last_exit_code="$?"
    last_bash_command="$BASH_COMMAND"
-   if [ "$REPORT_TRAP_ERR" = "yes" ]; then
-      echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
+   echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
 last bash command: $last_bash_command"
-   fi
-   if [ ! "$FAIL_TRAP_ERR" = "yes" ]; then
-      return
-   fi
    ## Check if "bailout" function is available.
    ## This is not the case in chroot-script.
    if command -v bailout >/dev/null 2>&1; then
       bailout 1
    else
-      echo 'FAIL_TRAP_ERR is set to "yes", exit 1.'
       exit 1
    fi
 }
 
-if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
-   set -e
-   set -E
-   set -o pipefail
-   trap "error_handler" ERR
-   export -f "error_handler"
-fi
+set -e
+set -E
+set -o pipefail
+trap "error_handler" ERR
+export -f "error_handler"
 # }}}
 
 # variables {{{
