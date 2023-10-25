@@ -256,7 +256,9 @@ cleanup() {
 
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-    rmdir "$MNTPOINT" 2>/dev/null
+    if test -d "$MNTPOINT" ; then
+      rmdir "$MNTPOINT" 2>/dev/null
+    fi
   fi
 
   # make sure $TARGET is not mounted when exiting grml-debootstrap
