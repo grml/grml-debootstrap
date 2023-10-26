@@ -599,25 +599,21 @@ hostname() {
 
 # generate initrd/initramfs {{{
 initrd() {
+  if [ "${INITRD,,}" = "no" ] ; then
+    echo 'Skipping initrd stuff as requested via INITRD environment variable.'>&2
+    return 0
+  fi
   # assume the first available kernel as our main kernel
   # shellcheck disable=SC2012
   KERNELIMG=$(ls -1 /boot/vmlinuz-* 2>/dev/null | head -1)
-  if [ -z "$KERNELIMG" ] ; then
-     echo 'No kernel image found, skipping initrd stuff.'>&2
-     return
-  fi
-
   KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
-  # generate initrd
-  if [ -n "$INITRD" ] ; then
-     echo "Generating initrd."
-     if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
-         DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
-         dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
-     else
-         update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
-     fi
+  echo "Generating initrd."
+  if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
+      dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
+  else
+      update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
   fi
 }
 # }}}
