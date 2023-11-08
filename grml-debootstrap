@@ -1811,6 +1811,8 @@ preparechroot() {
   [ -n "$TUNE2FS" ]             && echo "TUNE2FS='$(sed "s,','\\\\'',g" <<<"${TUNE2FS}")'"                         >> "$CHROOT_VARIABLES"
   [ -n "$VMSIZE" ]              && echo "VMSIZE='$(sed "s,','\\\\'',g" <<<"${VMSIZE}")'"                           >> "$CHROOT_VARIABLES"
 
+  [ -n "$TMPDIR" ] && mkdir --parents "${MNTPOINT}/${TMPDIR}"
+
   cp $VERBOSE "${CONFFILES}"/chroot-script "${MNTPOINT}"/bin/chroot-script
   chmod 755 "${MNTPOINT}"/bin/chroot-script
   [ -d "$MNTPOINT"/etc/debootstrap/ ] || mkdir "$MNTPOINT"/etc/debootstrap/
