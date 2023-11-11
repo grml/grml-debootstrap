@@ -1,0 +1,7 @@
+# Stub data file for shellcheck runs.
+# shellcheck shell=sh
+# shellcheck disable=SC2034  # The point of our whole existence is to conflict with SC2034.
+
+# ARCH is defaulted in grml-debootstrap, so it is never empty.
+ARCH=amd64
+
