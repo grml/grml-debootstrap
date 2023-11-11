@@ -1692,6 +1692,11 @@ grub_install() {
     eend $?
   fi
 
+  if [ -n "${BOOT_APPEND}" ] ; then
+    echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
+    sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" "${MNTPOINT}/etc/default/grub"
+  fi
+
   einfo "Updating grub configuration file."
   chroot "${MNTPOINT}" update-grub
   chroot "${MNTPOINT}" sync
