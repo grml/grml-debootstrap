@@ -1,0 +1,40 @@
+# PR Review workflows.
+# The intention is for these to only find *new* issues.
+
+name: pr-review
+on:
+  pull_request:
+jobs:
+
+  shellcheck-code:
+    name: shellcheck grml-debootstrap
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          path: "."
+          pattern: |
+            chroot-script
+            grml-debootstrap
+            config
+            tests/shellcheck-stub-debootstrap-variables
+          check_all_files_with_shebangs: "false"
+
+  shellcheck-tests:
+    name: shellcheck test scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          path: "."
+          pattern: |
+            tests/*
+          check_all_files_with_shebangs: "false"
