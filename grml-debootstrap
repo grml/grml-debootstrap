@@ -5,6 +5,7 @@
 # Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2+
 ################################################################################
+# shellcheck disable=SC2001,SC2181
 
 # error_handler {{{
 [ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
