@@ -1034,14 +1034,16 @@ efi_support() {
 checkconfiguration()
 {
 
-if efi_support ; then
-  if [ -z "$_opt_efi" ] ; then
-    ewarn "EFI support detected but no --efi option given, please consider enabling it."
-  fi
-else
-  if [ -n "$_opt_efi" ] ; then
-     eerror "EFI option used but no EFI support detected."
-     bailout 1
+if [ -z "$VIRTUAL" ] ; then
+  if efi_support ; then
+    if [ -z "$_opt_efi" ] ; then
+      ewarn "EFI support detected but no --efi option given, please consider enabling it."
+    fi
+  else
+    if [ -n "$_opt_efi" ] ; then
+      eerror "EFI option used but no EFI support detected."
+      bailout 1
+    fi
   fi
 fi
 
