@@ -463,26 +463,6 @@ throwing segfaults during debootstrap. This can be identified by the following m
    dpkg[...]: segfault at [...]
 
 To work around this issue boot your system with the kernel boot option 'vsyscall=emulate'.
-
-You also need to specify a filesystem that's supported by lenny, e.g.
-'--filesystem ext3' since grml-debootstrap's current default (ext4) isn't
-supported by lenny.
-
-Also when debootstrapping lenny on a live system with a kernel version
-like "3.16-1-grml-amd64" lenny's libc will fail to install with:
-
-   [...]
-   /var/lib/dpkg/tmp.ci/preinst: line 265: [: 3.16-1-grml-amd64: integery expression expected
-   /var/lib/dpkg/tmp.ci/preinst: line 231: 3.16-1-grml-amd64: syntax error: invalid arithemtic operator (error token is ".16-1-grml-amd64")
-   dpkg: error processing /var/cache/apt/archives/libc6_2.7-18lenny7_amd64.deb (--install):
-   [....]
-
-To workaround this either debootstrap from a system with an according
-kernel version or use the "fake uname" workaround (just google for it).
-
-When installing lenny to a new mdraid, grml-debootstrap will use md metadata
-format version 0.90. This limits the device to a maximum size of 2TB, but has
-the advantage of grub-legacy actually being able to boot from it.
 ================================================================================
 
 [NOTE]

@@ -926,16 +926,10 @@ while IFS= read -r i; do
   NUM_PARTITIONS=$(( NUM_PARTITIONS + 1 ))
 done < "$TMPFILE"
 
-# force metadata version 0.90 for lenny so old grub can boot from this array.
-METADATA_VERSION=""
-if [ "$RELEASE" = "lenny" ]; then
-   METADATA_VERSION="-e0"
-fi
-
 ERRORFILE=$(mktemp)
 # shellcheck disable=SC2086
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
-      --raid-devices="${NUM_PARTITIONS}" ${METADATA_VERSION} ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
+      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
 if [ "$RC" = 0 ] ; then
    dialog --title "$PN" --msgbox \
