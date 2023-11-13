@@ -9,7 +9,6 @@ file
 grub2-common
 grub-efi-arm64
 ifenslave
-initramfs-tools
 isc-dhcp-client
 less
 locales

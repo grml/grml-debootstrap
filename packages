@@ -8,7 +8,6 @@ dbus
 file
 grub-pc
 ifenslave
-initramfs-tools
 isc-dhcp-client
 less
 locales
