@@ -730,26 +730,13 @@ grub_install() {
      done
      rm -f /boot/grub/device.map
   else
-     echo "Installing grub on ${GRUB}:"
-     case "$RELEASE" in
-       lenny|squeeze|wheezy)
-         local grub_dev
-         grub_dev="$(readlink -f "${GRUB}")"
-         if ! grub-install --no-floppy "${grub_dev}" ; then
-           echo "Error: failed to execute 'grub-install --no-floppy ${grub_dev}'." >&2
-           exit 1
-         fi
-         rm -f /boot/grub/device.map
-         ;;
-       *)
-         echo "(hd0) ${GRUB}" > /boot/grub/device.map
-         if ! grub-install "(hd0)" ; then
-           echo "Error: failed to execute 'grub-install (hd0)'." >&2
-           exit 1
-         fi
-         rm /boot/grub/device.map
-         ;;
-     esac
+    echo "Installing grub on ${GRUB}:"
+    echo "(hd0) ${GRUB}" > /boot/grub/device.map
+    if ! grub-install "(hd0)" ; then
+      echo "Error: failed to execute 'grub-install (hd0)'." >&2
+      exit 1
+    fi
+    rm /boot/grub/device.map
   fi
 
   echo "Adjusting grub configuration for use on ${GRUB}."

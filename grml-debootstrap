@@ -1618,15 +1618,7 @@ grub_install() {
       eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
       bailout 1
     fi
-
-    case "$RELEASE" in
-      lenny|squeeze|wheezy)
-        cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
-        ;;
-      *)
-        cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
-        ;;
-    esac
+    cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
 
     if [ -n "$VMEFI" ]; then
 
