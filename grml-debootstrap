@@ -1908,9 +1908,6 @@ preparechroot() {
   # setup default locales
   [ -n "$LOCALES" ] && cp $VERBOSE "${CONFFILES}"/locale.gen "${MNTPOINT}"/etc/locale.gen
 
-  # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
-  ( cd "${MNTPOINT}"/dev && tar zxf /etc/debootstrap/devices.tar.gz )
-
   # copy any existing files to chroot
   [ -d "${CONFFILES}"/bin   ] && cp $VERBOSE -a -L "${CONFFILES}"/bin/*   "${MNTPOINT}"/bin/
   [ -d "${CONFFILES}"/boot  ] && cp $VERBOSE -a -L "${CONFFILES}"/boot/*  "${MNTPOINT}"/boot/
