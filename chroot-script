@@ -324,11 +324,7 @@ get_kernel_version() {
   # shellcheck disable=SC2153
   case "$ARCH" in
     i386)
-      case "$RELEASE" in
-        lenny|squeeze|wheezy) KARCH='686' ;;
-        # since jessie the linux-image-686 image doesn't exist any longer
-        *) KARCH='686-pae' ;;
-      esac
+      KARCH='686-pae'
       ;;
     amd64)
       KARCH='amd64'
