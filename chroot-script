@@ -337,14 +337,15 @@ get_kernel_version() {
       return 1
   esac
 
-  for KPREFIX in "" "2.6-" ; do  # iterate through the kernel prefixes,
-                                 # currently "" and "2.6-"
-    if package_exists linux-image-${KPREFIX}${KARCH} ; then
-      echo ${KPREFIX}${KARCH}
-      return 0
-    fi
+  local KPACKAGE
+  KPACKAGE=linux-image-"${KPREFIX}${KARCH}"
+  if package_exists "$KPACKAGE"; then
+    echo "${KPREFIX}${KARCH}"
+    return 0
+  fi
 
-  done
+  echo "Expected kernel package $KPACKAGE not found" >&2
+  return 1
 }
 
 # install kernel packages {{{
