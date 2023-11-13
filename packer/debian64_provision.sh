@@ -203,29 +203,8 @@ EOF
   fi
 }
 
-verify_debootstrap_version() {
-  local required_version=1.0.65
-  local present_version=$(dpkg-query --show --showformat='${Version}' debootstrap)
-
-  if dpkg --compare-versions $present_version lt $required_version ; then
-    echo "** debootstrap version $present_version is older than minimum required version $required_version - upgrading."
-    apt-get update
-    apt-get -y install debootstrap
-  fi
-}
-
 grml_debootstrap_execution() {
   echo "* Installing Debian"
-
-  # release specific stuff
-  case "$DEBIAN_VERSION" in
-    lenny)
-      GRML_DEB_OPTIONS="--mirror http://archive.debian.org/debian/ --filesystem ext3"
-      ;;
-    stretch)
-      verify_debootstrap_version
-      ;;
-  esac
 
   echo "** Executing: $GRML_DEBOOTSTRAP --hostname $DEBIAN_VERSION --release $DEBIAN_VERSION --target ${INSTALL_TARGET} --grub ${GRUB_TARGET} --password grml --force $GRML_DEB_OPTIONS" | tee -a /tmp/grml-debootstrap.log
   $GRML_DEBOOTSTRAP --hostname "${DEBIAN_VERSION}" --release "${DEBIAN_VERSION}" --target "${INSTALL_TARGET}" --grub "${GRUB_TARGET}" --password grml --force $GRML_DEB_OPTIONS 2>&1 | tee -a /tmp/grml-debootstrap.log

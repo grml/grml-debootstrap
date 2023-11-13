@@ -24,7 +24,7 @@ Package: grml-debootstrap
 Architecture: all
 Depends:
  debian-archive-keyring,
- debootstrap (>= 0.3.3.3) | cdebootstrap (>= 0.3.16) | mmdebstrap,
+ debootstrap (>= 1.0.65) | cdebootstrap (>= 0.3.16) | mmdebstrap,
  dosfstools,
  e2fsprogs,
  fdisk | util-linux (<< 2.29.2-3~),
