@@ -32,13 +32,6 @@ trap 'bailout ${LINENO} $?' ERR
 
 ## helper functions
 virtualbox_setup() {
-  case "$DEBIAN_VERSION" in
-    lenny)
-      echo "* Debian lenny doesn't support Virtualbox Guest Additions, skipping."
-      return 0
-      ;;
-  esac
-
   if ! mountpoint "${TARGET}" &>/dev/null ; then
     echo "* Mounting target system"
     mount "${INSTALL_TARGET}" "${TARGET}"
@@ -115,12 +108,8 @@ vagrant_setup() {
   chroot ${TARGET} chown vagrant:vagrant /home/vagrant/.ssh /home/vagrant/.ssh/authorized_keys
 
   echo "* Setting up sudo configuration for user vagrant"
-  if ! [ -d "${TARGET}/etc/sudoers.d" ] ; then # lenny:
-    echo "vagrant ALL=(ALL) NOPASSWD: ALL" >> "${TARGET}/etc/sudoers"
-  else # wheezy and newer:
-    echo "vagrant ALL=(ALL) NOPASSWD: ALL" > "${TARGET}/etc/sudoers.d/vagrant"
-    chmod 0440 "${TARGET}/etc/sudoers.d/vagrant"
-  fi
+  echo "vagrant ALL=(ALL) NOPASSWD: ALL" > "${TARGET}/etc/sudoers.d/vagrant"
+  chmod 0440 "${TARGET}/etc/sudoers.d/vagrant"
 
   host="$(cat ${TARGET}/etc/hostname)"
   if ! grep -q "${host}$" "${TARGET}"/etc/hosts ; then
