@@ -101,20 +101,10 @@ chrootmirror() {
     fi
   fi
 
-  # LTS support
-  case "$RELEASE" in
-    squeeze)
-      if [ -n "$MIRROR" ] ; then
-        echo "Release matching $RELEASE - enabling LTS support in sources.list"
-        echo "deb $MIRROR ${RELEASE}-lts $COMPONENTS" >> /etc/apt/sources.list
-      fi
-      ;;
-  esac
-
   # add security.debian.org:
   case "$RELEASE" in
-    unstable|sid|lenny) ;;  # no security pool available
-    squeeze|wheezy|jessie|stretch|buster)
+    unstable|sid) ;;  # no security pool available
+    jessie|stretch|buster)
       echo "Adding security.debian.org to sources.list."
       echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
@@ -324,11 +314,7 @@ get_kernel_version() {
   # shellcheck disable=SC2153
   case "$ARCH" in
     i386)
-      case "$RELEASE" in
-        lenny|squeeze|wheezy) KARCH='686' ;;
-        # since jessie the linux-image-686 image doesn't exist any longer
-        *) KARCH='686-pae' ;;
-      esac
+      KARCH='686-pae'
       ;;
     amd64)
       KARCH='amd64'
@@ -341,14 +327,15 @@ get_kernel_version() {
       return 1
   esac
 
-  for KPREFIX in "" "2.6-" ; do  # iterate through the kernel prefixes,
-                                 # currently "" and "2.6-"
-    if package_exists linux-image-${KPREFIX}${KARCH} ; then
-      echo ${KPREFIX}${KARCH}
-      return 0
-    fi
+  local KPACKAGE
+  KPACKAGE=linux-image-"${KPREFIX}${KARCH}"
+  if package_exists "$KPACKAGE"; then
+    echo "${KPREFIX}${KARCH}"
+    return 0
+  fi
 
-  done
+  echo "Expected kernel package $KPACKAGE not found" >&2
+  return 1
 }
 
 # install kernel packages {{{
@@ -720,6 +707,10 @@ grub_install() {
      echo "Error: grub-install not available. (Error while installing grub package?)" >&2
      return 1
   fi
+  if ! [ -x "$(command -v update-grub)" ] ; then
+     echo "Error: update-grub not available. (Error while installing grub package?)" >&2
+     return 1
+  fi
 
   if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
      for device in $SELECTED_PARTITIONS ; do
@@ -733,39 +724,16 @@ grub_install() {
      done
      rm -f /boot/grub/device.map
   else
-     echo "Installing grub on ${GRUB}:"
-     case "$RELEASE" in
-       lenny|squeeze|wheezy)
-         local grub_dev
-         grub_dev="$(readlink -f "${GRUB}")"
-         if ! grub-install --no-floppy "${grub_dev}" ; then
-           echo "Error: failed to execute 'grub-install --no-floppy ${grub_dev}'." >&2
-           exit 1
-         fi
-         rm -f /boot/grub/device.map
-         ;;
-       *)
-         echo "(hd0) ${GRUB}" > /boot/grub/device.map
-         if ! grub-install "(hd0)" ; then
-           echo "Error: failed to execute 'grub-install (hd0)'." >&2
-           exit 1
-         fi
-         rm /boot/grub/device.map
-         ;;
-     esac
+    echo "Installing grub on ${GRUB}:"
+    echo "(hd0) ${GRUB}" > /boot/grub/device.map
+    if ! grub-install "(hd0)" ; then
+      echo "Error: failed to execute 'grub-install (hd0)'." >&2
+      exit 1
+    fi
+    rm /boot/grub/device.map
   fi
 
   echo "Adjusting grub configuration for use on ${GRUB}."
-
-  # finally install grub
-  if [ -x /usr/sbin/update-grub ] ; then
-     UPDATEGRUB='/usr/sbin/update-grub'
-  elif [ -x /sbin/update-grub ] ; then
-     UPDATEGRUB='/sbin/update-grub'
-  else
-    echo "Error: update-grub not available, can not execute it." >&2
-    return 1
-  fi
 
   if [ -n "${BOOT_APPEND}" ] ; then
     echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
@@ -774,7 +742,8 @@ grub_install() {
 
   mountpoint /boot/efi &>/dev/null && umount /boot/efi
 
-  $UPDATEGRUB
+  # finally install grub. Existence of update-grub is checked above.
+  update-grub
 }
 # }}}
 

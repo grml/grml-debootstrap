@@ -45,17 +45,5 @@ stretch: clean fake-uname.so install
 jessie: clean fake-uname.so install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
 
-# Debian 7
-wheezy: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-# Debian 6.0
-squeeze: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-# Debian 5.0
-lenny: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-.PHONY: compile bullseye buster stretch jessie wheezy squeeze lenny
+.PHONY: compile bullseye buster stretch jessie
 .NOTPARALLEL:
