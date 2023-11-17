@@ -384,9 +384,6 @@ passwords()
     return 0
   fi
 
-  echo "Activating shadow passwords."
-  shadowconfig on
-
   CHPASSWD_OPTION=
   if chpasswd --help 2>&1 | grep -q -- '-m,' ; then
      CHPASSWD_OPTION='-m'
