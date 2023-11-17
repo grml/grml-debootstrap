@@ -5,6 +5,7 @@
 # Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2+
 ################################################################################
+# shellcheck disable=SC2001,SC2181
 
 # error_handler {{{
 [ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
@@ -42,7 +43,7 @@ fi
 # variables {{{
 PN="$(basename "$0")"
 if [[ -d "$(dirname "$(command -v "$0")")"/.git ]]; then
-  VERSION="$(git --git-dir $(dirname "$(command -v "$0")")/.git describe | sed 's|^v||')"
+  VERSION="$(git --git-dir "$(dirname "$(command -v "$0")")"/.git describe | sed 's|^v||')"
 else
   VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 fi
@@ -1947,11 +1948,13 @@ iface ${interface} inet dhcp
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
@@ -1962,6 +1965,7 @@ iface ${interface} inet dhcp
     ewarn "Couldn't read /etc/network/interfaces, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   fi
 

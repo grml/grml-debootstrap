@@ -8,6 +8,7 @@
 # GRML_CHROOT_SCRIPT_MARKER - do not remove this line unless you want to keep
 # this script as /bin/chroot-script on your new installed system
 ################################################################################
+# shellcheck disable=SC2317  # shellcheck has trouble understanding the code flow in this file
 
 # error_handler {{{
 if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
@@ -18,9 +19,9 @@ if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
 fi
 # }}}
 
-# shellcheck disable=SC1091
+# shellcheck source=config
 . /etc/debootstrap/config    || exit 1
-# shellcheck disable=SC1091
+# shellcheck source=tests/shellcheck-stub-debootstrap-variables
 . /etc/debootstrap/variables || exit 1
 
 [ -r /proc/1 ] || mount -t proc none /proc
@@ -392,6 +393,7 @@ passwords()
   fi
 
   if [ -n "$ROOTPASSWORD" ] ; then
+     # shellcheck disable=SC2086
      echo root:"$ROOTPASSWORD" | chpasswd $CHPASSWD_OPTION
      export ROOTPASSWORD=''
   else
@@ -414,6 +416,7 @@ passwords()
          a='1'
          b='2'
        else
+         # shellcheck disable=SC2086
          echo root:"$a" | chpasswd $CHPASSWD_OPTION
          unset a
          unset b
@@ -601,8 +604,10 @@ initrd() {
      echo "Generating initrd."
      if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
          DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
+         # shellcheck disable=SC2086
          dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
      else
+         # shellcheck disable=SC2086
          update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
      fi
   fi
@@ -698,9 +703,9 @@ grub_install() {
   echo "Setting ${GRUB_PACKAGE} debconf configuration for install device to $GRUB"
   echo "${GRUB_PACKAGE} ${GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
 
-  if ! dpkg --list ${GRUB_PACKAGE} 2>/dev/null | grep -q '^ii' ; then
+  if ! dpkg --list "${GRUB_PACKAGE}" 2>/dev/null | grep -q '^ii' ; then
     echo "Notice: grub option set but no ${GRUB_PACKAGE} package, installing it therefore."
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL ${GRUB_PACKAGE}
+    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${GRUB_PACKAGE}"
   fi
 
   if ! [ -x "$(command -v grub-install)" ] ; then
