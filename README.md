@@ -1,7 +1,7 @@
 grml-debootstrap
 ================
 
-[![Build Status](https://travis-ci.org/grml/grml-debootstrap.svg?branch=master)](https://travis-ci.org/grml/grml-debootstrap)
+[![test-build](https://github.com/grml/grml-debootstrap/actions/workflows/test-build.yml/badge.svg)](https://github.com/grml/grml-debootstrap/actions/workflows/test-build.yml)
 
 This tool is a wrapper suite around debootstrap and cdebootstrap
 to ease installation of a pure [Debian](https://debian.org/) system.
