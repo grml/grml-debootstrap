@@ -7,42 +7,31 @@
 ################################################################################
 
 # error_handler {{{
-[ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
-[ -n "$FAIL_TRAP_ERR" ] || FAIL_TRAP_ERR='no'
-
 error_handler() {
    last_exit_code="$?"
    last_bash_command="$BASH_COMMAND"
-   if [ "$REPORT_TRAP_ERR" = "yes" ]; then
-      echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
+   echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
 last bash command: $last_bash_command"
-   fi
-   if [ ! "$FAIL_TRAP_ERR" = "yes" ]; then
-      return
-   fi
    ## Check if "bailout" function is available.
    ## This is not the case in chroot-script.
    if command -v bailout >/dev/null 2>&1; then
       bailout 1
    else
-      echo 'FAIL_TRAP_ERR is set to "yes", exit 1.'
       exit 1
    fi
 }
 
-if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
-   set -e
-   set -E
-   set -o pipefail
-   trap "error_handler" ERR
-   export -f "error_handler"
-fi
+set -e
+set -E
+set -o pipefail
+trap "error_handler" ERR
+export -f "error_handler"
 # }}}
 
 # variables {{{
 PN="$(basename "$0")"
 if [[ -d "$(dirname "$(command -v "$0")")"/.git ]]; then
-  VERSION="$(git --git-dir $(dirname "$(command -v "$0")")/.git describe | sed 's|^v||')"
+  VERSION="$(git --git-dir "$(dirname "$(command -v "$0")")"/.git describe | sed 's|^v||')"
 else
   VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 fi
@@ -254,11 +243,11 @@ check4progs(){
 # helper functions {{{
 cleanup() {
   if [ -n "$CHROOT_VARIABLES" ] ; then
-    einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" ; eend $?
+    einfo "Removing ${CHROOT_VARIABLES}" ; rm "$CHROOT_VARIABLES" || eend $?
   fi
 
   if [ -n "$STAGES" ] ; then
-    einfo "Removing ${STAGES}" ; rmdir "$STAGES" ; eend $?
+    einfo "Removing ${STAGES}" ; rmdir "$STAGES" || eend $?
   fi
 
   if [ -n "$ARM_EFI_TARGET" ]; then
@@ -267,7 +256,10 @@ cleanup() {
 
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-    rmdir "$MNTPOINT" 2>/dev/null
+    if test -d "$MNTPOINT" ; then
+      einfo "Removing directory ${MNTPOINT}"
+      rmdir "$MNTPOINT" || true
+    fi
   fi
 
   # make sure $TARGET is not mounted when exiting grml-debootstrap
@@ -280,25 +272,24 @@ cleanup() {
         fi
       done
 
-      [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1
+      [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1 || true
 
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
       for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1
-        umount "$MNTPOINT"/$ARG >/dev/null 2>&1
+        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
+        umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
       if [ -n "$ISODIR" ] ; then
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1
+        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
       fi
 
       if [ -n "$DIRECTORY" ] ; then
         einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice."
       else
         einfo "Unmounting $MNTPOINT"
-        umount "$MNTPOINT"
-        eend $?
+        umount "$MNTPOINT" || eend $?
       fi
 
       if [ -n "$STAGES" ] ; then
@@ -308,27 +299,28 @@ cleanup() {
 
       # remove directory only if we used the default with process id inside the name
       if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
-        einfo "Removing directory ${MNTPOINT}"
-        rmdir "$MNTPOINT"
-        eend $?
+        if test -d "$MNTPOINT" ; then
+          einfo "Removing directory ${MNTPOINT}"
+          rmdir "$MNTPOINT" || eend $?
+        fi
       fi
     fi
   fi
 
   if [ -n "${ORIG_TARGET}" ] ; then
     einfo "Removing loopback mount of file ${ORIG_TARGET}."
-    kpartx -d "${ORIG_TARGET}"
+    kpartx -d "${ORIG_TARGET}" || eend $?
     # Workaround for a bug in kpartx which doesn't clean up properly,
     # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
     if dmsetup ls | grep -q "^${LOOP_PART} "; then
-      kpartx -d "/dev/${LOOP_DISK}" >/dev/null
+      kpartx -d "/dev/${LOOP_DISK}" >/dev/null || eend $?
     fi
-    eend $?
   fi
 }
 
 # we want to exit smoothly and clean:
 bailout(){
+  eend "$1" || true
 
   cleanup
 
@@ -354,6 +346,7 @@ stage() {
 
 # source main configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
+  bash -n /etc/debootstrap/config
   # shellcheck disable=SC1091
   . /etc/debootstrap/config
 fi
@@ -362,11 +355,10 @@ fi
 # cmdline handling {{{
 CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmefi,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
-_opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
-  $CMDLINE_OPTS -- "$@")
-
-if [ $? != 0 ]; then
-  eerror "Try 'grml-debootstrap --help' for more information."; eend 1; exit 1
+if ! _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
+  $CMDLINE_OPTS -- "$@"); then
+  eerror "Try 'grml-debootstrap --help' for more information."
+  bailout 1
 fi
 eval set -- "$_opt_temp"
 
@@ -545,11 +537,11 @@ done
   CONFFILES=$_opt_confdir
   einfo "Using config files under $CONFFILES/."
   if ! [ -r "$CONFFILES/config" ] ; then
-    eerror "Error: config file $CONFFILES/config not found."; eend 1; bailout 1
+    eerror "Error: config file $CONFFILES/config not found."; bailout 1
   fi
   # shellcheck disable=SC1091 source=config
   if ! . "$CONFFILES/config" ; then
-    eerror "Error reading config file $CONFFILES/config" ; eend 1 ; bailout 1
+    eerror "Error reading config file $CONFFILES/config" ; bailout 1
   fi
   # restore the command line parameter value
   CONFFILES=$_opt_confdir
@@ -618,20 +610,17 @@ fi
 if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   eerror "The --grub option is incompatible with --vmfile, please drop it from your command line."
   eerror "The --grub option is unneeded as GRUB will be installed automatically (unless GRUB_INSTALL='no')."
-  eend 1
   bailout 1
 fi
 
 if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
   eerror "The --sshcopyid option is incompatible with --sshcopyauth, please drop either of them from your command line."
-  eend 1
   bailout 1
 fi
 
 if [ -n "$ISO" ] && [[ "$DEBOOTSTRAP" =~ mmdebstrap$ ]] ; then
   eerror "The ISO option is incompatible with usage of mmdebstrap for bootstrapping."
   eerror "Either drop the --iso ... option or use plain debootstrap instead."
-  eend 1
   bailout 1
 fi
 
@@ -670,8 +659,9 @@ fi
 if [ -n "$CONFIGFILE" ] ; then
   einfo "Reading specified config file $CONFIGFILE."
   # shellcheck disable=SC1091 source=config
+  bash -n "$CONFIGFILE"
   if ! . "$CONFIGFILE" ; then
-    eerror "Error reading config file $CONFIGFILE" ; eend 1 ; bailout 1
+    eerror "Error reading config file $CONFIGFILE" ; bailout 1
   fi
 fi
 # }}}
@@ -681,14 +671,12 @@ if [ -n "$GROOT" ] ; then
    eerror "Error: you seem to have \$GROOT configured."
    eerror "This variable is no longer supported, please visit the"
    eerror "grml-debootstrap documentation for details."
-   eend 1
    bailout 1
 fi
 
 if echo "$GRUB" | grep -q '^hd' ; then
    eerror "Error: this syntax for the grub configuration variable is no longer supported."
    eerror "Please do not use hd... any longer but /dev/sdX instead."
-   eend 1
    bailout 1
 fi
 # }}}
@@ -713,8 +701,7 @@ prompt_for_target()
      dialog --title "$PN" --trim \
      --msgbox "Sorry, no partitions found. Please configure your
      harddisks (see /proc/partitions) using a tool like fdisk,
-     cfdisk, gpart, gparted,..." 0 0
-     bailout 1
+     cfdisk, gpart, gparted,..." 0 0 || bailout 1
   fi
 
   PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
@@ -727,8 +714,7 @@ prompt_for_target()
   # shellcheck disable=SC2086
   TARGET=$(dialog --title "$PN" --single-quoted --stdout \
          --menu "Please select the target partition:" 0 0 0 \
-         $PARTITION_LIST)
-  [ $? -eq 0 ] || bailout 1
+         $PARTITION_LIST) || bailout 1
 }
 # }}}
 
@@ -776,8 +762,7 @@ prompt_for_bootmanager()
           --menu "Where do you want to install the bootmanager grub?" 0 0 0 \
             mbr       "install bootmanager into $MBRPART" \
             nowhere   "do not install bootmanager at all" \
-          ${ADDITIONAL_PARAMS})
-  [ $? -eq 0 ] || bailout 3
+          ${ADDITIONAL_PARAMS}) || bailout 3
   IFS="$OIFS"
 
   case "$GETMBR" in
@@ -812,8 +797,8 @@ prompt_for_release()
             buster   Debian/10 \
             bullseye Debian/11 \
             bookworm Debian/12 \
-            sid      Debian/unstable)"
-  [ $? -eq 0 ] || bailout
+            sid      Debian/unstable)" \
+            || bailout
 }
 # }}}
 
@@ -822,8 +807,7 @@ prompt_for_hostname()
 {
   HOSTNAME="$(dialog --stdout --title "${PN}" --inputbox \
             "Please enter the hostname you would like to use for installation:" \
-            0 0 "$HOSTNAME")"
-  [ $? -eq 0 ] || bailout
+            0 0 "$HOSTNAME")" || bailout
 }
 # }}}
 
@@ -839,13 +823,11 @@ prompt_for_password()
   ROOTPW2='PW2'
   while [ "$ROOTPW1" != "$ROOTPW2" ]; do
     ROOTPW1=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
-    "Please enter the password for the root account:" 10 60)
-    [ $? -eq 0 ] || bailout
+    "Please enter the password for the root account:" 10 60) || bailout
 
     ROOTPW2=$(dialog --insecure --stdout --title "${PN}" --passwordbox \
     "Please enter the password for the root account again for \
-    confirmation:" 10 60)
-    [ $? -eq 0 ] || bailout
+    confirmation:" 10 60) || bailout
 
     if [ "$ROOTPW1" != "$ROOTPW2" ]; then
       dialog --stdout --title "${PN}" --ok-label \
@@ -866,20 +848,18 @@ prompt_for_mirror()
             net   "install via network (downloading from mirror)" \
             local "install from local directory/mirror"
           )
-  [ $? -eq 0 ] || bailout
 
   if [ "$CHOOSE_MIRROR" = 'net' ] ; then
      [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
-               0 0 $MIRROR)"
-     [ $? -eq 0 ] || bailout
+               0 0 $MIRROR)" || bailout
+
   else # CHOOSE_MIRROR == local
      [ -n "$ISO" ] || ISO='/mnt/mirror'
      ISO="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter directory name you would like to use for installing packages." \
-               0 0 $ISO)"
-     [ $? -eq 0 ] || bailout
+               0 0 $ISO)" || bailout
   fi
 }
 # }}}
@@ -902,8 +882,7 @@ TARGET=$(dialog --stdout --title "$PN" --default-item /dev/md0 \
 --menu "Which device do you want to use for ${RAIDLEVEL}?
 
 Notice: activated devices will not be listed for security reasons. Anyway, please make sure the selected device is not in use already!" 0 0 0 \
-$MD_LIST)
-[ $? -eq 0 ] || bailout 20
+$MD_LIST) || bailout 20
 
 AVAILABLE_PARTITIONS=$(LANG=C fdisk -l 2>/dev/null | \
              sed 's/*//' | \
@@ -917,8 +896,8 @@ PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
 # shellcheck disable=SC2086
 dialog --title "$PN" --separate-output \
        --checklist "Please select the partitions you would like to use for your $RAIDLEVEL on ${TARGET}:" 0 0 0 \
-       $PARTITION_LIST 2>"$TMPFILE"
-[ $? -eq 0 ] || bailout
+       $PARTITION_LIST 2>"$TMPFILE" || bailout
+
 SELECTED_PARTITIONS="$(cat "$TMPFILE")"
 
 NUM_PARTITIONS=0
@@ -992,7 +971,6 @@ format_efi_partition() {
     RC=$?
     if [ ! $RC -eq 0 ] ; then
       eerror "Error while creating filesystem on ${EFI}."
-      eend 1
       bailout 1
     fi
   fi
@@ -1072,8 +1050,7 @@ elif [ -n "$INTERACTIVE" ] ; then
 Is this ok for you? Notice: selecting 'No' will exit ${PN}."
 
    dialog --title "$PN" --no-collapse \
-          --yesno "$INFOTEXT" 0 0
-   [ $? -eq 0 ] || bailout 0
+          --yesno "$INFOTEXT" 0 0 || bailout 0
 
 else # if not running automatic installation display configuration and prompt for execution:
    einfo "$PN [${VERSION}] - Please recheck configuration before execution:"
@@ -1120,7 +1097,7 @@ else # if not running automatic installation display configuration and prompt fo
      einfon "Is this ok for you? [y/N] "
      read -r a
      if ! [ "$a" = 'y' ] || [ "$a" = 'Y' ] ; then
-        eerror "Exiting as requested." ; eend 1
+        eerror "Exiting as requested."
         bailout 1
      fi
    fi
@@ -1170,7 +1147,7 @@ fi
 
 if [ -z "${ARCH:-}" ] ; then
   eerror 'Architecture neither set (environment variable ARCH), nor could be automatically identified (using dpkg).'
-  eerror 'Consider setting the --arch ... option.' ; eend 1
+  eerror 'Consider setting the --arch ... option.'
   bailout 1
 fi
 # }}}
@@ -1179,7 +1156,7 @@ fi
 CURRENT_ARCH="$(uname -m)"
 if [ "$CURRENT_ARCH" != "x86_64" ] ; then
    if [ "$ARCH" = "amd64" ] ; then
-      eerror "It is not possible to build amd64 on $CURRENT_ARCH. Consider installing and booting the 'linux-image-amd64' kernel or using '--arch i386' instead." ; eend 1
+      eerror "It is not possible to build amd64 on $CURRENT_ARCH. Consider installing and booting the 'linux-image-amd64' kernel or using '--arch i386' instead."
       bailout 1
    fi
 fi
@@ -1188,7 +1165,7 @@ fi
 # Support for generic release codenames is unavailable. {{{
 if [ "$RELEASE" = "stable" ] || [ "$RELEASE" = "testing" ] ; then
    eerror "Generic release codenames (stable, testing) are unsupported. \
-Please use specific codenames such as bullseye or bookworm." ; eend 1
+Please use specific codenames such as bullseye or bookworm."
    bailout 1
 fi
 # }}}
@@ -1200,7 +1177,7 @@ if [ -n "$TARGET" ] ; then
    SHORT_TARGET="${TARGET##*/}"
 else
    eerror "Please adjust $CONFFILES/config or..."
-   eerror "... use the interactive version for configuration before running ${0}" ; eend 1
+   eerror "... use the interactive version for configuration before running ${0}"
    bailout 1
 fi
 # }}}
@@ -1214,7 +1191,7 @@ fi
 if [ -r "$STAGES"/grml-debootstrap ] ; then
    if grep -q 'done' "${STAGES}/grml-debootstrap" ; then
       eerror "Error: grml-debootstrap has been executed already, won't continue therefore."
-      eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}" ; eend 1
+      eerror "If you want to re-execute grml-debootstrap just manually remove ${STAGES}"
    fi
 fi
 # }}}
@@ -1242,7 +1219,7 @@ else
     # $TARGET was not detected as block device, but we do not want to create target directory in /dev/
     if [[ $TARGET == "/dev/"* ]]; then
       eerror "Error: Will not create target directory $TARGET in /dev."
-      eerror "  Please check the partition(s) of the blockdevice."; eend 1
+      eerror "  Please check the partition(s) of the blockdevice."
       bailout 1
     fi
     set_target_directory
@@ -1277,7 +1254,7 @@ mkfs() {
   fi
 
   if grep -q "$TARGET" /proc/mounts ; then
-    eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)" ; eend 1
+    eerror "$TARGET already mounted, exiting to avoid possible damage. (Manually unmount $TARGET)"
     bailout 1
   fi
 
@@ -1331,8 +1308,6 @@ mkfs() {
     if [ -n "${ARM_EFI_TARGET}" ] ; then
       einfo "Running mkfs.fat $MKFS_OPTS on $ARM_EFI_TARGET"
       mkfs.fat -n "EFI" "$ARM_EFI_TARGET"
-      eend $?
-
       MKFS_OPTS="$MKFS_OPTS -L LINUX"
     fi
 
@@ -1343,19 +1318,16 @@ mkfs() {
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
       if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
         eerror "Not changing disk uuid for $TARGET because $MKFS doesn't seem to match for ext{2,3,4} file system"
-        eend 1
         bailout 1
       else
         einfo "Changing disk uuid for $TARGET to fixed (non-random) value $DISK_IDENTIFIER using tune2fs"
         tune2fs "$TARGET" -U "$DISK_IDENTIFIER" </dev/null
-        eend $?
       fi
     fi
 
     if [ -n "$VIRTUAL" ] && [ -n "$EFI_TARGET" ]; then
       einfo "Creating FAT filesystem on $EFI_TARGET"
       mkfs.fat -F32 -n "EFI" "$EFI_TARGET"
-      eend $?
     fi
 
     # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
@@ -1433,7 +1405,6 @@ tunefs() {
   if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
      $TUNE2FS "$TARGET" </dev/null
-     eend $?
   fi
 }
 # }}}
@@ -1452,14 +1423,12 @@ mount_target() {
        einfo "Mounting $TARGET to $MNTPOINT"
        mkdir -p "$MNTPOINT"
        mount -o rw,suid,dev "$TARGET" "$MNTPOINT"
-       eend $?
      fi
   fi
   if [ -n "$ISODIR" ] ; then
      einfo "Mounting Debian image loopback to $MNTPOINT/$ISODIR."
      mkdir -p "$MNTPOINT/$ISODIR"
      mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
-     eend $?
   fi
 }
 # }}}
@@ -1472,19 +1441,17 @@ prepare_vm() {
 
   if [ -b "$TARGET" ] && [ -n "$VMFILE" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
-     eend 1
      bailout 1
   fi
   if [ ! -b "$TARGET" ] && [ -z "$VMFILE" ] ; then
      eerror "Error: specified virtual disk target ($TARGET) does not exist yet."
-     eend 1
      bailout 1
   fi
 
   # make sure loop module is present and a usable loop device exists
   modprobe -q loop
   if ! losetup -f >/dev/null 2>&1; then
-    eerror "Error finding usable loop device" ; eend 1
+    eerror "Error finding usable loop device"
     bailout 1
   fi
 
@@ -1492,7 +1459,7 @@ prepare_vm() {
   # "Is device-mapper driver missing from kernel? [...]"
   modprobe -q dm-mod
   if ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
-    eerror "Device-mapper support missing in kernel." ; eend 1
+    eerror "Device-mapper support missing in kernel."
     bailout 1
   fi
 
@@ -1525,7 +1492,6 @@ prepare_vm() {
         dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
         echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
         dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-        eend $?
       fi
       parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
       parted -s "${TARGET}" 'set 1 boot on'
@@ -1534,7 +1500,7 @@ prepare_vm() {
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3' - will be multi-line for arm64
   if [ -z "${DEVINFO}" ] ; then
-    eerror "Error setting up loopback device." ; eend 1
+    eerror "Error setting up loopback device."
     bailout 1
   fi
 
@@ -1558,7 +1524,7 @@ prepare_vm() {
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
 
   if [ -z "$TARGET" ] ; then
-     eerror "Error: target could not be set to according /dev/mapper/* device." ; eend 1
+     eerror "Error: target could not be set to according /dev/mapper/* device."
      bailout 1
   fi
 }
@@ -1575,14 +1541,14 @@ grub_install() {
   fi
 
   if ! mount "${TARGET}" "${MNTPOINT}" ; then
-    eerror "Error: Mounting ${TARGET} failed, can not continue." ; eend 1
+    eerror "Error: Mounting ${TARGET} failed, can not continue."
     bailout 1
   fi
 
   if [ -n "${ARM_EFI_TARGET}" ]; then
     mkdir -p "${MNTPOINT}/boot/efi"
     if ! mount "${ARM_EFI_TARGET}" "${MNTPOINT}/boot/efi" ; then
-      eerror "Error: Mounting ${ARM_EFI_TARGET} failed, can not continue." ; eend 1
+      eerror "Error: Mounting ${ARM_EFI_TARGET} failed, can not continue."
       bailout 1
     fi
   fi
@@ -1609,7 +1575,7 @@ grub_install() {
 
     mkdir -p "${MNTPOINT}/boot/grub"
     if ! [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ] ; then
-      eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
+      eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader."
       bailout 1
     fi
     cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
@@ -1675,7 +1641,6 @@ grub_install() {
     einfo "Setting up bind-mount /run/udev"
     mkdir -p "${MNTPOINT}"/run/udev
     mount --bind /run/udev "${MNTPOINT}"/run/udev
-    eend $?
   fi
 
   if [ -n "${BOOT_APPEND}" ] ; then
@@ -1708,7 +1673,6 @@ grub_install() {
   if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
     einfo "Unmounting bind-mount /run/udev"
     umount "${MNTPOINT}"/run/udev
-    eend $?
   fi
 
   umount "${MNTPOINT}"/proc
@@ -1947,22 +1911,18 @@ iface ${interface} inet dhcp
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    eend $?
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    eend $?
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
     mkdir -p "${MNTPOINT}/etc/network"
     cp $VERBOSE /etc/network/interfaces "${MNTPOINT}/etc/network/interfaces"
-    eend $?
   else
     ewarn "Couldn't read /etc/network/interfaces, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    eend $?
   fi
 
   # install config file providing some example entries
@@ -1980,7 +1940,6 @@ iface ${interface} inet dhcp
       chmod 0700 "${MNTPOINT}"/root/.ssh
       if ! ssh-add -L >> "${MNTPOINT}"/root/.ssh/authorized_keys ; then
         eerror "Error: executing 'ssh-add -L' failed."
-        eend 1
         bailout 1
       fi
     elif [ -f "$AUTHORIZED_KEYS_SOURCE" ]; then
@@ -1989,12 +1948,10 @@ iface ${interface} inet dhcp
       chmod 0700 "$AUTHORIZED_KEYS_TARGET"
       if ! cp "$AUTHORIZED_KEYS_SOURCE" "$AUTHORIZED_KEYS_TARGET" ; then
         eerror "Error: copying '$AUTHORIZED_KEYS_SOURCE' to '$AUTHORIZED_KEYS_TARGET' failed"
-        eend 1
         bailout 1
       fi
     else
       eerror "Error: Could not open a connection to your authentication agent or the agent has no identities."
-      eend 1
       bailout 1
     fi
   fi
@@ -2004,7 +1961,6 @@ iface ${interface} inet dhcp
 
     if ! [ -f "${AUTHORIZED_KEYS_SOURCE}" ]; then
       eerror "Error: could not read '${AUTHORIZED_KEYS_SOURCE}' for setting up SSH key login."
-      eend 1
       bailout 1
     fi
 
@@ -2014,7 +1970,6 @@ iface ${interface} inet dhcp
     chmod 0700 "${AUTHORIZED_KEYS_TARGET}"
     if ! cp "${AUTHORIZED_KEYS_SOURCE}" "${AUTHORIZED_KEYS_TARGET}" ; then
       eerror "Error: copying '${AUTHORIZED_KEYS_SOURCE}' to '${AUTHORIZED_KEYS_TARGET}' failed."
-      eend 1
       bailout 1
     fi
   fi
@@ -2023,7 +1978,6 @@ iface ${interface} inet dhcp
     einfo "Setting up bind-mount /run/udev"
     mkdir -p "${MNTPOINT}"/run/udev
     mount --bind /run/udev "${MNTPOINT}"/run/udev
-    eend $?
   fi
 }
 # }}}
@@ -2041,7 +1995,7 @@ execute_pre_scripts() {
     for script in "${pre_scripts}"/* ; do
       if [ -x "$script" ] ; then
         einfo "Executing pre-script $script"
-        "$script" ; eend $?
+        "$script"
       fi
     done
   fi
@@ -2066,7 +2020,7 @@ execute_post_scripts() {
     for script in "${post_scripts}"/* ; do
       if [ -x "$script" ] ; then
         einfo "Executing post-script $script"
-        "$script" ; eend $?
+        "$script"
       fi
     done
   fi
@@ -2123,7 +2077,6 @@ chrootscript() {
   if grep -q GRML_CHROOT_SCRIPT_MARKER "${MNTPOINT}/bin/chroot-script" ; then
     einfo "Removing chroot-script again"
     rm -f "${MNTPOINT}/bin/chroot-script"
-    eend $?
   else
     einfo "Keeping chroot-script as string GRML_CHROOT_SCRIPT_MARKER could not be found"
   fi
@@ -2142,7 +2095,6 @@ umount_chroot() {
      if grep -q "$ISODIR" /proc/mounts ; then
         einfo "Unmount $MNTPOINT/$ISODIR"
         umount "$MNTPOINT/$ISODIR"
-        eend $?
      fi
   fi
 
@@ -2150,13 +2102,11 @@ umount_chroot() {
     if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
       einfo "Unmounting bind-mount /run/udev"
       umount "${MNTPOINT}"/run/udev
-      eend $?
     fi
 
      if [ -n "$PARTITION" ] ; then
         einfo "Unmount $MNTPOINT"
         umount "$MNTPOINT"
-        eend $?
      fi
   fi
 }
@@ -2173,7 +2123,6 @@ fscktool() {
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
    einfo "Checking filesystem on $TARGET using $FSCKTOOL"
    "$FSCKTOOL" "$TARGET"
-   eend $?
  fi
 }
 # }}}
@@ -2191,7 +2140,6 @@ remove_configs() {
 
   einfo "Removing configuration files from installed system as requested via --remove-configs / REMOVE_CONFIGS."
   rm -rf "${MNTPOINT}"/etc/debootstrap/
-  eend $?
 }
 # }}}
 
@@ -2202,11 +2150,8 @@ for i in format_efi_partition prepare_vm mkfs tunefs \
          remove_configs umount_chroot grub_install umount_target fscktool ; do
     if stage "${i}" ; then
       "$i"
-      if [ $? -eq 0 ]; then
-        stage "${i}" 'done' && rm -f "${STAGES}/${i}"
-      else
-        bailout 2 "$i"
-      fi
+      stage "${i}" 'done'
+      rm -f "${STAGES}/${i}"
     fi
 done
 

@@ -10,16 +10,16 @@
 ################################################################################
 
 # error_handler {{{
-if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
-   set -e
-   set -E
-   set -o pipefail
-   trap "error_handler" ERR
-fi
+set -e
+set -E
+set -o pipefail
+trap "error_handler" ERR
 # }}}
 
+bash -n /etc/debootstrap/config
 # shellcheck disable=SC1091
 . /etc/debootstrap/config    || exit 1
+bash -n /etc/debootstrap/variables
 # shellcheck disable=SC1091
 . /etc/debootstrap/variables || exit 1
 
@@ -586,25 +586,21 @@ hostname() {
 
 # generate initrd/initramfs {{{
 initrd() {
+  if [ "${INITRD,,}" = "no" ] ; then
+    echo 'Skipping initrd stuff as requested via INITRD environment variable.'>&2
+    return 0
+  fi
   # assume the first available kernel as our main kernel
   # shellcheck disable=SC2012
   KERNELIMG=$(ls -1 /boot/vmlinuz-* 2>/dev/null | head -1)
-  if [ -z "$KERNELIMG" ] ; then
-     echo 'No kernel image found, skipping initrd stuff.'>&2
-     return
-  fi
-
   KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
-  # generate initrd
-  if [ -n "$INITRD" ] ; then
-     echo "Generating initrd."
-     if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
-         DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
-         dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
-     else
-         update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
-     fi
+  echo "Generating initrd."
+  if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
+      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
+      dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
+  else
+      update-initramfs -c -t -k "$KERNELVER" $INITRD_GENERATOR_OPTS
   fi
 }
 # }}}
@@ -621,7 +617,7 @@ efi_setup() {
 
   mkdir -p /boot/efi
   echo "Mounting $EFI on /boot/efi"
-  mount "$EFI" /boot/efi || return 1
+  mount "$EFI" /boot/efi
 
   # if efivarfs kernel module is loaded, but efivars isn't,
   # then we need to mount efivarfs for efibootmgr usage
@@ -631,7 +627,7 @@ efi_setup() {
   fi
 
   echo "Invoking efibootmgr"
-  efibootmgr || return 1
+  efibootmgr
 }
 
 # grub configuration/installation {{{
@@ -678,7 +674,7 @@ grub_install() {
     return 0
   fi
 
-  efi_setup || return 1
+  efi_setup
 
   if [ -n "$EFI" ] ; then
     GRUB_PACKAGE=grub-efi-amd64
@@ -805,8 +801,9 @@ trap signal_handler HUP INT QUIT TERM
      initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
-     if stage $i ; then
-       $i && stage $i 'done' || exit 1
+     if stage "$i" ; then
+       "$i"
+       stage "$i" 'done'
      fi
   done
   # always execute the finalize stage:
