@@ -1,1 +1,2 @@
+rm_conffile /etc/debootstrap/devices.tar.gz 0.105~
 rm_conffile /etc/zsh/completion.d/_grml-debootstrap 0.86~

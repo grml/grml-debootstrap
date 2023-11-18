@@ -5,6 +5,7 @@
 # Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2+
 ################################################################################
+# shellcheck disable=SC2001,SC2181
 
 # error_handler {{{
 [ -n "$REPORT_TRAP_ERR" ] || REPORT_TRAP_ERR='no'
@@ -42,7 +43,7 @@ fi
 # variables {{{
 PN="$(basename "$0")"
 if [[ -d "$(dirname "$(command -v "$0")")"/.git ]]; then
-  VERSION="$(git --git-dir $(dirname "$(command -v "$0")")/.git describe | sed 's|^v||')"
+  VERSION="$(git --git-dir "$(dirname "$(command -v "$0")")"/.git describe | sed 's|^v||')"
 else
   VERSION="$(dpkg-query --show --showformat='${Version}' "$PN")"
 fi
@@ -601,7 +602,7 @@ done
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 
 case "${RELEASE}" in
-  lenny|squeeze|wheezy|jessie|stretch|buster|bullseye)
+  jessie|stretch|buster|bullseye)
     [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
     ;;
   *)
@@ -926,16 +927,10 @@ while IFS= read -r i; do
   NUM_PARTITIONS=$(( NUM_PARTITIONS + 1 ))
 done < "$TMPFILE"
 
-# force metadata version 0.90 for lenny so old grub can boot from this array.
-METADATA_VERSION=""
-if [ "$RELEASE" = "lenny" ]; then
-   METADATA_VERSION="-e0"
-fi
-
 ERRORFILE=$(mktemp)
 # shellcheck disable=SC2086
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
-      --raid-devices="${NUM_PARTITIONS}" ${METADATA_VERSION} ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
+      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
 RC=$?
 if [ "$RC" = 0 ] ; then
    dialog --title "$PN" --msgbox \
@@ -1034,14 +1029,16 @@ efi_support() {
 checkconfiguration()
 {
 
-if efi_support ; then
-  if [ -z "$_opt_efi" ] ; then
-    ewarn "EFI support detected but no --efi option given, please consider enabling it."
-  fi
-else
-  if [ -n "$_opt_efi" ] ; then
-     eerror "EFI option used but no EFI support detected."
-     bailout 1
+if [ -z "$VIRTUAL" ] ; then
+  if efi_support ; then
+    if [ -z "$_opt_efi" ] ; then
+      ewarn "EFI support detected but no --efi option given, please consider enabling it."
+    fi
+  else
+    if [ -n "$_opt_efi" ] ; then
+      eerror "EFI option used but no EFI support detected."
+      bailout 1
+    fi
   fi
 fi
 
@@ -1303,7 +1300,7 @@ mkfs() {
   # so disable this feature for older Debian releases where it's known to be unsupported
   if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
     case "$RELEASE" in
-      lenny|squeeze|wheezy|jessie)
+      jessie)
         # assume a more recent version if we can't identify the version via dpkg-query
         local e2fsprogs_version
         e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
@@ -1320,7 +1317,7 @@ mkfs() {
   # Disable this feature for Debian releases older than bookworm
   if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
     case "$RELEASE" in
-      lenny|squeeze|wheezy|jessie|stretch|buster|bullseye)
+      jessie|stretch|buster|bullseye)
         local e2fsprogs_version
         # assume a more recent version if we can't identify the version via dpkg-query
         e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.47)"
@@ -1618,15 +1615,7 @@ grub_install() {
       eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader." ; eend 1
       bailout 1
     fi
-
-    case "$RELEASE" in
-      lenny|squeeze|wheezy)
-        cp "${MNTPOINT}"/usr/lib/grub/i386-pc/* "${MNTPOINT}/boot/grub/"
-        ;;
-      *)
-        cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
-        ;;
-    esac
+    cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
 
     if [ -n "$VMEFI" ]; then
 
@@ -1690,6 +1679,11 @@ grub_install() {
     mkdir -p "${MNTPOINT}"/run/udev
     mount --bind /run/udev "${MNTPOINT}"/run/udev
     eend $?
+  fi
+
+  if [ -n "${BOOT_APPEND}" ] ; then
+    echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
+    sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" "${MNTPOINT}/etc/default/grub"
   fi
 
   einfo "Updating grub configuration file."
@@ -1802,55 +1796,53 @@ preparechroot() {
   touch "$CHROOT_VARIABLES"
   chmod 600 "$CHROOT_VARIABLES" # make sure nobody except root can read it
   echo "# Configuration of ${PN}"                                                                                   > "$CHROOT_VARIABLES"
-  # Resorting to sed(1) for escaping since "VAR='${VAR//\'/\'\\\'\'}'" does not work with all versions of Bash,
-  #   e.g. not with 4.2.37(1)-release (a.k.a 4.2+dfsg-0.1+deb7u3) of Debian wheezy
-  [ -n "$ARCH" ]                && echo "ARCH='$(sed "s,','\\\\'',g" <<<"${ARCH}")'"                               >> "$CHROOT_VARIABLES"
-  [ -n "$BACKPORTREPOS" ]       && echo "BACKPORTREPOS='$(sed "s,','\\\\'',g" <<<"${BACKPORTREPOS}")'"             >> "$CHROOT_VARIABLES"
-  [ -n "$BOOT_APPEND" ]         && echo "BOOT_APPEND='$(sed "s,','\\\\'',g" <<<"${BOOT_APPEND}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$CHROOT_SCRIPTS" ]      && echo "CHROOT_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${CHROOT_SCRIPTS}")'"           >> "$CHROOT_VARIABLES"
-  [ -n "$COMPONENTS" ]          && echo "COMPONENTS='$(sed "s,','\\\\'',g" <<<"${COMPONENTS}")'"                   >> "$CHROOT_VARIABLES"
-  [ -n "$CONFFILES" ]           && echo "CONFFILES='$(sed "s,','\\\\'',g" <<<"${CONFFILES}")'"                     >> "$CHROOT_VARIABLES"
-  [ -n "$DEBCONF" ]             && echo "DEBCONF='$(sed "s,','\\\\'',g" <<<"${DEBCONF}")'"                         >> "$CHROOT_VARIABLES"
-  [ -n "$DEBIAN_FRONTEND" ]     && echo "DEBIAN_FRONTEND='$(sed "s,','\\\\'',g" <<<"${DEBIAN_FRONTEND}")'"         >> "$CHROOT_VARIABLES"
-  [ -n "$DEBOOTSTRAP" ]         && echo "DEBOOTSTRAP='$(sed "s,','\\\\'',g" <<<"${DEBOOTSTRAP}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$DEFAULT_LOCALES" ]     && echo "DEFAULT_LOCALES='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LOCALES}")'"         >> "$CHROOT_VARIABLES"
-  [ -n "$DEFAULT_LANGUAGE" ]    && echo "DEFAULT_LANGUAGE='$(sed "s,','\\\\'',g" <<<"${DEFAULT_LANGUAGE}")'"       >> "$CHROOT_VARIABLES"
-  [ -n "$EXTRAPACKAGES" ]       && echo "EXTRAPACKAGES='$(sed "s,','\\\\'',g" <<<"${EXTRAPACKAGES}")'"             >> "$CHROOT_VARIABLES"
-  [ -n "$EFI" ]                 && echo "EFI='$(sed "s,','\\\\'',g" <<<"${EFI}")'"                                 >> "$CHROOT_VARIABLES"
-  [ -n "$FALLBACK_MIRROR" ]     && echo "FALLBACK_MIRROR='$(sed "s,','\\\\'',g" <<<"${FALLBACK_MIRROR}")'"         >> "$CHROOT_VARIABLES"
-  [ -n "$FILESYSTEM" ]          && echo "FILESYSTEM='$(sed "s,','\\\\'',g" <<<"${FILESYSTEM}")'"                   >> "$CHROOT_VARIABLES"
-  [ -n "$FORCE" ]               && echo "FORCE='$(sed "s,','\\\\'',g" <<<"${FORCE}")'"                             >> "$CHROOT_VARIABLES"
-  [ -n "$GRMLREPOS" ]           && echo "GRMLREPOS='$(sed "s,','\\\\'',g" <<<"${GRMLREPOS}")'"                     >> "$CHROOT_VARIABLES"
-  [ -n "$GRUB" ]                && echo "GRUB='$(sed "s,','\\\\'',g" <<<"${GRUB}")'"                               >> "$CHROOT_VARIABLES"
-  [ -n "$HOSTNAME" ]            && echo "HOSTNAME='$(sed "s,','\\\\'',g" <<<"${HOSTNAME}")'"                       >> "$CHROOT_VARIABLES"
-  [ -n "$INITRD" ]              && echo "INITRD='$(sed "s,','\\\\'',g" <<<"${INITRD}")'"                           >> "$CHROOT_VARIABLES"
-  [ -n "$INITRD_GENERATOR" ]    && echo "INITRD_GENERATOR='$(sed "s,','\\\\'',g" <<<"${INITRD_GENERATOR}")'"       >> "$CHROOT_VARIABLES"
-  [ -n "$INITRD_GENERATOR_OPTS" ] && echo "INITRD_GENERATOR_OPTS='$(sed "s,','\\\\'',g" <<<"${INITRD_GENERATOR_OPTS}")'" >> "$CHROOT_VARIABLES"
-  [ -n "$INSTALL_NOTES" ]       && echo "INSTALL_NOTES='$(sed "s,','\\\\'',g" <<<"${INSTALL_NOTES}")'"             >> "$CHROOT_VARIABLES"
-  [ -n "$ISODIR" ]              && echo "ISODIR='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                              >> "$CHROOT_VARIABLES"
-  [ -n "$ISO" ]                 && echo "ISO='$(sed "s,','\\\\'',g" <<<"${ISO}")'"                                 >> "$CHROOT_VARIABLES"
-  [ -n "$KEEP_SRC_LIST" ]       && echo "KEEP_SRC_LIST='$(sed "s,','\\\\'',g" <<<"${KEEP_SRC_LIST}")'"             >> "$CHROOT_VARIABLES"
-  [ -n "$LOCALES" ]             && echo "LOCALES='$(sed "s,','\\\\'',g" <<<"${LOCALES}")'"                         >> "$CHROOT_VARIABLES"
-  [ -n "$MIRROR" ]              && echo "MIRROR='$(sed "s,','\\\\'',g" <<<"${MIRROR}")'"                           >> "$CHROOT_VARIABLES"
-  [ -n "$MKFS" ]                && echo "MKFS='$(sed "s,','\\\\'',g" <<<"${MKFS}")'"                               >> "$CHROOT_VARIABLES"
-  [ -n "$NOPASSWORD" ]          && echo "NOPASSWORD=\"true\""                                                      >> "$CHROOT_VARIABLES"
-  [ -n "$NOKERNEL" ]            && echo "NOKERNEL=\"true\""                                                        >> "$CHROOT_VARIABLES"
-  [ -n "$PACKAGES" ]            && echo "PACKAGES='$(sed "s,','\\\\'',g" <<<"${PACKAGES}")'"                       >> "$CHROOT_VARIABLES"
-  [ -n "$POST_SCRIPTS" ]        && echo "POST_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${POST_SCRIPTS}")'"               >> "$CHROOT_VARIABLES"
-  [ -n "$PRE_SCRIPTS" ]         && echo "PRE_SCRIPTS='$(sed "s,','\\\\'',g" <<<"${PRE_SCRIPTS}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$RECONFIGURE" ]         && echo "RECONFIGURE='$(sed "s,','\\\\'',g" <<<"${RECONFIGURE}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$RELEASE" ]             && echo "RELEASE='$(sed "s,','\\\\'',g" <<<"${RELEASE}")'"                         >> "$CHROOT_VARIABLES"
-  [ -n "$RM_APTCACHE" ]         && echo "RM_APTCACHE='$(sed "s,','\\\\'',g" <<<"${RM_APTCACHE}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$ROOTPASSWORD" ]        && echo "ROOTPASSWORD='$(sed "s,','\\\\'',g" <<<"${ROOTPASSWORD}")'"               >> "$CHROOT_VARIABLES"
-  [ -n "$SCRIPTS" ]             && echo "SCRIPTS='$(sed "s,','\\\\'',g" <<<"${SCRIPTS}")'"                         >> "$CHROOT_VARIABLES"
-  [ -n "$SECURE" ]              && echo "SECURE='$(sed "s,','\\\\'',g" <<<"${SECURE}")'"                           >> "$CHROOT_VARIABLES"
-  [ -n "$SELECTED_PARTITIONS" ] && echo "SELECTED_PARTITIONS='$(sed "s,','\\\\'',g" <<<"${SELECTED_PARTITIONS}")'" >> "$CHROOT_VARIABLES"
-  [ -n "$TARGET" ]              && echo "TARGET='$(sed "s,','\\\\'',g" <<<"${TARGET}")'"                           >> "$CHROOT_VARIABLES"
-  [ -n "$UPGRADE_SYSTEM" ]      && echo "UPGRADE_SYSTEM='$(sed "s,','\\\\'',g" <<<"${UPGRADE_SYSTEM}")'"           >> "$CHROOT_VARIABLES"
-  [ -n "$TARGET_UUID" ]         && echo "TARGET_UUID='$(sed "s,','\\\\'',g" <<<"${TARGET_UUID}")'"                 >> "$CHROOT_VARIABLES"
-  [ -n "$TIMEZONE" ]            && echo "TIMEZONE='$(sed "s,','\\\\'',g" <<<"${TIMEZONE}")'"                       >> "$CHROOT_VARIABLES"
-  [ -n "$TUNE2FS" ]             && echo "TUNE2FS='$(sed "s,','\\\\'',g" <<<"${TUNE2FS}")'"                         >> "$CHROOT_VARIABLES"
-  [ -n "$VMSIZE" ]              && echo "VMSIZE='$(sed "s,','\\\\'',g" <<<"${VMSIZE}")'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$ARCH" ]                      && echo "ARCH='${ARCH//\'/\'\\\'\'}'"                                         >> "$CHROOT_VARIABLES"
+  [ -n "$BACKPORTREPOS" ]             && echo "BACKPORTREPOS='${BACKPORTREPOS//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
+  [ -n "$BOOT_APPEND" ]               && echo "BOOT_APPEND='${BOOT_APPEND//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$CHROOT_SCRIPTS" ]            && echo "CHROOT_SCRIPTS='${CHROOT_SCRIPTS//\'/\'\\\'\'}'"                     >> "$CHROOT_VARIABLES"
+  [ -n "$COMPONENTS" ]                && echo "COMPONENTS='${COMPONENTS//\'/\'\\\'\'}'"                             >> "$CHROOT_VARIABLES"
+  [ -n "$CONFFILES" ]                 && echo "CONFFILES='${CONFFILES//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
+  [ -n "$DEBCONF" ]                   && echo "DEBCONF='${DEBCONF//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$DEBIAN_FRONTEND" ]           && echo "DEBIAN_FRONTEND='${DEBIAN_FRONTEND//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
+  [ -n "$DEBOOTSTRAP" ]               && echo "DEBOOTSTRAP='${DEBOOTSTRAP//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$DEFAULT_LOCALES" ]           && echo "DEFAULT_LOCALES='${DEFAULT_LOCALES//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
+  [ -n "$DEFAULT_LANGUAGE" ]          && echo "DEFAULT_LANGUAGE='${DEFAULT_LANGUAGE//\'/\'\\\'\'}'"                 >> "$CHROOT_VARIABLES"
+  [ -n "$EXTRAPACKAGES" ]             && echo "EXTRAPACKAGES='${EXTRAPACKAGES//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
+  [ -n "$EFI" ]                       && echo "EFI='${EFI//\'/\'\\\'\'}'"                                           >> "$CHROOT_VARIABLES"
+  [ -n "$FALLBACK_MIRROR" ]           && echo "FALLBACK_MIRROR='${FALLBACK_MIRROR//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
+  [ -n "$FILESYSTEM" ]                && echo "FILESYSTEM='${FILESYSTEM//\'/\'\\\'\'}'"                             >> "$CHROOT_VARIABLES"
+  [ -n "$FORCE" ]                     && echo "FORCE='${FORCE//\'/\'\\\'\'}'"                                       >> "$CHROOT_VARIABLES"
+  [ -n "$GRMLREPOS" ]                 && echo "GRMLREPOS='${GRMLREPOS//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
+  [ -n "$GRUB" ]                      && echo "GRUB='${GRUB//\'/\'\\\'\'}'"                                         >> "$CHROOT_VARIABLES"
+  [ -n "$HOSTNAME" ]                  && echo "HOSTNAME='${HOSTNAME//\'/\'\\\'\'}'"                                 >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD" ]                    && echo "INITRD='${INITRD//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD_GENERATOR" ]          && echo "INITRD_GENERATOR='${INITRD_GENERATOR//\'/\'\\\'\'}'"                 >> "$CHROOT_VARIABLES"
+  [ -n "$INITRD_GENERATOR_OPTS" ]     && echo "INITRD_GENERATOR_OPTS='${INITRD_GENERATOR_OPTS//\'/\'\\\'\'}'"       >> "$CHROOT_VARIABLES"
+  [ -n "$INSTALL_NOTES" ]             && echo "INSTALL_NOTES='${INSTALL_NOTES//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
+  [ -n "$ISODIR" ]                    && echo "ISODIR='${ISO//\'/\'\\\'\'}'"                                        >> "$CHROOT_VARIABLES"
+  [ -n "$ISO" ]                       && echo "ISO='${ISO//\'/\'\\\'\'}'"                                           >> "$CHROOT_VARIABLES"
+  [ -n "$KEEP_SRC_LIST" ]             && echo "KEEP_SRC_LIST='${KEEP_SRC_LIST//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
+  [ -n "$LOCALES" ]                   && echo "LOCALES='${LOCALES//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$MIRROR" ]                    && echo "MIRROR='${MIRROR//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
+  [ -n "$MKFS" ]                      && echo "MKFS='${MKFS//\'/\'\\\'\'}'"                                         >> "$CHROOT_VARIABLES"
+  [ -n "$NOPASSWORD" ]                && echo "NOPASSWORD=\"true\""                                                 >> "$CHROOT_VARIABLES"
+  [ -n "$NOKERNEL" ]                  && echo "NOKERNEL=\"true\""                                                   >> "$CHROOT_VARIABLES"
+  [ -n "$PACKAGES" ]                  && echo "PACKAGES='${PACKAGES//\'/\'\\\'\'}'"                                 >> "$CHROOT_VARIABLES"
+  [ -n "$POST_SCRIPTS" ]              && echo "POST_SCRIPTS='${POST_SCRIPTS//\'/\'\\\'\'}'"                         >> "$CHROOT_VARIABLES"
+  [ -n "$PRE_SCRIPTS" ]               && echo "PRE_SCRIPTS='${PRE_SCRIPTS//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$RECONFIGURE" ]               && echo "RECONFIGURE='${RECONFIGURE//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$RELEASE" ]                   && echo "RELEASE='${RELEASE//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$RM_APTCACHE" ]               && echo "RM_APTCACHE='${RM_APTCACHE//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$ROOTPASSWORD" ]              && echo "ROOTPASSWORD='${ROOTPASSWORD//\'/\'\\\'\'}'"                         >> "$CHROOT_VARIABLES"
+  [ -n "$SCRIPTS" ]                   && echo "SCRIPTS='${SCRIPTS//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$SECURE" ]                    && echo "SECURE='${SECURE//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
+  [ -n "$SELECTED_PARTITIONS" ]       && echo "SELECTED_PARTITIONS='${SELECTED_PARTITIONS//\'/\'\\\'\'}'"           >> "$CHROOT_VARIABLES"
+  [ -n "$TARGET" ]                    && echo "TARGET='${TARGET//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
+  [ -n "$UPGRADE_SYSTEM" ]            && echo "UPGRADE_SYSTEM='${UPGRADE_SYSTEM//\'/\'\\\'\'}'"                     >> "$CHROOT_VARIABLES"
+  [ -n "$TARGET_UUID" ]               && echo "TARGET_UUID='${TARGET_UUID//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
+  [ -n "$TIMEZONE" ]                  && echo "TIMEZONE='${TIMEZONE//\'/\'\\\'\'}'"                                 >> "$CHROOT_VARIABLES"
+  [ -n "$TUNE2FS" ]                   && echo "TUNE2FS='${TUNE2FS//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$VMSIZE" ]                    && echo "VMSIZE='${VMSIZE//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
 
   cp $VERBOSE "${CONFFILES}"/chroot-script "${MNTPOINT}"/bin/chroot-script
   chmod 755 "${MNTPOINT}"/bin/chroot-script
@@ -1902,9 +1894,6 @@ preparechroot() {
 
   # setup default locales
   [ -n "$LOCALES" ] && cp $VERBOSE "${CONFFILES}"/locale.gen "${MNTPOINT}"/etc/locale.gen
-
-  # MAKEDEV is just a forking bomb crap, let's do it on our own instead :)
-  ( cd "${MNTPOINT}"/dev && tar zxf /etc/debootstrap/devices.tar.gz )
 
   # copy any existing files to chroot
   [ -d "${CONFFILES}"/bin   ] && cp $VERBOSE -a -L "${CONFFILES}"/bin/*   "${MNTPOINT}"/bin/
@@ -1961,11 +1950,13 @@ iface ${interface} inet dhcp
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
@@ -1976,6 +1967,7 @@ iface ${interface} inet dhcp
     ewarn "Couldn't read /etc/network/interfaces, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+    # shellcheck disable=SC2320
     eend $?
   fi
 

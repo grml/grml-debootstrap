@@ -40,7 +40,6 @@ install:
 	mkdir -p $(DESTDIR)/usr/sbin/
 	mkdir -p $(DESTDIR)/usr/share/zsh/vendor-completions
 	install -m 644 config           $(DESTDIR)/etc/debootstrap/
-	install -m 644 devices.tar.gz   $(DESTDIR)/etc/debootstrap/
 	install -m 644 locale.gen       $(DESTDIR)/etc/debootstrap/
 	install -m 644 packages         $(DESTDIR)/etc/debootstrap/
 	install -m 644 packages-arm64   $(DESTDIR)/etc/debootstrap/

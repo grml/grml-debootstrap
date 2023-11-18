@@ -1,6 +1,7 @@
 process:
   sshd:
     running: true
+
 file:
   /etc/timezone:
     exists: true
@@ -9,3 +10,9 @@ file:
     filetype: symlink
     exists: true
     linked-to: /usr/share/zoneinfo/Europe/Vienna
+
+  # shadow passwords are enabled.
+  /etc/shadow:
+    exists: true
+  /etc/gshadow:
+    exists: true

@@ -1,0 +1,100 @@
+name: test-build
+on:
+  pull_request:
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  build-debian:
+    strategy:
+      # Keep other matrix jobs running, even if one fails.
+      fail-fast: false
+      matrix:
+        host_release:
+        - unstable
+        - trixie
+        - bookworm
+        - bullseye
+
+    # We want a working shell, qemu, python and docker. Specific version should not matter (much).
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - run: ./tests/gha-build-deb.sh
+      name: "Build .deb for ${{matrix.host_release}}"
+      env:
+        HOST_RELEASE: ${{matrix.host_release}}
+
+    - name: Archive built .deb
+      uses: actions/upload-artifact@v3
+      with:
+        name: deb-${{matrix.host_release}}
+        if-no-files-found: error
+        path: |
+          *.deb
+
+  test-debian:
+    needs: build-debian
+    strategy:
+      # Keep other matrix jobs running, even if one fails.
+      fail-fast: false
+      matrix:
+        host_release:
+        - unstable
+        - trixie
+        - bookworm
+        - bullseye
+
+        release:
+        - trixie
+        - bookworm
+        - bullseye
+        - buster
+        - stretch
+
+        debootstrap:
+        - ''
+        - mmdebstrap
+
+        exclude:
+          # debootstrap in bullseye is too old.
+          - host_release: bullseye
+            release: trixie
+          # unclear how to pass --no-check-gpg to mmdebstrap
+          - release: stretch
+            debootstrap: mmdebstrap
+
+    # We want a working shell, qemu, python and docker. Specific version should not matter (much).
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download built deb
+      uses: actions/download-artifact@v3
+      with:
+        name: deb-${{matrix.host_release}}
+
+    - run: ./tests/build-vm-and-test.sh setup
+      name: "Setup test environment"
+
+    - run: ./tests/build-vm-and-test.sh run
+      name: "Build VM image using grml-debootstrap on host ${{matrix.host_release}} for ${{matrix.release}} using debootstrap=${{matrix.debootstrap}}"
+      env:
+        HOST_RELEASE: ${{matrix.host_release}}
+        RELEASE: ${{matrix.release}}
+        DEBOOTSTRAP: ${{matrix.debootstrap}}
+
+    - run: ./tests/build-vm-and-test.sh test
+      name: "Test built VM image for ${{matrix.release}}"
+      env:
+        RELEASE: ${{matrix.release}}
+
+    - name: Archive VM test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: vm-results-${{matrix.host_release}}-${{matrix.release}}-${{matrix.debootstrap}}
+        if-no-files-found: error
+        path: tests/results/

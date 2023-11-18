@@ -4,6 +4,7 @@
 # Bug-Reports:   see https://grml.org/bugs/
 # License:       This file is licensed under the GPL v2 or any later version.
 ################################################################################
+# shellcheck shell=sh
 
 ################################################################################
 # Important: adjust this file if you want to execute grml-debootstrap
@@ -72,7 +73,7 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: lenny, squeeze, wheezy, jessie, stretch, buster, bullseye, sid
+# Supported values: jessie, stretch, buster, bullseye, sid
 # Default: 'bullseye'
 # RELEASE='bullseye'
 
