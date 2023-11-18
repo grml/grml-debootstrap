@@ -350,7 +350,7 @@ kernel() {
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
      # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free"
+     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free $INITRD_GENERATOR"
      # only add firmware-linux if we have non-free as a component
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
        KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
@@ -600,7 +600,6 @@ initrd() {
   if [ -n "$INITRD" ] ; then
      echo "Generating initrd."
      if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
-         DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL dracut
          # shellcheck disable=SC2086
          dracut --no-hostonly --kver "$KERNELVER" --fstab --add-fstab /etc/fstab --force --reproducible $INITRD_GENERATOR_OPTS
      else
