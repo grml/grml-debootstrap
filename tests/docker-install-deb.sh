@@ -15,5 +15,5 @@ DEB_NAME="$1"
 
 apt-get update
 # docker images can be relatively old, especially for unstable.
-apt-get -y upgrade
-apt-get -y install "$DEB_NAME"
+apt-get upgrade -qq -y
+apt-get install -qq -y "$DEB_NAME"
