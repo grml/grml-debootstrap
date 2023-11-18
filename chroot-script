@@ -17,8 +17,10 @@ set -o pipefail
 trap "error_handler" ERR
 # }}}
 
+bash -n /etc/debootstrap/config
 # shellcheck source=config
 . /etc/debootstrap/config    || exit 1
+bash -n /etc/debootstrap/variables
 # shellcheck source=tests/shellcheck-stub-debootstrap-variables
 . /etc/debootstrap/variables || exit 1
 
