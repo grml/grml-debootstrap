@@ -1452,7 +1452,7 @@ prepare_vm() {
   fi
 
   # make sure loop module is present and a usable loop device exists
-  modprobe -q loop
+  modprobe loop
   if ! losetup -f >/dev/null 2>&1; then
     eerror "Error finding usable loop device"
     bailout 1
@@ -1460,7 +1460,7 @@ prepare_vm() {
 
   # if dm-mod isn't available then kpartx will fail with
   # "Is device-mapper driver missing from kernel? [...]"
-  modprobe -q dm-mod
+  modprobe dm-mod
   if ! grep -q 'device-mapper' /proc/misc >/dev/null 2>&1 ; then
     eerror "Device-mapper support missing in kernel."
     bailout 1
