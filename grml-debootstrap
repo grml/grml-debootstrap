@@ -346,6 +346,7 @@ stage() {
 
 # source main configuration file {{{
 if [ -r /etc/debootstrap/config ] ; then
+  bash -n /etc/debootstrap/config
   # shellcheck disable=SC1091
   . /etc/debootstrap/config
 fi
@@ -657,6 +658,7 @@ fi
 # source specified configuration file {{{
 if [ -n "$CONFIGFILE" ] ; then
   einfo "Reading specified config file $CONFIGFILE."
+  bash -n "$CONFIGFILE"
   # shellcheck disable=SC1091 source=config
   if ! . "$CONFIGFILE" ; then
     eerror "Error reading config file $CONFIGFILE" ; bailout 1
