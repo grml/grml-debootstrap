@@ -1452,7 +1452,7 @@ prepare_vm() {
   fi
 
   # make sure loop module is present and a usable loop device exists
-  modprobe loop
+  modprobe loop || true
   if ! losetup -f >/dev/null 2>&1; then
     eerror "Error finding usable loop device"
     bailout 1
