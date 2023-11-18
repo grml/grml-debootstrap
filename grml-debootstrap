@@ -1320,8 +1320,6 @@ mkfs() {
     if [ -n "${ARM_EFI_TARGET}" ] ; then
       einfo "Running mkfs.fat $MKFS_OPTS on $ARM_EFI_TARGET"
       mkfs.fat -n "EFI" "$ARM_EFI_TARGET"
-      eend $?
-
       MKFS_OPTS="$MKFS_OPTS -L LINUX"
     fi
 
@@ -1337,14 +1335,12 @@ mkfs() {
       else
         einfo "Changing disk uuid for $TARGET to fixed (non-random) value $DISK_IDENTIFIER using tune2fs"
         tune2fs "$TARGET" -U "$DISK_IDENTIFIER" </dev/null
-        eend $?
       fi
     fi
 
     if [ -n "$VIRTUAL" ] && [ -n "$EFI_TARGET" ]; then
       einfo "Creating FAT filesystem on $EFI_TARGET"
       mkfs.fat -F32 -n "EFI" "$EFI_TARGET"
-      eend $?
     fi
 
     # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
@@ -1422,7 +1418,6 @@ tunefs() {
   if [ -n "$TUNE2FS" ] && echo "$MKFS" | grep -q "mkfs.ext" ; then
      einfo "Disabling automatic filesystem check on $TARGET via tune2fs"
      $TUNE2FS "$TARGET" </dev/null
-     eend $?
   fi
 }
 # }}}
@@ -1441,14 +1436,12 @@ mount_target() {
        einfo "Mounting $TARGET to $MNTPOINT"
        mkdir -p "$MNTPOINT"
        mount -o rw,suid,dev "$TARGET" "$MNTPOINT"
-       eend $?
      fi
   fi
   if [ -n "$ISODIR" ] ; then
      einfo "Mounting Debian image loopback to $MNTPOINT/$ISODIR."
      mkdir -p "$MNTPOINT/$ISODIR"
      mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
-     eend $?
   fi
 }
 # }}}
@@ -1514,7 +1507,6 @@ prepare_vm() {
         dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
         echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
         dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-        eend $?
       fi
       parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
       parted -s "${TARGET}" 'set 1 boot on'
@@ -1664,7 +1656,6 @@ grub_install() {
     einfo "Setting up bind-mount /run/udev"
     mkdir -p "${MNTPOINT}"/run/udev
     mount --bind /run/udev "${MNTPOINT}"/run/udev
-    eend $?
   fi
 
   if [ -n "${BOOT_APPEND}" ] ; then
@@ -1697,7 +1688,6 @@ grub_install() {
   if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
     einfo "Unmounting bind-mount /run/udev"
     umount "${MNTPOINT}"/run/udev
-    eend $?
   fi
 
   umount "${MNTPOINT}"/proc
@@ -1936,25 +1926,18 @@ iface ${interface} inet dhcp
     einfo "Installing default /etc/network/interfaces as requested via --defaultinterfaces options."
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    # shellcheck disable=SC2320
-    eend $?
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    # shellcheck disable=SC2320
-    eend $?
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
     mkdir -p "${MNTPOINT}/etc/network"
     cp $VERBOSE /etc/network/interfaces "${MNTPOINT}/etc/network/interfaces"
-    eend $?
   else
     ewarn "Couldn't read /etc/network/interfaces, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
-    # shellcheck disable=SC2320
-    eend $?
   fi
 
   # install config file providing some example entries
@@ -2015,7 +1998,6 @@ iface ${interface} inet dhcp
     einfo "Setting up bind-mount /run/udev"
     mkdir -p "${MNTPOINT}"/run/udev
     mount --bind /run/udev "${MNTPOINT}"/run/udev
-    eend $?
   fi
 }
 # }}}
@@ -2033,7 +2015,7 @@ execute_pre_scripts() {
     for script in "${pre_scripts}"/* ; do
       if [ -x "$script" ] ; then
         einfo "Executing pre-script $script"
-        "$script" ; eend $?
+        "$script"
       fi
     done
   fi
@@ -2058,7 +2040,7 @@ execute_post_scripts() {
     for script in "${post_scripts}"/* ; do
       if [ -x "$script" ] ; then
         einfo "Executing post-script $script"
-        "$script" ; eend $?
+        "$script"
       fi
     done
   fi
@@ -2115,7 +2097,6 @@ chrootscript() {
   if grep -q GRML_CHROOT_SCRIPT_MARKER "${MNTPOINT}/bin/chroot-script" ; then
     einfo "Removing chroot-script again"
     rm -f "${MNTPOINT}/bin/chroot-script"
-    eend $?
   else
     einfo "Keeping chroot-script as string GRML_CHROOT_SCRIPT_MARKER could not be found"
   fi
@@ -2134,7 +2115,6 @@ umount_chroot() {
      if grep -q "$ISODIR" /proc/mounts ; then
         einfo "Unmount $MNTPOINT/$ISODIR"
         umount "$MNTPOINT/$ISODIR"
-        eend $?
      fi
   fi
 
@@ -2142,13 +2122,11 @@ umount_chroot() {
     if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
       einfo "Unmounting bind-mount /run/udev"
       umount "${MNTPOINT}"/run/udev
-      eend $?
     fi
 
      if [ -n "$PARTITION" ] ; then
         einfo "Unmount $MNTPOINT"
         umount "$MNTPOINT"
-        eend $?
      fi
   fi
 }
@@ -2165,7 +2143,6 @@ fscktool() {
    [ -n "$FSCKTOOL" ] || FSCKTOOL="fsck.${MKFS#mkfs.}"
    einfo "Checking filesystem on $TARGET using $FSCKTOOL"
    "$FSCKTOOL" "$TARGET"
-   eend $?
  fi
 }
 # }}}
@@ -2183,7 +2160,6 @@ remove_configs() {
 
   einfo "Removing configuration files from installed system as requested via --remove-configs / REMOVE_CONFIGS."
   rm -rf "${MNTPOINT}"/etc/debootstrap/
-  eend $?
 }
 # }}}
 
