@@ -480,6 +480,10 @@ EOF
     local rootfs_mount_options=""
 
     if [ -z "${FILESYSTEM}" ] ; then
+      ## Debugging.
+      ls -la /dev/disk/by-uuid/"${TARGET_UUID}"
+      blkid /dev/disk/by-uuid/"${TARGET_UUID}"
+
       FILESYSTEM="$(blkid -o value -s TYPE /dev/disk/by-uuid/"${TARGET_UUID}")"
     fi
 
