@@ -11,16 +11,16 @@
 # shellcheck disable=SC2317  # shellcheck has trouble understanding the code flow in this file
 
 # error_handler {{{
-if [ "$REPORT_TRAP_ERR" = "yes" ] || [ "$FAIL_TRAP_ERR" = "yes" ]; then
-   set -e
-   set -E
-   set -o pipefail
-   trap "error_handler" ERR
-fi
+set -e
+set -E
+set -o pipefail
+trap "error_handler" ERR
 # }}}
 
+bash -n /etc/debootstrap/config
 # shellcheck source=config
 . /etc/debootstrap/config    || exit 1
+bash -n /etc/debootstrap/variables
 # shellcheck source=tests/shellcheck-stub-debootstrap-variables
 . /etc/debootstrap/variables || exit 1
 
@@ -480,7 +480,12 @@ EOF
     local rootfs_mount_options=""
 
     if [ -z "${FILESYSTEM}" ] ; then
-      FILESYSTEM="$(blkid -o value -s TYPE /dev/disk/by-uuid/"${TARGET_UUID}")"
+      ## Debugging.
+      ls -la /dev/disk/by-uuid/"${TARGET_UUID}" || true
+      test -r /dev/disk/by-uuid/"${TARGET_UUID}" || true
+      blkid /dev/disk/by-uuid/"${TARGET_UUID}" || true
+
+      FILESYSTEM="$(blkid -o value -s TYPE /dev/disk/by-uuid/"${TARGET_UUID}")" || true
     fi
 
     case "${FILESYSTEM}" in
@@ -496,8 +501,8 @@ EOF
   fi
 
 if [ -n "$EFI" ] ; then
-  # shellcheck disable=SC2086
-  echo "UUID=$(blkid -o value -s UUID $EFI)  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
+  UUID_EFI="$(blkid -o value -s UUID "$EFI")"
+  echo "UUID=$UUID_EFI  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
 fi
 
 cat >> /etc/fstab << EOF
@@ -623,7 +628,7 @@ efi_setup() {
 
   mkdir -p /boot/efi
   echo "Mounting $EFI on /boot/efi"
-  mount "$EFI" /boot/efi || return 1
+  mount "$EFI" /boot/efi
 
   # if efivarfs kernel module is loaded, but efivars isn't,
   # then we need to mount efivarfs for efibootmgr usage
@@ -633,7 +638,7 @@ efi_setup() {
   fi
 
   echo "Invoking efibootmgr"
-  efibootmgr || return 1
+  efibootmgr
 }
 
 # grub configuration/installation {{{
@@ -680,7 +685,7 @@ grub_install() {
     return 0
   fi
 
-  efi_setup || return 1
+  efi_setup
 
   if [ -n "$EFI" ] ; then
     GRUB_PACKAGE=grub-efi-amd64
@@ -807,8 +812,9 @@ trap signal_handler HUP INT QUIT TERM
      initrd grub_install passwords \
      custom_scripts upgrade_system remove_apt_cache services \
      remove_chrootmirror; do
-     if stage $i ; then
-       $i && stage $i 'done' || exit 1
+     if stage "$i" ; then
+       "$i"
+       stage "$i" 'done'
      fi
   done
   # always execute the finalize stage:
