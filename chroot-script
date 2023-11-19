@@ -501,8 +501,8 @@ EOF
   fi
 
 if [ -n "$EFI" ] ; then
-  # shellcheck disable=SC2086
-  echo "UUID=$(blkid -o value -s UUID $EFI)  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
+  UUID_EFI="$(blkid -o value -s UUID "$EFI")"
+  echo "UUID=$UUID_EFI  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
 fi
 
 cat >> /etc/fstab << EOF
