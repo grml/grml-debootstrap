@@ -104,8 +104,8 @@ chrootmirror() {
 
   # add security.debian.org:
   case "$RELEASE" in
-    unstable|sid) ;;  # no security pool available
-    jessie|stretch|buster)
+    unstable|sid|stretch) ;;  # no security pool available
+    jessie|buster)
       echo "Adding security.debian.org to sources.list."
       echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
