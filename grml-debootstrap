@@ -258,7 +258,7 @@ cleanup() {
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
     if [ -d "$MNTPOINT" ] ; then
-      rmdir "$MNTPOINT"
+      rmdir "$MNTPOINT" || true
     fi
   fi
 
