@@ -479,7 +479,7 @@ EOF
     local rootfs_mount_options=""
 
     if [ -z "${FILESYSTEM}" ] ; then
-      FILESYSTEM="$(blkid -o value -s TYPE /dev/disk/by-uuid/"${TARGET_UUID}")"
+      FILESYSTEM="$(blkid -o value -s TYPE /dev/disk/by-uuid/"${TARGET_UUID}")" || true
     fi
 
     case "${FILESYSTEM}" in
