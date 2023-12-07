@@ -349,8 +349,7 @@ kernel() {
   $APTUPDATE
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
-     # note: install busybox to be able to debug initramfs
-     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER busybox firmware-linux-free $INITRD_GENERATOR"
+     KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER firmware-linux-free $INITRD_GENERATOR"
      # only add firmware-linux if we have non-free as a component
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
        KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
