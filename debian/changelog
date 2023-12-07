@@ -1,3 +1,57 @@
+grml-debootstrap (0.105) unstable; urgency=medium
+
+  The "farewell lenny, squeeze + wheezy; hello arm64" release
+
+  [ Michael Prokop ]
+  * [4405248] packer: update to Grml 2022.11 ISO
+  * [2708f44] Don't install busybox any longer by default.
+    Thanks to Patrick Schleizer + Chris Hofstaedtler
+
+  [ Daniel Winzen ]
+  * [f4d3906] Add EFI support for VMs
+  * [39685c7] Add support for legacy BIOS boot to efi VM images
+
+  [ Patrick Schleizer ]
+  * [ef3019b] add mmdebstrap as alternative to (c)debootstrap
+  * [c1d92f2] remove unnecessary unicode from config
+  * [438ca09] remove unnecessary unicode from chroot-script
+  * [e8494a4] disable prompt/wait by tune2fs
+  * [1e27d8e] improve error handling
+  * [256bdb7] debian: add dosfstools to Depends for EFI use case
+  * [dcccf11] code simplification: drop NOP usage of eend 0
+  * [b9035f6] Avoid intermediary installation of initramfs-tools when
+    using INITRD_GENERATOR=dracut.
+
+  [ GavinPacini ]
+  * [670035b] Initial arm64 support
+
+  [ Chris Hofstaedtler ]
+  * [7f5e351] grml-debootstrap: support BOOT_APPEND in --vm mode
+  * [e53df19] GitHub Actions: build and test grml-debootstrap in PRs
+  * [46d50de] README: replace build status badge
+  * [dc0052a] kernel selection: drop pre-jessie code
+  * [f01e4a2] kernel selection: drop 2.6 specific kernel image support
+  * [94b63ad] grub_install: remove pre-jessie code
+  * [3bcafe4] grub_install: use same method for checking grub-install and
+    update-grub
+  * [0a759e7] d/control: record (actual) minimum debootstrap version
+  * [ce80d13] chrootmirror: remove pre-jessie code
+  * [0cf7d8e] swraid: remove code for lenny
+  * [ac6c869] packer: remove pre-jessie code
+  * [ed7ad07] Drop support for installing releases before jessie
+  * [1f6141f] Stop using sed when creating CHROOT_VARIABLES
+  * [045542c] Skip EFI support check if --vm is given
+  * [511ca11] shellcheck: fix some warnings
+  * [dbfbaac] GitHub Actions: add shellcheck to PR workflow
+  * [bd7e57f] shellcheck: ignore SC2001,SC2181
+  * [8671b4a] Remove manual setup of /dev contents
+  * [64f1f16] Remove shadowconfig call
+  * [2f15cb7] Remove empty shell-based test suite
+  * [84a613c] ci: disable progress output from apt-get
+  * [ebcba7a] ci: fix shellcheck for test scripts
+
+ -- Michael Prokop <mika@grml.org>  Thu, 07 Dec 2023 18:15:09 +0100
+
 grml-debootstrap (0.104) unstable; urgency=medium
 
   [ Michael Prokop ]
