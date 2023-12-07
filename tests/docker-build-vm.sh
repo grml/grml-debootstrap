@@ -16,7 +16,7 @@ TARGET="$2"
 RELEASE="$3"
 
 if [ -n "${DEBOOTSTRAP:-}" ] && [ "${DEBOOTSTRAP:-}" != "debootstrap" ]; then
-  apt-get install -y "${DEBOOTSTRAP}"
+  apt-get install -qq -y "${DEBOOTSTRAP}"
 fi
 
 set -x

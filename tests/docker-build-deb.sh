@@ -18,7 +18,7 @@ if [ -z "$BUILD_NUMBER" ]; then
 fi
 
 apt-get update
-apt-get install --no-install-recommends -y build-essential devscripts equivs
+apt-get install -qq -y --no-install-recommends build-essential devscripts equivs
 
 SOURCEDIR=$PWD
 
