@@ -251,7 +251,7 @@ cleanup() {
     einfo "Removing ${STAGES}" ; rmdir "$STAGES" || eend $?
   fi
 
-  if [ -n "$ARM_EFI_TARGET" ]; then
+  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
     umount "${MNTPOINT}"/boot/efi
   fi
 
@@ -1682,7 +1682,7 @@ grub_install() {
   umount "${MNTPOINT}"/dev/pts
   try_umount 3 "${MNTPOINT}"/dev
 
-  if [ -n "$VMEFI" ]; then
+  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
     umount "${MNTPOINT}"/boot/efi
   fi
 
@@ -1695,7 +1695,7 @@ umount_target() {
      return 0
   fi
 
-  if [ -n "${ARM_EFI_TARGET}" ]; then
+  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
     umount "${MNTPOINT}"/boot/efi
   fi
 
