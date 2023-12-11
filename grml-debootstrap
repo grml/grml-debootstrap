@@ -252,7 +252,7 @@ cleanup() {
   fi
 
   if [ -n "$ARM_EFI_TARGET" ]; then
-    umount "${MNTPOINT}/boot/efi" >/dev/null 2>&1
+    umount "${MNTPOINT}"/boot/efi
   fi
 
   # Remove temporary mountpoint again
@@ -1548,8 +1548,8 @@ grub_install() {
   fi
 
   if [ -n "${ARM_EFI_TARGET}" ]; then
-    mkdir -p "${MNTPOINT}/boot/efi"
-    if ! mount "${ARM_EFI_TARGET}" "${MNTPOINT}/boot/efi" ; then
+    mkdir -p "${MNTPOINT}"/boot/efi
+    if ! mount "${ARM_EFI_TARGET}" "${MNTPOINT}"/boot/efi ; then
       eerror "Error: Mounting ${ARM_EFI_TARGET} failed, can not continue."
       bailout 1
     fi
@@ -1696,7 +1696,7 @@ umount_target() {
   fi
 
   if [ -n "${ARM_EFI_TARGET}" ]; then
-    umount "${MNTPOINT}/boot/efi"
+    umount "${MNTPOINT}"/boot/efi
   fi
 
   umount "${MNTPOINT}"
