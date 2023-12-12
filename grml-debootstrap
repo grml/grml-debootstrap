@@ -1517,7 +1517,7 @@ prepare_vm() {
     if [ "$ARCH" = 'arm64' ]; then
       einfo "Setting up GPT partitions for arm64"
       parted -s "${TARGET}" 'mklabel gpt'
-      parted -s "${TARGET}" 'mkpart EFI fat32 1MiB 10MiB'
+      parted -s "${TARGET}" 'mkpart ESP fat32 1MiB 10MiB'
       parted -s "${TARGET}" 'set 1 boot on'
       parted -s "${TARGET}" 'mkpart LINUX ext4 10MiB 100%'
     else
