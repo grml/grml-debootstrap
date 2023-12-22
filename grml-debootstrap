@@ -1352,7 +1352,6 @@ mkfs() {
     # race conditions :-/
     sleep 2
 
-    eend $RC
   fi
 }
 # }}}
@@ -1744,7 +1743,6 @@ debootstrap_system() {
     fi
   fi
 
-  eend $RC
 }
 # }}}
 
@@ -2069,7 +2067,6 @@ chrootscript() {
     fi
     try_umount 3 "$MNTPOINT"/dev/pts
     try_umount 3 "$MNTPOINT"/dev
-    eend $RC
   fi
 
   # finally get rid of chroot-script again, there's no good reason to
