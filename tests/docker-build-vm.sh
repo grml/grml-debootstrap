@@ -37,6 +37,7 @@ echo " ****************************************************************** "
 echo " * Running grml-debootstrap"
 
 grml-debootstrap \
+  --debug \
   --force \
   --vmfile \
   --vmsize 3G \
