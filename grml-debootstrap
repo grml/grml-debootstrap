@@ -251,9 +251,7 @@ cleanup() {
     einfo "Removing ${STAGES}" ; rmdir "$STAGES" || eend $?
   fi
 
-  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
-    umount "${MNTPOINT}"/boot/efi
-  fi
+  try_umount 3 "${MNTPOINT}"/boot/efi
 
   # Remove temporary mountpoint again
   if echo "$MNTPOINT" | grep -q '/mnt/debootstrap\.' ; then
@@ -282,14 +280,14 @@ cleanup() {
       done
 
       if [ -n "$ISODIR" ] ; then
-        [ -d "$MNTPOINT/$ISODIR" ] && umount "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
+        try_umount 3 "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
       fi
 
       if [ -n "$DIRECTORY" ] ; then
         einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice."
       else
         einfo "Unmounting $MNTPOINT"
-        umount "$MNTPOINT" || eend $?
+        try_umount 3 "$MNTPOINT"
       fi
 
       if [ -n "$STAGES" ] ; then
@@ -1671,19 +1669,14 @@ grub_install() {
 
   # workaround for Debian bug #918590 with lvm + udev:
   # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
-  if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
-    einfo "Unmounting bind-mount /run/udev"
-    umount "${MNTPOINT}"/run/udev
-  fi
+  try_umount 3 "${MNTPOINT}"/run/udev
 
-  umount "${MNTPOINT}"/proc
-  umount "${MNTPOINT}"/sys
-  umount "${MNTPOINT}"/dev/pts
+  try_umount 3 "${MNTPOINT}"/proc
+  try_umount 3 "${MNTPOINT}"/sys
+  try_umount 3 "${MNTPOINT}"/dev/pts
   try_umount 3 "${MNTPOINT}"/dev
 
-  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
-    umount "${MNTPOINT}"/boot/efi
-  fi
+  try_umount 3 "${MNTPOINT}"/boot/efi
 
 }
 # }}}
@@ -1694,11 +1687,9 @@ umount_target() {
      return 0
   fi
 
-  if findmnt "${MNTPOINT}"/boot/efi &>/dev/null ; then
-    umount "${MNTPOINT}"/boot/efi
-  fi
+  try_umount 3 "${MNTPOINT}"/boot/efi
 
-  umount "${MNTPOINT}"
+  try_umount 3 "${MNTPOINT}"
   kpartx -d "${ORIG_TARGET}" >/dev/null
   # Workaround for a bug in kpartx which doesn't clean up properly,
   # see Debian Bug #891077 and Github-PR grml/grml-debootstrap#112
@@ -2030,6 +2021,10 @@ try_umount() {
   local tries=$1
   local mountpoint="$2"
 
+  if ! mountpoint "$mountpoint" &>/dev/null ; then
+    return 0
+  fi
+
   for (( try=1; try<=tries; try++ )); do
     if [[ ${try} -eq ${tries} ]]; then
       # Last time, show errors this time
@@ -2089,22 +2084,14 @@ umount_chroot() {
   fi
 
   if [ -n "$ISODIR" ] ; then
-     if grep -q "$ISODIR" /proc/mounts ; then
-        einfo "Unmount $MNTPOINT/$ISODIR"
-        umount "$MNTPOINT/$ISODIR"
-     fi
+     einfo "Unmount $MNTPOINT/$ISODIR"
+     try_umount 3 "$MNTPOINT/$ISODIR"
   fi
 
-  if grep -q "$MNTPOINT" /proc/mounts ; then
-    if mountpoint "${MNTPOINT}"/run/udev &>/dev/null ; then
-      einfo "Unmounting bind-mount /run/udev"
-      umount "${MNTPOINT}"/run/udev
-    fi
+  try_umount 3 "${MNTPOINT}"/run/udev
 
-     if [ -n "$PARTITION" ] ; then
-        einfo "Unmount $MNTPOINT"
-        umount "$MNTPOINT"
-     fi
+  if [ -n "$PARTITION" ] ; then
+     try_umount 3 "$MNTPOINT"
   fi
 }
 # }}}
