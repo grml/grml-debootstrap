@@ -349,6 +349,13 @@ kernel() {
   $APTUPDATE
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
+    case "$RELEASE" in
+      stretch)
+        echo "Installing busybox on Debian/$RELEASE as it's essential for the initramfs"
+        DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL busybox
+        ;;
+    esac
+
      KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER firmware-linux-free $INITRD_GENERATOR"
      # only add firmware-linux if we have non-free as a component
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
