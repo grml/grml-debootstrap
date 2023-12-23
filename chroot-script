@@ -11,6 +11,14 @@
 # shellcheck disable=SC2317  # shellcheck has trouble understanding the code flow in this file
 
 # error_handler {{{
+error_handler() {
+   last_exit_code="$?"
+   last_bash_command="$BASH_COMMAND"
+   echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
+last bash command: $last_bash_command"
+   exit 1
+}
+
 set -e
 set -E
 set -o pipefail
