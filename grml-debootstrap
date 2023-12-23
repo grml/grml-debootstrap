@@ -906,10 +906,12 @@ while IFS= read -r i; do
 done < "$TMPFILE"
 
 ERRORFILE=$(mktemp)
+
+local RC=0
 # shellcheck disable=SC2086
 yes | mdadm --create "${TARGET}" --level="${RAIDLEVEL}" \
-      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE
-RC=$?
+      --raid-devices="${NUM_PARTITIONS}" ${SELECTED_PARTITIONS} >/dev/null 2>$ERRORFILE || RC=$?
+
 if [ "$RC" = 0 ] ; then
    dialog --title "$PN" --msgbox \
    "Creating $TARGET was successful." 0 0
@@ -967,9 +969,7 @@ format_efi_partition() {
     einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying."
   else
     einfo "EFI partition $EFI doesn't seem to be formatted, creating filesystem."
-    mkfs.fat -F32 -n "EFI" "$EFI"
-    RC=$?
-    if [ ! $RC -eq 0 ] ; then
+    if ! mkfs.fat -F32 -n "EFI" "$EFI" ; then
       eerror "Error while creating filesystem on ${EFI}."
       bailout 1
     fi
@@ -1315,7 +1315,7 @@ mkfs() {
 
     einfo "Running $MKFS $MKFS_OPTS on $TARGET"
     # shellcheck disable=SC2086
-    "$MKFS" $MKFS_OPTS "$TARGET" ; RC=$?
+    "$MKFS" $MKFS_OPTS "$TARGET"
 
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
       if ! echo "$MKFS" | grep -q "mkfs.ext" ; then
@@ -1352,7 +1352,6 @@ mkfs() {
     # race conditions :-/
     sleep 2
 
-    eend $RC
   fi
 }
 # }}}
@@ -1728,13 +1727,11 @@ debootstrap_system() {
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
     # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$ISO"
-    RC=$?
   else
     einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
     einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
     # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
-    RC=$?
   fi
 
   if [ $RC -ne 0 ] ; then
@@ -1746,7 +1743,6 @@ debootstrap_system() {
     fi
   fi
 
-  eend $RC
 }
 # }}}
 
@@ -2065,13 +2061,12 @@ chrootscript() {
     mount -t devtmpfs udev "${MNTPOINT}"/dev
     mount -t devpts devpts "${MNTPOINT}"/dev/pts
     if [ "$DEBUG" = "true" ] ; then
-      chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script ; RC=$?
+      chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script
     else
-      chroot "$MNTPOINT" /bin/chroot-script ; RC=$?
+      chroot "$MNTPOINT" /bin/chroot-script
     fi
     try_umount 3 "$MNTPOINT"/dev/pts
     try_umount 3 "$MNTPOINT"/dev
-    eend $RC
   fi
 
   # finally get rid of chroot-script again, there's no good reason to
