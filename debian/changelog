@@ -1,3 +1,23 @@
+grml-debootstrap (0.106) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  - [1a229d0..cc891df] Improve error handling (PR #255)
+  * [81d7587] consistently use ESP label for the EFI system partition
+  * [9706bd9] improved error handling, removed RC=$? noops
+  * [48f3096] remove noops "eend $RC"
+  * [cbd20a0] consistently use same code path for umounting
+
+  [ Michael Prokop ]
+  * [19dc059] coding style: use '[' instead of 'test'
+  * [325a888] Install busybox On Debian/stretch as it's required for
+    initramfs. Thanks to Patrick Schleizer <adrelanos@whonix.org> for
+    spotting and reporting
+
+  [ Chris Hofstaedtler ]
+  * [090612a] ci: enable test-build on pushes to branches and periodic
+
+ -- Michael Prokop <mika@grml.org>  Sat, 23 Dec 2023 20:00:42 +0100
+
 grml-debootstrap (0.105) unstable; urgency=medium
 
   The "farewell lenny, squeeze + wheezy; hello arm64" release
