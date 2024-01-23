@@ -13,6 +13,12 @@ error_handler() {
    last_bash_command="$BASH_COMMAND"
    echo "Unexpected non-zero exit code $last_exit_code in ${BASH_SOURCE[*]} at line ${BASH_LINENO[*]} detected!
 last bash command: $last_bash_command"
+   if [ -r "$MNTPOINT/debootstrap/debootstrap.log" ] && \
+          [ -s "$MNTPOINT/debootstrap/debootstrap.log" ] ; then
+       einfo "Presenting last ten lines of debootstrap.log:"
+       tail -10 "${MNTPOINT}"/debootstrap/debootstrap.log
+       einfo "End of debootstrap.log"
+   fi
    ## Check if "bailout" function is available.
    ## This is not the case in chroot-script.
    if command -v bailout >/dev/null 2>&1; then
@@ -1724,16 +1730,6 @@ debootstrap_system() {
     # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
   fi
-
-  if [ $RC -ne 0 ] ; then
-    if [ -r "$MNTPOINT/debootstrap/debootstrap.log" ] && \
-      [ -s "$MNTPOINT/debootstrap/debootstrap.log" ] ; then
-      einfo "Presenting last ten lines of debootstrap.log:"
-      tail -10 "${MNTPOINT}"/debootstrap/debootstrap.log
-      einfo "End of debootstrap.log"
-    fi
-  fi
-
 }
 # }}}
 
