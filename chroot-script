@@ -492,7 +492,7 @@ EOF
     case "${FILESYSTEM}" in
       # errors=remount-ro is supported only by a few file systems
       ext*|exfat|fat|jfs|nilfs2|vfat)
-        rootfs_mount_options=",errors=remount-ro"
+        rootfs_mount_options="discard,errors=remount-ro"
         ;;
     esac
 
