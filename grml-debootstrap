@@ -247,6 +247,32 @@ check4progs(){
 }
 # }}}
 
+# unmount mountpoint {{{
+try_umount() {
+  local tries=$1
+  local mountpoint="$2"
+
+  if ! mountpoint "$mountpoint" &>/dev/null ; then
+    return 0
+  fi
+
+  for (( try=1; try<=tries; try++ )); do
+    if [[ ${try} -eq ${tries} ]]; then
+      # Last time, show errors this time
+      umount "${mountpoint}" && return 0
+    else
+      # Not last time, hide errors until fatal
+      if umount "${mountpoint}" 2>/dev/null ; then
+        return 0
+      else
+        sleep 1
+      fi
+    fi
+  done
+  return 1  # Tried enough
+}
+# }}}
+
 # helper functions {{{
 cleanup() {
   if [ -n "$CHROOT_VARIABLES" ] ; then
@@ -2009,32 +2035,6 @@ execute_post_scripts() {
       fi
     done
   fi
-}
-# }}}
-
-# unmount mountpoint {{{
-try_umount() {
-  local tries=$1
-  local mountpoint="$2"
-
-  if ! mountpoint "$mountpoint" &>/dev/null ; then
-    return 0
-  fi
-
-  for (( try=1; try<=tries; try++ )); do
-    if [[ ${try} -eq ${tries} ]]; then
-      # Last time, show errors this time
-      umount "${mountpoint}" && return 0
-    else
-      # Not last time, hide errors until fatal
-      if umount "${mountpoint}" 2>/dev/null ; then
-        return 0
-      else
-        sleep 1
-      fi
-    fi
-  done
-  return 1  # Tried enough
 }
 # }}}
 
