@@ -1,3 +1,10 @@
+grml-debootstrap (0.107) unstable; urgency=medium
+
+  [ Antoine Beaupré ]
+  * [cfa1651] fix debootstrap error handler
+
+ -- Michael Prokop <mika@grml.org>  Fri, 02 Feb 2024 12:31:41 +0100
+
 grml-debootstrap (0.106) unstable; urgency=medium
 
   [ Patrick Schleizer ]
