@@ -1,3 +1,10 @@
+grml-debootstrap (0.108) unstable; urgency=medium
+
+  [ Darshaka Pathirana ]
+  * [811c294] Move try_umount above cleanup()
+
+ -- Michael Prokop <mika@grml.org>  Sat, 24 Feb 2024 10:55:23 +0100
+
 grml-debootstrap (0.107) unstable; urgency=medium
 
   [ Antoine Beaupré ]
