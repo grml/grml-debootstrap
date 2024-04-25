@@ -1766,7 +1766,7 @@ clean_chroot() {
   local chroot_command=("${@:2}")
 
   # Run chroot, then env -i with the specified environment variables inside the chroot
-  /usr/sbin/chroot "$chroot_dir" /usr/bin/env -i "${env_vars[@]}" "${chroot_command[@]}"
+  chroot "$chroot_dir" /usr/bin/env -i "${env_vars[@]}" "${chroot_command[@]}"
 }
 # }}}
 
