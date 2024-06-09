@@ -1372,10 +1372,28 @@ mkfs() {
       # if we deploy to /dev/sdX# then let's see if /dev/sdX exists
       local main_device="${TARGET%%[0-9]*}"
       # sanity check to not try to e.g. access /dev/loop if we get /dev/loop0
-      if [ -f "/sys/block/$(basename "${main_device}")/$(basename "${TARGET}")/dev" ] ; then
-        blockdev --rereadpt "$main_device"
-      else
+      if ! [ -f "/sys/block/$(basename "${main_device}")/$(basename "${TARGET}")/dev" ] ; then
         einfo "No underlying block device for $TARGET identified, skipping blockdev --rereadpt."
+      else
+        udevadm settle
+        # ensure we give blockdev up to 30 seconds/retries
+        local timeout=30
+        local success=0
+        while [ "$timeout" -gt 0 ] ; do
+          ((timeout--))
+          if blockdev --rereadpt "${main_device}" ; then
+            success=1
+            break
+          else
+            ewarn "Failed to reread partition table of ${main_device} [${timeout} retries left]"
+            sleep 1
+          fi
+        done
+
+        if [ "${success}" = "0" ] ; then
+          eerror "Error: failed to reread partition table, giving up."
+          bailout 1
+        fi
       fi
     fi
     # give the system 2 seconds, otherwise we might run into
