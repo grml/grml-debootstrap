@@ -220,6 +220,7 @@ install_policy_rcd() {
      export POLICYRCD=1
      cat > /usr/sbin/policy-rc.d << EOF
 #!/bin/sh
+# Installed by grml-debootstrap chroot-script.
 exit 101
 EOF
      chmod 775 /usr/sbin/policy-rc.d
