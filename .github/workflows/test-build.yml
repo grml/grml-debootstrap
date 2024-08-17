@@ -99,6 +99,7 @@ jobs:
 
     - name: Archive VM test results
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: vm-results-${{matrix.host_release}}-${{matrix.release}}-${{matrix.debootstrap}}
         if-no-files-found: error

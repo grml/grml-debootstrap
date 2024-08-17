@@ -34,6 +34,8 @@ fi
 if [ "$1" == "setup" ]; then
   sudo apt-get update
   sudo apt-get -qq -y install curl qemu-system-x86 kpartx python3-pexpect python3-serial
+  # vncsnapshot might not be available, though we don't want to abort execution then
+  sudo apt-get -qq -y install vncsnapshot || true
   [ -x ./tests/goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)/tests" sh
   # TODO: docker.io
   exit 0
