@@ -1301,35 +1301,48 @@ mkfs() {
     esac
   fi
 
-  # starting with e2fsprogs 1.43~WIP.2015.05.18-1 mkfs.ext4 enables the metadata_csum feature
-  # by default, which requires a recent version of tune2fs on the target system then,
-  # so disable this feature for older Debian releases where it's known to be unsupported
   if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
+    # Detect modern mkfs.ext4 features, and disable them if the kernel or fsck
+    # on the target release will be too old to support them.
+    local e2fsprogs_version
+    e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
+
+    local mkfs_supports_metadata_csum=''
+    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
+      mkfs_supports_metadata_csum=1
+    fi
+    local mkfs_supports_metadata_csum_seed=''
+    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43' ; then
+      mkfs_supports_metadata_csum_seed=1
+    fi
+    local mkfs_supports_orphan_file=''
+    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.47.0-1' ; then
+      mkfs_supports_orphan_file=1
+    fi
+
     case "$RELEASE" in
       jessie)
-        # assume a more recent version if we can't identify the version via dpkg-query
-        local e2fsprogs_version
-        e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
-        if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
-          einfo "Disabling metadata_csum feature for $MKFS as $RELEASE doesn't support it."
+        if [ "$mkfs_supports_metadata_csum" = 1 ]; then
+          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum"
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum"
         fi
-        ;;
-    esac
-  fi
-
-  # starting with e2fsprogs v1.47.0 mkfs.ext4 enables the metadata_csum_seed feature
-  # by default, which requires Linux kernel >=4.4, e2fsprogs >=1.43, according GRUB etc.
-  # Disable this feature for Debian releases older than bookworm
-  if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
-    case "$RELEASE" in
-      jessie|stretch|buster|bullseye)
-        local e2fsprogs_version
-        # assume a more recent version if we can't identify the version via dpkg-query
-        e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.47)"
-        if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43' ; then
-          einfo "Disabling metadata_csum_seed feature for $MKFS as $RELEASE doesn't support it."
+        if [ "$mkfs_supports_metadata_csum_seed" = 1 ]; then
+          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum_seed"
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
+        fi
+        if [ "$mkfs_supports_orphan_file" = 1 ]; then
+          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: orphan_file"
+          MKFS_OPTS="$MKFS_OPTS -O ^orphan_file"
+        fi
+        ;;
+      bullseye|buster|stretch)
+        if [ "$mkfs_supports_metadata_csum_seed" = 1 ]; then
+          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum_seed"
+          MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
+        fi
+        if [ "$mkfs_supports_orphan_file" = 1 ]; then
+          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: orphan_file"
+          MKFS_OPTS="$MKFS_OPTS -O ^orphan_file"
         fi
         ;;
     esac
