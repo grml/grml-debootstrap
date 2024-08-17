@@ -1,30 +1,43 @@
 #!/usr/bin/env python
 import argparse
-import pexpect
 import serial
 import sys
 import time
-from pexpect import fdpexpect, TIMEOUT
+from pexpect import fdpexpect
 
-parser = argparse.ArgumentParser(description='Connect to serial console ' +
-                                 'to execute stuff')
-parser.add_argument('--port', required=True,
-                    help='serial console device to connect ' +
-                    'to (e.g. /dev/pts/X)')
-parser.add_argument('--hostname', default="buster",
-                    help='hostname of the system for login process ' +
-                    '(default: buster)')
-parser.add_argument('--user', default="root",
-                    help='user name to use for login (default: root)')
-parser.add_argument('--password', default="grml",
-                    help='password for login (default: grml)')
-parser.add_argument('--tries', default="12", type=int,
-                    help='Number of retries for finding the login prompt')
-parser.add_argument('--poweroff', action="store_true", default=False,
-                    help='send "poweroff" command after all other commands')
-parser.add_argument('command', nargs='+',
-                    help='command to execute after logging in')
-
+parser = argparse.ArgumentParser(
+    description="Connect to serial console to execute stuff",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
+parser.add_argument(
+    "--port",
+    required=True,
+    help="serial console device to connect " + "to (e.g. /dev/pts/X)",
+)
+parser.add_argument(
+    "--hostname", default="buster", help="hostname of the system for login process"
+)
+parser.add_argument("--user", default="root", help="user name to use for login")
+parser.add_argument("--password", default="grml", help="password for login")
+parser.add_argument(
+    "--timeout",
+    default="180",
+    type=int,
+    help="Maximum time for finding the login prompt, in seconds",
+)
+parser.add_argument(
+    "--tries",
+    default="12",
+    type=int,
+    help="Number of retries for finding the login prompt",
+)
+parser.add_argument(
+    "--poweroff",
+    action="store_true",
+    default=False,
+    help='send "poweroff" command after all other commands',
+)
+parser.add_argument("command", nargs="+", help="command to execute after logging in")
 
 
 def print_ser_lines(ser):
@@ -74,6 +87,7 @@ def main():
     ser.flushOutput()
 
     success = False
+    ts_start = time.time()
     for i in range(args.tries):
         try:
             print("Logging into %s via serial console [try %s]" % (port, i))
@@ -81,8 +95,11 @@ def main():
             success = True
             break
         except Exception as except_inst:
-            print("Login failure (try %s):" % (i, ), except_inst, file=sys.stderr)
+            print("Login failure (try %s):" % (i,), except_inst, file=sys.stderr)
             time.sleep(5)
+        if time.time() - ts_start > args.timeout:
+            print("Timeout reached waiting for login prompt", file=sys.stderr)
+            break
 
     if success:
         write_ser_line(ser, "")
@@ -100,6 +117,7 @@ def main():
 
     if not success:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
