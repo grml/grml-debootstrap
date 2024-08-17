@@ -121,7 +121,7 @@ RC=0
   --port "$serial_port" \
   --hostname "$VM_HOSTNAME" \
   --poweroff \
-  "mount -t 9p -o trans=virtio,version=9p2000.L,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner" || RC=$?
+  "mount -t 9p -o trans=virtio,version=9p2000.L,msize=512000,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner" || RC=$?
 
 if [ ! -d results ] || [ ! -f ./results/goss.tap ] || [ ! -f ./results/goss.exitcode ]; then
   echo "Running tests inside VM failed for unknown reason" >&2
