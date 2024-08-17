@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import argparse
-import pexpect
 import serial
 import sys
 import time
-from pexpect import fdpexpect, TIMEOUT
+from pexpect import fdpexpect
 
 parser = argparse.ArgumentParser(
     description='Connect to serial console to execute stuff',
