@@ -6,20 +6,20 @@ import sys
 import time
 from pexpect import fdpexpect, TIMEOUT
 
-parser = argparse.ArgumentParser(description='Connect to serial console ' +
-                                 'to execute stuff')
+parser = argparse.ArgumentParser(
+    description='Connect to serial console to execute stuff',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--port', required=True,
                     help='serial console device to connect ' +
                     'to (e.g. /dev/pts/X)')
 parser.add_argument('--hostname', default="buster",
-                    help='hostname of the system for login process ' +
-                    '(default: buster)')
+                    help='hostname of the system for login process')
 parser.add_argument('--user', default="root",
-                    help='user name to use for login (default: root)')
+                    help='user name to use for login')
 parser.add_argument('--password', default="grml",
-                    help='password for login (default: grml)')
+                    help='password for login')
 parser.add_argument('--timeout', default="180", type=int,
-                    help='Maximum time for finding the login prompt (seconds)')
+                    help='Maximum time for finding the login prompt, in seconds')
 parser.add_argument('--tries', default="12", type=int,
                     help='Number of retries for finding the login prompt')
 parser.add_argument('--poweroff', action="store_true", default=False,
