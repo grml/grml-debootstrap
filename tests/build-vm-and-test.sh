@@ -32,9 +32,9 @@ if [ ! -d ./tests ]; then
 fi
 
 if [ "$1" == "setup" ]; then
-  [ -x ./tests/goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)/tests" sh
   sudo apt-get update
-  sudo apt-get -qq -y install qemu-system-x86 kpartx python3-pexpect python3-serial
+  sudo apt-get -qq -y install curl qemu-system-x86 kpartx python3-pexpect python3-serial
+  [ -x ./tests/goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)/tests" sh
   # TODO: docker.io
   exit 0
 fi
