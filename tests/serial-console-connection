@@ -18,6 +18,8 @@ parser.add_argument('--user', default="root",
                     help='user name to use for login (default: root)')
 parser.add_argument('--password', default="grml",
                     help='password for login (default: grml)')
+parser.add_argument('--timeout', default="180", type=int,
+                    help='Maximum time for finding the login prompt (seconds)')
 parser.add_argument('--tries', default="12", type=int,
                     help='Number of retries for finding the login prompt')
 parser.add_argument('--poweroff', action="store_true", default=False,
@@ -74,6 +76,7 @@ def main():
     ser.flushOutput()
 
     success = False
+    ts_start = time.time()
     for i in range(args.tries):
         try:
             print("Logging into %s via serial console [try %s]" % (port, i))
@@ -83,6 +86,9 @@ def main():
         except Exception as except_inst:
             print("Login failure (try %s):" % (i, ), except_inst, file=sys.stderr)
             time.sleep(5)
+        if time.time() - ts_start > args.timeout:
+            print("Timeout reached waiting for login prompt", file=sys.stderr)
+            break
 
     if success:
         write_ser_line(ser, "")
