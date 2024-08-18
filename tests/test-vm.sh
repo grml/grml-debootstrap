@@ -135,6 +135,6 @@ echo "Finished serial console connection [timeout=${timeout}]."
 
 mv results/* "$TESTS_RESULTSDIR/"
 
-bailout $RC
+bailout "$RC"
 
 # EOF
