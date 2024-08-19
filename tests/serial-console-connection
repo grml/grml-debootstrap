@@ -1,6 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import serial
+import os
+import shutil
+import subprocess
 import sys
 import time
 from pexpect import fdpexpect
@@ -15,7 +18,7 @@ parser.add_argument(
     help="serial console device to connect " + "to (e.g. /dev/pts/X)",
 )
 parser.add_argument(
-    "--hostname", default="buster", help="hostname of the system for login process"
+    "--hostname", default="bookworm", help="hostname of the system for login process"
 )
 parser.add_argument("--user", default="root", help="user name to use for login")
 parser.add_argument("--password", default="grml", help="password for login")
@@ -24,6 +27,11 @@ parser.add_argument(
     default="180",
     type=int,
     help="Maximum time for finding the login prompt, in seconds",
+)
+parser.add_argument(
+    "--screenshot",
+    default="screenshot.jpg",
+    help="file name for screenshot captured via VNC on error",
 )
 parser.add_argument(
     "--tries",
@@ -74,6 +82,21 @@ def login(ser, hostname, user, password, timeout=5):
     child.expect("%s@%s" % (user, hostname), timeout=timeout)
 
 
+def capture_vnc_screenshot(screenshot_file):
+    if not shutil.which("vncsnapshot"):
+        print("WARN: vncsnapshot not available, skipping vnc snapshot capturing.")
+        return
+
+    print("Trying to capture screenshot via vncsnapshot to", screenshot_file)
+
+    proc = subprocess.Popen(["vncsnapshot", "localhost", screenshot_file])
+    proc.wait()
+    if proc.returncode != 0:
+        print("WARN: failed to capture vnc snapshot :(")
+    else:
+        print("Screenshot file '%s' available" % os.path.abspath(screenshot_file))
+
+
 def main():
     args = parser.parse_args()
     hostname = args.hostname
@@ -81,6 +104,7 @@ def main():
     port = args.port
     user = args.user
     commands = args.command
+    screenshot_file = args.screenshot
 
     ser = serial.Serial(port, 115200)
     ser.flushInput()
@@ -116,6 +140,7 @@ def main():
             # after poweroff, the serial device will probably vanish. do not attempt reading from it anymore.
 
     if not success:
+        capture_vnc_screenshot(screenshot_file)
         sys.exit(1)
 
 

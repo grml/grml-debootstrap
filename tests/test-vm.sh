@@ -114,12 +114,14 @@ if [ "$success" = "0" ] ; then
   exit 1
 fi
 
+RC=0
 "$TEST_PWD"/tests/serial-console-connection \
   --tries 180 \
+  --screenshot "$TEST_PWD/tests/screenshot.jpg" \
   --port "$serial_port" \
   --hostname "$VM_HOSTNAME" \
   --poweroff \
-  "mount -t 9p -o trans=virtio,version=9p2000.L,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner"
+  "mount -t 9p -o trans=virtio,version=9p2000.L,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner" || RC=$?
 
 if [ ! -d results ] || [ ! -f ./results/goss.tap ] || [ ! -f ./results/goss.exitcode ]; then
   echo "Running tests inside VM failed for unknown reason" >&2
@@ -133,7 +135,14 @@ fi
 
 echo "Finished serial console connection [timeout=${timeout}]."
 
-mv results/* "$TESTS_RESULTSDIR/"
+# in case of errors we might have captured a screenshot via VNC
+if [ -r "${TEST_PWD}"/tests/screenshot.jpg ] ; then
+  cp "${TEST_PWD}"/tests/screenshot.jpg "${TESTS_RESULTSDIR}"
+fi
+
+if [ -d results ] ; then
+  mv results/* "$TESTS_RESULTSDIR/"
+fi
 
 bailout $RC
 
