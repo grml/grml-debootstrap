@@ -93,9 +93,19 @@ jobs:
         DEBOOTSTRAP: ${{matrix.debootstrap}}
 
     - run: ./tests/build-vm-and-test.sh test
+      id: build_vm_and_test_test
       name: "Test built VM image for ${{matrix.release}}"
       env:
         RELEASE: ${{matrix.release}}
+
+    - name: Archive VM image on failure
+      uses: actions/upload-artifact@v4
+      if: always() && (steps.build_vm_and_test_test.outcome == 'failure')
+      with:
+        name: vm-image-${{matrix.host_release}}-${{matrix.release}}-${{matrix.debootstrap}}
+        if-no-files-found: error
+        path: qemu.img
+        retention-days: 5
 
     - name: Archive VM test results
       uses: actions/upload-artifact@v4
