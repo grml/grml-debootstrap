@@ -37,5 +37,5 @@ jobs:
           reporter: github-pr-review
           path: tests
           pattern: |
-            *
+            *.sh
           check_all_files_with_shebangs: "false"

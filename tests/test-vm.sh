@@ -144,6 +144,6 @@ if [ -d results ] ; then
   mv results/* "$TESTS_RESULTSDIR/"
 fi
 
-bailout $RC
+bailout "$RC"
 
 # EOF
