@@ -49,27 +49,14 @@ jobs:
         host_release:
         - unstable
         - trixie
-        - bookworm
-        - bullseye
 
         release:
+        - unstable
         - trixie
-        - bookworm
-        - bullseye
-        - buster
-        - stretch
 
         debootstrap:
         - ''
         - mmdebstrap
-
-        exclude:
-          # debootstrap in bullseye is too old.
-          - host_release: bullseye
-            release: trixie
-          # unclear how to pass --no-check-gpg to mmdebstrap
-          - release: stretch
-            debootstrap: mmdebstrap
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ubuntu-latest
