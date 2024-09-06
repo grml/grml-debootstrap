@@ -1,3 +1,37 @@
+grml-debootstrap (0.109) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [9b2cf83] mkfs: avoid blockdev failing to re-read partition table.
+    Thanks to Darshaka Pathirana for bug report and initial investigation,
+    and Chris Hofstaedtler for feedback
+  * [430aa47] GitHub Actions: raise upload-artifact + download-artifact to
+    v4. Thanks to Darshaka Pathirana
+  * [9272096] tests: provide README
+  * [bffadf3] tests/build-vm-and-test.sh: install curl
+  * [95bd689] tests/serial-console-connection: use python3 in shebang
+  * [844419c] tests/serial-console-connection: update default hostname
+  * [13e2a39] tests: Try to capture screenshot via VNC if serial-console-
+    connection fails
+
+  [ Darshaka Pathirana ]
+  * [014c7df] GitHub Actions: Add workflow_dispatch trigger
+
+  [ Chris Hofstaedtler ]
+  * [e591bd1] Tag installed policy-rc.d file
+  * [c530e15] tests/serial-console-connection: add timeout (default to
+    3min)
+  * [e129b3c] tests/serial-console-connection: automatically format
+    defaults in --help
+  * [0e7cffd] tests/serial-console-connection: remove unused imports
+  * [235670b] tests/serial-console-connection: reformat using black
+  * [25c56d2] Disable ext4 feature orphan_file for older releases
+  * [a0f30f1] actions: archive VM image on test failure
+  * [36dbe9b] shellcheck: restrict shellcheck-tests to tests/*.sh files
+  * [d2dd4f1] tests/test-vm.sh: fix shellcheck SC2086
+  * [2ae7c2b] tests: set msize=512000 option for 9pfs
+
+ -- Michael Prokop <mika@grml.org>  Fri, 06 Sep 2024 17:45:35 +0200
+
 grml-debootstrap (0.108) unstable; urgency=medium
 
   [ Darshaka Pathirana ]
