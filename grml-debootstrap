@@ -970,20 +970,6 @@ fi
 }
 # }}}
 
-# user should recheck his configuration {{{
-# support full automatic installation:
-checkforrun() {
-   dialog --timeout 10 --title "$PN" \
-          --yesno "Do you want to stop at this stage?
-
-Notice: you are running ${PN} in non-interactive mode.
-${PN} will install Debian ${RELEASE} on ${TARGET}.
-Last chance to quit. Timeout of 10 seconds running....
-
-Do you want to stop now?" 0 0 2>/dev/null
-}
-# }}}
-
 # format efi partition {{{
 format_efi_partition() {
   if [ -z "$EFI" ] ; then
@@ -1049,12 +1035,7 @@ if [ -z "$VIRTUAL" ] ; then
   fi
 fi
 
-if [ -n "$AUTOINSTALL" ] ; then
-   if checkforrun ; then
-      eerror "Exiting as requested"
-      bailout 1
-   fi
-elif [ -n "$INTERACTIVE" ] ; then
+if [ -n "$INTERACTIVE" ] ; then
 
    INFOTEXT="Please recheck configuration before execution:
    "
@@ -2169,18 +2150,7 @@ done
 cleanup
 # }}}
 
-# end dialog of autoinstallation {{{
-if [ -n "$AUTOINSTALL" ] ; then
-   if dialog --title "${PN}" --pause "Finished execution of ${PN}.
-Automatically rebooting in 10 seconds.
-
-Choose Cancel to skip rebooting." 10 60 10 ; then
-     noeject noprompt reboot
-  fi
-else
-   einfo "Finished execution of ${PN}. Enjoy your Debian system."
-fi
-# }}}
+einfo "Finished execution of ${PN}. Enjoy your Debian system."
 
 ## END OF FILE #################################################################
 # vim: ai tw=100 expandtab foldmethod=marker shiftwidth=2
