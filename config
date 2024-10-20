@@ -101,8 +101,8 @@
 
 # Name of debootstrap executable.
 # Supported values: 'debootstrap', 'cdebootstrap', 'mmdebstrap'
-# Default: 'debootstrap'
-# DEBOOTSTRAP='debootstrap'
+# Default: 'mmdebstrap'
+# DEBOOTSTRAP='mmdebstrap'
 
 # Pass extra options to debootstrap.
 # Default: no default.
