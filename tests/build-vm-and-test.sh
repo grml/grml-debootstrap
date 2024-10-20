@@ -66,7 +66,7 @@ if [ "$1" == "run" ]; then
     -e DEBOOTSTRAP="$DEBOOTSTRAP" \
     -w /code \
     debian:"$HOST_RELEASE" \
-    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$TARGET"' '"$RELEASE"
+    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' '"$DEBOOTSTRAP"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$TARGET"' '"$RELEASE"
 
 elif [ "$1" == "test" ]; then
   # run tests from inside Debian system
