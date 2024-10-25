@@ -820,8 +820,8 @@ prompt_for_bootmanager()
 # ask for Debian release {{{
 prompt_for_release()
 {
-  [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='bullseye'
-  RELEASE="$(dialog --stdout --title "${PN}" --default-item "$DEFAULT_RELEASE" --menu \
+  local default_value="$RELEASE"
+  RELEASE="$(dialog --stdout --title "${PN}" --default-item "$default_value" --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 8 \
             buster   Debian/10 \
