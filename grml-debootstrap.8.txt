@@ -387,58 +387,6 @@ system then. If you want to install additional packages that are not available
 via the Grml or Debian mirror drop them into /etc/debootstrap/extrapackages and
 make sure that EXTRAPACKAGES is set to "yes".
 
-Automatic installation
-----------------------
-
-If environment variable AUTOINSTALL is set grml-debootstrap can be executed in a
-full automatic mode. While this mode isn't really useful for interactive
-execution (just configure /etc/debootstrap/configure or specify the relevant
-variables on the command line instead) it is meant for use via boot option
-debian2hd on the Grml live system. The boot option debian2hd (more precise: the
-kernelname at the bootprompt) supports the following boot options (they
-correspond with the command line options mentioned above):
-
-  target=...
-
-The target partition/directory of the new Debian system. Usage example:
-target=/dev/sda1
-
-  grub=...
-
-Where do you want to install grub to? Usage example: grub=/dev/sda
-
-  release=...
-
-Specify release of new Debian system. Defaults to Debian bookworm.
-Supported releases: jessie, stretch, buster, bullseye, bookworm and sid.
-Usage example: release=bullseye
-
-  mirror=...
-
-Specify mirror which should be used for apt-get/aptitude instead
-of the default one (http://deb.debian.org/debian).
-Usage example: mirror=ftp://ftp.tugraz.at/mirror/debian
-
-  password=...
-
-Set password of user root without prompting for it but set it to the given
-argument. Usage example: password=AiTh5ahn
-
-Usage example for automatic installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  debian2hd target=/dev/sda1 grub=/dev/sda mirror=ftp://ftp.tugraz.at/mirror/debian password=foobar
-
-You have to enter this command line at the bootprompt of the Grml live system.
-Please make sure that /dev/sda1 is the partition where you really want to
-install your new Debian system.
-
-[NOTE]
-Automatic installation within booting process is done in grml-autoconfig via
-setting environment variable AUTOINSTALL and creation of
-/usr/bin/grml-debootstrap_noninteractive with the available and relevant
-boot options for grml-debootstrap.
-
 Supported Releases
 ------------------
 
