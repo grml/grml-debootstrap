@@ -302,12 +302,12 @@ cleanup() {
         fi
       done
 
-      [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount -a >/dev/null 2>&1 || true
+      [ -x "$MNTPOINT"/bin/umount ] && { chroot "$MNTPOINT" umount -a >/dev/null 2>&1 || true; }
 
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
       for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
-        [ -x "$MNTPOINT"/bin/umount ] && chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true
+        [ -x "$MNTPOINT"/bin/umount ] && { chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; }
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
