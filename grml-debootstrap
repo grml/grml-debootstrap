@@ -821,7 +821,7 @@ prompt_for_bootmanager()
 prompt_for_release()
 {
   [ -n "$RELEASE" ] && DEFAULT_RELEASE="$RELEASE" || DEFAULT_RELEASE='bullseye'
-  RELEASE="$(dialog --stdout --title "${PN}" --default-item $DEFAULT_RELEASE --menu \
+  RELEASE="$(dialog --stdout --title "${PN}" --default-item "$DEFAULT_RELEASE" --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 8 \
             buster   Debian/10 \
@@ -873,7 +873,7 @@ prompt_for_mirror()
 {
   [ -n "$ISO" ] && DEFAULT_MIRROR='local' || DEFAULT_MIRROR='net'
 
-  CHOOSE_MIRROR=$(dialog --stdout --title "$PN" --default-item $DEFAULT_MIRROR \
+  CHOOSE_MIRROR=$(dialog --stdout --title "$PN" --default-item "$DEFAULT_MIRROR" \
           --menu "Where do you want to install from?" 0 0 0 \
             net   "install via network (downloading from mirror)" \
             local "install from local directory/mirror"
@@ -883,13 +883,13 @@ prompt_for_mirror()
      [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
      MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter Debian mirror you would like to use for installing packages." \
-               0 0 $MIRROR)" || bailout
+               0 0 "$MIRROR")" || bailout
 
   else # CHOOSE_MIRROR == local
      [ -n "$ISO" ] || ISO='/mnt/mirror'
      ISO="$(dialog --stdout --title "${PN}" --inputbox \
                "Please enter directory name you would like to use for installing packages." \
-               0 0 $ISO)" || bailout
+               0 0 "$ISO")" || bailout
   fi
 }
 # }}}
