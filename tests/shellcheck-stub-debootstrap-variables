@@ -5,3 +5,93 @@
 # ARCH is defaulted in grml-debootstrap, so it is never empty.
 ARCH=amd64
 
+# defaulted
+CHROOT_SCRIPTS=yes
+
+# defaulted (conditional, but always set)
+COMPONENTS=main
+
+# defaulted
+CONFFILES=/etc/debootstrap
+
+# defaulted
+DEBCONF=yes
+
+# defaulted
+DEBIAN_FRONTEND=noninteractive
+
+# defaulted
+DEFAULT_LANGUAGE=en_US:en
+
+# defaulted
+DEFAULT_LOCALES=en_US.UTF-8
+
+# defaulted
+EXTRAPACKAGES=yes
+
+# defaulted
+FALLBACK_MIRROR=http://deb.debian.org/debian
+
+# defaulted
+FORCE=
+
+# defaulted
+HOSTNAME=grml
+
+# defaulted
+INITRD=yes
+
+# defaulted
+INITRD_GENERATOR=initramfs-tools
+
+# defaulted
+INITRD_GENERATOR_OPTS=
+
+# defaulted
+INSTALL_NOTES=/etc/debootstrap/install_notes
+
+# defaulted
+LOCALES=yes
+
+# defaulted
+MIRROR=$FALLBACK_MIRROR
+
+# defaulted
+MKFS=mkfs.ext4
+
+# defaulted
+PACKAGES=yes
+
+# defaulted
+POST_SCRIPTS=yes
+
+# defaulted
+PRE_SCRIPTS=yes
+
+# defaulted
+RECONFIGURE=console-data
+
+# defaulted
+RELEASE=bookworm
+
+# defaulted
+RM_APTCACHE=yes
+
+# defaulted
+SCRIPTS=no
+
+# defaulted
+SECURE=yes
+
+# defaulted
+TIMEZONE=Europe/Vienna
+
+# defaulted
+TUNE2FS=tune2fs -c0 -i0
+
+# defaulted
+UPGRADE_SYSTEM=yes
+
+# defaulted
+VMSIZE=2G
+
