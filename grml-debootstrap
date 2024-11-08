@@ -1873,7 +1873,7 @@ preparechroot() {
 
   cp ${VERBOSE:+-v} -a -L "${CONFFILES}"/extrapackages/ "${MNTPOINT}"/etc/debootstrap/
 
-  # make sure we can access network [relevant for cdebootstrap/mmdebstrap]
+  # make sure we can access network [relevant for mmdebstrap]
   [ -f "${MNTPOINT}"/etc/resolv.conf ] || cp ${VERBOSE:+-v} /etc/resolv.conf "${MNTPOINT}"/etc/resolv.conf
 
   # setup default locales

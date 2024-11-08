@@ -100,7 +100,7 @@
 # ROOTPASSWORD=''
 
 # Name of debootstrap executable.
-# Supported values: 'debootstrap', 'cdebootstrap', 'mmdebstrap'
+# Supported values: 'debootstrap', 'mmdebstrap'
 # Default: 'mmdebstrap'
 # DEBOOTSTRAP='mmdebstrap'
 
