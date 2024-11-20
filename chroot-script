@@ -523,12 +523,7 @@ EOF
 
 # generate /etc/fstab {{{
 fstab() {
-  # set up /etc/fstab if file is not present (cdebootstrap)
-  if [ ! -f /etc/fstab  ] ; then
-     createfstab
-  fi
-
-  # set up /etc/fstab if file is UNCONFIGURED (debootstrap)
+  # set up /etc/fstab if file is UNCONFIGURED (debootstrap, mmdebstrap)
   if grep -q UNCONFIGURED /etc/fstab ; then
      createfstab
   fi

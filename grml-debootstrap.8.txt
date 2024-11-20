@@ -14,8 +14,8 @@ image:images/screenshot.png[Screenshot]
 Introduction
 ------------
 
-grml-debootstrap is a wrapper suite around mmdebstrap (and debootstrap and
-cdebootstrap) for installing a plain Debian system very fast and easy.
+grml-debootstrap is a wrapper suite around mmdebstrap (and debootstrap)
+for installing a plain Debian system very fast and easy.
 
 All you have to do is adjust a few variables in the configuration file
 /etc/debootstrap/config or specify some command line options and invoke
@@ -430,7 +430,7 @@ Please report bugs towards https://github.com/grml/grml-debootstrap/issues
 See also
 --------
 
-debootstrap (8), cdebootstrap (1), mmdebstrap(1).
+debootstrap(8), mmdebstrap(1).
 
 Author
 ------
