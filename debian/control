@@ -4,9 +4,7 @@ Priority: optional
 Maintainer: Grml Team <team@grml.org>
 Uploaders:
  Michael Prokop <mika@debian.org>,
- Alexander Wirt <formorer@debian.org>,
  Chris Hofstaedtler <zeha@debian.org>,
- Ulrich Dangel <mru@spamt.net>,
 Build-Depends:
  debhelper-compat (= 13),
 Build-Depends-Indep:
