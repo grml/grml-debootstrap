@@ -19,8 +19,7 @@ last bash command: $last_bash_command"
        tail -10 "${MNTPOINT}"/debootstrap/debootstrap.log
        einfo "End of debootstrap.log"
    fi
-   ## Check if "bailout" function is available.
-   ## This is not the case in chroot-script.
+   ## Check if "bailout" function is already available.
    if command -v bailout >/dev/null 2>&1; then
       bailout 1
    else
@@ -32,7 +31,6 @@ set -e
 set -E
 set -o pipefail
 trap "error_handler" ERR
-export -f "error_handler"
 # }}}
 
 # variables {{{
@@ -80,11 +78,6 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$UPGRADE_SYSTEM" ] || UPGRADE_SYSTEM='yes'
 [ -n "$VMSIZE" ] || VMSIZE="2G"
 [ -n "$GRUB_INSTALL" ] || GRUB_INSTALL='yes'
-
-# inside the chroot system locales might not be available, so use minimum:
-export LANG=C
-export LC_ALL=C
-export LANGUAGE=C
 
 # make sure interactive mode is only executed when
 # using an empty configuration file or option --interactive
@@ -298,16 +291,16 @@ cleanup() {
       # make sure nothing is left inside chroot so we can unmount it
       for service in ssh mdadm ; do
         if [ -x "${MNTPOINT}/etc/init.d/${service}" ] ; then
-          chroot "$MNTPOINT" "/etc/init.d/${service}" stop
+          clean_chroot "$MNTPOINT" "/etc/init.d/${service}" stop
         fi
       done
 
-      [ -x "$MNTPOINT"/bin/umount ] && { chroot "$MNTPOINT" umount -a >/dev/null 2>&1 || true; }
+      [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount -a >/dev/null 2>&1 || true; }
 
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
       for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
-        [ -x "$MNTPOINT"/bin/umount ] && { chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; }
+        [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; } 
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
@@ -1604,16 +1597,16 @@ grub_install() {
   if [ -n "$ARM_EFI_TARGET" ]; then
     einfo "Installing Grub as bootloader into EFI."
 
-    chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
+    clean_chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
   # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
   # chroot-script skips installation for unset ${GRUB}
   elif [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
     einfo "Installing Grub as bootloader."
 
-    if ! chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
+    if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
       echo "Notice: grub-pc package not present yet, installing it therefore."
       # shellcheck disable=SC2086
-      DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
+      clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
     fi
 
     mkdir -p "${MNTPOINT}/boot/grub"
@@ -1628,48 +1621,48 @@ grub_install() {
       mkdir -p "${MNTPOINT}"/boot/efi
       mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
 
-      if ! chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
+      if ! clean_chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
         echo "Notice: shim-signed package not present yet, installing it therefore."
         # shellcheck disable=SC2086
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
+        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
       fi
 
       if [ "$(dpkg --print-architecture)" = "arm64" ]; then
-        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
+        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
         fi
-        chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
       elif [ "$(dpkg --print-architecture)" = "i386" ]; then
-        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
+        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
         fi
-        chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
-        chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       else
-        if ! chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
+        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          DEBIAN_FRONTEND=$DEBIAN_FRONTEND chroot "$MNTPOINT" apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
         fi
-        chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
-        chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       fi
     else
       dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
       case "${_opt_filesystem}" in
         f2fs)
-          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
+          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
           ;;
         xfs)
-          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
+          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
           ;;
         # NOTE - we might need to distinguish between further filesystems
         *)
-          chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
           ;;
       esac
 
@@ -1692,8 +1685,8 @@ grub_install() {
   fi
 
   einfo "Updating grub configuration file."
-  chroot "${MNTPOINT}" update-grub
-  chroot "${MNTPOINT}" sync
+  clean_chroot "${MNTPOINT}" update-grub
+  clean_chroot "${MNTPOINT}" sync
 
   case "$RELEASE" in
     jessie)
@@ -1768,6 +1761,46 @@ debootstrap_system() {
     # shellcheck disable=SC2086
     "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
   fi
+}
+# }}}
+
+# clean_chroot {{{
+clean_chroot() {
+  # inside the chroot system locales might not be available, so use minimum:
+  local -a env_vars=(
+    "LANG=C"
+    "LC_ALL=C"
+    "LANGUAGE=C"
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  )
+
+  # List of additional environment variables to include if set
+  local -a additional_vars=("http_proxy" "https_proxy" "ALL_PROXY")
+
+  # Loop through the additional environment variables and add them if set
+  for var in "${additional_vars[@]}"; do
+    if [[ -n "${!var}" ]]; then
+      env_vars+=("$var=${!var}")
+    fi
+  done
+
+  # Capture additional environment variables passed as arguments.
+  for var in "$@"; do
+    if [[ "$var" == *=* ]]; then
+      env_vars+=("$var")
+    else
+      break
+    fi
+  done
+
+  # First argument is the chroot directory.
+  local chroot_dir="$1"
+
+  # Remaining arguments are for the command to be executed in the chroot environment.
+  local chroot_command=("${@:2}")
+
+  # Run chroot, then env -i with the specified environment variables inside the chroot
+  chroot "$chroot_dir" env -i "${env_vars[@]}" "${chroot_command[@]}"
 }
 # }}}
 
@@ -2064,9 +2097,9 @@ chrootscript() {
     mount -t devtmpfs udev "${MNTPOINT}"/dev
     mount -t devpts devpts "${MNTPOINT}"/dev/pts
     if [ "$DEBUG" = "true" ] ; then
-      chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script
+      clean_chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script
     else
-      chroot "$MNTPOINT" /bin/chroot-script
+      clean_chroot "$MNTPOINT" /bin/chroot-script
     fi
     try_umount 3 "$MNTPOINT"/dev/pts
     try_umount 3 "$MNTPOINT"/dev
