@@ -1,3 +1,26 @@
+grml-debootstrap (0.110) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [8da0f25] Drop support for debian2hd / AUTOINSTALL
+  * [d558ca5] shellcheck: use parameter expansion style for $VERBOSE
+  * [1de02ac] shellcheck: avoid if-then-else warning
+  * [cdd9896] shellcheck: quote vars passed to dialog
+  * [18c3508] prompt_for_release: RELEASE is already defaulted
+  * [5bdbcfd] shellcheck: add all defaulted vars for chroot-script
+  * [e401995] Switch default debootstrap tool to mmdebstrap
+  * [e2806da] Drop support for cdebootstrap
+  * [5f5f3da] Add .github/FUNDING.yml
+
+  [ Michael Prokop ]
+  * [8ba8be4] Ship debian/gbp.conf for gbp usage
+  * [50c4163] debian: update Uploaders field
+
+  [ Patrick Schleizer ]
+  * [be5c2e8] Implement clean_chroot to avoid host env variables like TMP
+    to leak into the chroot
+
+ -- Michael Prokop <mika@grml.org>  Fri, 22 Nov 2024 16:28:59 +0100
+
 grml-debootstrap (0.109) unstable; urgency=medium
 
   [ Michael Prokop ]
