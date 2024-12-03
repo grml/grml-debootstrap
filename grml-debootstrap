@@ -728,7 +728,7 @@ prompt_for_target()
   fi
 
   PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
-                     fs="$(blkid -s TYPE -o value "$i" 2>/dev/null)"
+                     fs="$(blkid -s TYPE -o value "$i" 2>/dev/null || true)"
                      [ -n "$fs" ] || fs='[no_filesystem_yet]'
                      echo "$i" "$fs"
                      unset fs
