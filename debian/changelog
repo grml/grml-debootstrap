@@ -1,3 +1,10 @@
+grml-debootstrap (0.111) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [7ef3249] interactive mode: ignore failures when identifying file system fails
+
+ -- Chris Hofstaedtler <ch@grml.org>  Sat, 07 Dec 2024 16:09:19 +0100
+
 grml-debootstrap (0.110) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
