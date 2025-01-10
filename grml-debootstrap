@@ -300,7 +300,7 @@ cleanup() {
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
       for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
-        [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; } 
+        [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; }
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
@@ -1597,16 +1597,32 @@ grub_install() {
   if [ -n "$ARM_EFI_TARGET" ]; then
     einfo "Installing Grub as bootloader into EFI."
 
-    clean_chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --removable
+    clean_chroot "${MNTPOINT}" grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=debian --recheck --no-nvram --force-extra-removable
   # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
   # chroot-script skips installation for unset ${GRUB}
   elif [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
     einfo "Installing Grub as bootloader."
 
-    if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
-      echo "Notice: grub-pc package not present yet, installing it therefore."
-      # shellcheck disable=SC2086
-      clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
+    if [ -z "$VMEFI" ]; then
+      if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: grub-pc package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
+      fi
+    else
+      # We install grub-pc-bin instead of grub-pc when EFI is enabled, because
+      # otherwise the EFI bootloader won't be automatically updated when GRUB
+      # packages are uploaded. Doing this means that the BIOS bootloader won't
+      # be automatically updated, which stinks, however the BIOS bootloader
+      # doesn't have the same security concerns as the EFI bootloader (there's
+      # no Secure Boot to grapple with when using legacy BIOS boot) so it's
+      # better to let the BIOS bootloader lag behind and update the EFI one
+      # than to let the EFI bootloader lag behind and update the BIOS one.
+      if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc-bin 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: grub-pc-bin package not present yet, installing it therefore."
+        # shellcheck disable=SC2086
+        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc-bin
+      fi
     fi
 
     mkdir -p "${MNTPOINT}/boot/grub"
@@ -1617,7 +1633,6 @@ grub_install() {
     cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
 
     if [ -n "$VMEFI" ]; then
-
       mkdir -p "${MNTPOINT}"/boot/efi
       mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
 
@@ -1631,24 +1646,24 @@ grub_install() {
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed grub-efi-arm64
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
       elif [ "$(dpkg --print-architecture)" = "i386" ]; then
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed grub-efi-ia32
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       else
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed grub-efi-amd64
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --removable "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       fi
     else
@@ -1670,6 +1685,9 @@ grub_install() {
       rm -f "${MNTPOINT}/tmp/core.img"
     fi
   fi
+
+  # Make sure bootloader updates affect the removable media partition too
+  clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true'
 
   # workaround for Debian bug #918590 with lvm + udev:
   # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
