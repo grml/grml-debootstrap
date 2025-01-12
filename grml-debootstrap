@@ -1590,12 +1590,10 @@ grub_install() {
   if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
     einfo "Installing Grub as bootloader."
 
+    local grub_pc_package_name=''
+
     if [ -z "$VMEFI" ]; then
-      if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: grub-pc package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc
-      fi
+      grub_pc_package_name='grub-pc'
     elif [ "$ARCH" != 'arm64' ]; then
       # We install grub-pc-bin instead of grub-pc when EFI is enabled, because
       # otherwise the EFI bootloader won't be automatically updated when GRUB
@@ -1605,10 +1603,13 @@ grub_install() {
       # no Secure Boot to grapple with when using legacy BIOS boot) so it's
       # better to let the BIOS bootloader lag behind and update the EFI one
       # than to let the EFI bootloader lag behind and update the BIOS one.
-      if ! clean_chroot "${MNTPOINT}" dpkg --list grub-pc-bin 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: grub-pc-bin package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-pc-bin
+      grub_pc_package_name='grub-pc-bin'
+    fi
+
+    if [ -n "${grub_pc_package_name}" ]; then
+      if ! clean_chroot "${MNTPOINT}" dpkg --list "${grub_pc_package_name}" 2>/dev/null | grep -q '^ii' ; then
+        echo "Notice: ${grub_pc_package_name} package not present yet, installing it therefore."
+        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS "${grub_pc_package_name}"
       fi
     fi
 
