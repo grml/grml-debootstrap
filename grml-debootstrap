@@ -122,6 +122,8 @@ Options for Virtual Machine deployment:
       --vmsize <size>    Use specified size for size of VM file (default: 2G).
                          Syntax as supported by qemu-img, like: --vmsize 3G
       --vmefi            Create an EFI boot partition for the VM.
+      --efi-id <id>      Sets the efi bootloader ID for the VM. Only relevant when
+                         used with --vmefi.
 
 Configuration options:
 
@@ -376,7 +378,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmefi,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmefi,efi-id:,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
 if ! _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@"); then
@@ -412,6 +414,9 @@ while :; do
     ;;
   --vmefi)            # Create an EFI boot partition for the VM
     _opt_vmefi="T"
+    ;;
+  --efi-id)
+    shift; _opt_efi_id="$1"
     ;;
   --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
@@ -579,6 +584,7 @@ done
 [ "$_opt_vmfile" ]              && VMFILE=1 && VIRTUAL=1
 [ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
 [ "$_opt_vmefi" ]               && VMEFI=1
+[ "$_opt_efi_id" ]              && EFI_ID=$_opt_efi_id
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
@@ -1636,34 +1642,54 @@ grub_install() {
       mkdir -p "${MNTPOINT}"/boot/efi
       mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
 
+      if [ -z "${EFI_ID}" ]; then
+        EFI_ID="$(
+          source "${MNTPOINT}"/etc/default/grub
+          for file in "${MNTPOINT}"/etc/default/grub.d/*.cfg; do
+            if [ -f "${file}" ]; then
+              source "${file}"
+            fi
+          done
+          echo "${GRUB_DISTRIBUTOR}"
+        )"
+      else
+        # This is prefixed with a `z` so that it takes precedence over any other GRUB config.
+        echo "GRUB_DISTRIBUTOR='${EFI_ID}'" > "${MNTPOINT}"/etc/default/grub.d/z-grml-debootstrap-efi-id.cfg
+      fi
+
+      mkdir -p "${MNTPOINT}"/boot/efi/EFI/BOOT
+      mkdir -p "${MNTPOINT}"/boot/efi/EFI/"${EFI_ID}"
+
       if ! clean_chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
         echo "Notice: shim-signed package not present yet, installing it therefore."
         # shellcheck disable=SC2086
         clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
       fi
 
+      # The EFI bootloader will automatically be installed to the proper location when the
+      # corresponding grub-efi-ARCH package is installed.
       if [ "$(dpkg --print-architecture)" = "arm64" ]; then
+        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-arm64 grub2/force_efi_extra_removable boolean true'
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
           clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed grub-efi-arm64
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
       elif [ "$(dpkg --print-architecture)" = "i386" ]; then
+        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-ia32 grub2/force_efi_extra_removable boolean true'
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
           clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed grub-efi-ia32
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       else
+        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true'
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
           clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed grub-efi-amd64
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id=debian --force-extra-removable "/dev/$LOOP_DISK"
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       fi
     else
@@ -1685,9 +1711,6 @@ grub_install() {
       rm -f "${MNTPOINT}/tmp/core.img"
     fi
   fi
-
-  # Make sure bootloader updates affect the removable media partition too
-  clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true'
 
   # workaround for Debian bug #918590 with lvm + udev:
   # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
