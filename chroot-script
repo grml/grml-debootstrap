@@ -471,9 +471,12 @@ timezone() {
     echo "Adjusting /etc/localtime"
     ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
 
-    echo "Setting /etc/timezone to $TIMEZONE"
-    printf '%s\n' "$TIMEZONE"  > /etc/timezone
-
+    if [ -e /etc/timezone ] ; then
+      # not necessary for trixie or newer, see tzdata 2024b-6 changelog.
+      # https://salsa.debian.org/glibc-team/tzdata/-/commit/c071fbc167ad306394b576879d515e6ecbe5a734
+      echo "Setting /etc/timezone to $TIMEZONE"
+      printf '%s\n' "$TIMEZONE"  > /etc/timezone
+    fi
   fi
 }
 # }}}

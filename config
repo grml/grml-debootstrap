@@ -192,7 +192,7 @@
 # Default: 'en_US:en'
 # DEFAULT_LANGUAGE='en_US:en'
 
-# Use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime + set /etc/timezone.
+# Use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime.
 # Default: 'Europe/Vienna'
 # TIMEZONE='Europe/Vienna'
 
