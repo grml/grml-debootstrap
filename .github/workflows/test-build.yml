@@ -57,7 +57,6 @@ jobs:
         - bookworm
         - bullseye
         - buster
-        - stretch
 
         debootstrap:
         - debootstrap
@@ -67,9 +66,6 @@ jobs:
           # debootstrap in bullseye is too old.
           - host_release: bullseye
             release: trixie
-          # unclear how to pass --no-check-gpg to mmdebstrap
-          - release: stretch
-            debootstrap: mmdebstrap
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ubuntu-latest
