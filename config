@@ -73,7 +73,7 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: jessie, stretch, buster, bullseye, sid
+# Supported values: buster, bullseye, sid
 # Default: 'bullseye'
 # RELEASE='bullseye'
 

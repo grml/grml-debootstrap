@@ -219,7 +219,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    jessie, stretch, buster, bullseye, bookworm and sid.
+    buster, bullseye, bookworm and sid.
     Corresponding with configuration variable RELEASE. Default release: bookworm
 
 *--remove-configs*::
@@ -301,9 +301,9 @@ Usage examples
 
 Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  grml-debootstrap --release stretch --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
+  grml-debootstrap --release buster --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
 
-Install Debian release stretch on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install Debian release buster on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Set hostname to 'debian01' and password for user root to 'changeme'.
 
   grml-debootstrap --target /dev/sda6 --grub /dev/sda --release sid
@@ -393,9 +393,9 @@ Supported Releases
 include::releasetable.txt[]
 
 [NOTE]
-.jessie/stretch/buster release
+.buster release
 ================================================================================
-[1] Please notice that releases like jessie, stretch and buster are unsupported releases within Debian nowadays.
+[1] Please notice that releases like buster are unsupported releases within Debian nowadays.
 grml-debootstrap can handle the releases but you really should not use them anymore unless you really know what you are doing.
 Even older versions are also entirely unsupported by grml-debootstrap.
 

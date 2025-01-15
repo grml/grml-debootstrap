@@ -616,7 +616,7 @@ done
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 
 case "${RELEASE}" in
-  jessie|stretch|buster|bullseye)
+  buster|bullseye)
     [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
     ;;
   *)
@@ -1295,21 +1295,7 @@ mkfs() {
     fi
 
     case "$RELEASE" in
-      jessie)
-        if [ "$mkfs_supports_metadata_csum" = 1 ]; then
-          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum"
-          MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum"
-        fi
-        if [ "$mkfs_supports_metadata_csum_seed" = 1 ]; then
-          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum_seed"
-          MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
-        fi
-        if [ "$mkfs_supports_orphan_file" = 1 ]; then
-          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: orphan_file"
-          MKFS_OPTS="$MKFS_OPTS -O ^orphan_file"
-        fi
-        ;;
-      bullseye|buster|stretch)
+      bullseye|buster)
         if [ "$mkfs_supports_metadata_csum_seed" = 1 ]; then
           einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum_seed"
           MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
@@ -1687,14 +1673,6 @@ grub_install() {
   einfo "Updating grub configuration file."
   clean_chroot "${MNTPOINT}" update-grub
   clean_chroot "${MNTPOINT}" sync
-
-  case "$RELEASE" in
-    jessie)
-      einfo "Applying workaround for GRUB font path bug in jessie (Debian #787685)."
-      mkdir -p "${MNTPOINT}/boot/grub/fonts/"
-      cp "${MNTPOINT}/usr/share/grub/unicode.pf2" "${MNTPOINT}/boot/grub/fonts/"
-      ;;
-  esac
 
   if grep -q '^GRUB_DISABLE_LINUX_UUID=.*true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
     ewarn "GRUB_DISABLE_LINUX_UUID is set to true in /etc/default/grub, not adjusting root= in grub.cfg."
