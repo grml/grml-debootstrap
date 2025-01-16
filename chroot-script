@@ -83,6 +83,21 @@ askpass() {
 }
 # }}}
 
+# mark existing packages as automatically installed {{{
+markauto() {
+  case "$RELEASE" in
+    jessie|stretch|buster|bullseye)
+      # apt-mark is unavailable or does not support all used patterns.
+      return
+      ;;
+  esac
+
+  # Mark most leaf packages as automatically installed.
+  # Later in the systems life, apt autoremove will remove them if possible.
+  apt-mark auto '~i !~M ?not(?priority(required)) ?not(?priority(important)) ?not(?priority(standard))'
+}
+# }}}
+
 # define chroot mirror {{{
 chrootmirror() {
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
@@ -813,7 +828,7 @@ trap signal_handler HUP INT QUIT TERM
  # always execute install_policy_rcd
  install_policy_rcd
 
- for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
+ for i in markauto chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages reconfigure hosts \
      default_locales timezone fstab install_fs_tools hostname \
      initrd grub_install passwords \
