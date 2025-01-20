@@ -21,16 +21,7 @@ fi
 
 set -x
 
-case "${RELEASE:-}" in
-  stretch)
-    MIRROR='http://archive.debian.org/debian'
-    EXTRAOPT=--debopt=--no-check-gpg
-  ;;
-  *)
-    MIRROR='http://deb.debian.org/debian'
-    EXTRAOPT=''
-  ;;
-esac
+MIRROR='http://deb.debian.org/debian'
 
 
 echo " ****************************************************************** "
@@ -46,7 +37,6 @@ grml-debootstrap \
   --password grml \
   --release  "$RELEASE" \
   --hostname "$RELEASE" \
-  --mirror "$MIRROR" \
-  $EXTRAOPT
+  --mirror "$MIRROR"
 
 chown "$HOST_UID" "$TARGET"

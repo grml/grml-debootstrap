@@ -86,7 +86,7 @@ askpass() {
 # mark existing packages as automatically installed {{{
 markauto() {
   case "$RELEASE" in
-    jessie|stretch|buster|bullseye)
+    buster|bullseye)
       # apt-mark is unavailable or does not support all used patterns.
       return
       ;;
@@ -127,8 +127,8 @@ chrootmirror() {
 
   # add security.debian.org:
   case "$RELEASE" in
-    unstable|sid|stretch) ;;  # no security pool available
-    jessie|buster)
+    unstable|sid) ;;  # no security pool available
+    buster)
       echo "Adding security.debian.org to sources.list."
       echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
@@ -373,13 +373,6 @@ kernel() {
   $APTUPDATE
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
-    case "$RELEASE" in
-      stretch)
-        echo "Installing busybox on Debian/$RELEASE as it's essential for the initramfs"
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL busybox
-        ;;
-    esac
-
      KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER firmware-linux-free $INITRD_GENERATOR"
      # only add firmware-linux if we have non-free as a component
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
