@@ -201,11 +201,11 @@ EOF
   fi
 
   apt-get update -o Acquire::AllowInsecureRepositories=1
-  apt-get -y --allow-unauthenticated install grml-debian-keyring
+  apt-get -y --allow-unauthenticated install grml-keyring
   apt-get update
 
-  if [ "$(dpkg-query -f "\${db:Status-Status} \${db:Status-Eflag}" -W grml-debian-keyring 2>/dev/null)" != 'installed ok' ]; then
-    echo "Error: installation of grml-debian-keyring failed." >&2
+  if [ "$(dpkg-query -f "\${db:Status-Status} \${db:Status-Eflag}" -W grml-keyring 2>/dev/null)" != 'installed ok' ]; then
+    echo "Error: installation of grml-keyring failed." >&2
     exit 1
   fi
 }
