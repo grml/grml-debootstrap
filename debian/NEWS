@@ -1,3 +1,10 @@
+grml-debootstrap (0.112) unstable; urgency=medium
+
+  Support for the old Debian releases "jessie" and "stretch"
+  was removed.
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 21 Jan 2025 00:41:49 +0100
+
 grml-debootstrap (0.70) unstable; urgency=medium
 
   The 'contrib' and 'non-free' repositories are no longer
