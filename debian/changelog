@@ -1,3 +1,16 @@
+grml-debootstrap (0.112) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [fdcbead] Mark packages as automatically installed
+  * [8b9d174] Update /etc/timezone only if it exists
+  * [754be6f] NEWS: record jessie, stretch support removal
+  * [30788c5] NEWS: drop entries from 2015 and back
+
+  [ Patrick Schleizer ]
+  * [794d55c] Remove support for Debian `jessie` and `stretch`
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 21 Jan 2025 00:43:09 +0100
+
 grml-debootstrap (0.111) unstable; urgency=medium
 
   [ Michael Prokop ]
