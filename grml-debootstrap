@@ -1597,7 +1597,7 @@ grub_install() {
     elif [ "$ARCH" != 'arm64' ]; then
       # We install grub-pc-bin instead of grub-pc when EFI is enabled, because
       # otherwise the EFI bootloader won't be automatically updated when GRUB
-      # packages are uploaded. Doing this means that the BIOS bootloader won't
+      # packages are updated. Doing this means that the BIOS bootloader won't
       # be automatically updated, which stinks, however the BIOS bootloader
       # doesn't have the same security concerns as the EFI bootloader (there's
       # no Secure Boot to grapple with when using legacy BIOS boot) so it's
