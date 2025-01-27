@@ -1,3 +1,9 @@
+grml-debootstrap (0.113) unstable; urgency=medium
+
+  * [394b232] Follow rename of grml-debian-keyring to grml-keyring
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 27 Jan 2025 17:37:31 +0100
+
 grml-debootstrap (0.112) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
