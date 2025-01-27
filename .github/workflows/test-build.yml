@@ -53,6 +53,7 @@ jobs:
         - bullseye
 
         release:
+        - unstable
         - trixie
         - bookworm
         - bullseye
@@ -66,6 +67,9 @@ jobs:
           # debootstrap in bullseye is too old.
           - host_release: bullseye
             release: trixie
+          # debootstrap in bullseye is too old.
+          - host_release: bullseye
+            release: unstable
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ubuntu-latest
