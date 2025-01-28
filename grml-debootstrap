@@ -1281,10 +1281,6 @@ mkfs() {
     local e2fsprogs_version
     e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
 
-    local mkfs_supports_metadata_csum=''
-    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43~WIP.2015.05.18-1' ; then
-      mkfs_supports_metadata_csum=1
-    fi
     local mkfs_supports_metadata_csum_seed=''
     if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43' ; then
       mkfs_supports_metadata_csum_seed=1
