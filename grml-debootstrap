@@ -48,7 +48,6 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$CONFFILES" ] || CONFFILES='/etc/debootstrap'
 [ -n "$DEBCONF" ] || DEBCONF='yes'
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
-[ -n "$DEBOOTSTRAP" ] || DEBOOTSTRAP='mmdebstrap'
 [ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
 [ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
@@ -298,7 +297,7 @@ cleanup() {
       # ugly, but make sure we really don't leave anything (/proc /proc and
       # /dev /dev are intended, trying to work around timing issues, see #657023)
       for ARG in /run/udev /sys /proc /proc /dev/pts /dev/pts /dev /dev ; do
-        [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; } 
+        [ -x "$MNTPOINT"/bin/umount ] && { clean_chroot "$MNTPOINT" umount $ARG >/dev/null 2>&1 || true; }
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
@@ -631,6 +630,10 @@ if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
   bailout 1
 fi
 
+if [ -n "$DEBOOTSTRAP" ]; then
+  ewarn "The DEBOOTSTRAP setting is deprecated and will be ignored. Please remove it from your configuration."
+fi
+
 if [ "$DEBUG" = "true" ] ; then
   set -x
 fi
@@ -655,7 +658,7 @@ fi
 # }}}
 
 # make sure we have what we need {{{
-check4progs "${DEBOOTSTRAP}" || bailout 1
+check4progs mmdebstrap || bailout 1
 
 if [ -n "$VIRTUAL" ] ; then
   check4progs kpartx parted qemu-img || bailout 1
@@ -1664,10 +1667,10 @@ debootstrap_system() {
     eend 1 ; exit 1
   fi
 
-  einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
-  einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+  einfo "Running mmdebstrap $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
+  einfo "Executing: mmdebstrap $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
   # shellcheck disable=SC2086
-  "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
+  mmdebstrap $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
 }
 # }}}
 
@@ -1728,7 +1731,6 @@ preparechroot() {
   [ -n "$CONFFILES" ]                 && echo "CONFFILES='${CONFFILES//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
   [ -n "$DEBCONF" ]                   && echo "DEBCONF='${DEBCONF//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
   [ -n "$DEBIAN_FRONTEND" ]           && echo "DEBIAN_FRONTEND='${DEBIAN_FRONTEND//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
-  [ -n "$DEBOOTSTRAP" ]               && echo "DEBOOTSTRAP='${DEBOOTSTRAP//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
   [ -n "$DEFAULT_LOCALES" ]           && echo "DEFAULT_LOCALES='${DEFAULT_LOCALES//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
   [ -n "$DEFAULT_LANGUAGE" ]          && echo "DEFAULT_LANGUAGE='${DEFAULT_LANGUAGE//\'/\'\\\'\'}'"                 >> "$CHROOT_VARIABLES"
   [ -n "$EXTRAPACKAGES" ]             && echo "EXTRAPACKAGES='${EXTRAPACKAGES//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"

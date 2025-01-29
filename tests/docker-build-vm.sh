@@ -15,10 +15,6 @@ HOST_UID="$1"
 TARGET="$2"
 RELEASE="$3"
 
-if [ -n "${DEBOOTSTRAP:-}" ] && [ "${DEBOOTSTRAP:-}" != "debootstrap" ]; then
-  apt-get install -qq -y "${DEBOOTSTRAP}"
-fi
-
 set -x
 
 MIRROR='http://deb.debian.org/debian'

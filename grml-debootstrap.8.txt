@@ -302,7 +302,7 @@ Set hostname to 'debian01' and password for user root to 'changeme'.
 
 Install Debian unstable/sid on /dev/sda6 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  DEBOOTSTRAP=mmdebstrap grml-debootstrap --target /dev/sda1 --grub /dev/sda
+  grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
 Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use mmdebstrap instead of default debootstrap tool for bootstrapping.

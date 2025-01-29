@@ -93,12 +93,7 @@
 # Default: no default.
 # ROOTPASSWORD=''
 
-# Name of debootstrap executable.
-# Supported values: 'debootstrap', 'mmdebstrap'
-# Default: 'mmdebstrap'
-# DEBOOTSTRAP='mmdebstrap'
-
-# Pass extra options to debootstrap.
+# Pass extra options to mmdebstrap.
 # Default: no default.
 # Usage example:
 # DEBOOTSTRAP_OPT='--include=debconf-utils,locales,pciutils --exclude=nano,tasksel,tasksel-data,iptables'
