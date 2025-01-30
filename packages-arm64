@@ -6,8 +6,6 @@ console-data
 cryptsetup
 dbus
 file
-grub2-common
-grub-efi-arm64
 ifenslave
 isc-dhcp-client
 less
