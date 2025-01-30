@@ -807,6 +807,7 @@ prompt_for_release()
             buster   Debian/10 \
             bullseye Debian/11 \
             bookworm Debian/12 \
+            trixie   Debian/13 \
             sid      Debian/unstable)" \
             || bailout
 }

@@ -211,7 +211,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    buster, bullseye, bookworm and sid.
+    buster, bullseye, bookworm, trixie and sid.
     Corresponding with configuration variable RELEASE. Default release: bookworm
 
 *--remove-configs*::
@@ -384,6 +384,7 @@ Supported Releases
 |buster   |works[1]
 |bullseye |works
 |bookworm |works
+|trixie   |works
 |sid      |works[2]
 |======================
 
