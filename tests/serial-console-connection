@@ -18,7 +18,7 @@ parser.add_argument(
     help="serial console device to connect " + "to (e.g. /dev/pts/X)",
 )
 parser.add_argument(
-    "--hostname", default="bookworm", help="hostname of the system for login process"
+    "--hostname", default="trixie", help="hostname of the system for login process"
 )
 parser.add_argument("--user", default="root", help="user name to use for login")
 parser.add_argument("--password", default="grml", help="password for login")
