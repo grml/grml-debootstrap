@@ -40,14 +40,8 @@ bash -n /etc/debootstrap/variables
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
    APTUPDATE="aptitude update $DPKG_OPTIONS"
-   # Debian ISOs do not contain signed Release files
-   if [ -n "$ISO" ] ; then
-      APTINSTALL="aptitude -y --allow-untrusted --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE="aptitude -y --allow-untrusted safe-upgrade $DPKG_OPTIONS"
-   else
-      APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
-   fi
+   APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
+   APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
 else
    APTINSTALL="apt-get -y --no-install-recommends install $DPKG_OPTIONS"
    APTUPDATE="apt-get update $DPKG_OPTIONS"
@@ -110,19 +104,9 @@ chrootmirror() {
   fi
   echo "Using repository components $COMPONENTS"
 
-  if [ -n "$ISO" ] ; then
-    echo "Adjusting sources.list for ISO (${ISO})."
-    echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
-
-    if [ -n "$MIRROR" ] ; then
-      echo "Adding mirror entry (${MIRROR}) to sources.list."
-      echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
-    fi
-  else
-    if [ -n "$MIRROR" ] ; then
-      echo "Adjusting sources.list for mirror (${MIRROR})."
-      echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
-    fi
+  if [ -n "$MIRROR" ] ; then
+    echo "Adjusting sources.list for mirror (${MIRROR})."
+    echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
   fi
 
   # add security.debian.org:
@@ -149,18 +133,12 @@ remove_chrootmirror() {
     return
   fi
 
-  if [ -n "$ISO" ] ; then
-    echo "Removing ISO (${ISO}) from sources.list."
-    TMP_ISO="${ISO//\//\\\/}"
-    sed -i "/deb $TMP_ISO $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
-  else
-    if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
-      echo "Removing local mirror (${MIRROR}) from sources.list."
-      TMP_MIRROR="${MIRROR//\//\\\/}"
-      sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
-      echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
-      echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
-    fi
+  if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
+    echo "Removing local mirror (${MIRROR}) from sources.list."
+    TMP_MIRROR="${MIRROR//\//\\\/}"
+    sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
+    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
+    echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
   fi
 }
 # }}}
