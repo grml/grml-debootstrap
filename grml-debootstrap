@@ -1786,10 +1786,6 @@ preparechroot() {
   if [ "$PACKAGES" = 'yes' ] ; then
     PACKAGES_FILE="packages"
 
-    if [ "$ARCH" = 'arm64' ]; then
-      PACKAGES_FILE="packages-arm64"
-    fi
-
     cp ${VERBOSE:+-v} "${_opt_packages:-$CONFFILES/$PACKAGES_FILE}" \
       "${MNTPOINT}/etc/debootstrap/${PACKAGES_FILE}"
   fi
