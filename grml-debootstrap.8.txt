@@ -134,14 +134,6 @@ Options and environment variables
 
     Use specified hostname instead of the default (being $HOSTNAME or if unset 'grml').
 
-*-i*, *--iso* _/mntpoint_::
-
-    Specify mount point where you have a Debian ISO mounted loopback.
-    Using this option instead of the mirror option gives you the possibility
-    to install the base-system without network access. Make sure you
-    mounted the according Debian-ISO to the given _/mntpoint_. See section
-    'Usage examples' for a demonstration.
-
 *--keep_src_list*::
 
      Do not overwrite user provided /etc/apt/sources.list.
@@ -337,13 +329,8 @@ Use specified mirror instead of the default (http://deb.debian.org/debian) one.
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default debian release (bookworm) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
+Install default debian release (bookworm) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file).
 
-  mount -o loop ./debian-CD-1.iso /media/cdrom
-  grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso /media/cdrom
-
-Install Debian on /dev/sda1 using the loopback mounted Debian-ISO for the base-system and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
-Please notice, that the chroot system requires network access for all packages which are not part of the ISO.
 
 Files
 -----

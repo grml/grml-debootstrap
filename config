@@ -46,12 +46,6 @@
 # Usage example:
 # MIRROR='ftp://ftp.de.debian.org/debian'
 
-# Debian Install CD path:
-# If you have a Debian CD (or mounted ISO), core packages will be
-# installed from the CD instead of from the network.
-# Default: no default.
-# ISO='file:/mnt/iso/debian/'
-
 # If /etc/apt/sources.list should NOT be build on the fly, this
 # options allows providing a separate apt sources.list file via
 # /etc/debootstrap/etc/apt/sources.list

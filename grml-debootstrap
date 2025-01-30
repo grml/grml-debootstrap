@@ -93,8 +93,6 @@ Usage: $PN [options]
 Bootstrap options:
 
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
-  -i, --iso <mnt>        Mountpoint where a Debian ISO is mounted to, for use
-                         instead of fetching packages from a mirror.
   -r, --release <name>   Release of new Debian system (default: bullseye).
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
@@ -304,10 +302,6 @@ cleanup() {
         umount "$MNTPOINT"/$ARG >/dev/null 2>&1 || true
       done
 
-      if [ -n "$ISODIR" ] ; then
-        try_umount 3 "$MNTPOINT/$ISODIR" >/dev/null 2>&1 || true
-      fi
-
       if [ -n "$DIRECTORY" ] ; then
         einfo "Not unmounting $MNTPOINT as you requested me to install into a directory of your own choice."
       else
@@ -391,9 +385,6 @@ while :; do
   # == Bootstrap options
   --mirror|-m)         # Mirror which should be used for apt-get/aptitude
     shift; _opt_mirror="$1"
-    ;;
-  --iso|-i)            # Mountpoint where a Debian ISO is mounted to
-    shift; _opt_iso="$1"
     ;;
   --release|-r)        # Release of new Debian system
     shift; _opt_release="$1"
@@ -572,7 +563,6 @@ done
 # }}}
 
 [ "$_opt_mirror" ]              && MIRROR=$_opt_mirror
-[ "$_opt_iso" ]                 && ISO=$_opt_iso
 [ "$_opt_release" ]             && RELEASE=$_opt_release
 [ "$_opt_target" ]              && TARGET=$_opt_target
 [ "$_opt_vm" ]                  && VIRTUAL=1
@@ -638,12 +628,6 @@ fi
 
 if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
   eerror "The --sshcopyid option is incompatible with --sshcopyauth, please drop either of them from your command line."
-  bailout 1
-fi
-
-if [ -n "$ISO" ] && [[ "$DEBOOTSTRAP" =~ mmdebstrap$ ]] ; then
-  eerror "The ISO option is incompatible with usage of mmdebstrap for bootstrapping."
-  eerror "Either drop the --iso ... option or use plain debootstrap instead."
   bailout 1
 fi
 
@@ -864,26 +848,10 @@ prompt_for_password()
 # ask for Debian mirror {{{
 prompt_for_mirror()
 {
-  [ -n "$ISO" ] && DEFAULT_MIRROR='local' || DEFAULT_MIRROR='net'
-
-  CHOOSE_MIRROR=$(dialog --stdout --title "$PN" --default-item "$DEFAULT_MIRROR" \
-          --menu "Where do you want to install from?" 0 0 0 \
-            net   "install via network (downloading from mirror)" \
-            local "install from local directory/mirror"
-          )
-
-  if [ "$CHOOSE_MIRROR" = 'net' ] ; then
-     [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
-     MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
-               "Please enter Debian mirror you would like to use for installing packages." \
-               0 0 "$MIRROR")" || bailout
-
-  else # CHOOSE_MIRROR == local
-     [ -n "$ISO" ] || ISO='/mnt/mirror'
-     ISO="$(dialog --stdout --title "${PN}" --inputbox \
-               "Please enter directory name you would like to use for installing packages." \
-               0 0 "$ISO")" || bailout
-  fi
+  [ -n "$MIRROR" ] || MIRROR='http://deb.debian.org/debian'
+  MIRROR="$(dialog --stdout --title "${PN}" --inputbox \
+            "Please enter Debian mirror you would like to use for installing packages." \
+            0 0 "$MIRROR")" || bailout
 }
 # }}}
 
@@ -1044,8 +1012,6 @@ if [ -n "$INTERACTIVE" ] ; then
    Using hostname:  $HOSTNAME"
    [ -n "$MIRROR" ]  && INFOTEXT="$INFOTEXT
    Using mirror:    $MIRROR"
-   [ -n "$ISO" ]  && INFOTEXT="$INFOTEXT
-   Using ISO:       $ISO"
    [ -n "$ARCH" ]  && INFOTEXT="$INFOTEXT
    Using arch:      $ARCH"
    [ -n "$CONFFILES" ] && INFOTEXT="$INFOTEXT
@@ -1077,7 +1043,6 @@ else # if not running automatic installation display configuration and prompt fo
    [ -n "$RELEASE" ]   && echo "   Using release:   $RELEASE"
    [ -n "$HOSTNAME" ]  && echo "   Using hostname:  $HOSTNAME"
    [ -n "$MIRROR" ]    && echo "   Using mirror:    $MIRROR"
-   [ -n "$ISO" ]       && echo "   Using ISO:       $ISO"
    [ -n "$ARCH" ]      && echo "   Using arch:      $ARCH"
    [ -n "$CONFFILES" ] && echo "   Config files:    $CONFFILES"
    if [ -n "$VIRTUAL" ] ; then
@@ -1229,26 +1194,6 @@ else
       bailout 1
     fi
     set_target_directory
-fi
-# }}}
-
-# make sure we have the right syntax when using an iso image {{{
-if [ -n "$ISO" ] ; then
-   case $ISO in
-      file*) # do nothing
-      ;;
-      *)
-      ISO=file:$ISO
-      ;;
-   esac
-fi
-ISODIR=${ISO##file:}
-ISODIR=${ISODIR%%/}
-# }}}
-
-# Debian ISOs do not contain signed Release files {{{
-if [ -n "$ISO" ] ; then
-    DEBOOTSTRAP_OPT="$DEBOOTSTRAP_OPT --no-check-gpg"
 fi
 # }}}
 
@@ -1442,11 +1387,6 @@ mount_target() {
        mkdir -p "$MNTPOINT"
        mount -o rw,suid,dev "$TARGET" "$MNTPOINT"
      fi
-  fi
-  if [ -n "$ISODIR" ] ; then
-     einfo "Mounting Debian image loopback to $MNTPOINT/$ISODIR."
-     mkdir -p "$MNTPOINT/$ISODIR"
-     mount --bind "$ISODIR" "$MNTPOINT/$ISODIR"
   fi
 }
 # }}}
@@ -1724,17 +1664,10 @@ debootstrap_system() {
     eend 1 ; exit 1
   fi
 
-  if [ -n "$ISO" ] ; then
-    einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${ISO}"
-    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $ISO"
-    # shellcheck disable=SC2086
-    "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$ISO"
-  else
-    einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
-    einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
-    # shellcheck disable=SC2086
-    "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
-  fi
+  einfo "Running $DEBOOTSTRAP $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
+  einfo "Executing: $DEBOOTSTRAP $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+  # shellcheck disable=SC2086
+  "$DEBOOTSTRAP" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
 }
 # }}}
 
@@ -1810,8 +1743,6 @@ preparechroot() {
   [ -n "$INITRD_GENERATOR" ]          && echo "INITRD_GENERATOR='${INITRD_GENERATOR//\'/\'\\\'\'}'"                 >> "$CHROOT_VARIABLES"
   [ -n "$INITRD_GENERATOR_OPTS" ]     && echo "INITRD_GENERATOR_OPTS='${INITRD_GENERATOR_OPTS//\'/\'\\\'\'}'"       >> "$CHROOT_VARIABLES"
   [ -n "$INSTALL_NOTES" ]             && echo "INSTALL_NOTES='${INSTALL_NOTES//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
-  [ -n "$ISODIR" ]                    && echo "ISODIR='${ISO//\'/\'\\\'\'}'"                                        >> "$CHROOT_VARIABLES"
-  [ -n "$ISO" ]                       && echo "ISO='${ISO//\'/\'\\\'\'}'"                                           >> "$CHROOT_VARIABLES"
   [ -n "$KEEP_SRC_LIST" ]             && echo "KEEP_SRC_LIST='${KEEP_SRC_LIST//\'/\'\\\'\'}'"                       >> "$CHROOT_VARIABLES"
   [ -n "$LOCALES" ]                   && echo "LOCALES='${LOCALES//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
   [ -n "$MIRROR" ]                    && echo "MIRROR='${MIRROR//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
@@ -2096,11 +2027,6 @@ umount_chroot() {
   # display installation notes:
   if [ -n "$INSTALL_NOTES" ] ; then
      [ -r "${MNTPOINT}/${INSTALL_NOTES}" ] && cat "${MNTPOINT}/${INSTALL_NOTES}"
-  fi
-
-  if [ -n "$ISODIR" ] ; then
-     einfo "Unmount $MNTPOINT/$ISODIR"
-     try_umount 3 "$MNTPOINT/$ISODIR"
   fi
 
   try_umount 3 "${MNTPOINT}"/run/udev
