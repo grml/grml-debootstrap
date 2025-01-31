@@ -5,7 +5,6 @@ console-data
 cryptsetup
 dbus
 file
-grub-pc
 ifenslave
 isc-dhcp-client
 less
