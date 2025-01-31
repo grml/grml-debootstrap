@@ -33,7 +33,13 @@ fi
 
 if [ "$1" == "setup" ]; then
   sudo apt-get update
-  sudo apt-get -qq -y install curl qemu-system-x86 kpartx python3-pexpect python3-serial
+  sudo apt-get -qq -y install curl kpartx python3-pexpect python3-serial
+  DPKG_ARCHITECTURE=$(dpkg --print-architecture)
+  if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
+    sudo apt-get -qq -y install qemu-system qemu-system-gui ovmf seabios
+  elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
+    sudo apt-get -qq -y install qemu-system qemu-system-gui qemu-efi-aarch64
+  fi
   # vncsnapshot might not be available, though we don't want to abort execution then
   sudo apt-get -qq -y install vncsnapshot || true
   [ -x ./tests/goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)/tests" sh

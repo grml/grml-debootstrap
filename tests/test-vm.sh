@@ -67,10 +67,33 @@ chmod a+rx "$TEST_TMPDIR"/testrunner
 cd "$TEST_TMPDIR"
 
 MOUNT_TAG=host0
-qemu-system-x86_64 -hda "${VM_IMAGE}" -m 2048 \
-                   -display none -vnc :0 \
-                   -virtfs local,path="$TEST_TMPDIR",mount_tag="$MOUNT_TAG",security_model=none,id=host0 \
-                   -serial pty &>qemu.log &
+declare -a qemu_command
+
+DPKG_ARCHITECTURE=$(dpkg --print-architecture)
+if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
+    qemu_command=( qemu-system-x86_64 )
+    qemu_command+=( -machine q35 )
+elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
+    cp /usr/share/AAVMF/AAVMF_VARS.fd efi_vars.fd
+    qemu_command=( qemu-system-aarch64 )
+    qemu_command+=( -machine type=virt,gic-version=max,accel=kvm:tcg )
+    qemu_command+=( -drive "if=pflash,format=raw,unit=0,file.filename=/usr/share/AAVMF/AAVMF_CODE.no-secboot.fd,file.locking=off,readonly=on" )
+    qemu_command+=( -drive "if=pflash,unit=1,file=efi_vars.fd" )
+else
+    echo "E: unsupported ${DPKG_ARCHITECTURE}"
+    exit 1
+fi
+qemu_command+=( -cpu max )
+qemu_command+=( -smp 2 )
+qemu_command+=( -m 2048 )
+qemu_command+=( -hda "${VM_IMAGE}" )
+qemu_command+=( -virtfs "local,path=${TEST_TMPDIR},mount_tag=${MOUNT_TAG},security_model=none,id=host0" )
+qemu_command+=( -nographic )
+qemu_command+=( -display none )
+qemu_command+=( -vnc :0 )
+qemu_command+=( -monitor "unix:qemu-monitor-socket,server,nowait" )
+qemu_command+=( -serial pty )
+"${qemu_command[@]}" &>qemu.log &
 QEMU_PID="$!"
 
 timeout=30
