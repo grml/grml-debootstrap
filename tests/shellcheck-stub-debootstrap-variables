@@ -72,7 +72,7 @@ PRE_SCRIPTS=yes
 RECONFIGURE=console-data
 
 # defaulted
-RELEASE=bookworm
+RELEASE=trixie
 
 # defaulted
 RM_APTCACHE=yes
@@ -94,4 +94,3 @@ UPGRADE_SYSTEM=yes
 
 # defaulted
 VMSIZE=2G
-

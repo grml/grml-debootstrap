@@ -15,22 +15,9 @@ HOST_UID="$1"
 TARGET="$2"
 RELEASE="$3"
 
-if [ -n "${DEBOOTSTRAP:-}" ] && [ "${DEBOOTSTRAP:-}" != "debootstrap" ]; then
-  apt-get install -qq -y "${DEBOOTSTRAP}"
-fi
-
 set -x
 
-case "${RELEASE:-}" in
-  stretch)
-    MIRROR='http://archive.debian.org/debian'
-    EXTRAOPT=--debopt=--no-check-gpg
-  ;;
-  *)
-    MIRROR='http://deb.debian.org/debian'
-    EXTRAOPT=''
-  ;;
-esac
+MIRROR='http://deb.debian.org/debian'
 
 
 echo " ****************************************************************** "
@@ -46,7 +33,6 @@ grml-debootstrap \
   --password grml \
   --release  "$RELEASE" \
   --hostname "$RELEASE" \
-  --mirror "$MIRROR" \
-  $EXTRAOPT
+  --mirror "$MIRROR"
 
 chown "$HOST_UID" "$TARGET"

@@ -42,16 +42,13 @@ if [ "$1" == "setup" ]; then
 fi
 
 # Debian version to install using grml-debootstrap
-RELEASE="${RELEASE:-bookworm}"
+RELEASE="${RELEASE:-trixie}"
 
 TARGET="${TARGET:-qemu.img}"
 
-# debootstrap to use, default empty (let grml-debootstrap decide)
-DEBOOTSTRAP="${DEBOOTSTRAP:-}"
-
 if [ "$1" == "run" ]; then
   # Debian version on which grml-debootstrap will *run*
-  HOST_RELEASE="${HOST_RELEASE:-bookworm}"
+  HOST_RELEASE="${HOST_RELEASE:-trixie}"
 
   DEB_NAME=$(ls ./grml-debootstrap*.deb || true)
   if [ -z "$DEB_NAME" ]; then
@@ -63,10 +60,9 @@ if [ "$1" == "run" ]; then
   exec docker run --privileged --rm -i \
     -v "$(pwd)":/code \
     -e TERM="$TERM" \
-    -e DEBOOTSTRAP="$DEBOOTSTRAP" \
     -w /code \
     debian:"$HOST_RELEASE" \
-    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' '"$DEBOOTSTRAP"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$TARGET"' '"$RELEASE"
+    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$TARGET"' '"$RELEASE"
 
 elif [ "$1" == "test" ]; then
   # run tests from inside Debian system

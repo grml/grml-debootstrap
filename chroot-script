@@ -40,14 +40,8 @@ bash -n /etc/debootstrap/variables
 # use aptitude only if it's available
 if [ -x /usr/bin/aptitude ] ; then
    APTUPDATE="aptitude update $DPKG_OPTIONS"
-   # Debian ISOs do not contain signed Release files
-   if [ -n "$ISO" ] ; then
-      APTINSTALL="aptitude -y --allow-untrusted --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE="aptitude -y --allow-untrusted safe-upgrade $DPKG_OPTIONS"
-   else
-      APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
-      APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
-   fi
+   APTINSTALL="aptitude -y --without-recommends install $DPKG_OPTIONS"
+   APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
 else
    APTINSTALL="apt-get -y --no-install-recommends install $DPKG_OPTIONS"
    APTUPDATE="apt-get update $DPKG_OPTIONS"
@@ -83,6 +77,21 @@ askpass() {
 }
 # }}}
 
+# mark existing packages as automatically installed {{{
+markauto() {
+  case "$RELEASE" in
+    buster|bullseye)
+      # apt-mark is unavailable or does not support all used patterns.
+      return
+      ;;
+  esac
+
+  # Mark most leaf packages as automatically installed.
+  # Later in the systems life, apt autoremove will remove them if possible.
+  apt-mark auto '~i !~M ?not(?priority(required)) ?not(?priority(important)) ?not(?priority(standard))'
+}
+# }}}
+
 # define chroot mirror {{{
 chrootmirror() {
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
@@ -95,25 +104,15 @@ chrootmirror() {
   fi
   echo "Using repository components $COMPONENTS"
 
-  if [ -n "$ISO" ] ; then
-    echo "Adjusting sources.list for ISO (${ISO})."
-    echo "deb $ISO $RELEASE $COMPONENTS" > /etc/apt/sources.list
-
-    if [ -n "$MIRROR" ] ; then
-      echo "Adding mirror entry (${MIRROR}) to sources.list."
-      echo "deb $MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
-    fi
-  else
-    if [ -n "$MIRROR" ] ; then
-      echo "Adjusting sources.list for mirror (${MIRROR})."
-      echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
-    fi
+  if [ -n "$MIRROR" ] ; then
+    echo "Adjusting sources.list for mirror (${MIRROR})."
+    echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
   fi
 
   # add security.debian.org:
   case "$RELEASE" in
-    unstable|sid|stretch) ;;  # no security pool available
-    jessie|buster)
+    unstable|sid) ;;  # no security pool available
+    buster)
       echo "Adding security.debian.org to sources.list."
       echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
       ;;
@@ -134,18 +133,12 @@ remove_chrootmirror() {
     return
   fi
 
-  if [ -n "$ISO" ] ; then
-    echo "Removing ISO (${ISO}) from sources.list."
-    TMP_ISO="${ISO//\//\\\/}"
-    sed -i "/deb $TMP_ISO $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
-  else
-    if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
-      echo "Removing local mirror (${MIRROR}) from sources.list."
-      TMP_MIRROR="${MIRROR//\//\\\/}"
-      sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
-      echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
-      echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
-    fi
+  if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
+    echo "Removing local mirror (${MIRROR}) from sources.list."
+    TMP_MIRROR="${MIRROR//\//\\\/}"
+    sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
+    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
+    echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
   fi
 }
 # }}}
@@ -186,11 +179,11 @@ EOF
   fi
 
   apt-get update -o Acquire::AllowInsecureRepositories=1
-  apt-get -y --allow-unauthenticated install grml-debian-keyring
+  apt-get -y --allow-unauthenticated install grml-keyring
   apt-get update
 
-  if [ "$(dpkg-query -f "\${db:Status-Status} \${db:Status-Eflag}" -W grml-debian-keyring 2>/dev/null)" != 'installed ok' ]; then
-    echo "Error: installation of grml-debian-keyring failed." >&2
+  if [ "$(dpkg-query -f "\${db:Status-Status} \${db:Status-Eflag}" -W grml-keyring 2>/dev/null)" != 'installed ok' ]; then
+    echo "Error: installation of grml-keyring failed." >&2
     exit 1
   fi
 }
@@ -271,10 +264,6 @@ packages() {
 
   if [ "$PACKAGES" = 'yes' ] ; then
     PACKAGES_FILE="/etc/debootstrap/packages"
-
-    if [ "$ARCH" = 'arm64' ]; then
-      PACKAGES_FILE="/etc/debootstrap/packages-arm64"
-    fi
 
     if ! [ -r "${PACKAGES_FILE}" ] ; then
       echo "Error: ${PACKAGES_FILE} (inside chroot) not found, exiting." >&2
@@ -358,13 +347,6 @@ kernel() {
   $APTUPDATE
   KVER=$(get_kernel_version)
   if [ -n "$KVER" ] ; then
-    case "$RELEASE" in
-      stretch)
-        echo "Installing busybox on Debian/$RELEASE as it's essential for the initramfs"
-        DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL busybox
-        ;;
-    esac
-
      KERNELPACKAGES="linux-image-$KVER linux-headers-$KVER firmware-linux-free $INITRD_GENERATOR"
      # only add firmware-linux if we have non-free as a component
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
@@ -471,9 +453,12 @@ timezone() {
     echo "Adjusting /etc/localtime"
     ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
 
-    echo "Setting /etc/timezone to $TIMEZONE"
-    printf '%s\n' "$TIMEZONE"  > /etc/timezone
-
+    if [ -e /etc/timezone ] ; then
+      # not necessary for trixie or newer, see tzdata 2024b-6 changelog.
+      # https://salsa.debian.org/glibc-team/tzdata/-/commit/c071fbc167ad306394b576879d515e6ecbe5a734
+      echo "Setting /etc/timezone to $TIMEZONE"
+      printf '%s\n' "$TIMEZONE"  > /etc/timezone
+    fi
   fi
 }
 # }}}
@@ -810,7 +795,7 @@ trap signal_handler HUP INT QUIT TERM
  # always execute install_policy_rcd
  install_policy_rcd
 
- for i in chrootmirror grmlrepos backportrepos kernelimg_conf \
+ for i in markauto chrootmirror grmlrepos backportrepos kernelimg_conf \
      kernel packages extrapackages reconfigure hosts \
      default_locales timezone fstab install_fs_tools hostname \
      initrd grub_install passwords \

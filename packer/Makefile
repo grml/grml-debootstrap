@@ -25,6 +25,10 @@ clean:
 	$(RM) *.o *.so
 	rm -rf local_dir
 
+# Debian 13
+trixie: clean fake-uname.so install
+	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
+
 # Debian 12
 bookworm: clean fake-uname.so install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
@@ -37,13 +41,5 @@ bullseye: clean fake-uname.so install
 buster: clean fake-uname.so install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
 
-# Debian 9
-stretch: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-# Debian 8
-jessie: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-.PHONY: compile bullseye buster stretch jessie
+.PHONY: compile bullseye buster
 .NOTPARALLEL:

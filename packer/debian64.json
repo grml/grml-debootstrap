@@ -71,7 +71,7 @@
     }
   ],
   "variables": {
-    "debian_version": "bookworm",
+    "debian_version": "trixie",
     "grml_debootstrap_local_path": "doesnotexist",
     "grml_debootstrap_version": "latest",
     "grml_iso_checksum": "ac071ab44592568b05635ccdd881da4f2a90c3a8",
@@ -79,4 +79,3 @@
     "grml_version": "2022.11"
   }
 }
-

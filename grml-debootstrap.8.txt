@@ -134,14 +134,6 @@ Options and environment variables
 
     Use specified hostname instead of the default (being $HOSTNAME or if unset 'grml').
 
-*-i*, *--iso* _/mntpoint_::
-
-    Specify mount point where you have a Debian ISO mounted loopback.
-    Using this option instead of the mirror option gives you the possibility
-    to install the base-system without network access. Make sure you
-    mounted the according Debian-ISO to the given _/mntpoint_. See section
-    'Usage examples' for a demonstration.
-
 *--keep_src_list*::
 
      Do not overwrite user provided /etc/apt/sources.list.
@@ -219,8 +211,8 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    jessie, stretch, buster, bullseye, bookworm and sid.
-    Corresponding with configuration variable RELEASE. Default release: bookworm
+    buster, bullseye, bookworm, trixie and sid.
+    Corresponding with configuration variable RELEASE. Default release: trixie
 
 *--remove-configs*::
 
@@ -299,51 +291,46 @@ Usage examples
 
   grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (trixie) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  grml-debootstrap --release stretch --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
+  grml-debootstrap --release buster --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
 
-Install Debian release stretch on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install Debian release buster on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Set hostname to 'debian01' and password for user root to 'changeme'.
 
   grml-debootstrap --target /dev/sda6 --grub /dev/sda --release sid
 
 Install Debian unstable/sid on /dev/sda6 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  DEBOOTSTRAP=mmdebstrap grml-debootstrap --target /dev/sda1 --grub /dev/sda
+  grml-debootstrap --target /dev/sda1 --grub /dev/sda
 
-Install default Debian release (bookworm) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (trixie) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use mmdebstrap instead of default debootstrap tool for bootstrapping.
 
   grml-debootstrap --target /dev/mapper/vg0-rootfs --grub /dev/sda
 
-Install default Debian release (bookworm) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (trixie) on LVM device /dev/mapper/vg0-rootfs and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
   grml-debootstrap --efi /dev/sda1 --target /dev/sda2 --grub /dev/sda
 
-Install default Debian release (bookworm) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (trixie) on /dev/sda2 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use /dev/sda1 as EFI partition (requires EFI support in booted system).
 
   mount /dev/sda1 /data/chroot
   grml-debootstrap --target /data/chroot
 
-Install default Debian release (bookworm) in directory /data/chroot (without any bootloader).
+Install default Debian release (trixie) in directory /data/chroot (without any bootloader).
 
   grml-debootstrap --target /dev/sda3 --grub /dev/sda  --mirror ftp://ftp.tugraz.at/mirror/debian
 
-Install default Debian release (bookworm) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install default Debian release (trixie) on /dev/sda3 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Use specified mirror instead of the default (http://deb.debian.org/debian) one.
 
   mount /dev/sda1 /mnt/sda1
   grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
 
-Install default debian release (bookworm) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file):
+Install default debian release (trixie) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file).
 
-  mount -o loop ./debian-CD-1.iso /media/cdrom
-  grml-debootstrap --target /dev/sda1 --grub /dev/sda --iso /media/cdrom
-
-Install Debian on /dev/sda1 using the loopback mounted Debian-ISO for the base-system and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
-Please notice, that the chroot system requires network access for all packages which are not part of the ISO.
 
 Files
 -----
@@ -390,12 +377,21 @@ make sure that EXTRAPACKAGES is set to "yes".
 Supported Releases
 ------------------
 
-include::releasetable.txt[]
+.Current status
+[width="40%",frame="topbot",options="header"]
+|======================
+|Release  |Status
+|buster   |works[1]
+|bullseye |works
+|bookworm |works
+|trixie   |works
+|sid      |works[2]
+|======================
 
 [NOTE]
-.jessie/stretch/buster release
+.buster release
 ================================================================================
-[1] Please notice that releases like jessie, stretch and buster are unsupported releases within Debian nowadays.
+[1] Please notice that releases like buster are unsupported releases within Debian nowadays.
 grml-debootstrap can handle the releases but you really should not use them anymore unless you really know what you are doing.
 Even older versions are also entirely unsupported by grml-debootstrap.
 

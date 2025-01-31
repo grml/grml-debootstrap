@@ -3,9 +3,6 @@ process:
     running: true
 
 file:
-  /etc/timezone:
-    exists: true
-    contains: ["Europe/Vienna"]
   /etc/localtime:
     filetype: symlink
     exists: true

@@ -42,7 +42,6 @@ install:
 	install -m 644 config           $(DESTDIR)/etc/debootstrap/
 	install -m 644 locale.gen       $(DESTDIR)/etc/debootstrap/
 	install -m 644 packages         $(DESTDIR)/etc/debootstrap/
-	install -m 644 packages-arm64   $(DESTDIR)/etc/debootstrap/
 	install -m 755 chroot-script    $(DESTDIR)/etc/debootstrap/
 	install -m 755 grml-debootstrap $(DESTDIR)/usr/sbin/
 	install -m 644 zsh-completion   $(DESTDIR)/usr/share/zsh/vendor-completions/_grml-debootstrap
@@ -51,7 +50,7 @@ clean:
 	rm -rf grml-debootstrap.8.html grml-debootstrap.8.xml grml-debootstrap.8 html-stamp man-stamp packer/local_dir/
 
 testrun:
-	cd ./packer && $(MAKE) compile && $(MAKE) jessie
+	cd ./packer && $(MAKE) compile && $(MAKE) buster
 
 vagrant:
 	vagrant up

@@ -46,12 +46,6 @@
 # Usage example:
 # MIRROR='ftp://ftp.de.debian.org/debian'
 
-# Debian Install CD path:
-# If you have a Debian CD (or mounted ISO), core packages will be
-# installed from the CD instead of from the network.
-# Default: no default.
-# ISO='file:/mnt/iso/debian/'
-
 # If /etc/apt/sources.list should NOT be build on the fly, this
 # options allows providing a separate apt sources.list file via
 # /etc/debootstrap/etc/apt/sources.list
@@ -73,7 +67,7 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: jessie, stretch, buster, bullseye, sid
+# Supported values: buster, bullseye, sid
 # Default: 'bullseye'
 # RELEASE='bullseye'
 
@@ -99,12 +93,7 @@
 # Default: no default.
 # ROOTPASSWORD=''
 
-# Name of debootstrap executable.
-# Supported values: 'debootstrap', 'mmdebstrap'
-# Default: 'mmdebstrap'
-# DEBOOTSTRAP='mmdebstrap'
-
-# Pass extra options to debootstrap.
+# Pass extra options to mmdebstrap.
 # Default: no default.
 # Usage example:
 # DEBOOTSTRAP_OPT='--include=debconf-utils,locales,pciutils --exclude=nano,tasksel,tasksel-data,iptables'
@@ -192,7 +181,7 @@
 # Default: 'en_US:en'
 # DEFAULT_LANGUAGE='en_US:en'
 
-# Use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime + set /etc/timezone.
+# Use /usr/share/zoneinfo/$TIMEZONE for /etc/localtime.
 # Default: 'Europe/Vienna'
 # TIMEZONE='Europe/Vienna'
 
