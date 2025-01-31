@@ -1535,13 +1535,6 @@ grub_install() {
     fi
 
     mkdir -p "${MNTPOINT}/boot/grub"
-    # TODO is any of this even necessary? Shouldn't grub-install do this?
-    # if [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ]; then
-    #   cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
-    # elif [ "$ARCH" != 'arm64' ]; then
-    #    eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader."
-    #    bailout 1
-    # fi
 
     if [ -n "$VMEFI" ]; then
       mkdir -p "${MNTPOINT}"/boot/efi
@@ -1608,23 +1601,6 @@ grub_install() {
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       fi
     else
-      # TODO is this actually important? Can't we use grub-intall for this?
-      # dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
-      # case "${_opt_filesystem}" in
-      #   f2fs)
-      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
-      #     ;;
-      #   xfs)
-      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
-      #     ;;
-      #   # NOTE - we might need to distinguish between further filesystems
-      #   *)
-      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
-      #     ;;
-      # esac
-
-      # dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
-      # rm -f "${MNTPOINT}/tmp/core.img"
       clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
     fi
   fi
