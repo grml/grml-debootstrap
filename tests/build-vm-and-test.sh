@@ -42,13 +42,13 @@ if [ "$1" == "setup" ]; then
 fi
 
 # Debian version to install using grml-debootstrap
-RELEASE="${RELEASE:-bookworm}"
+RELEASE="${RELEASE:-trixie}"
 
 TARGET="${TARGET:-qemu.img}"
 
 if [ "$1" == "run" ]; then
   # Debian version on which grml-debootstrap will *run*
-  HOST_RELEASE="${HOST_RELEASE:-bookworm}"
+  HOST_RELEASE="${HOST_RELEASE:-trixie}"
 
   DEB_NAME=$(ls ./grml-debootstrap*.deb || true)
   if [ -z "$DEB_NAME" ]; then

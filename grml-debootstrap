@@ -68,7 +68,7 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$POST_SCRIPTS" ] || POST_SCRIPTS='yes'
 [ -n "$PRE_SCRIPTS" ] || PRE_SCRIPTS='yes'
 [ -n "$RECONFIGURE" ] || RECONFIGURE='console-data'
-[ -n "$RELEASE" ] || RELEASE='bookworm'
+[ -n "$RELEASE" ] || RELEASE='trixie'
 [ -n "$RM_APTCACHE" ] || RM_APTCACHE='yes'
 [ -n "$SCRIPTS" ] || SCRIPTS='no' # deprecated, replaced by POST_SCRIPTS
 [ -n "$SECURE" ] || SECURE='yes'
@@ -807,6 +807,7 @@ prompt_for_release()
             buster   Debian/10 \
             bullseye Debian/11 \
             bookworm Debian/12 \
+            trixie   Debian/13 \
             sid      Debian/unstable)" \
             || bailout
 }
@@ -1139,7 +1140,7 @@ fi
 # Support for generic release codenames is unavailable. {{{
 if [ "$RELEASE" = "stable" ] || [ "$RELEASE" = "testing" ] ; then
    eerror "Generic release codenames (stable, testing) are unsupported. \
-Please use specific codenames such as bullseye or bookworm."
+Please use specific codenames such as bookworm or trixie."
    bailout 1
 fi
 # }}}
