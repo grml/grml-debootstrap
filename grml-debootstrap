@@ -1679,9 +1679,7 @@ debootstrap_system() {
 clean_chroot() {
   # inside the chroot system locales might not be available, so use minimum:
   local -a env_vars=(
-    "LANG=C"
     "LC_ALL=C"
-    "LANGUAGE=C"
     "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   )
 
