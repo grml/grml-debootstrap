@@ -377,7 +377,15 @@ make sure that EXTRAPACKAGES is set to "yes".
 Supported Releases
 ------------------
 
-include::releasetable.txt[]
+.Current status
+[width="40%",frame="topbot",options="header"]
+|======================
+|Release  |Status
+|buster   |works[1]
+|bullseye |works
+|bookworm |works
+|sid      |works[2]
+|======================
 
 [NOTE]
 .buster release
