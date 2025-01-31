@@ -1443,8 +1443,8 @@ prepare_vm() {
     parted -s "${TARGET}" 'mklabel gpt'
     parted -s "${TARGET}" 'mkpart ESP fat32 1MiB 101MiB'
     parted -s "${TARGET}" 'set 1 boot on'
-    if [ "$ARCH" = 'arm64' ]; then
-      # No need for a bios_grub parttion on ARM64
+    if [ "$ARCH" = 'arm64' ] || [ "$ARCH" = 'i386' ]; then
+      # No need for a bios_grub parttion on ARM64 or i386
       parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
     else
       parted -s "${TARGET}" 'mkpart bios_grub 101MiB 102MiB'
@@ -1475,7 +1475,7 @@ prepare_vm() {
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   if [ -n "$VMEFI" ]; then
     export EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
-    if [ "$ARCH" = 'arm64' ]; then
+    if [ "$ARCH" = 'arm64' ] || [ "$ARCH" = 'i386' ]; then
       LOOP_PART="${LOOP_PART%p1}p2"
     else
       LOOP_PART="${LOOP_PART%p1}p3"
@@ -1518,18 +1518,13 @@ grub_install() {
 
     local grub_pc_package_name=''
 
+    # ARM64 uses EFI-only, and doesn't need a GRUB package. For i386, we only
+    # install the BIOS bootloader if we're not using EFI (since grub-pc and
+    # grub-efi-ia32 can't be co-installed). For amd64, we install grub-cloud
+    # which will pull in grub-pc-bin, so we don't need to explicitly install a
+    # BIOS bootloader for it when using EFI.
     if [ -z "$VMEFI" ]; then
       grub_pc_package_name='grub-pc'
-    elif [ "$ARCH" != 'arm64' ]; then
-      # We install grub-pc-bin instead of grub-pc when EFI is enabled, because
-      # otherwise the EFI bootloader won't be automatically updated when GRUB
-      # packages are updated. Doing this means that the BIOS bootloader won't
-      # be automatically updated, which stinks, however the BIOS bootloader
-      # doesn't have the same security concerns as the EFI bootloader (there's
-      # no Secure Boot to grapple with when using legacy BIOS boot) so it's
-      # better to let the BIOS bootloader lag behind and update the EFI one
-      # than to let the EFI bootloader lag behind and update the BIOS one.
-      grub_pc_package_name='grub-pc-bin'
     fi
 
     if [ -n "${grub_pc_package_name}" ]; then
@@ -1540,12 +1535,13 @@ grub_install() {
     fi
 
     mkdir -p "${MNTPOINT}/boot/grub"
-    if [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ]; then
-      cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
-    elif [ "$ARCH" != 'arm64' ]; then
-       eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader."
-       bailout 1
-    fi
+    # TODO is any of this even necessary? Shouldn't grub-install do this?
+    # if [ -d "${MNTPOINT}"/usr/lib/grub/i386-pc/ ]; then
+    #   cp -a "${MNTPOINT}"/usr/lib/grub/i386-pc "${MNTPOINT}/boot/grub/"
+    # elif [ "$ARCH" != 'arm64' ]; then
+    #    eerror "Error: grub not installed inside Virtual Machine. Can not install bootloader."
+    #    bailout 1
+    # fi
 
     if [ -n "$VMEFI" ]; then
       mkdir -p "${MNTPOINT}"/boot/efi
@@ -1553,21 +1549,25 @@ grub_install() {
 
       if [ -z "${EFI_ID}" ]; then
         EFI_ID="$(
-          source "${MNTPOINT}"/etc/default/grub
+          if [ -f "${MNTPOINT}"/etc/default/grub ]; then
+            source "${MNTPOINT}"/etc/default/grub
+          fi
           for file in "${MNTPOINT}"/etc/default/grub.d/*.cfg; do
             if [ -f "${file}" ]; then
               source "${file}"
             fi
           done
-          echo "${GRUB_DISTRIBUTOR}"
+          if [ "${GRUB_DISTRIBUTOR}" != "" ]; then
+            echo "${GRUB_DISTRIBUTOR}"
+          else
+            echo 'debian'
+          fi
         )"
       else
         # This is prefixed with a `z` so that it takes precedence over any other GRUB config.
+        mkdir -p "${MNTPOINT}"/etc/default/grub.d
         echo "GRUB_DISTRIBUTOR='${EFI_ID}'" > "${MNTPOINT}"/etc/default/grub.d/z-grml-debootstrap-efi-id.cfg
       fi
-
-      mkdir -p "${MNTPOINT}"/boot/efi/EFI/BOOT
-      mkdir -p "${MNTPOINT}"/boot/efi/EFI/"${EFI_ID}"
 
       if ! clean_chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
         echo "Notice: shim-signed package not present yet, installing it therefore."
@@ -1583,44 +1583,49 @@ grub_install() {
           echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
           clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-bin grub-efi-arm64-signed grub-efi-arm64
-          clean_chroot "$MNTPOINT" dpkg-reconfigure --priority=critical grub-efi-arm64
         fi
+        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${EFI_ID}" --force-extra-removable "/dev/$LOOP_DISK"
       elif [ "${ARCH}" = "i386" ]; then
         clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-ia32 grub2/force_efi_extra_removable boolean true'
         if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
           echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
           # shellcheck disable=SC2086
           clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-bin grub-efi-ia32-signed grub-efi-ia32
-          clean_chroot "$MNTPOINT" dpkg-reconfigure --priority=critical grub-efi-ia32
         fi
-        clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
+        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${EFI_ID}" --force-extra-removable "/dev/$LOOP_DISK"
       else
-        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-amd64 grub2/force_efi_extra_removable boolean true'
-        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-amd64-signed 2>/dev/null | grep -q '^ii' ; then
-          echo "Notice: grub-efi-amd64-signed package not present yet, installing it therefore."
+        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-cloud-amd64 2>/dev/null | grep -q '^ii' ; then
+          echo "Notice: grub-cloud-amd64 package not present yet, installing it therefore."
           # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-amd64-bin grub-efi-amd64-signed grub-efi-amd64
-          clean_chroot "$MNTPOINT" dpkg-reconfigure --priority=critical grub-efi-amd64
+          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-cloud-amd64
         fi
+        # grub-cloud pulls in all the needed deps. We don't use it to install
+        # GRUB initially, but we do need it to update GRUB, so we have to
+        # touch /etc/grub.d/enable_cloud.
+        mkdir -p "${MNTPOINT}"/etc/grub.d
+        touch "${MNTPOINT}"/etc/grub.d/enable_cloud
+        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${EFI_ID}" --force-extra-removable "/dev/$LOOP_DISK"
         clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
       fi
     else
-      dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
-      case "${_opt_filesystem}" in
-        f2fs)
-          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
-          ;;
-        xfs)
-          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
-          ;;
-        # NOTE - we might need to distinguish between further filesystems
-        *)
-          clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
-          ;;
-      esac
+      # TODO is this actually important? Can't we use grub-intall for this?
+      # dd if="${MNTPOINT}/usr/lib/grub/i386-pc/boot.img" of="${ORIG_TARGET}" conv=notrunc bs=440 count=1
+      # case "${_opt_filesystem}" in
+      #   f2fs)
+      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos f2fs
+      #     ;;
+      #   xfs)
+      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos xfs
+      #     ;;
+      #   # NOTE - we might need to distinguish between further filesystems
+      #   *)
+      #     clean_chroot "${MNTPOINT}" grub-mkimage -O i386-pc -p "(hd0,msdos1)/boot/grub" -o /tmp/core.img biosdisk part_msdos ext2
+      #     ;;
+      # esac
 
-      dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
-      rm -f "${MNTPOINT}/tmp/core.img"
+      # dd if="${MNTPOINT}/tmp/core.img" of="${ORIG_TARGET}" conv=notrunc seek=1
+      # rm -f "${MNTPOINT}/tmp/core.img"
+      clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
     fi
   fi
 
