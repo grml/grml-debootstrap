@@ -1,3 +1,27 @@
+grml-debootstrap (0.114) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [2a2fe04] Use mmdebstrap as our only debootstrap implementation
+  * [b5068d2] Drop --iso support
+  * [e6baa9c] Stop installing acpi-support-base by default
+  * [7fc2b60] Stop installing separate packages file for arm64
+  * [698809d] preparechroot: align interfaces(5) defauls with ifupdown
+  * [fd2b0ad] Set default release to trixie
+  * [1c04071] Remove unused mkfs_supports_metadata_csum variable
+  * [bcde0bb] Disable cleanup of APT data and disable chroot-empty check
+  * [8d76dfc] grml-debootstrap: remove stray whitespace
+  * [21d5c84] doc: merge releasetable.txt into grml-debootstrap.8.txt
+  * [86c2c7c] Add trixie as Debian version 13
+  * [0901e1f] Remove grub* from packages list
+  * [7f24b9a] arm64: really install grub
+  * [2839682] CI: test on arm hosts
+
+  [ Patrick Schleizer ]
+  * [07ba800] use LC_ALL=C instead of LANG=C
+  * [428a8a7] no longer set redundant environment variables LANG=C and LANGUAGE=C inside chroot
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 10 Feb 2025 13:57:34 +0100
+
 grml-debootstrap (0.113) unstable; urgency=medium
 
   * [394b232] Follow rename of grml-debian-keyring to grml-keyring
