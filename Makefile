@@ -1,5 +1,4 @@
-BASH_SCRIPTS = grml-debootstrap
-SHELL_SCRIPTS = chroot-script
+BASH_SCRIPTS = grml-debootstrap chroot-script
 DOCBOOK_XML=/usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
 all: doc
@@ -22,11 +21,6 @@ man-stamp: grml-debootstrap.8.txt
 
 shellcheck:
 	@echo -n "Checking for shell syntax errors"; \
-	for SCRIPT in $(SHELL_SCRIPTS); do \
-		test -r $${SCRIPT} || continue ; \
-		sh -n $${SCRIPT} || exit ; \
-		echo -n "."; \
-	done; \
 	for SCRIPT in $(BASH_SCRIPTS) ; do \
 		test -r $${SCRIPT} || continue ; \
 		bash -n $${SCRIPT} || exit ; \
