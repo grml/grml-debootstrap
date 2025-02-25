@@ -76,7 +76,7 @@ if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
 elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
     cp /usr/share/AAVMF/AAVMF_VARS.fd efi_vars.fd
     qemu_command=( qemu-system-aarch64 )
-    qemu_command+=( -machine type=virt,gic-version=max,accel=kvm:tcg )
+    qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg" )
     qemu_command+=( -drive "if=pflash,format=raw,unit=0,file.filename=/usr/share/AAVMF/AAVMF_CODE.no-secboot.fd,file.locking=off,readonly=on" )
     qemu_command+=( -drive "if=pflash,unit=1,file=efi_vars.fd" )
 else
