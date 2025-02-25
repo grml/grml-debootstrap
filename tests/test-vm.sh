@@ -97,52 +97,11 @@ qemu_command+=( -serial pty )
 "${qemu_command[@]}" &>qemu.log &
 QEMU_PID="$!"
 
-timeout=30
-success=0
-while [ "$timeout" -gt 0 ] ; do
-  ((timeout--))
-  if grep -q 'char device redirected to ' qemu.log ; then
-    success=1
-    sleep 1
-    break
-  else
-    echo "No serial console from Qemu found yet [$timeout retries left]"
-    sleep 1
-  fi
-done
-
-if [ "$success" = "1" ] ; then
-  serial_port=$(awk '/char device redirected/ {print $5}' qemu.log)
-else
-  echo "Error: Failed to identify serial console port." >&2
-  cat qemu.log
-  exit 1
-fi
-
-timeout=30
-success=0
-while [ "$timeout" -gt 0 ] ; do
-  ((timeout--))
-  if [ -c "$serial_port" ] ; then
-    success=1
-    sleep 1
-    break
-  else
-    echo "No block device for serial console found yet [$timeout retries left]"
-    sleep 1
-  fi
-done
-
-if [ "$success" = "0" ] ; then
-  echo "Error: can't access serial console block device." >&2
-  exit 1
-fi
-
 RC=0
 "$TEST_PWD"/tests/serial-console-connection \
   --tries 180 \
   --screenshot "$TEST_PWD/tests/screenshot.jpg" \
-  --port "$serial_port" \
+  --qemu-log qemu.log \
   --hostname "$VM_HOSTNAME" \
   --poweroff \
   "mount -t 9p -o trans=virtio,version=9p2000.L,msize=512000,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner" || RC=$?
@@ -157,8 +116,6 @@ else
 
   cat results/goss.tap
 fi
-
-echo "Finished serial console connection [timeout=${timeout}]."
 
 # in case of errors we might have captured a screenshot via VNC
 if [ -r "${TEST_PWD}"/tests/screenshot.jpg ] ; then
