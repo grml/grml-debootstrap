@@ -42,25 +42,26 @@ cat <<EOT > "$TEST_TMPDIR"/testrunner
 #!/bin/bash
 # Do not set -eu, we want to continue even if individual commands fail.
 set -x
-echo "INSIDE_VM $0 running"
+echo "INSIDE_VM \$0 running \$(date -R)"
 mkdir results
 
 # Collect information from VM first
-lsb_release -a > results/lsb_release.txt
+cat /etc/os-release > results/os-release.txt
+dpkg -l > results/dpkg-l.txt
 uname -a > results/uname-a.txt
 systemctl list-units > results/systemctl_list-units.txt
 systemctl status > results/systemctl_status.txt
 fdisk -l > results/fdisk-l.txt
 hostname -f > results/hostname-f.txt 2>&1
 journalctl -b > results/journalctl-b.txt
-dpkg -l > results/dpkg-l.txt
 
 # Run tests
-./goss --gossfile goss.yaml validate --format tap > results/goss.tap
+echo "INSIDE_VM starting goss \$(date -R)"
+./goss --gossfile goss.yaml validate --format tap > results/goss.tap 2> results/goss.err
 # Detection of testrunner success hinges on goss.exitcode file.
 echo \$? > results/goss.exitcode
 
-echo "INSIDE_VM $0 finished"
+echo "INSIDE_VM \$0 finished \$(date -R)"
 EOT
 chmod a+rx "$TEST_TMPDIR"/testrunner
 
@@ -149,6 +150,7 @@ RC=0
 if [ ! -d results ] || [ ! -f ./results/goss.tap ] || [ ! -f ./results/goss.exitcode ]; then
   echo "Running tests inside VM failed for unknown reason" >&2
   RC=1
+  cat results/goss.err || true
 else
   RC=$(cat results/goss.exitcode)
   echo "goss exitcode: $RC"
