@@ -78,7 +78,7 @@ elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
     qemu_command=( qemu-system-aarch64 )
     qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg" )
     qemu_command+=( -drive "if=pflash,format=raw,unit=0,file.filename=/usr/share/AAVMF/AAVMF_CODE.no-secboot.fd,file.locking=off,readonly=on" )
-    qemu_command+=( -drive "if=pflash,unit=1,file=efi_vars.fd" )
+    qemu_command+=( -drive "if=pflash,format=raw,unit=1,file=efi_vars.fd" )
 else
     echo "E: unsupported ${DPKG_ARCHITECTURE}"
     exit 1
@@ -86,7 +86,7 @@ fi
 qemu_command+=( -cpu max )
 qemu_command+=( -smp 2 )
 qemu_command+=( -m 2048 )
-qemu_command+=( -hda "${VM_IMAGE}" )
+qemu_command+=( -drive "file=${VM_IMAGE},format=raw,index=0,media=disk" )
 qemu_command+=( -virtfs "local,path=${TEST_TMPDIR},mount_tag=${MOUNT_TAG},security_model=none,id=host0" )
 qemu_command+=( -nographic )
 qemu_command+=( -display none )
