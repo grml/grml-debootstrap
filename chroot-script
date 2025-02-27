@@ -308,32 +308,16 @@ get_kernel_version() {
     return 0
   fi
 
-  local KARCH
-
-  # shellcheck disable=SC2153
-  case "$ARCH" in
-    i386)
-      KARCH='686-pae'
-      ;;
-    amd64)
-      KARCH='amd64'
-      ;;
-    arm64)
-      KARCH='arm64'
-      ;;
-    *)
-      echo "Only i386, amd64 and arm64 are currently supported" >&2
-      return 1
-  esac
-
-  local KPACKAGE
-  KPACKAGE=linux-image-"${KPREFIX}${KARCH}"
-  if package_exists "$KPACKAGE"; then
-    echo "${KPREFIX}${KARCH}"
+  local kpackage
+  local ksuffix
+  ksuffix="${KPREFIX}$(dpkg --print-architecture)"
+  kpackage=linux-image-"${ksuffix}"
+  if package_exists "${kpackage}"; then
+    echo "${ksuffix}"
     return 0
   fi
 
-  echo "Expected kernel package $KPACKAGE not found" >&2
+  echo "Automatically determined kernel package named ${kpackage} not found" >&2
   return 1
 }
 

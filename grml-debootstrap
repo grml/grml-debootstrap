@@ -102,7 +102,7 @@ Bootstrap options:
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
       --efi <device>     Target for EFI installation. Usage example: /dev/sda1
-      --arch <arch>      Set target architecture, use for installing i386 on amd64.
+      --arch <arch>      Set target architecture.
       --filesystem <fs>  Filesystem that should be used when target is a partition
                          or Virtual Machine (see --vmfile).
       --force            Do not prompt for user acknowledgement.
@@ -1127,13 +1127,10 @@ if [ -z "${ARCH:-}" ] ; then
 fi
 # }}}
 
-# It is not possible to build amd64 on i686. {{{
-CURRENT_ARCH="$(uname -m)"
-if [ "$CURRENT_ARCH" != "x86_64" ] ; then
-   if [ "$ARCH" = "amd64" ] ; then
-      eerror "It is not possible to build amd64 on $CURRENT_ARCH. Consider installing and booting the 'linux-image-amd64' kernel or using '--arch i386' instead."
-      bailout 1
-   fi
+# Only support certain architectures. {{{
+if [[ "$ARCH" != "amd64" ]] && [[ "$ARCH" != "arm64" ]] ; then
+  eerror "Unsupported architecture: ${ARCH}. Only amd64, arm64 are supported by grml-debootstrap."
+  bailout 1
 fi
 # }}}
 
