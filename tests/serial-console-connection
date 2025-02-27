@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 import argparse
+import re
 import serial
 import os
 import shutil
 import subprocess
 import sys
 import time
-from pexpect import fdpexpect
 
 parser = argparse.ArgumentParser(
     description="Connect to serial console to execute stuff",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument(
-    "--port",
+    "--qemu-log",
+    dest="qemu_log",
     required=True,
-    help="serial console device to connect " + "to (e.g. /dev/pts/X)",
+    help="QEMU log to look for serial port info in",
 )
 parser.add_argument(
     "--hostname", default="trixie", help="hostname of the system for login process"
@@ -59,27 +60,48 @@ def write_ser_line(ser, text):
     ser.flush()
 
 
-def login(ser, hostname, user, password, timeout=5):
+def wait_ser_text(ser, texts, timeout):
+    if isinstance(texts, str):
+        texts = [texts]
 
-    child = fdpexpect.fdspawn(ser.fileno())
-    child.sendline("\n")
+    ts_max = time.time() + timeout
+    ser.timeout = 1
+    texts_encoded = [text.encode("utf-8") for text in texts]
+    found = False
+    print(time.time(), "D: expecting one of", texts_encoded)
+    while ts_max > time.time() and found is False:
+        for line in ser.readlines():
+            print(time.time(), "<<", line)  # line will be a binary string
+            for index, text in enumerate(texts_encoded):
+                if text in line:
+                    found = texts[index]
+                    break
+    return found
 
-    try:
-        child.expect("%s@%s" % (user, hostname), timeout=timeout)
+
+def login(ser, hostname, user, password, timeout):
+    login_prompt = "%s login:" % hostname
+    shell_prompt = "%s@%s" % (user, hostname)
+
+    write_ser_line(ser, "")  # send newline
+
+    found = wait_ser_text(ser, [shell_prompt, login_prompt], timeout=timeout * 4)
+    if found == shell_prompt:
         return
-    except:
-        pass
+    elif found is False:
+        raise ValueError("timeout waiting for login prompt")
 
-    print("Waiting for login prompt...")
-    child.expect("%s login:" % hostname, timeout=timeout)
     print("Logging in...")
     write_ser_line(ser, user)
-    time.sleep(1)
+    if not wait_ser_text(ser, "Password:", timeout=timeout):
+        raise ValueError("timeout waiting for password prompt")
+
     write_ser_line(ser, password)
     time.sleep(1)
 
-    print("Waiting for shell prompt...")
-    child.expect("%s@%s" % (user, hostname), timeout=timeout)
+    print(time.time(), "Waiting for shell prompt...")
+    if not wait_ser_text(ser, shell_prompt, timeout=timeout * 4):
+        raise ValueError("timeout waiting for shell prompt")
 
 
 def capture_vnc_screenshot(screenshot_file):
@@ -97,14 +119,41 @@ def capture_vnc_screenshot(screenshot_file):
         print("Screenshot file '%s' available" % os.path.abspath(screenshot_file))
 
 
+def find_serial_port_from_qemu_log(qemu_log, tries):
+    port = None
+    for i in range(tries):
+        print("Waiting for qemu to present serial console [try %s]" % (i, ))
+        with open(qemu_log, "r", encoding="utf-8") as fp:
+            qemu_log_messages = fp.read().splitlines()
+        for line in qemu_log_messages:
+            m = re.match("char device redirected to ([^ ]+)", line)
+            if m:
+                port = m.group(1)
+                break
+        if port:
+            break
+        time.sleep(5)
+
+    print("qemu log (up to char device redirect) follows:")
+    print("\n".join(qemu_log_messages))
+    print()
+    return port  # might be None, caller has to deal with it
+
+
 def main():
     args = parser.parse_args()
     hostname = args.hostname
     password = args.password
-    port = args.port
+    qemu_log = args.qemu_log
     user = args.user
     commands = args.command
     screenshot_file = args.screenshot
+
+    port = find_serial_port_from_qemu_log(qemu_log, args.tries)
+    if not port:
+        print()
+        print("E: no serial port found in qemu log", qemu_log)
+        sys.exit(1)
 
     ser = serial.Serial(port, 115200)
     ser.flushInput()
@@ -115,19 +164,19 @@ def main():
     for i in range(args.tries):
         try:
             print("Logging into %s via serial console [try %s]" % (port, i))
-            login(ser, hostname, user, password)
+            login(ser, hostname, user, password, 30)
             success = True
             break
         except Exception as except_inst:
-            print("Login failure (try %s):" % (i,), except_inst, file=sys.stderr)
+            print("Login failure (try %s):" % (i,), except_inst)
             time.sleep(5)
         if time.time() - ts_start > args.timeout:
-            print("Timeout reached waiting for login prompt", file=sys.stderr)
+            print("E: Timeout reached waiting for login prompt")
             break
 
     if success:
         write_ser_line(ser, "")
-        ser.timeout = 5
+        ser.timeout = 30
         print_ser_lines(ser)
         print("Running commands...")
         for command in commands:
@@ -140,6 +189,7 @@ def main():
             # after poweroff, the serial device will probably vanish. do not attempt reading from it anymore.
 
     if not success:
+        print("W: Running tests failed, saving screenshot")
         capture_vnc_screenshot(screenshot_file)
         sys.exit(1)
 

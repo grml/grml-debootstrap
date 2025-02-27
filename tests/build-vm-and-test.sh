@@ -33,7 +33,7 @@ fi
 
 if [ "$1" == "setup" ]; then
   sudo apt-get update
-  sudo apt-get -qq -y install curl kpartx python3-pexpect python3-serial
+  sudo apt-get -qq -y install curl kpartx python3-serial
   DPKG_ARCHITECTURE=$(dpkg --print-architecture)
   if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
     sudo apt-get -qq -y install qemu-system qemu-system-gui ovmf seabios

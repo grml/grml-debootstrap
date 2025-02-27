@@ -42,25 +42,26 @@ cat <<EOT > "$TEST_TMPDIR"/testrunner
 #!/bin/bash
 # Do not set -eu, we want to continue even if individual commands fail.
 set -x
-echo "INSIDE_VM $0 running"
+echo "INSIDE_VM \$0 running \$(date -R)"
 mkdir results
 
 # Collect information from VM first
-lsb_release -a > results/lsb_release.txt
+cat /etc/os-release > results/os-release.txt
+dpkg -l > results/dpkg-l.txt
 uname -a > results/uname-a.txt
 systemctl list-units > results/systemctl_list-units.txt
 systemctl status > results/systemctl_status.txt
 fdisk -l > results/fdisk-l.txt
 hostname -f > results/hostname-f.txt 2>&1
 journalctl -b > results/journalctl-b.txt
-dpkg -l > results/dpkg-l.txt
 
 # Run tests
-./goss --gossfile goss.yaml validate --format tap > results/goss.tap
+echo "INSIDE_VM starting goss \$(date -R)"
+./goss --gossfile goss.yaml validate --format tap > results/goss.tap 2> results/goss.err
 # Detection of testrunner success hinges on goss.exitcode file.
 echo \$? > results/goss.exitcode
 
-echo "INSIDE_VM $0 finished"
+echo "INSIDE_VM \$0 finished \$(date -R)"
 EOT
 chmod a+rx "$TEST_TMPDIR"/testrunner
 
@@ -76,9 +77,9 @@ if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
 elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
     cp /usr/share/AAVMF/AAVMF_VARS.fd efi_vars.fd
     qemu_command=( qemu-system-aarch64 )
-    qemu_command+=( -machine type=virt,gic-version=max,accel=kvm:tcg )
+    qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg" )
     qemu_command+=( -drive "if=pflash,format=raw,unit=0,file.filename=/usr/share/AAVMF/AAVMF_CODE.no-secboot.fd,file.locking=off,readonly=on" )
-    qemu_command+=( -drive "if=pflash,unit=1,file=efi_vars.fd" )
+    qemu_command+=( -drive "if=pflash,format=raw,unit=1,file=efi_vars.fd" )
 else
     echo "E: unsupported ${DPKG_ARCHITECTURE}"
     exit 1
@@ -86,7 +87,7 @@ fi
 qemu_command+=( -cpu max )
 qemu_command+=( -smp 2 )
 qemu_command+=( -m 2048 )
-qemu_command+=( -hda "${VM_IMAGE}" )
+qemu_command+=( -drive "file=${VM_IMAGE},format=raw,index=0,media=disk" )
 qemu_command+=( -virtfs "local,path=${TEST_TMPDIR},mount_tag=${MOUNT_TAG},security_model=none,id=host0" )
 qemu_command+=( -nographic )
 qemu_command+=( -display none )
@@ -96,52 +97,11 @@ qemu_command+=( -serial pty )
 "${qemu_command[@]}" &>qemu.log &
 QEMU_PID="$!"
 
-timeout=30
-success=0
-while [ "$timeout" -gt 0 ] ; do
-  ((timeout--))
-  if grep -q 'char device redirected to ' qemu.log ; then
-    success=1
-    sleep 1
-    break
-  else
-    echo "No serial console from Qemu found yet [$timeout retries left]"
-    sleep 1
-  fi
-done
-
-if [ "$success" = "1" ] ; then
-  serial_port=$(awk '/char device redirected/ {print $5}' qemu.log)
-else
-  echo "Error: Failed to identify serial console port." >&2
-  cat qemu.log
-  exit 1
-fi
-
-timeout=30
-success=0
-while [ "$timeout" -gt 0 ] ; do
-  ((timeout--))
-  if [ -c "$serial_port" ] ; then
-    success=1
-    sleep 1
-    break
-  else
-    echo "No block device for serial console found yet [$timeout retries left]"
-    sleep 1
-  fi
-done
-
-if [ "$success" = "0" ] ; then
-  echo "Error: can't access serial console block device." >&2
-  exit 1
-fi
-
 RC=0
 "$TEST_PWD"/tests/serial-console-connection \
   --tries 180 \
   --screenshot "$TEST_PWD/tests/screenshot.jpg" \
-  --port "$serial_port" \
+  --qemu-log qemu.log \
   --hostname "$VM_HOSTNAME" \
   --poweroff \
   "mount -t 9p -o trans=virtio,version=9p2000.L,msize=512000,rw $MOUNT_TAG /mnt && cd /mnt && ./testrunner" || RC=$?
@@ -149,14 +109,13 @@ RC=0
 if [ ! -d results ] || [ ! -f ./results/goss.tap ] || [ ! -f ./results/goss.exitcode ]; then
   echo "Running tests inside VM failed for unknown reason" >&2
   RC=1
+  cat results/goss.err || true
 else
   RC=$(cat results/goss.exitcode)
   echo "goss exitcode: $RC"
 
   cat results/goss.tap
 fi
-
-echo "Finished serial console connection [timeout=${timeout}]."
 
 # in case of errors we might have captured a screenshot via VNC
 if [ -r "${TEST_PWD}"/tests/screenshot.jpg ] ; then
