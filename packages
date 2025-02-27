@@ -1,5 +1,4 @@
 bridge-utils
-bzip2
 console-common
 console-data
 cryptsetup
@@ -26,3 +25,4 @@ vim
 vlan
 w3m
 zsh
+zstd
