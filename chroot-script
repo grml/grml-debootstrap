@@ -623,11 +623,11 @@ efi_setup() {
   # then we need to mount efivarfs for efibootmgr usage
   if ! ls /sys/firmware/efi/efivars/* &>/dev/null ; then
     echo "Mounting efivarfs on /sys/firmware/efi/efivars"
-    mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+    mount -t efivarfs efivarfs /sys/firmware/efi/efivars || true
   fi
 
   echo "Invoking efibootmgr"
-  efibootmgr
+  efibootmgr || true
 }
 
 # grub configuration/installation {{{
@@ -667,20 +667,72 @@ device_to_id() {
   return 1
 }
 
+is_grub_bios_compatible() {
+  # Check if the disk uses an MSDOS partition table, these are always compatible
+  if [[ "$(blkid "$GRUB")" =~ 'PTTYPE="dos"' ]]; then
+    return 0
+  # Look for a BIOS boot partition otherwise
+  else
+    while read -r line; do
+      if [[ "$line" =~ ^${GRUB}.*21686148-6449-6e6f-744e-656564454649$ ]]; then
+        return 0
+      fi
+    done < <(lsblk -pnlo NAME,PARTTYPE)
+  fi
+  return 1
+}
+
+run_grub_install() {
+  grub_install_cmd=( 'grub-install' "$@" )
+  if ! "${grub_install_cmd[@]}" ; then
+    echo "Error: failed to execute '${grub_install_cmd[*]}'." >&2
+    exit 1
+  fi
+}
+
 grub_install() {
 
   if [ -z "$GRUB" ] ; then
     echo "Notice: \$GRUB not defined, will not install grub inside chroot at this stage."
     return 0
   fi
+  MAIN_GRUB_PACKAGE=""
+  GRUB_SECBOOT_PACKAGES=()
+
+  case "$ARCH" in
+    i386)
+      if [ -n "$EFI" ]; then
+        MAIN_GRUB_PACKAGE="grub-efi-ia32"
+        GRUB_SECBOOT_PACKAGES=( "grub-efi-ia32-signed" "shim-signed" )
+      elif is_grub_bios_compatible; then
+        MAIN_GRUB_PACKAGE="grub-pc"
+      fi
+      ;;
+    amd64)
+      if is_grub_bios_compatible && [ -n "$EFI" ]; then
+        MAIN_GRUB_PACKAGE="grub-cloud-amd64"
+        GRUB_SECBOOT_PACKAGES=( "grub-efi-amd64-signed" "shim-signed" )
+      elif [ -n "$EFI" ]; then
+        MAIN_GRUB_PACKAGE="grub-efi-amd64"
+        GRUB_SECBOOT_PACKAGES=( "grub-efi-amd64-signed" "shim-signed" )
+      else
+        MAIN_GRUB_PACKAGE="grub-pc"
+      fi
+      ;;
+    arm64)
+      if [ -n "$EFI" ]; then
+        MAIN_GRUB_PACKAGE="grub-efi-arm64"
+        GRUB_SECBOOT_PACKAGES=( "grub-efi-arm64-signed" "shim-signed" )
+      fi
+      ;;
+  esac
+
+  if [ -z "$MAIN_GRUB_PACKAGE" ]; then
+    echo "Notice: No applicable bootloaders found, will not install grub inside chroot at this stage."
+    return 0
+  fi
 
   efi_setup
-
-  if [ -n "$EFI" ] ; then
-    GRUB_PACKAGE=grub-efi-amd64
-  else
-    GRUB_PACKAGE=grub-pc
-  fi
 
   # make sure this is pre-defined so we have sane settings for automated
   # upgrades, see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=711019
@@ -691,13 +743,12 @@ grub_install() {
      grub_device="${GRUB}"
   fi
 
-  echo "Setting ${GRUB_PACKAGE} debconf configuration for install device to $GRUB"
-  echo "${GRUB_PACKAGE} ${GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
-
-  if ! dpkg --list "${GRUB_PACKAGE}" 2>/dev/null | grep -q '^ii' ; then
-    echo "Notice: grub option set but no ${GRUB_PACKAGE} package, installing it therefore."
-    DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${GRUB_PACKAGE}"
+  echo "Setting grub debconf configuration for install device to $GRUB"
+  if [ -n "$MAIN_GRUB_PACKAGE" ]; then
+    echo "${MAIN_GRUB_PACKAGE} ${MAIN_GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
   fi
+
+  DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${MAIN_GRUB_PACKAGE}" "${GRUB_SECBOOT_PACKAGES[@]}"
 
   if ! [ -x "$(command -v grub-install)" ] ; then
      echo "Error: grub-install not available. (Error while installing grub package?)" >&2
@@ -712,19 +763,31 @@ grub_install() {
      for device in $SELECTED_PARTITIONS ; do
         GRUB="${device%%[0-9]}"
         echo "Installing grub on ${GRUB}:"
-        if ! grub-install --no-floppy "$GRUB" ; then
-          echo "Error: failed to execute 'grub-install --no-floppy $GRUB'." >&2
-          exit 1
+        if [ -n "$EFI" ]; then
+          case "${ARCH}" in
+            i386)  run_grub_install --no-floppy --target=i386-efi "${GRUB}";;
+            amd64) run_grub_install --no-floppy --target=x86_64-efi "${GRUB}";;
+            arm64) run_grub_install --no-floppy --target=arm64-efi "${GRUB}";;
+          esac
         fi
-
+        if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
+          run_grub_install --no-floppy --target=i386-pc "${GRUB}"
+        fi
      done
      rm -f /boot/grub/device.map
   else
     echo "Installing grub on ${GRUB}:"
+    mkdir -p /boot/grub
     echo "(hd0) ${GRUB}" > /boot/grub/device.map
-    if ! grub-install "(hd0)" ; then
-      echo "Error: failed to execute 'grub-install (hd0)'." >&2
-      exit 1
+    if [ -n "$EFI" ]; then
+      case "${ARCH}" in
+        i386)  run_grub_install --target=i386-efi "${GRUB}";;
+        amd64) run_grub_install --target=x86_64-efi "${GRUB}";;
+        arm64) run_grub_install --target=arm64-efi "${GRUB}";;
+      esac
+    fi
+    if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
+      run_grub_install --target=i386-pc "${GRUB}"
     fi
     rm /boot/grub/device.map
   fi
