@@ -1,3 +1,19 @@
+grml-debootstrap (0.115) unstable; urgency=medium
+
+  [ Michael Prokop ]
+  * [c3b8f4f] Makefile: mark chroot-script as bash script for shellcheck.
+    Thanks to Aaron Rainbolt
+
+  [ Chris Hofstaedtler ]
+  * [2edb21f] test-vm.sh: appease shellcheck
+  * [220b1a1] test-vm: fix qemu warning about autodetecting raw format drive
+  * [9631e48] testrunner: be more resilient
+  * [5f92043] tests: delegate more to python
+  * [d8304df] packages: replace dbus with libpam-systemd
+  * [7b3b6aa] packages: replace bzip2 with zstd
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 04 Mar 2025 23:29:18 +0100
+
 grml-debootstrap (0.114) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
