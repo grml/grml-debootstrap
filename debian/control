@@ -26,7 +26,7 @@ Depends:
  mmdebstrap,
  dosfstools,
  e2fsprogs,
- fdisk | util-linux (<< 2.29.2-3~),
+ fdisk,
  gawk,
  kmod,
  ${misc:Depends},
