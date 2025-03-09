@@ -21,12 +21,11 @@ Vcs-Browser: https://github.com/grml/grml-debootstrap
 Package: grml-debootstrap
 Architecture: all
 Depends:
- bash (>= 4.3-11+deb8u2),
  debian-archive-keyring,
  mmdebstrap,
  dosfstools,
  e2fsprogs,
- fdisk | util-linux (<< 2.29.2-3~),
+ fdisk,
  gawk,
  kmod,
  ${misc:Depends},
