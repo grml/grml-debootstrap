@@ -76,7 +76,6 @@
 # COMPONENTS='main contrib non-free'
 
 # Set target architecture.
-# Only useful when installing i386 while running an amd64 kernel.
 # Default: current architecture. (From 'dpkg --print-architecture'.)
 # ARCH='amd64'
 
