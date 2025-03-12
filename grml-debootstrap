@@ -1668,10 +1668,14 @@ debootstrap_system() {
     eend 1 ; exit 1
   fi
 
+  local bootstrap_include
+  # Support https mirrors.
+  bootstrap_include='--include=ca-certificates'
+
   einfo "Running mmdebstrap $DEBOOTSTRAP_OPT for release ${RELEASE}${ARCHINFO} using ${MIRROR}"
-  einfo "Executing: mmdebstrap --skip=cleanup/apt --skip=check/empty $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
+  einfo "Executing: mmdebstrap --skip=cleanup/apt --skip=check/empty $bootstrap_include $ARCHCMD $DEBOOTSTRAP_OPT $RELEASE $MNTPOINT $MIRROR"
   # shellcheck disable=SC2086
-  mmdebstrap --skip=cleanup/apt --skip=check/empty $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
+  mmdebstrap --skip=cleanup/apt --skip=check/empty "$bootstrap_include" $ARCHCMD $DEBOOTSTRAP_OPT "$RELEASE" "$MNTPOINT" "$MIRROR"
 }
 # }}}
 

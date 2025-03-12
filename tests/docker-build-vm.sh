@@ -17,7 +17,7 @@ RELEASE="$3"
 
 set -x
 
-MIRROR='http://deb.debian.org/debian'
+MIRROR='https://deb.debian.org/debian'
 
 
 echo " ****************************************************************** "
