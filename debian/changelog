@@ -1,3 +1,16 @@
+grml-debootstrap (0.116) unstable; urgency=medium
+
+  [ Aaron Rainbolt ]
+  * [2891f17] Improve hybrid bootloader and arm64 UEFI support
+
+  [ Chris Hofstaedtler ]
+  * [fc97d10] Drop support for Debian's "i386" port
+  * [f2ebc18] d/control: drop fdisk | util-linux alternative
+  * [235d390] d/control: drop versioned bash dependency
+  * [7a9d8c3] Support https mirrors
+
+ -- Chris Hofstaedtler <ch@grml.org>  Fri, 14 Mar 2025 14:32:59 +0100
+
 grml-debootstrap (0.115) unstable; urgency=medium
 
   [ Michael Prokop ]
