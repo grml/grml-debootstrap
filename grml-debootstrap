@@ -625,6 +625,22 @@ if [ "$_opt_grub" ] && [ "$_opt_vmfile" ] ; then
   bailout 1
 fi
 
+# TODO: We *could* remove the above incompatibility, so people could generate
+# VM images but with a separate disk acting as boot disk. (Niche use case,
+# yes, but doable.) If we keep the above incompatibility, should --efi also be
+# incompatible with --vmfile, as added below?
+if [ "$_opt_efi" ] && [ "$_opt_vmfile" ] ; then
+  eerror "The --efi option is incompatible with --vmfile, please drop it from your command line."
+  eerror "You can use --vmefi if you want your VM image to be EFI-bootable."
+  bailout 1
+fi
+
+if [ "$_opt_efi" ] && [ "$_opt_vmefi" ] ; then
+  eerror "The --efi option is incompatible with --vmefi, please drop one of them from your command line."
+  eerror "--vmefi should be used if the VM image should be self-bootable. Use --efi if you need a secondary disk to act as a boot disk."
+  bailout 1
+fi
+
 if [ "${_opt_sshcopyid}" ] && [ "${_opt_sshcopyauth}" ] ; then
   eerror "The --sshcopyid option is incompatible with --sshcopyauth, please drop either of them from your command line."
   bailout 1
@@ -1470,148 +1486,13 @@ prepare_vm() {
      eerror "Error: target could not be set to according /dev/mapper/* device."
      bailout 1
   fi
-}
-# }}}
 
-# make VM image bootable {{{
-grub_install() {
-  if [ -z "${VIRTUAL}" ] ; then
-     return 0
+  if [ -z "$GRUB" ]; then
+    GRUB="/dev/$LOOP_DISK" # '/dev/mapper/loop0'
   fi
-  if [ "${GRUB_INSTALL}" != "yes" ] ; then
-    einfo "Not installing GRUB as requested via \$GRUB_INSTALL=$GRUB_INSTALL"
-    return 0
+  if [ -z "$EFI" ] && [ "$VMEFI" = '1' ]; then
+    EFI="${EFI_TARGET}"
   fi
-
-  if ! mount "${TARGET}" "${MNTPOINT}" ; then
-    eerror "Error: Mounting ${TARGET} failed, can not continue."
-    bailout 1
-  fi
-
-  mount -t proc none "${MNTPOINT}"/proc
-  mount -t sysfs none "${MNTPOINT}"/sys
-  mount -t devtmpfs udev "${MNTPOINT}"/dev
-  mount -t devpts devpts "${MNTPOINT}"/dev/pts
-
-  # Has chroot-script installed GRUB to MBR using grub-install (successfully), already?
-  # chroot-script skips installation for unset ${GRUB}
-  if [[ -z "${GRUB}" ]] || ! dd if="${GRUB}" bs=512 count=1 2>/dev/null | cat -v | grep -Fq GRUB; then
-    einfo "Installing Grub as bootloader."
-
-    local grub_pc_package_name=''
-
-    # ARM64 uses EFI-only, and doesn't need a GRUB package. For i386, we only
-    # install the BIOS bootloader if we're not using EFI (since grub-pc and
-    # grub-efi-ia32 can't be co-installed). For amd64, we install grub-cloud
-    # which will pull in grub-pc-bin, so we don't need to explicitly install a
-    # BIOS bootloader for it when using EFI.
-    if [ -z "$VMEFI" ]; then
-      grub_pc_package_name='grub-pc'
-    fi
-
-    if [ -n "${grub_pc_package_name}" ]; then
-      if ! clean_chroot "${MNTPOINT}" dpkg --list "${grub_pc_package_name}" 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: ${grub_pc_package_name} package not present yet, installing it therefore."
-        clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS "${grub_pc_package_name}"
-      fi
-    fi
-
-    if [ -n "$VMEFI" ]; then
-      mkdir -p "${MNTPOINT}"/boot/efi
-      mount -t vfat "${EFI_TARGET}" "${MNTPOINT}"/boot/efi
-
-      efi_id="$(
-        if [ -f "${MNTPOINT}"/etc/default/grub ]; then
-          source "${MNTPOINT}"/etc/default/grub
-        fi
-        for file in "${MNTPOINT}"/etc/default/grub.d/*.cfg; do
-          if [ -f "${file}" ]; then
-            source "${file}"
-          fi
-        done
-        if [ "${GRUB_DISTRIBUTOR}" != "" ]; then
-          echo "${GRUB_DISTRIBUTOR}"
-        else
-          echo 'Debian'
-        fi
-      )"
-
-      if ! clean_chroot "${MNTPOINT}" dpkg --list shim-signed 2>/dev/null | grep -q '^ii' ; then
-        echo "Notice: shim-signed package not present yet, installing it therefore."
-        # shellcheck disable=SC2086
-        clean_chroot "${MNTPOINT}" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS shim-signed
-      fi
-
-      # The EFI bootloader will automatically be installed to the proper location when the
-      # corresponding grub-efi-ARCH package is installed.
-      if [ "${ARCH}" = "arm64" ]; then
-        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-arm64 grub2/force_efi_extra_removable boolean true'
-        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-arm64-signed 2>/dev/null | grep -q '^ii' ; then
-          echo "Notice: grub-efi-arm64-signed package not present yet, installing it therefore."
-          # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-arm64-signed grub-efi-arm64
-        fi
-        clean_chroot "$MNTPOINT" grub-install --target=arm64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${efi_id}" --force-extra-removable "/dev/$LOOP_DISK"
-      elif [ "${ARCH}" = "i386" ]; then
-        clean_chroot "$MNTPOINT" debconf-set-selections <<< 'grub-efi-ia32 grub2/force_efi_extra_removable boolean true'
-        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-efi-ia32-signed 2>/dev/null | grep -q '^ii' ; then
-          echo "Notice: grub-efi-ia32-signed package not present yet, installing it therefore."
-          # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-efi-ia32-signed grub-efi-ia32
-        fi
-        clean_chroot "$MNTPOINT" grub-install --target=i386-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${efi_id}" --force-extra-removable "/dev/$LOOP_DISK"
-      else
-        if ! clean_chroot "${MNTPOINT}" dpkg --list grub-cloud-amd64 2>/dev/null | grep -q '^ii' ; then
-          echo "Notice: grub-cloud-amd64 package not present yet, installing it therefore."
-          # shellcheck disable=SC2086
-          clean_chroot "$MNTPOINT" DEBIAN_FRONTEND=$DEBIAN_FRONTEND apt-get -y --no-install-recommends install $DPKG_OPTIONS grub-cloud-amd64
-        fi
-        # grub-cloud pulls in all the needed deps. We don't use it to install
-        # GRUB initially, but we do need it to update GRUB, so we have to
-        # touch /etc/grub.d/enable_cloud.
-        mkdir -p "${MNTPOINT}"/etc/grub.d
-        touch "${MNTPOINT}"/etc/grub.d/enable_cloud
-        clean_chroot "$MNTPOINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --uefi-secure-boot --bootloader-id="${efi_id}" --force-extra-removable "/dev/$LOOP_DISK"
-        clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
-      fi
-    else
-      clean_chroot "$MNTPOINT" grub-install --target=i386-pc "/dev/$LOOP_DISK"
-    fi
-  fi
-
-  # workaround for Debian bug #918590 with lvm + udev:
-  # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
-  if [ -d /run/udev ] ; then
-    einfo "Setting up bind-mount /run/udev"
-    mkdir -p "${MNTPOINT}"/run/udev
-    mount --bind /run/udev "${MNTPOINT}"/run/udev
-  fi
-
-  if [ -n "${BOOT_APPEND}" ] ; then
-    echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
-    sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" "${MNTPOINT}/etc/default/grub"
-  fi
-
-  einfo "Updating grub configuration file."
-  clean_chroot "${MNTPOINT}" update-grub
-  clean_chroot "${MNTPOINT}" sync
-
-  if grep -q '^GRUB_DISABLE_LINUX_UUID=.*true' "${MNTPOINT}"/etc/default/grub 2>/dev/null ; then
-    ewarn "GRUB_DISABLE_LINUX_UUID is set to true in /etc/default/grub, not adjusting root= in grub.cfg."
-    ewarn "Please note that your system might NOT be able to properly boot."
-  fi
-
-  # workaround for Debian bug #918590 with lvm + udev:
-  # WARNING: Device /dev/... not initialized in udev database even after waiting 10000000 microseconds
-  try_umount 3 "${MNTPOINT}"/run/udev
-
-  try_umount 3 "${MNTPOINT}"/proc
-  try_umount 3 "${MNTPOINT}"/sys
-  try_umount 3 "${MNTPOINT}"/dev/pts
-  try_umount 3 "${MNTPOINT}"/dev
-
-  try_umount 3 "${MNTPOINT}"/boot/efi
-
 }
 # }}}
 
@@ -2052,7 +1933,7 @@ remove_configs() {
 for i in format_efi_partition prepare_vm mkfs tunefs \
          mount_target mountpoint_to_blockdevice debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
-         remove_configs umount_chroot grub_install umount_target fscktool ; do
+         remove_configs umount_chroot umount_target fscktool ; do
     if stage "${i}" ; then
       "$i"
       stage "${i}" 'done'
