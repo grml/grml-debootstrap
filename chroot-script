@@ -648,6 +648,8 @@ device_to_id() {
     echo "$1"
     return 0
   fi
+
+  echo "ERROR: Device '$1' does not exist!"
   return 1
 }
 
@@ -657,8 +659,16 @@ is_grub_bios_compatible() {
     return 0
   # Look for a BIOS boot partition otherwise
   else
+    SEARCH_STR="$GRUB"
+    if [[ "$SEARCH_STR" =~ ^/dev/loop ]]; then
+      SEARCH_STR="${SEARCH_STR//\/dev\//}" # loopX
+      SEARCH_STR="/dev/mapper/${SEARCH_STR}" # /dev/mapper/loopX
+      # Note that /dev/mapper/loopX won't actually exist, but
+      # /dev/mapper/loopXpY will, so this works for the regex check in the
+      # while loop below.
+    fi
     while read -r line; do
-      if [[ "$line" =~ ^${GRUB}.*21686148-6449-6e6f-744e-656564454649$ ]]; then
+      if [[ "$line" =~ ^${SEARCH_STR}.*21686148-6449-6e6f-744e-656564454649$ ]]; then
         return 0
       fi
     done < <(lsblk -pnlo NAME,PARTTYPE)
@@ -675,7 +685,6 @@ run_grub_install() {
 }
 
 grub_install() {
-
   if [ -z "$GRUB" ] ; then
     echo "Notice: \$GRUB not defined, will not install grub inside chroot at this stage."
     return 0
@@ -749,9 +758,9 @@ grub_install() {
         echo "Installing grub on ${GRUB}:"
         if [ -n "$EFI" ]; then
           case "${ARCH}" in
-            i386)  run_grub_install --no-floppy --target=i386-efi "${GRUB}";;
-            amd64) run_grub_install --no-floppy --target=x86_64-efi "${GRUB}";;
-            arm64) run_grub_install --no-floppy --target=arm64-efi "${GRUB}";;
+            i386)  run_grub_install --no-floppy --target=i386-efi --force-extra-removable "${GRUB}";;
+            amd64) run_grub_install --no-floppy --target=x86_64-efi --force-extra-removable "${GRUB}";;
+            arm64) run_grub_install --no-floppy --target=arm64-efi --force-extra-removable "${GRUB}";;
           esac
         fi
         if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
@@ -765,9 +774,9 @@ grub_install() {
     echo "(hd0) ${GRUB}" > /boot/grub/device.map
     if [ -n "$EFI" ]; then
       case "${ARCH}" in
-        i386)  run_grub_install --target=i386-efi "${GRUB}";;
-        amd64) run_grub_install --target=x86_64-efi "${GRUB}";;
-        arm64) run_grub_install --target=arm64-efi "${GRUB}";;
+        i386)  run_grub_install --target=i386-efi --force-extra-removable "${GRUB}";;
+        amd64) run_grub_install --target=x86_64-efi --force-extra-removable "${GRUB}";;
+        arm64) run_grub_install --target=arm64-efi --force-extra-removable "${GRUB}";;
       esac
     fi
     if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
