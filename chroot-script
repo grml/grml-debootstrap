@@ -741,6 +741,7 @@ grub_install() {
     echo "${MAIN_GRUB_PACKAGE} ${MAIN_GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
   fi
 
+  echo "Installing automatically-determined grub packages ${MAIN_GRUB_PACKAGE}" "${GRUB_SECBOOT_PACKAGES[@]}"
   DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${MAIN_GRUB_PACKAGE}" "${GRUB_SECBOOT_PACKAGES[@]}"
 
   if ! [ -x "$(command -v grub-install)" ] ; then
