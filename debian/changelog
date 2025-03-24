@@ -1,3 +1,10 @@
+grml-debootstrap (0.117) unstable; urgency=medium
+
+  [ Aaron Rainbolt ]
+  * [a3048cf] Deduplicate GRUB installation code
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 24 Mar 2025 11:30:11 +0100
+
 grml-debootstrap (0.116) unstable; urgency=medium
 
   [ Aaron Rainbolt ]
