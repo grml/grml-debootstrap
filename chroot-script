@@ -693,14 +693,6 @@ grub_install() {
   GRUB_SECBOOT_PACKAGES=()
 
   case "$ARCH" in
-    i386)
-      if [ -n "$EFI" ]; then
-        MAIN_GRUB_PACKAGE="grub-efi-ia32"
-        GRUB_SECBOOT_PACKAGES=( "grub-efi-ia32-signed" "shim-signed" )
-      elif is_grub_bios_compatible; then
-        MAIN_GRUB_PACKAGE="grub-pc"
-      fi
-      ;;
     amd64)
       if is_grub_bios_compatible && [ -n "$EFI" ]; then
         MAIN_GRUB_PACKAGE="grub-cloud-amd64"
@@ -770,7 +762,6 @@ grub_install() {
      echo "Installing grub on ${device}:"
      if [ -n "$EFI" ]; then
        case "${ARCH}" in
-         i386)  run_grub_install --no-floppy --target=i386-efi --force-extra-removable "${device}";;
          amd64) run_grub_install --no-floppy --target=x86_64-efi --force-extra-removable "${device}";;
          arm64) run_grub_install --no-floppy --target=arm64-efi --force-extra-removable "${device}";;
        esac
