@@ -786,10 +786,17 @@ grub_install() {
     sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" /etc/default/grub
   fi
 
-  mountpoint /boot/efi &>/dev/null && umount /boot/efi
+  # create (/update) grub configuration
+  if ! update-grub ; then
+    echo "Error: update-grub failed." >&2
+    return 1
+  fi
 
-  # finally install grub. Existence of update-grub is checked above.
-  update-grub
+  if mountpoint -q /boot/efi ; then
+    umount /boot/efi
+  fi
+
+  return 0
 }
 # }}}
 
