@@ -693,14 +693,6 @@ grub_install() {
   GRUB_SECBOOT_PACKAGES=()
 
   case "$ARCH" in
-    i386)
-      if [ -n "$EFI" ]; then
-        MAIN_GRUB_PACKAGE="grub-efi-ia32"
-        GRUB_SECBOOT_PACKAGES=( "grub-efi-ia32-signed" "shim-signed" )
-      elif is_grub_bios_compatible; then
-        MAIN_GRUB_PACKAGE="grub-pc"
-      fi
-      ;;
     amd64)
       if is_grub_bios_compatible && [ -n "$EFI" ]; then
         MAIN_GRUB_PACKAGE="grub-cloud-amd64"
@@ -741,6 +733,7 @@ grub_install() {
     echo "${MAIN_GRUB_PACKAGE} ${MAIN_GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
   fi
 
+  echo "Installing automatically-determined grub packages ${MAIN_GRUB_PACKAGE}" "${GRUB_SECBOOT_PACKAGES[@]}"
   DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL "${MAIN_GRUB_PACKAGE}" "${GRUB_SECBOOT_PACKAGES[@]}"
 
   if ! [ -x "$(command -v grub-install)" ] ; then
@@ -752,50 +745,49 @@ grub_install() {
      return 1
   fi
 
-  if [ -n "$SELECTED_PARTITIONS" ] ; then # using sw-raid
-     for device in $SELECTED_PARTITIONS ; do
-        GRUB="${device%%[0-9]}"
-        echo "Installing grub on ${GRUB}:"
-        if [ -n "$EFI" ]; then
-          case "${ARCH}" in
-            i386)  run_grub_install --no-floppy --target=i386-efi --force-extra-removable "${GRUB}";;
-            amd64) run_grub_install --no-floppy --target=x86_64-efi --force-extra-removable "${GRUB}";;
-            arm64) run_grub_install --no-floppy --target=arm64-efi --force-extra-removable "${GRUB}";;
-          esac
-        fi
-        if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
-          run_grub_install --no-floppy --target=i386-pc "${GRUB}"
-        fi
-     done
-     rm -f /boot/grub/device.map
+  local grub_targets=""
+  if [ -n "$SELECTED_PARTITIONS" ]; then
+    # sw-raid
+    local device
+    for device in $SELECTED_PARTITIONS ; do
+      local grub_target="${device%%[0-9]}"
+      grub_targets="${grub_targets} ${grub_target}"
+    done
   else
-    echo "Installing grub on ${GRUB}:"
-    mkdir -p /boot/grub
-    echo "(hd0) ${GRUB}" > /boot/grub/device.map
-    if [ -n "$EFI" ]; then
-      case "${ARCH}" in
-        i386)  run_grub_install --target=i386-efi --force-extra-removable "${GRUB}";;
-        amd64) run_grub_install --target=x86_64-efi --force-extra-removable "${GRUB}";;
-        arm64) run_grub_install --target=arm64-efi --force-extra-removable "${GRUB}";;
-      esac
-    fi
-    if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
-      run_grub_install --target=i386-pc "${GRUB}"
-    fi
-    rm /boot/grub/device.map
+    grub_targets="${GRUB}"
   fi
 
-  echo "Adjusting grub configuration for use on ${GRUB}."
+  local device
+  for device in $grub_targets ; do
+     echo "Installing grub on ${device}:"
+     if [ -n "$EFI" ]; then
+       case "${ARCH}" in
+         amd64) run_grub_install --no-floppy --target=x86_64-efi --force-extra-removable "${device}";;
+         arm64) run_grub_install --no-floppy --target=arm64-efi --force-extra-removable "${device}";;
+       esac
+     fi
+     if [ "$MAIN_GRUB_PACKAGE" = 'grub-cloud-amd64' ] || [ -z "$EFI" ]; then
+       run_grub_install --no-floppy --target=i386-pc "${device}"
+     fi
+  done
+  rm -f /boot/grub/device.map  # avoid confusion with sw-raid
 
   if [ -n "${BOOT_APPEND}" ] ; then
     echo "Adding BOOT_APPEND configuration ['${BOOT_APPEND}'] to /etc/default/grub."
     sed -i "/GRUB_CMDLINE_LINUX_DEFAULT/ s#\"\$# ${BOOT_APPEND}\"#" /etc/default/grub
   fi
 
-  mountpoint /boot/efi &>/dev/null && umount /boot/efi
+  # create (/update) grub configuration
+  if ! update-grub ; then
+    echo "Error: update-grub failed." >&2
+    return 1
+  fi
 
-  # finally install grub. Existence of update-grub is checked above.
-  update-grub
+  if mountpoint -q /boot/efi ; then
+    umount /boot/efi
+  fi
+
+  return 0
 }
 # }}}
 

@@ -1430,7 +1430,7 @@ prepare_vm() {
   ORIG_TARGET="$TARGET" # store for later reuse
 
   case "$ARCH" in
-    i386|amd64) true;;
+    amd64)      true;;
     arm64)      VMEFI=1;;
   esac
 
@@ -1441,8 +1441,8 @@ prepare_vm() {
     parted -s "${TARGET}" 'mklabel gpt'
     parted -s "${TARGET}" 'mkpart ESP fat32 1MiB 101MiB'
     parted -s "${TARGET}" 'set 1 boot on'
-    if [ "$ARCH" = 'arm64' ] || [ "$ARCH" = 'i386' ]; then
-      # No need for a bios_grub parttion on ARM64 or i386
+    if [ "$ARCH" = 'arm64' ]; then
+      # No need for a bios_grub parttion on ARM64
       parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
     else
       parted -s "${TARGET}" 'mkpart bios_grub 101MiB 102MiB'
@@ -1473,7 +1473,7 @@ prepare_vm() {
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   if [ -n "$VMEFI" ]; then
     export EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
-    if [ "$ARCH" = 'arm64' ] || [ "$ARCH" = 'i386' ]; then
+    if [ "$ARCH" = 'arm64' ]; then
       LOOP_PART="${LOOP_PART%p1}p2"
     else
       LOOP_PART="${LOOP_PART%p1}p3"
