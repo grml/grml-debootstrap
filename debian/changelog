@@ -1,3 +1,13 @@
+grml-debootstrap (0.118) unstable; urgency=medium
+
+  * [2970ed4] grub: merge swraid and non-swraid code paths
+  * [39ca807] grub: show which packages get installed
+  * [a0afa91] grub: umount /boot/efi after update-grub
+  * [f4bf8a9] grub: drop ARCH=i386 support
+  * [f5051be] Set Standards-Version to 4.7.2
+
+ -- Chris Hofstaedtler <ch@grml.org>  Sun, 30 Mar 2025 16:07:42 +0200
+
 grml-debootstrap (0.117) unstable; urgency=medium
 
   [ Aaron Rainbolt ]
