@@ -976,21 +976,17 @@ format_efi_partition() {
 
 # check for EFI support or try to enable it {{{
 efi_support() {
-  local efivars_loaded=false
-  if modprobe efivarfs &>/dev/null ; then
-    efivars_loaded=true
-  fi
+  # Absence of an EFI runtime does not prevent loading efivarfs since commit
+  # 301de9a2055357375a4e1053d9df0f8f3467ff00 which landed in Linux v6.3.
+  # Unconditionally load it, in case nothing else attempted it.
+  modprobe efivarfs &>/dev/null || true
 
   if [ -d /sys/firmware/efi ] ; then
     einfo "EFI support detected."
     return 0
   fi
 
-  if ! [ -d /sys/firmware/efi ] && [ "${efivars_loaded:-}" = "true" ] ; then
-    einfo "EFI support detected, but system seems to be running in BIOS mode."
-  fi
-
-  # The user may have a legitimate reason to do an EFI installation on a BIOS
+  # The user may have a legitimate reason to do an EFI installation on a non-EFI
   # system (for instance if doing a hybrid-bootable installation), so don't
   # return 1 here.
 }
