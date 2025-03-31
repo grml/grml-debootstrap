@@ -977,11 +977,6 @@ format_efi_partition() {
 # check for EFI support or try to enable it {{{
 efi_support() {
   local efivars_loaded=false
-  # this is for kernels versions before v3.10, which didn't provide efivarfs yet
-  if modprobe efivars &>/dev/null ; then
-    efivars_loaded=true
-  fi
-  # kernel versions v3.10 and newer usually provide efivarfs
   if modprobe efivarfs &>/dev/null ; then
     efivars_loaded=true
   fi
