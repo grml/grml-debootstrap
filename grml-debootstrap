@@ -180,10 +180,10 @@ if [ "${TERM}" = "dumb" ] ; then
   WARN=
   NORMAL=
 else
-  GOOD='[32;01m'
-  BAD='[31;01m'
-  WARN='[33;01m'
-  NORMAL='[0m'
+  GOOD="$(printf '\033[32;01m')"
+  BAD="$(printf '\033[31;01m')"
+  WARN="$(printf '\033[33;01m')"
+  NORMAL="$(printf '\033[0m')"
 fi
 
 einfo() {
