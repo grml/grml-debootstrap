@@ -1358,6 +1358,8 @@ mkfs() {
     # will fail to detect the uuid in the chroot
     if [ -n "$VIRTUAL" ] ; then
       einfo "Virtual environment doesn't require blockdev --rereadpt, skipping therefore"
+    elif [ -n "$RPI" ] ; then
+      einfo "Raspberry Pi image build doesn't require blockdev --rereadpt, skipping therefore"
     elif echo "$TARGET" | grep -q "/dev/md" ; then
       blockdev --rereadpt "${TARGET}"
     else
@@ -1546,19 +1548,29 @@ prepare_image() {
 
   # hopefully this always works as expected
   LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
+
+  case "${LOOP_PART}" in
+    sd*|vd*|xvd*) part_prefix=""  ;;
+    *)            part_prefix="p" ;;
+  esac
+
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   if [ -n "$VMEFI" ]; then
     EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
     if [ "$ARCH" = 'arm64' ]; then
-      LOOP_PART="${LOOP_PART%p1}p2"
+      LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}2"
     else
-      LOOP_PART="${LOOP_PART%p1}p3"
+      LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}3"
     fi
   elif [ -n "$RPI" ]; then
     RPIFIRM_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
-    LOOP_PART="${LOOP_PART%p1}p2"
+    LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}2"
   fi
-  LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
+  if [ -n "${part_prefix}" ]; then
+    LOOP_DISK="${LOOP_PART%${part_prefix}*}"      # 'loop0'
+  else
+    LOOP_DISK="${LOOP_PART%%[0-9]*}"              # 'sda'
+  fi
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
 
   if [ -z "$TARGET" ] ; then
@@ -1567,7 +1579,7 @@ prepare_image() {
   fi
 
   if [ -z "$GRUB" ]; then
-    GRUB="/dev/$LOOP_DISK" # '/dev/mapper/loop0'
+    GRUB="/dev/$LOOP_DISK" # '/dev/loop0' or '/dev/sda'
   fi
   if [ -z "$EFI" ] && [ "$VMEFI" = '1' ]; then
     EFI="${EFI_TARGET}"
