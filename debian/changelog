@@ -1,3 +1,14 @@
+grml-debootstrap (0.119) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [6a1d471] efi_support: drop support for Linux before 3.10
+  * [b8a6a2c] efi_support: drop BIOS-mode info
+
+  [ Patrick Schleizer ]
+  * [0cfdc33] Replace inline ESC with printf calls
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 07 Apr 2025 12:33:54 +0200
+
 grml-debootstrap (0.118) unstable; urgency=medium
 
   * [2970ed4] grub: merge swraid and non-swraid code paths
