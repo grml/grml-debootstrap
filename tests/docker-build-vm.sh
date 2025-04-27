@@ -6,14 +6,15 @@
 
 set -eu -o pipefail
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
   echo "$0: Invalid arguments" >&2
-  echo "Expect: $0 HOST_UID TARGET RELEASE" >&2
+  echo "Expect: $0 HOST_UID TARGET RELEASE RASPI" >&2
   exit 1
 fi
 HOST_UID="$1"
 TARGET="$2"
 RELEASE="$3"
+RASPI="$4"
 
 set -x
 
@@ -23,11 +24,17 @@ MIRROR='https://deb.debian.org/debian'
 echo " ****************************************************************** "
 echo " * Running grml-debootstrap"
 
+if [ "$RASPI" = 'yes' ]; then
+  extra_buildopts='--rpifile --non-free'
+else
+  extra_buildopts='--vmfile'
+fi
+
 grml-debootstrap \
   --debug \
   --force \
-  --vmfile \
-  --vmsize 3G \
+  ${extra_buildopts} \
+  --imagesize 3G \
   --target "$TARGET" \
   --bootappend "console=ttyS0,115200 console=tty0 vga=791" \
   --password grml \
