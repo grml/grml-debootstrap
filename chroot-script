@@ -576,7 +576,7 @@ initrd() {
   KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
   # generate initrd
-  if [ -n "$INITRD" ] ; then
+  if [ "$INITRD" = "yes" ] ; then
      echo "Generating initrd."
      if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
          # shellcheck disable=SC2086
