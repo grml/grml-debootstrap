@@ -78,7 +78,7 @@ if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
 elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
   if [ "$RASPI" = 'yes' ]; then
     if ! rpi_bootdata="$(sudo "$TEST_PWD"/tests/extract-rpi-bootdata.sh "$VM_IMAGE")"; then
-      echo "E: could not extract RPi boot data"
+      echo "E: could not extract RPi boot data" >&2
       exit 1
     fi
     IFS='|' read rpi_kern rpi_initrd rpi_kerncmd <<< "$rpi_bootdata"
@@ -95,7 +95,7 @@ elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
     qemu_command+=( -drive "if=pflash,format=raw,unit=1,file=efi_vars.fd" )
   fi
 else
-  echo "E: unsupported ${DPKG_ARCHITECTURE}"
+  echo "E: unsupported ${DPKG_ARCHITECTURE}" >&2
   exit 1
 fi
 qemu_command+=( -cpu max )
