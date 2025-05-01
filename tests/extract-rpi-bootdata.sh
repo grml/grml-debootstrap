@@ -9,11 +9,11 @@ bail_noremove() {
 }
 
 cleanup() {
-  if mountpoint "$WORK_DIR" 2>/dev/null >/dev/null; then
-    umount "$WORK_DIR" 2>/dev/null >/dev/null
+  if mountpoint "$WORK_DIR" >/dev/null 2>&1; then
+    umount "$WORK_DIR" >/dev/null 2>&1
   fi
-  rmdir "$WORK_DIR" 2>/dev/null >/dev/null
-  kpartx -d -s -v "$VM_IMAGE" 2>/dev/null >/dev/null
+  rmdir "$WORK_DIR" >/dev/null 2>&1
+  kpartx -d -s -v "$VM_IMAGE" >/dev/null 2>&1
 }
 
 bail() {
