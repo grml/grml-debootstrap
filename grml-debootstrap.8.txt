@@ -133,6 +133,14 @@ Options and environment variables
 
     Use specified hostname instead of the default (being $HOSTNAME or if unset 'grml').
 
+*--imagesize* _size_::
+
+   Use specified size for size of Virtual Machine or Raspberry Pi disk file.
+   If not specified it defaults to 2G (being 2GiB) for virtual machines, and 3G
+   (being 3GiB) for Raspberry Pi images. Syntax as supported by qemu-img (see
+   manpage qemu-img(1) for details.
+   Usage example: --imagesize 3G
+
 *--keep_src_list*::
 
      Do not overwrite user provided /etc/apt/sources.list.
@@ -218,6 +226,32 @@ Options and environment variables
     Delete grml-debootstrap configuration files (/etc/debootstrap/*) from installed
     system. Useful for reproducible builds or if you don't want to leak information.
 
+*--rpi*::
+
+    Set up a Raspberry Pi installation on an existing block device, which will
+    be partitioned. This allows deployment of a physical Raspberry Pi system.
+    The option needs to be combined with the --target option.
+    This option automatically enables the --defaultinterfaces option.
+    Usage example: --rpi --target /dev/mmcblk0
+
+*--rpifile*::
+
+    Set up a Raspberry Pi installation using a regular file instead of
+    installing to a partition/block device. This allows creation of a
+    Raspberry Pi image. The option needs to be combined with the --target
+    option ('qemu-img create -f raw ...' is executed on the specified target).
+    This option automatically enables the --defaultinterfaces option.
+    Usage example: --rpifile --target /mnt/sda1/rpi.img
+
+*--rpifirm* _device_::
+
+    Partition where Raspberry Pi firmware should be installed to. If the
+    specified device doesn't use a FAT filesystem yet grml-debootstrap
+    automatically creates the filesystem. If a FAT filesystem is already
+    present the filesystem creation is skipped. Please ensure that it's a
+    valid FAT32 filesystem. This option is NOT supported for Raspberry Pi
+    image file deployments.
+
 *--sshcopyauth*::
 
     Use locally available _$HOME/.ssh/authorized_keys_ to authorise root login on the target system.
@@ -261,10 +295,7 @@ Options and environment variables
 
 *--vmsize* _size_::
 
-   Use specified size for size of Virtual Machine disk file. If not specified it
-   defaults to 2G (being 2GB). Syntax as supported by qemu-img (see manpage
-   qemu-img(1) for details.
-   Usage example: --vmsize 3G
+   Deprecated alias for --imagesize.
 
 *--vmefi*::
 
@@ -326,7 +357,7 @@ Install default Debian release (trixie) on /dev/sda3 and install bootmanager GRU
 Use specified mirror instead of the default (http://deb.debian.org/debian) one.
 
   mount /dev/sda1 /mnt/sda1
-  grml-debootstrap --vmfile --vmsize 3G --target /mnt/sda1/qemu.img
+  grml-debootstrap --vmfile --imagesize 3G --target /mnt/sda1/qemu.img
 
 Install default debian release (trixie) in a Virtual Machine file with 3GB disk size (including GRUB as bootmanager in MBR of the virtual disk file).
 
