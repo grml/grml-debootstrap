@@ -1832,6 +1832,10 @@ iface ${interface} inet dhcp
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+  elif [ -n "$RPI" ] ; then
+    einfo "Setting up Raspberry Pi installation, installing default /etc/network/interfaces"
+    mkdir -p "${MNTPOINT}/etc/network"
+    echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
   elif [ -r /etc/network/interfaces ] ; then
     einfo "Copying /etc/network/interfaces from host to target system"
     mkdir -p "${MNTPOINT}/etc/network"
