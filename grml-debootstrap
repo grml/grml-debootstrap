@@ -1145,6 +1145,12 @@ Please use specific codenames such as bookworm or trixie."
 fi
 # }}}
 
+# Verify that provided GRUB device actually exists{{{
+if [ -n "${GRUB}" ] && ! [ -b "${GRUB}" ] ;  then
+  eerror "GRUB target '${GRUB}' doesn't look like a supported block device."
+  bailout 1
+fi
+# }}}
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
