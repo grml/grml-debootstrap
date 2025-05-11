@@ -1,3 +1,17 @@
+grml-debootstrap (0.120) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  * [d634a72] fix skipping initrd creation using INITRD=no
+
+  [ Aaron Rainbolt ]
+  * [d8ca8f2] Set root partition type UUIDs for VM images according to the
+    Discoverable Partition Specification
+
+  [ Michael Prokop ]
+  * [0208c8a] Verify that GRUB configuration points to valid block device
+
+ -- Chris Hofstaedtler <ch@grml.org>  Sun, 11 May 2025 18:45:24 +0200
+
 grml-debootstrap (0.119) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
