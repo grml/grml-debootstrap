@@ -1431,6 +1431,11 @@ prepare_vm() {
     arm64)      VMEFI=1;;
   esac
 
+  parted_type_command_supported='no'
+  if [[ "$(parted --help)" =~ 'type NUMBER TYPE-ID or TYPE-UUID' ]]; then
+    parted_type_command_supported='yes'
+  fi
+
   if [ -n "$VMFILE" ]; then
     qemu-img create -f raw "${TARGET}" "${VMSIZE}"
   fi
@@ -1441,10 +1446,21 @@ prepare_vm() {
     if [ "$ARCH" = 'arm64' ]; then
       # No need for a bios_grub parttion on ARM64
       parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
+      if [ "${parted_type_command_supported}" = 'yes' ]; then
+        # Make the root partition identify itself as "Root Partition (64-bit
+        # ARM/AARCH64)", see
+        # https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
+        parted -s "${TARGET}" 'type 2 b921b045-1df0-41c3-af44-4c6f280d3fae'
+      fi
     else
       parted -s "${TARGET}" 'mkpart bios_grub 101MiB 102MiB'
       parted -s "${TARGET}" 'set 2 bios_grub on'
       parted -s "${TARGET}" 'mkpart primary ext4 102MiB 100%'
+      if [ "${parted_type_command_supported}" = 'yes' ]; then
+        # Make the root partition identify itself as "Root Partition
+        # (amd64/x86_64)", see Discoverable Partitions Specification link above
+        parted -s "${TARGET}" 'type 3 4f68bce3-e8cd-4db1-96e7-fbcaf984b709'
+      fi
     fi
   else
     parted -s "${TARGET}" 'mklabel msdos'
