@@ -1,3 +1,10 @@
+grml-debootstrap (0.121) unstable; urgency=medium
+
+  [ Aaron Rainbolt ]
+  * [b3aeda2] Don't set bogus debconf variable on grub-cloud packages
+
+ -- Chris Hofstaedtler <ch@grml.org>  Wed, 14 May 2025 13:20:54 +0200
+
 grml-debootstrap (0.120) unstable; urgency=medium
 
   [ Patrick Schleizer ]
