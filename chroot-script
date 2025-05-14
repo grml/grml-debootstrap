@@ -728,8 +728,8 @@ grub_install() {
      grub_device="${GRUB}"
   fi
 
-  echo "Setting grub debconf configuration for install device to $GRUB"
-  if [ -n "$MAIN_GRUB_PACKAGE" ]; then
+  if [ -n "$MAIN_GRUB_PACKAGE" ] && ! [[ "$MAIN_GRUB_PACKAGE" =~ ^grub-cloud ]]; then
+    echo "Setting grub debconf configuration for install device to $GRUB"
     echo "${MAIN_GRUB_PACKAGE} ${MAIN_GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
   fi
 
