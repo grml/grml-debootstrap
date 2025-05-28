@@ -1718,6 +1718,12 @@ iface eth0 inet dhcp
   if [ -x /bin/udevadm ]; then
     tmpfile=$(mktemp)
     for interface in /sys/class/net/*; do
+      # skip any interfaces that don't end up in a directory,
+      # which we could query via udevadm, like f.e. "bonding_masters"
+      if ! [ -d "${interface}" ] ; then
+        continue
+      fi
+
       udevadm info --query=all --path="${interface}" > "${tmpfile}"
       # skip virtual devices, like bridges, vboxnet,...
       if grep -q 'P: /devices/virtual/net/' "${tmpfile}" ; then
