@@ -1814,12 +1814,6 @@ iface ${interface} inet dhcp
       bailout 1
     fi
   fi
-
-  if [ -d /run/udev ] ; then
-    einfo "Setting up bind-mount /run/udev"
-    mkdir -p "${MNTPOINT}"/run/udev
-    mount --bind /run/udev "${MNTPOINT}"/run/udev
-  fi
 }
 # }}}
 
@@ -1879,8 +1873,11 @@ chrootscript() {
     eend 1
   else
     einfo "Executing chroot-script now"
-    mount -t devtmpfs udev "${MNTPOINT}"/dev
-    mount -t devpts devpts "${MNTPOINT}"/dev/pts
+    # Linux kernel only has a *single* instance of devtmpfs. Mounting it
+    # with -t devtmpfs will give the chroot the *same* instance as the host has.
+    # To avoid modifying the host /dev, we provide a read-only bind mount.
+    mount -o bind,ro /dev "${MNTPOINT}"/dev
+    mount -t devpts -o newinstance devpts "${MNTPOINT}"/dev/pts
     if [ "$DEBUG" = "true" ] ; then
       clean_chroot "$MNTPOINT" /bin/bash -x /bin/chroot-script
     else
