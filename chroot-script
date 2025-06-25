@@ -783,6 +783,12 @@ grub_install() {
     return 1
   fi
 
+  echo 'XXXXXXXXXXXXX mount output follows'
+  mount
+  echo 'XXXXXXXXXXXXX grub.cfg follows'
+  cat /boot/grub/grub.cfg
+  echo 'XXXXXXXXXXXXX end'
+
   if mountpoint -q /boot/efi ; then
     umount /boot/efi
   fi
