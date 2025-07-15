@@ -56,7 +56,6 @@ jobs:
         - trixie
         - bookworm
         - bullseye
-        - buster
 
         runner:
         - ubuntu-latest
@@ -68,8 +67,6 @@ jobs:
             host_release: bullseye
           - runner: ubuntu-24.04-arm
             release: bullseye
-          - runner: ubuntu-24.04-arm
-            release: buster
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ${{ matrix.runner }}

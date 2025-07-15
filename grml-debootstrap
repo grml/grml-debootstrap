@@ -605,7 +605,7 @@ done
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 
 case "${RELEASE}" in
-  buster|bullseye)
+  bullseye)
     [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
     ;;
   *)
@@ -819,8 +819,7 @@ prompt_for_release()
   local default_value="$RELEASE"
   RELEASE="$(dialog --stdout --title "${PN}" --default-item "$default_value" --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 8 \
-            buster   Debian/10 \
+            0 50 0 \
             bullseye Debian/11 \
             bookworm Debian/12 \
             trixie   Debian/13 \
