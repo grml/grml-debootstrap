@@ -80,7 +80,7 @@ askpass() {
 # mark existing packages as automatically installed {{{
 markauto() {
   case "$RELEASE" in
-    buster|bullseye)
+    bullseye)
       # apt-mark is unavailable or does not support all used patterns.
       return
       ;;
@@ -112,10 +112,6 @@ chrootmirror() {
   # add security.debian.org:
   case "$RELEASE" in
     unstable|sid) ;;  # no security pool available
-    buster)
-      echo "Adding security.debian.org to sources.list."
-      echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
-      ;;
     *)
       # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html

@@ -20,5 +20,5 @@ mountpoint="/srv/debian"
 @test "debian_version exists and is valid version" {
   run cat "${mountpoint}/etc/debian_version"
   [ "$status" -eq 0 ]
-  [[ "$output" == [0-9].[0-9]* ]] || [[ "$output" == 'buster/sid' ]]
+  [[ "$output" == [0-9].[0-9]* ]] || [[ "$output" == 'trixie/sid' ]]
 }
