@@ -152,9 +152,12 @@ EOF
 sources_list_setup() {
   # This is ugly because it's 'testing' no matter what ISO we're using, but otherwise we're running into
   # W: Failed to fetch http://snapshot.debian.org/archive/debian/20141114/dists/testing/main/binary-amd64/Packages  404  Not Found [IP: 193.62.202.30 80]
-  echo "* Setting up /etc/apt/sources.list.d/debian.list to avoid snapshot.debian.org usage causing possible failures"
-  cat > /etc/apt/sources.list.d/debian.list << EOF
-deb http://ftp.debian.org/debian testing main
+  echo "* Setting up /etc/apt/sources.list.d/debian.sources to avoid snapshot.debian.org usage causing possible failures"
+  cat > /etc/apt/sources.list.d/debian.sources << EOF
+Types: deb
+URIs: http://ftp.debian.org/debian
+Suites: testing
+Components: main
 EOF
 }
 
@@ -163,8 +166,11 @@ grml_debootstrap_setup() {
   if [ "$GRML_DEBOOTSTRAP_VERSION" = "latest" ] ; then
     echo "** GRML_DEBOOTSTRAP_VERSION is set to '$GRML_DEBOOTSTRAP_VERSION'"
     echo "** Setting up grml-debootstrap from CI repository from jenkins.grml.org"
-    cat > /etc/apt/sources.list.d/grml-debootstrap.list << EOF
-deb     http://jenkins.grml.org/debian grml-debootstrap main
+    cat > /etc/apt/sources.list.d/grml-debootstrap.sources << EOF
+Types: deb
+URIs: http://jenkins.grml.org/debian
+Suites: grml-debootstrap
+Components: main
 EOF
     wget -O - http://jenkins.grml.org/debian/C525F56752D4A654.asc | apt-key add -
     apt-get update
