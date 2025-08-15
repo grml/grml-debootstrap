@@ -44,7 +44,7 @@ if [ -x /usr/bin/aptitude ] ; then
    APTUPGRADE="aptitude -y safe-upgrade $DPKG_OPTIONS"
 else
    APTINSTALL="apt-get -y --no-install-recommends install $DPKG_OPTIONS"
-   APTUPDATE="apt-get update $DPKG_OPTIONS"
+   APTUPDATE="apt-get --error-on=any update $DPKG_OPTIONS"
    APTUPGRADE="apt-get -y upgrade $DPKG_OPTIONS"
 fi
 
