@@ -7,14 +7,14 @@ doc: doc_man doc_html
 
 doc_html: html-stamp
 
-html-stamp: grml-debootstrap.8.txt
-	asciidoc -b xhtml11 -a icons grml-debootstrap.8.txt
+html-stamp: grml-debootstrap.8.adoc
+	asciidoc -b xhtml11 -a icons grml-debootstrap.8.adoc
 	touch html-stamp
 
 doc_man: man-stamp
 
-man-stamp: grml-debootstrap.8.txt
-	asciidoc -d manpage -b docbook grml-debootstrap.8.txt
+man-stamp: grml-debootstrap.8.adoc
+	asciidoc -d manpage -b docbook grml-debootstrap.8.adoc
 	xsltproc --nonet --stringparam man.base.url.for.relative.links https://grml.org/grml-debootstrap/ \
 		$(DOCBOOK_XML) grml-debootstrap.8.xml
 	touch man-stamp
