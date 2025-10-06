@@ -1,0 +1,75 @@
+name: package-build
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  build-debian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Update changelog"
+        run: |
+          set -ex
+          OLD_VERSION=$(dpkg-parsechangelog -SVersion)
+          SOURCE=$(dpkg-parsechangelog -SSource)
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION_SUFFIX="+gh"
+          else
+            VERSION_SUFFIX="+autobuild${GITHUB_RUN_NUMBER}"
+          fi
+          cat > debian/changelog <<EOT
+          ${SOURCE} (${OLD_VERSION}${VERSION_SUFFIX}) UNRELEASED; urgency=medium
+
+            * Automated Build
+
+           -- Automated Build <builder@localhost>  $(date -R)
+          EOT
+      - uses: jtdor/build-deb-action@v1
+      - name: Archive build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            debian/artifacts/*.deb
+            debian/artifacts/*.tar.*
+      - name: Comment PR with artifact link
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.runId;
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+
+            // Get the artifact download URL
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: repoOwner,
+              repo: repoName,
+              run_id: runId
+            });
+
+            const packagesArtifact = artifacts.data.artifacts.find(artifact => artifact.name === 'packages');
+            if (!packagesArtifact) {
+              console.log('No packages artifact found');
+              return;
+            }
+
+            const artifactUrl = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts/${packagesArtifact.id}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📦 Built packages are ready! [Download here](${artifactUrl}).`
+            });
