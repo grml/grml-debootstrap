@@ -73,7 +73,7 @@ jobs:
             throw new Error('Package-build workflow did not complete successfully within 10 minutes');
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages
           path: artifacts/
