@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - run: ./tests/gha-build-deb.sh
       name: "Build .deb for ${{matrix.host_release}}"
@@ -72,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Download built deb
       uses: actions/download-artifact@v4
