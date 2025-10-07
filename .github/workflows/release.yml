@@ -43,7 +43,7 @@ jobs:
 
       - name: Wait for and get package build run ID
         id: build-run
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const maxWaitTime = 10 * 60 * 1000; // 10 minutes
