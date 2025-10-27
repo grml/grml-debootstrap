@@ -33,7 +33,7 @@ jobs:
         HOST_RELEASE: ${{matrix.host_release}}
 
     - name: Archive built .deb
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: deb-${{matrix.host_release}}
         if-no-files-found: error
@@ -95,7 +95,7 @@ jobs:
         RELEASE: ${{matrix.release}}
 
     - name: Archive VM image on failure
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always() && (steps.build_vm_and_test_test.outcome == 'failure')
       with:
         name: vm-image-${{matrix.host_release}}-${{matrix.release}}-${{matrix.runner}}
@@ -104,7 +104,7 @@ jobs:
         retention-days: 5
 
     - name: Archive VM test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: vm-results-${{matrix.host_release}}-${{matrix.release}}-${{matrix.runner}}

@@ -35,7 +35,7 @@ jobs:
           EOT
       - uses: jtdor/build-deb-action@v1
       - name: Archive build result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: packages
           if-no-files-found: error
