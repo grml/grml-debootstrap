@@ -1,3 +1,14 @@
+grml-debootstrap (0.123) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [f88c07b] Rename asciidoc files to *.adoc
+  * [02b0da4] Update GitHub README.md
+  * [e4e361a] Add package-build, release GitHub workflows
+  * [fdad144] Add dependabot configuration
+  * [4341805] d/copyright: remove (old) FSF address
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 03 Nov 2025 13:01:17 +0100
+
 grml-debootstrap (0.122) unstable; urgency=medium
 
   * [8172dda] Skip udevadm execution on unsupported network interfaces
