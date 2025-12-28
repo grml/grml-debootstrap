@@ -92,7 +92,7 @@ Usage: $PN [options]
 Bootstrap options:
 
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
-  -r, --release <name>   Release of new Debian system (default: bullseye).
+  -r, --release <name>   Release of new Debian system
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
