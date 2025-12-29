@@ -106,7 +106,7 @@ writesource() {
 
   mkdir -p "${file%/*}" || exit 73
 
-  if [ -f "$file" ] && [ "$(tail -n 1 "$file")" = '' ]; then
+  if [ -f "$file" ] && [ "$(tail -n 1 "$file")" != '' ]; then
     ## stanzas need a space between them and the previous stanza
     echo >> "$file"
   fi
