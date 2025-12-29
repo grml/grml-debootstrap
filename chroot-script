@@ -140,10 +140,10 @@ chrootmirror() {
     rm -f /etc/apt/sources.list
 
     if grep -q 'file:' <<< "$MIRROR" ; then
-      echo "Adjusting sources.list.d/local.sources for mirror (${MIRROR})."
+      echo "Adjusting local.sources for mirror (${MIRROR})."
       writesource 'local' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
     else
-      echo "Adjusting sources.list.d/debian.sources for mirror (${MIRROR})."
+      echo "Adjusting debian.sources for mirror (${MIRROR})."
       writesource 'debian' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
     fi
   fi
@@ -154,7 +154,7 @@ chrootmirror() {
     *)
       # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
-      echo "Adding security.debian.org/debian-security to sources.list.d/debian.sources."
+      echo "Adding security.debian.org/debian-security to debian.sources."
       writesource 'debian' 'deb' 'http://security.debian.org/debian-security' "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
       ;;
   esac
@@ -170,8 +170,8 @@ remove_chrootmirror() {
 
   if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
     echo "Removing local.sources."
-    rm local.sources
-    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list.d/debian.sources instead."
+    rm /etc/apt/sources.list.d/local.sources
+    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to debian.sources instead."
     writesource 'debian' 'deb' "$FALLBACK_MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
   fi
 }
