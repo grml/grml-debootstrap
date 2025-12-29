@@ -184,7 +184,7 @@ grmlrepos() {
   fi
 
   # user might have provided their own apt sources configuration
-  if [ -r grml.sources ] ; then
+  if [ -r /etc/apt/sources.list.d/grml.sources ] ; then
     echo "File grml.sources exists already, not modifying."
   else
     echo "Setting up grml.sources."
