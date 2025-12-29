@@ -35,6 +35,8 @@ bash -n /etc/debootstrap/variables
 [ -r /proc/1 ] || mount -t proc none /proc
 [ -r /sys/kernel ] || mount -t sysfs none /sys
 
+mkdir -p /etc/apt/sources.list.d || exit 73
+
 # variable checks {{{
 
 # use aptitude only if it's available
@@ -103,8 +105,6 @@ writesource() {
   components="${5:-}"
   signed_by="${6:-}"
   comment="${7:-}"
-
-  mkdir -p "${file%/*}" || exit 73
 
   if [ -f "$file" ] && [ "$(tail -n 1 "$file")" != '' ]; then
     ## stanzas need a space between them and the previous stanza
