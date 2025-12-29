@@ -35,6 +35,8 @@ bash -n /etc/debootstrap/variables
 [ -r /proc/1 ] || mount -t proc none /proc
 [ -r /sys/kernel ] || mount -t sysfs none /sys
 
+mkdir -p /etc/apt/sources.list.d || exit 73
+
 # variable checks {{{
 
 # use aptitude only if it's available
@@ -92,6 +94,36 @@ markauto() {
 }
 # }}}
 
+# write a deb822 sources stanza to a file {{{
+writesource() {
+  local file types uris suites components signed_by
+
+  file="${1:-}"
+  types="${2:-}"
+  uris="${3:-}"
+  suites="${4:-}"
+  components="${5:-}"
+  signed_by="${6:-}"
+  comment="${7:-}"
+
+  if [ -f "$file" ] && [ "$(tail -n 1 "$file")" != '' ]; then
+    ## stanzas need a space between them and the previous stanza
+    echo >> "$file"
+  fi
+
+  {
+  [ -n "$comment" ] && echo "# $comment"
+  echo "Types: $types"
+  echo "URIs: $uris"
+  echo "Suites: $suites"
+  echo "Components: $components"
+  [ -n "$signed_by" ] && echo "Signed-By: $signed_by"
+  [ "${suites%-*}" = 'grml' ] && echo "Snapshot: disable"
+  echo
+  } >> "$file"
+}
+# }}}
+
 # define chroot mirror {{{
 chrootmirror() {
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
@@ -105,8 +137,16 @@ chrootmirror() {
   echo "Using repository components $COMPONENTS"
 
   if [ -n "$MIRROR" ] ; then
-    echo "Adjusting sources.list for mirror (${MIRROR})."
-    echo "deb $MIRROR $RELEASE $COMPONENTS" > /etc/apt/sources.list
+    echo "Deleting obsolete sources.list"
+    rm -f /etc/apt/sources.list
+
+    if grep -q 'file:' <<< "$MIRROR" ; then
+      echo "Adjusting local.sources for mirror (${MIRROR})."
+      writesource '/etc/apt/sources.list.d/local.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+    else
+      echo "Adjusting debian.sources for mirror (${MIRROR})."
+      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+    fi
   fi
 
   # add security.debian.org:
@@ -115,8 +155,8 @@ chrootmirror() {
     *)
       # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
-      echo "Adding security.debian.org/debian-security to sources.list."
-      echo "deb http://security.debian.org/debian-security ${RELEASE}-security $COMPONENTS" >> /etc/apt/sources.list
+      echo "Adding security.debian.org/debian-security to debian.sources."
+      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' 'http://security.debian.org/debian-security' "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
       ;;
   esac
 }
@@ -130,11 +170,10 @@ remove_chrootmirror() {
   fi
 
   if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
-    echo "Removing local mirror (${MIRROR}) from sources.list."
-    TMP_MIRROR="${MIRROR//\//\\\/}"
-    sed -i "/deb $TMP_MIRROR $RELEASE $COMPONENTS/ D" /etc/apt/sources.list
-    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list instead."
-    echo "deb $FALLBACK_MIRROR $RELEASE $COMPONENTS" >> /etc/apt/sources.list
+    echo "Removing local.sources."
+    rm /etc/apt/sources.list.d/local.sources
+    echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to debian.sources instead."
+    writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$FALLBACK_MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
   fi
 }
 # }}}
@@ -146,19 +185,12 @@ grmlrepos() {
   fi
 
   # user might have provided their own apt sources configuration
-  if [ -r /etc/apt/sources.list.d/grml.list ] ; then
-    echo "File /etc/apt/sources.list.d/grml.list exists already, not modifying."
+  if [ -r /etc/apt/sources.list.d/grml.sources ] ; then
+    echo "File grml.sources exists already, not modifying."
   else
-    echo "Setting up /etc/apt/sources.list.d/grml.list."
-    cat > /etc/apt/sources.list.d/grml.list << EOF
-# grml: stable repository:
-  deb     [signed-by=/usr/share/keyrings/grml-archive-keyring.gpg] http://deb.grml.org/ grml-stable main
-  deb-src [signed-by=/usr/share/keyrings/grml-archive-keyring.gpg] http://deb.grml.org/ grml-stable main
-
-# grml: testing/development repository:
-  deb     [signed-by=/usr/share/keyrings/grml-archive-keyring.gpg] http://deb.grml.org/ grml-testing main
-  deb-src [signed-by=/usr/share/keyrings/grml-archive-keyring.gpg] http://deb.grml.org/ grml-testing main
-EOF
+    echo "Setting up grml.sources."
+    writesource '/etc/apt/sources.list.d/grml.sources' 'deb deb-src' 'https://deb.grml.org' 'grml-stable' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: stable repository:'
+    writesource '/etc/apt/sources.list.d/grml.sources' 'deb deb-src' 'https://deb.grml.org' 'grml-testing' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: testing/development repository:'
   fi
 
   # make sure we install packages from Grml's pool only if not available from Debian
@@ -188,11 +220,7 @@ EOF
 # feature to provide Debian backports repos {{{
 backportrepos() {
   if [ -n "$BACKPORTREPOS" ] ; then
-    cat >> /etc/apt/sources.list.d/backports.list << EOF
-# debian backports: ${RELEASE}-backports repository:
-deb     ${MIRROR} ${RELEASE}-backports main
-deb-src ${MIRROR} ${RELEASE}-backports main
-EOF
+    writesource '/etc/apt/sources.list.d/backports.sources' 'deb deb-src' "$MIRROR" "${RELEASE}-backports" 'main' '/usr/share/keyrings/debian-archive-keyring.gpg' "debian backports: ${RELEASE}-backports repository:"
   fi
 }
 # }}}
