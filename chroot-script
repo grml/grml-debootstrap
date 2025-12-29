@@ -96,7 +96,7 @@ markauto() {
 writesource() {
   local file types uris suites components signed_by
 
-  file=/etc/apt/sources.list.d/"${1?}".sources
+  file="${1:-}"
   types="${2:-}"
   uris="${3:-}"
   suites="${4:-}"
@@ -142,10 +142,10 @@ chrootmirror() {
 
     if grep -q 'file:' <<< "$MIRROR" ; then
       echo "Adjusting local.sources for mirror (${MIRROR})."
-      writesource 'local' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      writesource '/etc/apt/sources.list.d/local.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
     else
       echo "Adjusting debian.sources for mirror (${MIRROR})."
-      writesource 'debian' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
     fi
   fi
 
@@ -156,7 +156,7 @@ chrootmirror() {
       # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
       echo "Adding security.debian.org/debian-security to debian.sources."
-      writesource 'debian' 'deb' 'http://security.debian.org/debian-security' "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' 'http://security.debian.org/debian-security' "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
       ;;
   esac
 }
@@ -173,7 +173,7 @@ remove_chrootmirror() {
     echo "Removing local.sources."
     rm /etc/apt/sources.list.d/local.sources
     echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to debian.sources instead."
-    writesource 'debian' 'deb' "$FALLBACK_MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+    writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$FALLBACK_MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
   fi
 }
 # }}}
@@ -189,8 +189,8 @@ grmlrepos() {
     echo "File grml.sources exists already, not modifying."
   else
     echo "Setting up grml.sources."
-    writesource 'grml' 'deb deb-src' 'https://deb.grml.org' 'grml-stable' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: stable repository:'
-    writesource 'grml' 'deb deb-src' 'https://deb.grml.org' 'grml-testing' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: testing/development repository:'
+    writesource '/etc/apt/sources.list.d/grml.sources' 'deb deb-src' 'https://deb.grml.org' 'grml-stable' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: stable repository:'
+    writesource '/etc/apt/sources.list.d/grml.sources' 'deb deb-src' 'https://deb.grml.org' 'grml-testing' 'main' '/usr/share/keyrings/grml-archive-keyring.gpg' 'grml: testing/development repository:'
   fi
 
   # make sure we install packages from Grml's pool only if not available from Debian
@@ -220,7 +220,7 @@ EOF
 # feature to provide Debian backports repos {{{
 backportrepos() {
   if [ -n "$BACKPORTREPOS" ] ; then
-    writesource 'backports' 'deb deb-src' "$MIRROR" "${RELEASE}-backports" 'main' '/usr/share/keyrings/debian-archive-keyring.gpg' "debian backports: ${RELEASE}-backports repository:"
+    writesource '/etc/apt/sources.list.d/backports.sources' 'deb deb-src' "$MIRROR" "${RELEASE}-backports" 'main' '/usr/share/keyrings/debian-archive-keyring.gpg' "debian backports: ${RELEASE}-backports repository:"
   fi
 }
 # }}}
