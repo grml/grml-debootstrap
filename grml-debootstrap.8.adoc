@@ -40,8 +40,8 @@ Options and environment variables
 *--backportrepos*::
 
     Enable Debian's Backports repository via the
-    /etc/apt/sources.list.d/backports.list configuration file. This provides the
-    option to install Debian packages from Debian's backports repository.
+    /etc/apt/sources.list.d/backports.sources configuration file. This provides
+    the option to install Debian packages from Debian's backports repository.
 
 *--bootappend* _appendline-for-the-kernel_::
 
@@ -113,7 +113,7 @@ Options and environment variables
 *--grmlrepos*::
 
     Enable Grml.org's Debian repository (http://deb.grml.org/) via the
-    /etc/apt/sources.list.d/grml.list configuration file. This provides the
+    /etc/apt/sources.list.d/grml.sources configuration file. This provides the
     option to install Debian packages from Grml's repository.
 
 *--grub* _device_::
@@ -135,7 +135,8 @@ Options and environment variables
 
 *--keep_src_list*::
 
-     Do not overwrite user provided /etc/apt/sources.list.
+     Do not override user provided /etc/apt/sources.list.d/debian.sources or
+     delete /etc/apt/sources.list.
 
 *-m*, *--mirror* _URL_::
 
