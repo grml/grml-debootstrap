@@ -104,11 +104,11 @@ writesource() {
   signed_by="${6:-}"
   comment="${7:-}"
 
-  mkdir -p "$(dirname "${file}")"
+  mkdir -p "${file%/*}" || exit 73
 
-  if [ -f "$file" ]; then
+  if [ -f "$file" ] && [ "$(tail -n 1 "$file")" = '' ]; then
     ## stanzas need a space between them and the previous stanza
-    echo '' >> "$file"
+    echo >> "$file"
   fi
 
   {
