@@ -112,16 +112,12 @@ writesource() {
   fi
 
   {
-  if [ -n "$comment" ]; then
-    echo "# $comment"
-  fi
+  [ -n "$comment" ] && echo "# $comment"
   echo "Types: $types"
   echo "URIs: $uris"
   echo "Suites: $suites"
   echo "Components: $components"
-  if [ -n "$signed_by" ]; then
-    echo "Signed-By: $signed_by"
-  fi
+  [ -n "$signed_by" ] && echo "Signed-By: $signed_by"
   echo
   } >> "$file"
 }
