@@ -118,6 +118,7 @@ writesource() {
   echo "Suites: $suites"
   echo "Components: $components"
   [ -n "$signed_by" ] && echo "Signed-By: $signed_by"
+  [ "${suites%-*}" = 'grml' ] && echo "Snapshot: disable"
   echo
   } >> "$file"
 }
