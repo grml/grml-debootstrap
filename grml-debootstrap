@@ -648,8 +648,6 @@ esac
 #
 # If $VMSIZE is unset and $IMAGESIZE is set, keep $IMAGESIZE's value.
 #
-# If $VMSIZE is set and $IMAGESIZE is unset, $IMAGESIZE wins, keep $IMAGESIZE's value.
-#
 # If $VMSIZE is unset and $IMAGESIZE is unset, $IMAGESIZE defaults to 2G for VM images and 3G for
 # RPi images (which need a bit more space).
 if [ -n "$VMSIZE" ] && [ -z "$IMAGESIZE" ]; then
