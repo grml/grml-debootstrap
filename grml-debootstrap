@@ -75,7 +75,6 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$TIMEZONE" ] || TIMEZONE='Europe/Vienna'
 [ -n "$TUNE2FS" ] || TUNE2FS='tune2fs -c0 -i0'
 [ -n "$UPGRADE_SYSTEM" ] || UPGRADE_SYSTEM='yes'
-[ -n "$VMSIZE" ] || VMSIZE="2G"
 [ -n "$GRUB_INSTALL" ] || GRUB_INSTALL='yes'
 
 # make sure interactive mode is only executed when
@@ -102,10 +101,19 @@ Bootstrap options:
       --nodebootstrap    Skip debootstrap, only do configuration to the target.
       --grub <device>    Target for grub installation. Usage example: /dev/sda
       --efi <device>     Target for EFI installation. Usage example: /dev/sda1
+      --rpifirm <device> Target for Raspberry Pi firmware installation. Usage
+                         example: /dev/mmcblk0p1
       --arch <arch>      Set target architecture.
       --filesystem <fs>  Filesystem that should be used when target is a partition
                          or Virtual Machine (see --vmfile).
       --force            Do not prompt for user acknowledgement.
+
+Options for image file deployments:
+
+      --imagesize        Use specified size for size of image file (default:
+                         2G for BIOS and UEFI systems, 3G for Raspberry Pi
+                         images). Syntax as supported by qemu-img, like:
+                         --imagesize 3G
 
 Options for Virtual Machine deployment:
 
@@ -116,9 +124,17 @@ Options for Virtual Machine deployment:
       --vmfile           Like --vm, but install into a regular file (created by
                          'qemu-img create -f raw ...') instead.
                          Example: --vmfile --target /mnt/sda1/qemu.img
-      --vmsize <size>    Use specified size for size of VM file (default: 2G).
-                         Syntax as supported by qemu-img, like: --vmsize 3G
+      --vmsize <size>    Deprecated alias for --imagesize.
       --vmefi            Create an EFI boot partition for the VM.
+
+Options for Raspberry Pi deployment:
+
+      --rpi              Set up a Raspberry Pi image on an existing block device
+                         instead of plainly installing to a partition or directory.
+                         Needs to be combined with --target.
+                         Example: --rpi --target /dev/mapper/your-rpi-disk
+      --rpifile          Like --rpi, but install into a regular file (created by
+                         'qemu-img create -f raw ...') instead.
 
 Configuration options:
 
@@ -369,7 +385,7 @@ fi
 # }}}
 
 # cmdline handling {{{
-CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,vmefi,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
+CMDLINE_OPTS=mirror:,iso:,release:,target:,mntpoint:,debopt:,defaultinterfaces,interactive,nodebootstrap,nointerfaces,nokernel,nopackages,filesystem:,config:,confdir:,packages:,chroot-scripts:,scripts:,post-scripts:,pre-scripts:,debconf:,vm,vmfile,vmsize:,imagesize:,vmefi,rpi,rpifile,keep_src_list,hostname:,password:,nopassword,grmlrepos,backportrepos,bootappend:,grub:,efi:,rpifirm:,arch:,insecure,verbose,help,version,force,debug,contrib,non-free,remove-configs,sshcopyid,sshcopyauth
 
 if ! _opt_temp=$(getopt --name grml-debootstrap -o +m:i:r:t:p:c:d:vhV --long \
   $CMDLINE_OPTS -- "$@"); then
@@ -391,6 +407,9 @@ while :; do
   --target|-t)         # Target partition (/dev/...) or directory
     shift; _opt_target="$1"
     ;;
+  --imagesize)         # size of image deployment file
+    shift; _opt_imagesize="$1"
+    ;;
   --vm)                # Virtual machine image (no file)
     _opt_vm="T"
     ;;
@@ -398,10 +417,16 @@ while :; do
     _opt_vmfile="T"
     ;;
   --vmsize)            # size of Virtual machine file
-    shift; _opt_vmsize="$1"
+    shift; _opt_imagesize="$1"
     ;;
   --vmefi)            # Create an EFI boot partition for the VM
     _opt_vmefi="T"
+    ;;
+  --rpi)               # RPi image (no file)
+    _opt_rpi="T"
+    ;;
+  --rpifile)           # RPi image file
+    _opt_rpifile="T"
     ;;
   --mntpoint|-p)       # Mountpoint used for mounting the target system
     shift; _opt_mntpoint="$1"
@@ -503,6 +528,9 @@ while :; do
   --efi)               # Target for EFI boot installation
     shift; _opt_efi="$1"
     ;;
+  --rpifirm)           # Target for RPi firmware installation
+    shift; _opt_rpifirm="$1"
+    ;;
   --contrib)           # Add 'contrib' to list of components
     _opt_contrib=T
     ;;
@@ -565,9 +593,11 @@ done
 [ "$_opt_release" ]             && RELEASE=$_opt_release
 [ "$_opt_target" ]              && TARGET=$_opt_target
 [ "$_opt_vm" ]                  && VIRTUAL=1
-[ "$_opt_vmfile" ]              && VMFILE=1 && VIRTUAL=1
-[ "$_opt_vmsize" ]              && VMSIZE=$_opt_vmsize
+[ "$_opt_vmfile" ]              && IMAGEFILE=1 && VIRTUAL=1
+[ "$_opt_imagesize" ]           && IMAGESIZE=$_opt_imagesize
 [ "$_opt_vmefi" ]               && VMEFI=1
+[ "$_opt_rpi" ]                 && RPI=1
+[ "$_opt_rpifile" ]             && IMAGEFILE=1 && RPI=1
 [ "$_opt_mntpoint" ]            && MNTPOINT=$_opt_mntpoint
 [ "$_opt_debopt" ]              && DEBOOTSTRAP_OPT=$_opt_debopt
 [ "$_opt_interactive" ]         && INTERACTIVE=1
@@ -593,6 +623,7 @@ done
 [ "$_opt_bootappend" ]          && BOOT_APPEND=$_opt_bootappend
 [ "$_opt_grub" ]                && GRUB=$_opt_grub
 [ "$_opt_efi" ]                 && EFI=$_opt_efi
+[ "$_opt_rpifirm" ]             && RPIFIRM=$_opt_rpifirm && RPI=1
 [ "$_opt_arch" ]                && ARCH=$_opt_arch
 [ "$_opt_insecure" ]            && echo "Warning: --insecure is deprecated, continuing anyway."
 [ "$_opt_force" ]               && FORCE=$_opt_force
@@ -612,6 +643,35 @@ case "${RELEASE}" in
     [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free-firmware non-free"
     ;;
 esac
+
+# If $VMSIZE is set and $IMAGESIZE is unset, put $VMSIZE's value in $IMAGESIZE.
+#
+# If $VMSIZE is unset and $IMAGESIZE is set, keep $IMAGESIZE's value.
+#
+# If $VMSIZE is unset and $IMAGESIZE is unset, $IMAGESIZE defaults to 2G for VM images and 3G for
+# RPi images (which need a bit more space).
+if [ -n "$VMSIZE" ] && [ -z "$IMAGESIZE" ]; then
+  IMAGESIZE="$VMSIZE"
+elif [ -z "$IMAGESIZE" ]; then
+  if [ "$RPI" ]; then
+    IMAGESIZE="3G"
+  else
+    IMAGESIZE="2G"
+  fi
+fi
+
+if [ "$RPI" ] && [ -z "$ARCH" ]; then
+  # Ensure the architecture for the build is set to arm64 even if building on
+  # a non-arm64 machine, this is necessary for cross-builds to work
+  ARCH='arm64'
+fi
+
+# RPi images *require* non-free-firmware as the raspi-firmware package resides
+# there, and Raspberry Pis are not bootable without it.
+if [ -z "$_opt_non_free" ] && [ "$RPI" ]; then
+  eerror "Raspberry Pi images require non-free firmware, please add --non-free to your command line."
+  bailout 1
+fi
 
 # command line option checks
 if [ "$_opt_scripts_set" ] ; then
@@ -638,6 +698,27 @@ fi
 if [ "$_opt_efi" ] && [ "$_opt_vmefi" ] ; then
   eerror "The --efi option is incompatible with --vmefi, please drop one of them from your command line."
   eerror "--vmefi should be used if the VM image should be self-bootable. Use --efi if you need a secondary disk to act as a boot disk."
+  bailout 1
+fi
+
+if [ "$RPI" ] && [ "$EFI" ] ; then
+  eerror "Raspberry Pi UEFI support has not yet been implemented, please drop EFI-related options from your command line."
+  bailout 1
+fi
+
+if [ "$RPI" ] && [ "$VIRTUAL" ] ; then
+  eerror "Raspberry Pi and virtual machine image options are mutually exclusive, please drop one of them from your command line."
+  eerror "If you want to build a virtual machine image for use on a Raspberry Pi, please build a VM image for the ARM64 architecture."
+  bailout 1
+fi
+
+if [ "$RPI" ] && [ "$GRUB" ] ; then
+  eerror "Raspberry Pi images do not use GRUB, please drop GRUB-related options from your command line."
+  bailout 1
+fi
+
+if [ "$RPI" ] && [ -n "$ARCH" ] && [ "$ARCH" != 'arm64' ] ; then
+  eerror "Raspberry Pi images support only the arm64 architecture. Please drop the --arch option from your command line or change it to specify arm64."
   bailout 1
 fi
 
@@ -950,26 +1031,29 @@ fi
 }
 # }}}
 
-# format efi partition {{{
-format_efi_partition() {
-  if [ -z "$EFI" ] ; then
-    return 0
-  fi
-
-  if ! [ -b "$EFI" ] ; then
-    eerror "Specified efi argument [$EFI] not a valid block device."
-    bailout 1
-  fi
-
-  if fsck.vfat -bn "$EFI" >/dev/null; then
-    einfo "EFI partition $EFI seems to have a FAT filesystem, not modifying."
-  else
-    einfo "EFI partition $EFI doesn't seem to be formatted, creating filesystem."
-    if ! mkfs.fat -F32 -n "EFI" "$EFI" ; then
-      eerror "Error while creating filesystem on ${EFI}."
+# format firmware boot partitions (ESP, Raspberry Pi firmware) {{{
+format_fwboot_partitions() {
+  for fwboot in "EFI $EFI" "RPIFIRM $RPIFIRM"; do
+    fwboot_type="${fwboot% *}"
+    fwboot_part="${fwboot#* }"
+    if [ -z "$fwboot_part" ]; then
+      continue
+    fi
+    if ! [ -b "$fwboot_part" ]; then
+      eerror "$fwboot_type partition $fwboot_part is not a valid block device."
       bailout 1
     fi
-  fi
+
+    if fsck.vfat -bn "$fwboot_part" >/dev/null; then
+      einfo "$fwboot_type partition $fwboot_part seems to have a FAT filesystem, not modifying."
+    else
+      einfo "$fwboot_type partition $fwboot_part doesn't seem to be formatted, creating filesystem."
+      if ! mkfs.fat -F32 -n "$fwboot_type" "$fwboot_part" ; then
+        eerror "Error while creating filesystem on ${fwboot_part}."
+        bailout 1
+      fi
+    fi
+  done
 }
 # }}}
 
@@ -1053,8 +1137,8 @@ else # if not running automatic installation display configuration and prompt fo
    [ -n "$CONFFILES" ] && echo "   Config files:    $CONFFILES"
    if [ -n "$VIRTUAL" ] ; then
       echo "   Deploying as Virtual Machine."
-      if [ -n "$VMSIZE" ] && [ -n "$VMFILE" ]; then
-         echo "   Using Virtual Disk file with size of ${VMSIZE}."
+      if [ -n "$IMAGESIZE" ] && [ -n "$IMAGEFILE" ]; then
+         echo "   Using Virtual Disk file with size of ${IMAGESIZE}."
       fi
    fi
 
@@ -1193,7 +1277,7 @@ set_target_directory(){
     TARGET="$(readlink -f "$TARGET")"
 }
 
-if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] ; then
+if [ -b "$TARGET" ] || [ -n "$VIRTUAL" ] || [ -n "$RPI" ]; then
     PARTITION=1
 else
     # $TARGET was not detected as block device, but we do not want to create target directory in /dev/
@@ -1278,10 +1362,17 @@ mkfs() {
       mkfs.fat -F32 -n "EFI" "$EFI_TARGET"
     fi
 
+    if [ -n "$RPI" ] && [ -n "$RPIFIRM_TARGET" ]; then
+      einfo "Creating FAT filesystem on $RPIFIRM_TARGET"
+      mkfs.fat -F32 -n "RPIFIRM" "$RPIFIRM_TARGET"
+    fi
+
     # make sure /dev/disk/by-uuid/... is up2date, otherwise grub
     # will fail to detect the uuid in the chroot
     if [ -n "$VIRTUAL" ] ; then
       einfo "Virtual environment doesn't require blockdev --rereadpt, skipping therefore"
+    elif [ -n "$RPI" ] ; then
+      einfo "Raspberry Pi image build doesn't require blockdev --rereadpt, skipping therefore"
     elif echo "$TARGET" | grep -q "/dev/md" ; then
       blockdev --rereadpt "${TARGET}"
     else
@@ -1394,17 +1485,17 @@ mount_target() {
 # }}}
 
 # prepare VM image for usage with debootstrap {{{
-prepare_vm() {
-  if [ -z "$VIRTUAL" ] ; then
+prepare_image() {
+  if [ -z "$VIRTUAL" ] && [ -z "$RPI" ]; then
      return 0 # be quiet by intention
   fi
 
-  if [ -b "$TARGET" ] && [ -n "$VMFILE" ] ; then
-     eerror "Error: specified virtual disk target ($TARGET) is an existing block device."
+  if [ -b "$TARGET" ] && [ -n "$IMAGEFILE" ] ; then
+     eerror "Error: specified disk image target ($TARGET) is an existing block device."
      bailout 1
   fi
-  if [ ! -b "$TARGET" ] && [ -z "$VMFILE" ] ; then
-     eerror "Error: specified virtual disk target ($TARGET) does not exist yet."
+  if [ ! -b "$TARGET" ] && [ -z "$IMAGEFILE" ] ; then
+     eerror "Error: specified disk image target ($TARGET) does not exist yet."
      bailout 1
   fi
 
@@ -1427,7 +1518,7 @@ prepare_vm() {
 
   case "$ARCH" in
     amd64)      true;;
-    arm64)      VMEFI=1;;
+    arm64)      [ -z "$RPI" ] && VMEFI=1;;
   esac
 
   parted_type_command_supported='no'
@@ -1435,8 +1526,8 @@ prepare_vm() {
     parted_type_command_supported='yes'
   fi
 
-  if [ -n "$VMFILE" ]; then
-    qemu-img create -f raw "${TARGET}" "${VMSIZE}"
+  if [ -n "$IMAGEFILE" ]; then
+    qemu-img create -f raw "${TARGET}" "${IMAGESIZE}"
   fi
   if [ -n "$VMEFI" ]; then
     parted -s "${TARGET}" 'mklabel gpt'
@@ -1461,6 +1552,10 @@ prepare_vm() {
         parted -s "${TARGET}" 'type 3 4f68bce3-e8cd-4db1-96e7-fbcaf984b709'
       fi
     fi
+  elif [ -n "$RPI" ]; then
+    parted -s "${TARGET}" 'mklabel msdos'
+    parted -s "${TARGET}" 'mkpart primary fat32 4MiB 508MiB'
+    parted -s "${TARGET}" 'mkpart primary ext4 508MiB 100%'
   else
     parted -s "${TARGET}" 'mklabel msdos'
     if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
@@ -1482,16 +1577,29 @@ prepare_vm() {
 
   # hopefully this always works as expected
   LOOP_PART="${DEVINFO##add map }" # 'loop0p1 (254:5): 0 20477 linear 7:0 3'
+
+  case "${LOOP_PART}" in
+    sd*|vd*|xvd*) part_prefix=""  ;;
+    *)            part_prefix="p" ;;
+  esac
+
   LOOP_PART="${LOOP_PART// */}"    # 'loop0p1'
   if [ -n "$VMEFI" ]; then
-    export EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
+    EFI_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
     if [ "$ARCH" = 'arm64' ]; then
-      LOOP_PART="${LOOP_PART%p1}p2"
+      LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}2"
     else
-      LOOP_PART="${LOOP_PART%p1}p3"
+      LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}3"
     fi
+  elif [ -n "$RPI" ]; then
+    RPIFIRM_TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
+    LOOP_PART="${LOOP_PART%${part_prefix}1}${part_prefix}2"
   fi
-  LOOP_DISK="${LOOP_PART%p*}"      # 'loop0'
+  if [ -n "${part_prefix}" ]; then
+    LOOP_DISK="${LOOP_PART%${part_prefix}*}"      # 'loop0'
+  else
+    LOOP_DISK="${LOOP_PART%%[0-9]*}"              # 'sda'
+  fi
   export TARGET="/dev/mapper/$LOOP_PART" # '/dev/mapper/loop0p1'
 
   if [ -z "$TARGET" ] ; then
@@ -1500,10 +1608,12 @@ prepare_vm() {
   fi
 
   if [ -z "$GRUB" ]; then
-    GRUB="/dev/$LOOP_DISK" # '/dev/mapper/loop0'
+    GRUB="/dev/$LOOP_DISK" # '/dev/loop0' or '/dev/sda'
   fi
   if [ -z "$EFI" ] && [ "$VMEFI" = '1' ]; then
     EFI="${EFI_TARGET}"
+  elif [ -z "$RPIFIRM" ] && [ "$RPI" = '1' ]; then
+    RPIFIRM="${RPIFIRM_TARGET}"
   fi
 }
 # }}}
@@ -1616,6 +1726,7 @@ preparechroot() {
   [ -n "$GRMLREPOS" ]                 && echo "GRMLREPOS='${GRMLREPOS//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
   [ -n "$GRUB" ]                      && echo "GRUB='${GRUB//\'/\'\\\'\'}'"                                         >> "$CHROOT_VARIABLES"
   [ -n "$HOSTNAME" ]                  && echo "HOSTNAME='${HOSTNAME//\'/\'\\\'\'}'"                                 >> "$CHROOT_VARIABLES"
+  [ -n "$IMAGESIZE" ]                 && echo "IMAGESIZE='${IMAGESIZE//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
   [ -n "$INITRD" ]                    && echo "INITRD='${INITRD//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
   [ -n "$INITRD_GENERATOR" ]          && echo "INITRD_GENERATOR='${INITRD_GENERATOR//\'/\'\\\'\'}'"                 >> "$CHROOT_VARIABLES"
   [ -n "$INITRD_GENERATOR_OPTS" ]     && echo "INITRD_GENERATOR_OPTS='${INITRD_GENERATOR_OPTS//\'/\'\\\'\'}'"       >> "$CHROOT_VARIABLES"
@@ -1631,6 +1742,8 @@ preparechroot() {
   [ -n "$PRE_SCRIPTS" ]               && echo "PRE_SCRIPTS='${PRE_SCRIPTS//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
   [ -n "$RECONFIGURE" ]               && echo "RECONFIGURE='${RECONFIGURE//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
   [ -n "$RELEASE" ]                   && echo "RELEASE='${RELEASE//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
+  [ -n "$RPI" ]                        && echo "RPI='${RPI}'"                                                       >> "$CHROOT_VARIABLES"
+  [ -n "$RPIFIRM" ]                   && echo "RPIFIRM='${RPIFIRM//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
   [ -n "$RM_APTCACHE" ]               && echo "RM_APTCACHE='${RM_APTCACHE//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
   [ -n "$ROOTPASSWORD" ]              && echo "ROOTPASSWORD='${ROOTPASSWORD//\'/\'\\\'\'}'"                         >> "$CHROOT_VARIABLES"
   [ -n "$SCRIPTS" ]                   && echo "SCRIPTS='${SCRIPTS//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
@@ -1641,7 +1754,6 @@ preparechroot() {
   [ -n "$TARGET_UUID" ]               && echo "TARGET_UUID='${TARGET_UUID//\'/\'\\\'\'}'"                           >> "$CHROOT_VARIABLES"
   [ -n "$TIMEZONE" ]                  && echo "TIMEZONE='${TIMEZONE//\'/\'\\\'\'}'"                                 >> "$CHROOT_VARIABLES"
   [ -n "$TUNE2FS" ]                   && echo "TUNE2FS='${TUNE2FS//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
-  [ -n "$VMSIZE" ]                    && echo "VMSIZE='${VMSIZE//\'/\'\\\'\'}'"                                     >> "$CHROOT_VARIABLES"
 
   cp ${VERBOSE:+-v} "${CONFFILES}"/chroot-script "${MNTPOINT}"/bin/chroot-script
   chmod 755 "${MNTPOINT}"/bin/chroot-script
@@ -1753,6 +1865,10 @@ iface ${interface} inet dhcp
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
   elif [ -n "$VIRTUAL" ] ; then
     einfo "Setting up Virtual Machine, installing default /etc/network/interfaces"
+    mkdir -p "${MNTPOINT}/etc/network"
+    echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
+  elif [ -n "$RPI" ] ; then
+    einfo "Setting up Raspberry Pi installation, installing default /etc/network/interfaces"
     mkdir -p "${MNTPOINT}/etc/network"
     echo "$DEFAULT_INTERFACES" > "${MNTPOINT}/etc/network/interfaces"
   elif [ -r /etc/network/interfaces ] ; then
@@ -1948,7 +2064,7 @@ remove_configs() {
 # }}}
 
 # now execute all the functions {{{
-for i in format_efi_partition prepare_vm mkfs tunefs \
+for i in format_fwboot_partitions prepare_image mkfs tunefs \
          mount_target mountpoint_to_blockdevice debootstrap_system \
          preparechroot execute_pre_scripts chrootscript execute_post_scripts \
          remove_configs umount_chroot umount_target fscktool ; do

@@ -35,6 +35,11 @@ bash -n /etc/debootstrap/variables
 [ -r /proc/1 ] || mount -t proc none /proc
 [ -r /sys/kernel ] || mount -t sysfs none /sys
 
+if [ -n "$RPIFIRM" ]; then
+  mkdir --parents /boot/firmware
+  mount "$RPIFIRM" /boot/firmware
+fi
+
 # variable checks {{{
 
 # use aptitude only if it's available
@@ -332,11 +337,27 @@ kernel() {
      if expr "$COMPONENTS" : '.*non-free' >/dev/null ; then
        KERNELPACKAGES="$KERNELPACKAGES firmware-linux"
      fi
+     if [ -n "$RPI" ] ; then
+       KERNELPACKAGES="$KERNELPACKAGES raspi-firmware"
+     fi
      # shellcheck disable=SC2086
      DEBIAN_FRONTEND=$DEBIAN_FRONTEND $APTINSTALL $KERNELPACKAGES
   else
      echo "Warning: Could not find a kernel for your system. Your system won't be able to boot itself!"
   fi
+}
+# }}}
+
+# fix kernel command line for Raspberry Pi {{{
+rpi_cmdline() {
+  if [ -z "$RPI" ]; then
+    return 0
+  fi
+
+  local cmdline
+  cmdline="$(cat /boot/firmware/cmdline.txt)"
+  cmdline="$(sed "s/root=[^ ]*/root=UUID=${TARGET_UUID}/" <<< "$cmdline")"
+  echo "$cmdline" > /boot/firmware/cmdline.txt
 }
 # }}}
 
@@ -478,6 +499,11 @@ EOF
 if [ -n "$EFI" ] ; then
   UUID_EFI="$(blkid -o value -s UUID "$EFI")"
   echo "UUID=$UUID_EFI  /boot/efi       vfat    umask=0077      0       1" >> /etc/fstab
+fi
+
+if [ -n "$RPIFIRM" ] ; then
+  UUID_RPIFIRM="$(blkid -o value -s UUID "$RPIFIRM")"
+  echo "UUID=$UUID_RPIFIRM  /boot/firmware       vfat    umask=0077      0       1" >> /etc/fstab
 fi
 
 cat >> /etc/fstab << EOF
@@ -819,6 +845,8 @@ finalize() {
 
   umount /sys >/dev/null 2>/dev/null || true
   umount /proc >/dev/null 2>/dev/null || true
+
+  umount /boot/firmware >/dev/null 2>/dev/null || true
 }
 # }}}
 
@@ -843,7 +871,7 @@ trap signal_handler HUP INT QUIT TERM
      kernel packages extrapackages reconfigure hosts \
      default_locales timezone fstab install_fs_tools hostname \
      initrd grub_install passwords \
-     custom_scripts upgrade_system remove_apt_cache services \
+     custom_scripts upgrade_system rpi_cmdline remove_apt_cache services \
      remove_chrootmirror; do
      if stage "$i" ; then
        "$i"
