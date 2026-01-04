@@ -91,7 +91,7 @@ Usage: $PN [options]
 Bootstrap options:
 
   -m, --mirror <URL>     Mirror which should be used for apt-get/aptitude.
-  -r, --release <name>   Release of new Debian system (default: bullseye).
+  -r, --release <name>   Release of new Debian system
   -t, --target <target>  Target partition (/dev/...) or directory where the
                          system should be installed to.
   -p, --mntpoint <mnt>   Mountpoint used for mounting the target system,
@@ -636,7 +636,7 @@ done
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
 
 case "${RELEASE}" in
-  buster|bullseye)
+  bullseye)
     [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
     ;;
   *)
@@ -902,8 +902,7 @@ prompt_for_release()
   local default_value="$RELEASE"
   RELEASE="$(dialog --stdout --title "${PN}" --default-item "$default_value" --menu \
             "Please enter the Debian release you would like to use for installation:" \
-            0 50 8 \
-            buster   Debian/10 \
+            0 50 0 \
             bullseye Debian/11 \
             bookworm Debian/12 \
             trixie   Debian/13 \
@@ -1231,6 +1230,12 @@ Please use specific codenames such as bookworm or trixie."
 fi
 # }}}
 
+# Verify that provided GRUB device actually exists{{{
+if [ -n "${GRUB}" ] && ! [ -b "${GRUB}" ] ;  then
+  eerror "GRUB target '${GRUB}' doesn't look like a supported block device."
+  bailout 1
+fi
+# }}}
 checkconfiguration
 
 # finally make sure at least $TARGET is set [the partition for the new system] {{{
@@ -1518,6 +1523,11 @@ prepare_image() {
     arm64)      [ -z "$RPI" ] && VMEFI=1;;
   esac
 
+  parted_type_command_supported='no'
+  if [[ "$(parted --help)" =~ 'type NUMBER TYPE-ID or TYPE-UUID' ]]; then
+    parted_type_command_supported='yes'
+  fi
+
   if [ -n "$IMAGEFILE" ]; then
     qemu-img create -f raw "${TARGET}" "${IMAGESIZE}"
   fi
@@ -1528,10 +1538,21 @@ prepare_image() {
     if [ "$ARCH" = 'arm64' ]; then
       # No need for a bios_grub parttion on ARM64
       parted -s "${TARGET}" 'mkpart primary ext4 101MiB 100%'
+      if [ "${parted_type_command_supported}" = 'yes' ]; then
+        # Make the root partition identify itself as "Root Partition (64-bit
+        # ARM/AARCH64)", see
+        # https://uapi-group.org/specifications/specs/discoverable_partitions_specification/
+        parted -s "${TARGET}" 'type 2 b921b045-1df0-41c3-af44-4c6f280d3fae'
+      fi
     else
       parted -s "${TARGET}" 'mkpart bios_grub 101MiB 102MiB'
       parted -s "${TARGET}" 'set 2 bios_grub on'
       parted -s "${TARGET}" 'mkpart primary ext4 102MiB 100%'
+      if [ "${parted_type_command_supported}" = 'yes' ]; then
+        # Make the root partition identify itself as "Root Partition
+        # (amd64/x86_64)", see Discoverable Partitions Specification link above
+        parted -s "${TARGET}" 'type 3 4f68bce3-e8cd-4db1-96e7-fbcaf984b709'
+      fi
     fi
   elif [ -n "$RPI" ]; then
     parted -s "${TARGET}" 'mklabel msdos'
@@ -1810,6 +1831,12 @@ iface eth0 inet dhcp
   if [ -x /bin/udevadm ]; then
     tmpfile=$(mktemp)
     for interface in /sys/class/net/*; do
+      # skip any interfaces that don't end up in a directory,
+      # which we could query via udevadm, like f.e. "bonding_masters"
+      if ! [ -d "${interface}" ] ; then
+        continue
+      fi
+
       udevadm info --query=all --path="${interface}" > "${tmpfile}"
       # skip virtual devices, like bridges, vboxnet,...
       if grep -q 'P: /devices/virtual/net/' "${tmpfile}" ; then

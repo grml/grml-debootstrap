@@ -1,3 +1,44 @@
+grml-debootstrap (0.123) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [f88c07b] Rename asciidoc files to *.adoc
+  * [02b0da4] Update GitHub README.md
+  * [e4e361a] Add package-build, release GitHub workflows
+  * [fdad144] Add dependabot configuration
+  * [4341805] d/copyright: remove (old) FSF address
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 03 Nov 2025 13:01:17 +0100
+
+grml-debootstrap (0.122) unstable; urgency=medium
+
+  * [8172dda] Skip udevadm execution on unsupported network interfaces
+    like bonding_masters. Thanks to Volodymyr Fedorov
+    <vfedorov@sipwise.com>
+  * [3c9cba2] Drop support for Debian v10 / buster
+
+ -- Michael Prokop <mika@grml.org>  Fri, 15 Aug 2025 12:17:04 +0200
+
+grml-debootstrap (0.121) unstable; urgency=medium
+
+  [ Aaron Rainbolt ]
+  * [b3aeda2] Don't set bogus debconf variable on grub-cloud packages
+
+ -- Chris Hofstaedtler <ch@grml.org>  Wed, 14 May 2025 13:20:54 +0200
+
+grml-debootstrap (0.120) unstable; urgency=medium
+
+  [ Patrick Schleizer ]
+  * [d634a72] fix skipping initrd creation using INITRD=no
+
+  [ Aaron Rainbolt ]
+  * [d8ca8f2] Set root partition type UUIDs for VM images according to the
+    Discoverable Partition Specification
+
+  [ Michael Prokop ]
+  * [0208c8a] Verify that GRUB configuration points to valid block device
+
+ -- Chris Hofstaedtler <ch@grml.org>  Sun, 11 May 2025 18:45:24 +0200
+
 grml-debootstrap (0.119) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]

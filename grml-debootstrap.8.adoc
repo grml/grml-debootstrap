@@ -218,7 +218,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    buster, bullseye, bookworm, trixie and sid.
+    bullseye, bookworm, trixie and sid.
     Corresponding with configuration variable RELEASE. Default release: trixie
 
 *--remove-configs*::
@@ -323,9 +323,9 @@ Usage examples
 
 Install default Debian release (trixie) on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 
-  grml-debootstrap --release buster --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
+  grml-debootstrap --release bookworm --target /dev/sda1 --grub /dev/sda --hostname debian01 --password changeme
 
-Install Debian release buster on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
+Install Debian release bookworm on /dev/sda1 and install bootmanager GRUB in MBR (master boot record) of /dev/sda.
 Set hostname to 'debian01' and password for user root to 'changeme'.
 
   grml-debootstrap --target /dev/sda6 --grub /dev/sda --release sid
@@ -411,39 +411,16 @@ Supported Releases
 [width="40%",frame="topbot",options="header"]
 |======================
 |Release  |Status
-|buster   |works[1]
 |bullseye |works
 |bookworm |works
 |trixie   |works
-|sid      |works[2]
+|sid      |works[1]
 |======================
-
-[NOTE]
-.buster release
-================================================================================
-[1] Please notice that releases like buster are unsupported releases within Debian nowadays.
-grml-debootstrap can handle the releases but you really should not use them anymore unless you really know what you are doing.
-Even older versions are also entirely unsupported by grml-debootstrap.
-
-Choose the current Debian stable version instead.
-See https://wiki.debian.org/DebianReleases for the list of supported releases.
-
-Notice that you need to specify a specific mirror providing old releases, the default (http://deb.debian.org/debian) doesn't provide them any longer.
-Set the mirror to e.g. http://archive.debian.org/debian/ if you don't have your own Debian mirror.
-
-Older releases might also fail to install when running on top of recent kernel versions,
-throwing segfaults during debootstrap. This can be identified by the following messages inside kernel log (check with 'dmesg'):
-
-   dpkg[...] vsyscall attempted with vsyscall=none ip:[...]
-   dpkg[...]: segfault at [...]
-
-To work around this issue boot your system with the kernel boot option 'vsyscall=emulate'.
-================================================================================
 
 [NOTE]
 .unstable and testing releases
 ================================================================================
-[2] Please notice that Debian/testing and Debian/unstable (sid) might
+[1] Please notice that Debian/testing and Debian/unstable (sid) might
 not be always installable due to their nature. What _might_ work instead is
 deploying a stable release and upgrade it after installation finished.
 ================================================================================

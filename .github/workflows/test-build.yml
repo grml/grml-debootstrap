@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - run: ./tests/gha-build-deb.sh
       name: "Build .deb for ${{matrix.host_release}}"
@@ -33,7 +33,7 @@ jobs:
         HOST_RELEASE: ${{matrix.host_release}}
 
     - name: Archive built .deb
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: deb-${{matrix.host_release}}
         if-no-files-found: error
@@ -56,7 +56,6 @@ jobs:
         - trixie
         - bookworm
         - bullseye
-        - buster
 
         runner:
         - ubuntu-latest
@@ -72,8 +71,6 @@ jobs:
             host_release: bullseye
           - runner: ubuntu-24.04-arm
             release: bullseye
-          - runner: ubuntu-24.04-arm
-            release: buster
           # don't try to do raspi tests on amd64
           - runner: ubuntu-latest
             raspi: yes
@@ -87,10 +84,10 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Download built deb
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: deb-${{matrix.host_release}}
 
@@ -112,7 +109,7 @@ jobs:
         RASPI: ${{matrix.raspi}}
 
     - name: Archive VM image on failure
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always() && (steps.build_vm_and_test_test.outcome == 'failure')
       with:
         name: vm-image-${{matrix.host_release}}-${{matrix.release}}-${{matrix.runner}}-raspi_${{matrix.raspi}}
@@ -121,7 +118,7 @@ jobs:
         retention-days: 5
 
     - name: Archive VM test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: vm-results-${{matrix.host_release}}-${{matrix.release}}-${{matrix.runner}}-raspi_${{matrix.raspi}}

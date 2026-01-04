@@ -1,0 +1,101 @@
+name: release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Extract changelog entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Extract and clean changelog for this specific version
+          CHANGES=$(dpkg-parsechangelog -l debian/changelog --since "${VERSION}" --until "${VERSION}" --show-field Changes | \
+            sed '/^[a-zA-Z0-9-].*([^)]*)[[:space:]]*.*$/d' | \
+            sed 's/^[[:space:]]*\.[[:space:]]*$//' | \
+            sed '/^[[:space:]]*$/d' | \
+            sed 's/^[[:space:]]*\*[[:space:]]*/- /' | \
+            sed 's/^[[:space:]]*\\+[[:space:]]*/  - /')
+
+          # Set as output for use in release
+          {
+            echo 'description<<EOF'
+            echo "$CHANGES"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Wait for and get package build run ID
+        id: build-run
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const maxWaitTime = 10 * 60 * 1000; // 10 minutes
+            const pollInterval = 30 * 1000; // 30 seconds
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < maxWaitTime) {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'package-build.yml',
+                head_sha: context.sha,
+                status: 'completed',
+                conclusion: 'success'
+              });
+
+              if (runs.data.workflow_runs.length > 0) {
+                const runId = runs.data.workflow_runs[0].id;
+                console.log(`Found successful package-build run: ${runId}`);
+                return runId;
+              }
+
+              console.log('Package-build workflow not completed yet, waiting...');
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+            }
+
+            throw new Error('Package-build workflow did not complete successfully within 10 minutes');
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: packages
+          path: artifacts/
+          run-id: ${{ steps.build-run.outputs.result }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          DEB_FILE=$(find artifacts -name "*.deb" -printf "%f\n" | head -1)
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "Release ${{ steps.version.outputs.tag }}" \
+            --notes "## Changes in ${{ steps.version.outputs.version }}
+
+          ${{ steps.changelog.outputs.description }}
+
+          ---
+
+          📦 **Installation:**
+          Download the package and install with:
+          \`\`\`bash
+          sudo apt install ./${DEB_FILE}
+          \`\`\`" \
+            artifacts/*
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

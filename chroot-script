@@ -85,7 +85,7 @@ askpass() {
 # mark existing packages as automatically installed {{{
 markauto() {
   case "$RELEASE" in
-    buster|bullseye)
+    bullseye)
       # apt-mark is unavailable or does not support all used patterns.
       return
       ;;
@@ -117,10 +117,6 @@ chrootmirror() {
   # add security.debian.org:
   case "$RELEASE" in
     unstable|sid) ;;  # no security pool available
-    buster)
-      echo "Adding security.debian.org to sources.list."
-      echo "deb http://security.debian.org ${RELEASE}/updates $COMPONENTS" >> /etc/apt/sources.list
-      ;;
     *)
       # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
@@ -602,7 +598,7 @@ initrd() {
   KERNELVER=${KERNELIMG#/boot/vmlinuz-}
 
   # generate initrd
-  if [ -n "$INITRD" ] ; then
+  if [ "$INITRD" = "yes" ] ; then
      echo "Generating initrd."
      if [ "$INITRD_GENERATOR" = 'dracut' ] ; then
          # shellcheck disable=SC2086
@@ -754,8 +750,8 @@ grub_install() {
      grub_device="${GRUB}"
   fi
 
-  echo "Setting grub debconf configuration for install device to $GRUB"
-  if [ -n "$MAIN_GRUB_PACKAGE" ]; then
+  if [ -n "$MAIN_GRUB_PACKAGE" ] && ! [[ "$MAIN_GRUB_PACKAGE" =~ ^grub-cloud ]]; then
+    echo "Setting grub debconf configuration for install device to $GRUB"
     echo "${MAIN_GRUB_PACKAGE} ${MAIN_GRUB_PACKAGE}/install_devices multiselect ${grub_device}" | debconf-set-selections
   fi
 

@@ -67,9 +67,9 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: buster, bullseye, sid
-# Default: 'bullseye'
-# RELEASE='bullseye'
+# Supported values: bullseye, bookworm, trixie, sid
+# Default: 'trixie'
+# RELEASE='trixie'
 
 # Define components that should be used within sources.list.
 # Default: 'main'
