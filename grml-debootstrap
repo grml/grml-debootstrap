@@ -139,7 +139,7 @@ Configuration options:
       --debconf <file>     Pre-seed packages using specified pre-seed db file.
       --grmlrepos          Enable Grml's Debian repository (deb.grml.org).
       --backportrepos      Enable Debian's backports repository (backports.debian.org).
-      --keep_src_list      Do not overwrite user provided apt sources.list.
+      --keep_src_list      Do not override user provided apt sources.
       --contrib            Enable 'contrib' in COMPONENTS (defaults to 'main' only).
       --non-free           Enable non-free / non-free-firmware in COMPONENTS (defaults to 'main' only).
       --hostname <name>    Hostname of Debian system.
@@ -461,7 +461,7 @@ while :; do
     shift; _opt_chroot_scripts="$1"
     _opt_chroot_scripts_set=T
     ;;
-  --keep_src_list)     # Do not overwrite user provided apt sources.list
+  --keep_src_list)     # Do not override user provided apt sources
     _opt_keep_src_list=T
     ;;
   --hostname)          # Hostname of Debian system

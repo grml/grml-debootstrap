@@ -41,17 +41,19 @@
 # BOOT_APPEND='pci=nomsi'
 
 # Set mirror where packages will be downloaded from.
-# Default: use /etc/debootstrap/etc/apt/sources.list if it exists, else
-# 'http://deb.debian.org/debian'
+# Default: use /etc/debootstrap/etc/apt/sources.list.d/debian.sources if it
+# exists, else use /etc/debootstrap/etc/apt/sources.list if it exists, else
+# use 'http://deb.debian.org/debian'
 # Usage example:
 # MIRROR='ftp://ftp.de.debian.org/debian'
 
-# If /etc/apt/sources.list should NOT be build on the fly, this
-# options allows providing a separate apt sources.list file via
-# /etc/debootstrap/etc/apt/sources.list
+# If /etc/apt/sources.list.d/debian.sources should NOT be built on the fly,
+# this option allows providing a separate apt sources.list file via
+# /etc/debootstrap/etc/apt/sources.list, or providing a deb822-format sources
+# file via /etc/debootstrap/etc/apt/sources.list.d/debian.sources.
 # KEEP_SRC_LIST='yes'
 
-# To enable the Grml repository via /etc/apt/sources.list.d/grml.list
+# To enable the Grml repository via /etc/apt/sources.list.d/grml.sources
 # set this variable to 'yes'.
 # Default: 'no'
 # GRMLREPOS='yes'
@@ -62,7 +64,7 @@
 # GRMLPACKAGES='grml-etc-core'
 
 # To enable Debian's backports repository via
-# /etc/apt/sources.list.d/backports.list set this variable to 'yes'.
+# /etc/apt/sources.list.d/backports.sources set this variable to 'yes'.
 # Default: 'no'
 # BACKPORTREPOS='yes'
 
@@ -71,7 +73,7 @@
 # Default: 'trixie'
 # RELEASE='trixie'
 
-# Define components that should be used within sources.list.
+# Define components that should be used within sources.list.d/debian.sources.
 # Default: 'main'
 # COMPONENTS='main contrib non-free'
 
