@@ -79,13 +79,6 @@ askpass() {
 
 # mark existing packages as automatically installed {{{
 markauto() {
-  case "$RELEASE" in
-    bullseye)
-      # apt-mark is unavailable or does not support all used patterns.
-      return
-      ;;
-  esac
-
   # Mark most leaf packages as automatically installed.
   # Later in the systems life, apt autoremove will remove them if possible.
   apt-mark auto '~i !~M ?not(?priority(required)) ?not(?priority(important)) ?not(?priority(standard))'
@@ -113,7 +106,6 @@ chrootmirror() {
   case "$RELEASE" in
     unstable|sid) ;;  # no security pool available
     *)
-      # bullseye and newer releases use a different repository layout, see
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
       echo "Adding security.debian.org/debian-security to sources.list."
       echo "deb http://security.debian.org/debian-security ${RELEASE}-security $COMPONENTS" >> /etc/apt/sources.list

@@ -33,9 +33,5 @@ trixie: clean fake-uname.so install
 bookworm: clean fake-uname.so install
 	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
 
-# Debian 11
-bullseye: clean fake-uname.so install
-	packer build -var debian_version=$@ -var grml_debootstrap_version=$(GRML_DEBOOTSTRAP_VERSION) -var grml_debootstrap_local_path=$(GRML_DEBOOTSTRAP_LOCAL_PATH) debian64.json
-
-.PHONY: trixie bookworm bullseye
+.PHONY: trixie bookworm
 .NOTPARALLEL:

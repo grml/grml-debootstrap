@@ -603,15 +603,7 @@ done
 # make sure main is always included
 [ -z "$COMPONENTS" ]            && COMPONENTS="main"
 [ "$_opt_contrib" ]             && COMPONENTS="$COMPONENTS contrib"
-
-case "${RELEASE}" in
-  bullseye)
-    [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free"
-    ;;
-  *)
-    [ "$_opt_non_free" ] && COMPONENTS="$COMPONENTS non-free-firmware non-free"
-    ;;
-esac
+[ "$_opt_non_free" ]            && COMPONENTS="$COMPONENTS non-free-firmware non-free"
 
 # command line option checks
 if [ "$_opt_scripts_set" ] ; then
@@ -820,7 +812,6 @@ prompt_for_release()
   RELEASE="$(dialog --stdout --title "${PN}" --default-item "$default_value" --menu \
             "Please enter the Debian release you would like to use for installation:" \
             0 50 0 \
-            bullseye Debian/11 \
             bookworm Debian/12 \
             trixie   Debian/13 \
             sid      Debian/unstable)" \
@@ -1225,35 +1216,6 @@ mkfs() {
       mkfs.ext*)
         einfo "Enabling force option (-F) for mkfs.ext* tool as requested via --force switch."
         MKFS_OPTS="$MKFS_OPTS -F"
-        ;;
-    esac
-  fi
-
-  if [ -n "$MKFS" ] && [ "$MKFS" = "mkfs.ext4" ] ; then
-    # Detect modern mkfs.ext4 features, and disable them if the kernel or fsck
-    # on the target release will be too old to support them.
-    local e2fsprogs_version
-    e2fsprogs_version="$(dpkg-query --show --showformat='${Version}' e2fsprogs 2>/dev/null || echo 1.44)"
-
-    local mkfs_supports_metadata_csum_seed=''
-    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.43' ; then
-      mkfs_supports_metadata_csum_seed=1
-    fi
-    local mkfs_supports_orphan_file=''
-    if [ -n "$e2fsprogs_version" ] && dpkg --compare-versions "$e2fsprogs_version" ge '1.47.0-1' ; then
-      mkfs_supports_orphan_file=1
-    fi
-
-    case "$RELEASE" in
-      bullseye|buster)
-        if [ "$mkfs_supports_metadata_csum_seed" = 1 ]; then
-          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: metadata_csum_seed"
-          MKFS_OPTS="$MKFS_OPTS -O ^metadata_csum_seed"
-        fi
-        if [ "$mkfs_supports_orphan_file" = 1 ]; then
-          einfo "Disabling $MKFS feature as OS Release $RELEASE does not support it: orphan_file"
-          MKFS_OPTS="$MKFS_OPTS -O ^orphan_file"
-        fi
         ;;
     esac
   fi

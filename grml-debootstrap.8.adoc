@@ -210,7 +210,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    bullseye, bookworm, trixie and sid.
+    bookworm, trixie and sid.
     Corresponding with configuration variable RELEASE. Default release: trixie
 
 *--remove-configs*::
@@ -380,7 +380,6 @@ Supported Releases
 [width="40%",frame="topbot",options="header"]
 |======================
 |Release  |Status
-|bullseye |works
 |bookworm |works
 |trixie   |works
 |sid      |works[1]
