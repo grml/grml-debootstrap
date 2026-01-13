@@ -2,9 +2,9 @@ bridge-utils
 console-common
 console-data
 cryptsetup
+dhcpcd-base
 file
 ifenslave
-isc-dhcp-client
 less
 libpam-systemd
 locales
