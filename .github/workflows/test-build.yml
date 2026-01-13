@@ -19,7 +19,6 @@ jobs:
         - unstable
         - trixie
         - bookworm
-        - bullseye
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ubuntu-latest
@@ -50,23 +49,14 @@ jobs:
         - unstable
         - trixie
         - bookworm
-        - bullseye
 
         release:
         - trixie
         - bookworm
-        - bullseye
 
         runner:
         - ubuntu-latest
         - ubuntu-24.04-arm
-
-        exclude:
-          # restrict arm tests to bookworm and newer, mostly to save time
-          - runner: ubuntu-24.04-arm
-            host_release: bullseye
-          - runner: ubuntu-24.04-arm
-            release: bullseye
 
     # We want a working shell, qemu, python and docker. Specific version should not matter (much).
     runs-on: ${{ matrix.runner }}
