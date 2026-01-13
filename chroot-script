@@ -11,6 +11,7 @@
 # shellcheck disable=SC2317  # shellcheck has trouble understanding the code flow in this file
 
 # error_handler {{{
+# shellcheck disable=SC2329
 error_handler() {
    last_exit_code="$?"
    last_bash_command="$BASH_COMMAND"
@@ -67,6 +68,7 @@ stage() {
   return 0
 }
 
+# shellcheck disable=SC2329
 askpass() {
   # read -s emulation for dash. result is in $resp.
   set -o noglob
@@ -78,6 +80,7 @@ askpass() {
 # }}}
 
 # mark existing packages as automatically installed {{{
+# shellcheck disable=SC2329
 markauto() {
   # Mark most leaf packages as automatically installed.
   # Later in the systems life, apt autoremove will remove them if possible.
@@ -86,6 +89,7 @@ markauto() {
 # }}}
 
 # define chroot mirror {{{
+# shellcheck disable=SC2329
 chrootmirror() {
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
     echo "KEEP_SRC_LIST has been enabled, skipping chrootmirror stage."
@@ -115,6 +119,7 @@ chrootmirror() {
 # }}}
 
 # remove local chroot mirror {{{
+# shellcheck disable=SC2329
 remove_chrootmirror() {
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
     echo "KEEP_SRC_LIST has been enabled, skipping remove_chrootmirror stage."
@@ -132,6 +137,7 @@ remove_chrootmirror() {
 # }}}
 
 # set up grml repository {{{
+# shellcheck disable=SC2329
 grmlrepos() {
   if [ -z "$GRMLREPOS" ] ; then
     return 0
@@ -178,6 +184,7 @@ EOF
 # }}}
 
 # feature to provide Debian backports repos {{{
+# shellcheck disable=SC2329
 backportrepos() {
   if [ -n "$BACKPORTREPOS" ] ; then
     cat >> /etc/apt/sources.list.d/backports.list << EOF
@@ -190,6 +197,7 @@ EOF
 # }}}
 
 # set up kernel-img.conf {{{
+# shellcheck disable=SC2329
 kernelimg_conf() {
   if ! [ -r /etc/kernel-img.conf ] ; then
      echo "Setting up /etc/kernel-img.conf"
@@ -204,6 +212,7 @@ EOF
 # }}}
 
 # make sure services do not start up {{{
+# shellcheck disable=SC2329
 install_policy_rcd() {
   if ! [ -r /usr/sbin/policy-rc.d ] ; then
      export POLICYRCD=1
@@ -218,6 +227,7 @@ EOF
 # }}}
 
 # make sure we have an up2date system {{{
+# shellcheck disable=SC2329
 upgrade_system() {
   if [ "$UPGRADE_SYSTEM" = "yes" ] ; then
     echo "Running update + upgrade"
@@ -229,7 +239,9 @@ upgrade_system() {
 }
 
 # }}}
+
 # remove now useless apt cache {{{
+# shellcheck disable=SC2329
 remove_apt_cache() {
   if [ "$RM_APTCACHE" = 'yes' ] ; then
     echo "Cleaning apt cache."
@@ -242,6 +254,7 @@ remove_apt_cache() {
 # }}}
 
 # install additional packages {{{
+# shellcheck disable=SC2329
 packages() {
   # Pre-seed the debconf database with answers. Each question will be marked
   # as seen to prevent debconf from asking the question interactively.
@@ -267,6 +280,7 @@ packages() {
 # }}}
 
 # install extra packages {{{
+# shellcheck disable=SC2329
 extrapackages() {
     if [ "$EXTRAPACKAGES" = 'yes' ] ; then
         PACKAGELIST=$(find /etc/debootstrap/extrapackages -type f -name '*.deb')
@@ -281,14 +295,15 @@ extrapackages() {
 # }}}
 
 # check if the specified Debian package exists
+# shellcheck disable=SC2329
 package_exists() {
   output=$(apt-cache show "$1" 2>/dev/null)
   [ -n "$output" ]
   return $?
 }
 
-
 # determine the kernel version postfix
+# shellcheck disable=SC2329
 get_kernel_version() {
   # do not override $KERNEL if set via config file
   if [ -n "$KERNEL" ] ; then
@@ -310,6 +325,7 @@ get_kernel_version() {
 }
 
 # install kernel packages {{{
+# shellcheck disable=SC2329
 kernel() {
   if [ -n "$NOKERNEL" ] ; then
     echo "Skipping installation of kernel packages as requested via --nokernel"
@@ -333,6 +349,7 @@ kernel() {
 # }}}
 
 # reconfigure packages {{{
+# shellcheck disable=SC2329
 reconfigure() {
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
@@ -346,6 +363,7 @@ reconfigure() {
 # }}}
 
 # set password of user root {{{
+# shellcheck disable=SC2329
 passwords()
 {
   if [ -n "$NOPASSWORD" ] ; then
@@ -393,6 +411,7 @@ passwords()
 # }}}
 
 # set up /etc/hosts {{{
+# shellcheck disable=SC2329
 hosts() {
   if ! [ -f /etc/hosts ] ; then
      cat > /etc/hosts << EOF
@@ -406,6 +425,7 @@ EOF
 # }}}
 
 # set default locales {{{
+# shellcheck disable=SC2329
 default_locales() {
   if [ -n "$DEFAULT_LOCALES" ] ; then
     if ! [ -x /usr/sbin/update-locale ] ; then
@@ -420,6 +440,7 @@ default_locales() {
 # }}}
 
 # adjust timezone {{{
+# shellcheck disable=SC2329
 timezone() {
   if [ -n "$TIMEZONE" ] ; then
     echo "Adjusting /etc/localtime"
@@ -436,6 +457,7 @@ timezone() {
 # }}}
 
 # helper function for fstab() {{{
+# shellcheck disable=SC2329
 createfstab(){
   echo "Setting up /etc/fstab"
   cat > /etc/fstab <<EOF
@@ -487,6 +509,7 @@ EOF
 # }}}
 
 # generate /etc/fstab {{{
+# shellcheck disable=SC2329
 fstab() {
   # set up /etc/fstab if file is UNCONFIGURED (debootstrap, mmdebstrap)
   if grep -q UNCONFIGURED /etc/fstab ; then
@@ -496,6 +519,7 @@ fstab() {
 # }}}
 
 # ensure we have according filesystem tools available {{{
+# shellcheck disable=SC2329
 install_fs_tools() {
   local pkg=""
 
@@ -518,6 +542,7 @@ install_fs_tools() {
 # }}}
 
 # set up hostname {{{
+# shellcheck disable=SC2329
 hostname() {
   if [ -n "$HOSTNAME" ] ; then
      echo "Setting hostname to ${HOSTNAME}."
@@ -552,6 +577,7 @@ hostname() {
 # }}}
 
 # generate initrd/initramfs {{{
+# shellcheck disable=SC2329
 initrd() {
   # assume the first available kernel as our main kernel
   # shellcheck disable=SC2012
@@ -577,6 +603,7 @@ initrd() {
 }
 # }}}
 
+# shellcheck disable=SC2329
 efi_setup() {
   if [ -z "$EFI" ] ; then
     return 0
@@ -606,6 +633,7 @@ efi_setup() {
 
 # helper function to get relevant /dev/disk/by-id/* entries,
 # based on GRUB's postinst script
+# shellcheck disable=SC2329
 available_ids() {
   local path ids
 
@@ -621,6 +649,7 @@ available_ids() {
 
 # helper function to report corresponding /dev/disk/by-id/ for a given device name,
 # based on GRUB's postinst script
+# shellcheck disable=SC2329
 device_to_id() {
   local id
 
@@ -641,6 +670,7 @@ device_to_id() {
   return 1
 }
 
+# shellcheck disable=SC2329
 is_grub_bios_compatible() {
   # Check if the disk uses an MSDOS partition table, these are always compatible
   if [[ "$(blkid "$GRUB")" =~ 'PTTYPE="dos"' ]]; then
@@ -664,6 +694,7 @@ is_grub_bios_compatible() {
   return 1
 }
 
+# shellcheck disable=SC2329
 run_grub_install() {
   grub_install_cmd=( 'grub-install' "$@" )
   if ! "${grub_install_cmd[@]}" ; then
@@ -672,6 +703,7 @@ run_grub_install() {
   fi
 }
 
+# shellcheck disable=SC2329
 grub_install() {
   if [ -z "$GRUB" ] ; then
     echo "Notice: \$GRUB not defined, will not install grub inside chroot at this stage."
@@ -780,6 +812,7 @@ grub_install() {
 # }}}
 
 # execute all scripts present in /etc/debootstrap/chroot-scripts/ {{{
+# shellcheck disable=SC2329
 custom_scripts() {
   [ -d /etc/debootstrap/chroot-scripts/ ] || return 0
 
@@ -791,6 +824,7 @@ custom_scripts() {
 # }}}
 
 # make sure we don't have any running processes left {{{
+# shellcheck disable=SC2329
 services() {
   for service in ssh mdadm mdadm-raid ; do
     if [ -x /etc/init.d/"$service" ] ; then
@@ -801,6 +835,7 @@ services() {
 # }}}
 
 # unmount /proc and make sure nothing is left {{{
+# shellcheck disable=SC2329
 finalize() {
   # make sure we don't leave any sensible data
   rm -f /etc/debootstrap/variables
@@ -815,6 +850,7 @@ finalize() {
 # }}}
 
 # signal handler {{{
+# shellcheck disable=SC2329
 signal_handler() {
   finalize
   [ -n "$1" ] && EXIT="$1" || EXIT="1"
