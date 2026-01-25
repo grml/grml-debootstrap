@@ -1,3 +1,11 @@
+grml-debootstrap (0.124) unstable; urgency=medium
+
+  * [8ca3b23] Drop support for Debian v11 / bullseye
+  * [34c3fa9] package selection: replace isc-dhcp-client with dhcpcd-base
+  * [f3299a7] help message: drop incorrect default value
+
+ -- Chris Hofstaedtler <ch@grml.org>  Sun, 25 Jan 2026 17:51:56 +0100
+
 grml-debootstrap (0.123) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
