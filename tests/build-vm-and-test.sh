@@ -50,7 +50,9 @@ fi
 # Debian version to install using grml-debootstrap
 RELEASE="${RELEASE:-trixie}"
 
-TARGET="${TARGET:-qemu.img}"
+TARGET="${TARGET:-no}"
+
+QEMU_IMG="${QEMU_IMG:-qemu.img}"
 
 if [ "$1" == "run" ]; then
   # Debian version on which grml-debootstrap will *run*
@@ -68,11 +70,11 @@ if [ "$1" == "run" ]; then
     -e TERM="$TERM" \
     -w /code \
     debian:"$HOST_RELEASE" \
-    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$TARGET"' '"$RELEASE"
+    bash -c './tests/docker-install-deb.sh '"$DEB_NAME"' && ./tests/docker-build-vm.sh '"$(id -u)"' '"/code/$QEMU_IMG"' '"$RELEASE"' '"$TARGET"
 
 elif [ "$1" == "test" ]; then
   # run tests from inside Debian system
-  exec ./tests/test-vm.sh "$PWD/$TARGET" "$RELEASE"
+  exec ./tests/test-vm.sh "$PWD/$QEMU_IMG" "$RELEASE" "$TARGET"
 
 else
   echo "$0: unknown parameters, see --help" >&2
