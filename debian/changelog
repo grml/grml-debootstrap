@@ -1,3 +1,13 @@
+grml-debootstrap (0.125) unstable; urgency=medium
+
+  [ Aaron Rainbolt ]
+  * [da46e1a] Use deb822 sources format everywhere
+  * [9633862] Add Raspberry Pi image generation support
+  * [fe244d7] Install default network interfaces config for RPi systems
+  * [2ab8815] Add RPi image CI testing
+
+ -- Chris Hofstaedtler <ch@grml.org>  Thu, 12 Feb 2026 23:09:44 +0100
+
 grml-debootstrap (0.124) unstable; urgency=medium
 
   * [8ca3b23] Drop support for Debian v11 / bullseye
