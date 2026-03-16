@@ -17,17 +17,18 @@ Rules-Requires-Root: no
 Homepage: https://grml.org/grml-debootstrap/
 Vcs-Git: https://github.com/grml/grml-debootstrap.git
 Vcs-Browser: https://github.com/grml/grml-debootstrap
+X-Style: black
 
 Package: grml-debootstrap
 Architecture: all
 Depends:
  debian-archive-keyring,
- mmdebstrap,
  dosfstools,
  e2fsprogs,
  fdisk,
  gawk,
  kmod,
+ mmdebstrap,
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
