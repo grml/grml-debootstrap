@@ -1,3 +1,10 @@
+grml-debootstrap (0.126) unstable; urgency=medium
+
+  * Maintenance release to fix build-time inclusion of empty
+    "etc" directory into tarball.
+
+ -- Chris Hofstaedtler <ch@grml.org>  Mon, 16 Mar 2026 15:44:47 +0100
+
 grml-debootstrap (0.125) unstable; urgency=medium
 
   [ Aaron Rainbolt ]
