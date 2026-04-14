@@ -46,7 +46,7 @@ jobs:
       - name: Comment PR with artifact link
         if: github.event_name == 'pull_request'
         continue-on-error: true
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const runId = context.runId;
