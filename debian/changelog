@@ -1,3 +1,9 @@
+grml-debootstrap (0.127) unstable; urgency=medium
+
+  * CI changes only.
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 28 Apr 2026 16:44:03 +0200
+
 grml-debootstrap (0.126) unstable; urgency=medium
 
   * Maintenance release to fix build-time inclusion of empty
