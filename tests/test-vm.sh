@@ -124,6 +124,13 @@ if [ ! -d results ] || [ ! -f ./results/goss.tap ] || [ ! -f ./results/goss.exit
   echo "Running tests inside VM failed for unknown reason" >&2
   RC=1
   cat results/goss.err || true
+  if ! kill -0 "${QEMU_PID}" 2>/dev/null; then
+    echo "E: qemu (pid ${QEMU_PID}) has exited" >&2
+  fi
+  if [ -r qemu.log ]; then
+    echo "qemu.log follows:" >&2
+    cat qemu.log >&2
+  fi
 else
   RC=$(cat results/goss.exitcode)
   echo "goss exitcode: $RC"
