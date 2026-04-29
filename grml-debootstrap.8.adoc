@@ -219,7 +219,7 @@ Options and environment variables
 *-r*, *--release* _releasename_::
 
     Specify release of new Debian system. Supported releases names:
-    bookworm, trixie and sid.
+    bookworm, trixie, forky and sid.
     Corresponding with configuration variable RELEASE. Default release: trixie
 
 *--remove-configs*::
@@ -414,15 +414,17 @@ Supported Releases
 |Release  |Status
 |bookworm |works
 |trixie   |works
+|forky    |works[1]
 |sid      |works[1]
 |======================
 
 [NOTE]
 .unstable and testing releases
 ================================================================================
-[1] Please notice that Debian/testing and Debian/unstable (sid) might
-not be always installable due to their nature. What _might_ work instead is
-deploying a stable release and upgrade it after installation finished.
+[1] Please notice that Debian/testing (currently: forky) and Debian/unstable
+(sid) might not be always installable due to their nature. What _might_
+work instead is deploying a stable release and upgrade it after installation
+finished.
 ================================================================================
 
 Bugs

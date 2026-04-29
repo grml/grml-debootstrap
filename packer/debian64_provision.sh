@@ -202,7 +202,7 @@ grml_debootstrap_execution() {
 apply_nic_workaround() {
   # release specific stuff
   case "$DEBIAN_VERSION" in
-    bookworm|trixie|unstable|sid)
+    bookworm|trixie|forky|unstable|sid)
       ;;
     *)
       echo "* Debian $DEBIAN_VERSION doesn't require NIC workaround"
