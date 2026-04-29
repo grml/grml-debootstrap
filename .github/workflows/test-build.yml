@@ -51,6 +51,7 @@ jobs:
         - bookworm
 
         release:
+        - forky
         - trixie
         - bookworm
 
