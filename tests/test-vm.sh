@@ -75,22 +75,23 @@ DPKG_ARCHITECTURE=$(dpkg --print-architecture)
 if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
   qemu_command=( qemu-system-x86_64 )
   qemu_command+=( -machine q35 )
+  qemu_command+=( -cpu max )
 elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
+  # Pick a real CPU model, and also one that does not crash QEMU on ubuntu-24.04-arm.
+  qemu_command=( qemu-system-aarch64 )
+  qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg" )
+  qemu_command+=( -cpu cortex-a76 )
   if [ "$TARGET" = 'RPI' ]; then
     if ! rpi_bootdata="$(sudo "$TEST_PWD"/tests/extract-rpi-bootdata.sh "$VM_IMAGE")"; then
       echo "E: could not extract RPi boot data" >&2
       exit 1
     fi
     IFS='|' read rpi_kern rpi_initrd rpi_kerncmd <<< "$rpi_bootdata"
-    qemu_command=( qemu-system-aarch64 )
-    qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg,highmem=off" )
     qemu_command+=( -kernel "$rpi_kern" )
     qemu_command+=( -initrd "$rpi_initrd" )
     qemu_command+=( -append "$rpi_kerncmd" )
   else
     cp /usr/share/AAVMF/AAVMF_VARS.fd efi_vars.fd
-    qemu_command=( qemu-system-aarch64 )
-    qemu_command+=( -machine "type=virt,gic-version=max,accel=kvm:tcg" )
     qemu_command+=( -drive "if=pflash,format=raw,unit=0,file.filename=/usr/share/AAVMF/AAVMF_CODE.no-secboot.fd,file.locking=off,readonly=on" )
     qemu_command+=( -drive "if=pflash,format=raw,unit=1,file=efi_vars.fd" )
   fi
@@ -98,7 +99,6 @@ else
   echo "E: unsupported ${DPKG_ARCHITECTURE}" >&2
   exit 1
 fi
-qemu_command+=( -cpu max )
 qemu_command+=( -smp 2 )
 qemu_command+=( -m 2048 )
 qemu_command+=( -drive "file=${VM_IMAGE},format=raw,index=0,media=disk" )
