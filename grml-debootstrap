@@ -895,6 +895,7 @@ prompt_for_release()
             16 50 5 \
             bookworm Debian/12 \
             trixie   Debian/13 \
+            forky    Debian/14 UNRELEASED \
             sid      Debian/unstable)" \
             || bailout
 }

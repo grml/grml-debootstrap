@@ -30,13 +30,22 @@ else
   extra_buildopts=(--vmfile)
 fi
 
+# arm64 'virt' machines expose a pl011 UART as ttyAMA0 with no VGA console;
+# amd64 has the traditional 8250 UART at ttyS0 plus a VGA tty0.
+DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
+if [ "$DPKG_ARCHITECTURE" = 'arm64' ]; then
+  bootappend="console=ttyAMA0,115200 console=tty0"
+else
+  bootappend="console=ttyS0,115200 console=tty0 vga=791"
+fi
+
 grml-debootstrap \
   --debug \
   --force \
   "${extra_buildopts[@]}" \
   --imagesize 3G \
   --target "$TARGET_FILE" \
-  --bootappend "console=ttyS0,115200 console=tty0 vga=791" \
+  --bootappend "$bootappend" \
   --password grml \
   --release  "$RELEASE" \
   --hostname "$RELEASE" \
