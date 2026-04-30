@@ -69,7 +69,7 @@
 # BACKPORTREPOS='yes'
 
 # Debian release that should be installed.
-# Supported values: bookworm, trixie, sid
+# Supported values: bookworm, trixie, forky, sid
 # Default: 'trixie'
 # RELEASE='trixie'
 
