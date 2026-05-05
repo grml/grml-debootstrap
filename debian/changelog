@@ -1,3 +1,13 @@
+grml-debootstrap (0.128) unstable; urgency=medium
+
+  * [db0fdeb] Increase size of release selection dialog
+  * [e081448] Add forky as a selectable release
+  * [ee6d205] tests: pass correct serial device to kernel
+  * [c6b22ad] tests: print qemu.log if qemu went AWOL on test end
+  * [7d5be68] tests: avoid crashing QEMU on ubuntu-24.04-arm
+
+ -- Chris Hofstaedtler <ch@grml.org>  Tue, 05 May 2026 18:17:48 +0200
+
 grml-debootstrap (0.127) unstable; urgency=medium
 
   * CI changes only.
