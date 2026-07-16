@@ -229,20 +229,6 @@ backportrepos() {
 }
 # }}}
 
-# set up kernel-img.conf {{{
-# shellcheck disable=SC2329
-kernelimg_conf() {
-  if ! [ -r /etc/kernel-img.conf ] ; then
-     echo "Setting up /etc/kernel-img.conf"
-     cat > /etc/kernel-img.conf << EOF
-# Kernel Image management overrides
-# See kernel-img.conf(5) for details
-do_symlinks = Yes
-EOF
-  fi
-}
-# }}}
-
 # make sure services do not start up {{{
 # shellcheck disable=SC2329
 install_policy_rcd() {
@@ -922,7 +908,7 @@ trap signal_handler HUP INT QUIT TERM
  # always execute install_policy_rcd
  install_policy_rcd
 
- for i in markauto chrootmirror grmlrepos backportrepos kernelimg_conf \
+ for i in markauto chrootmirror grmlrepos backportrepos \
      kernel packages extrapackages reconfigure hosts \
      default_locales timezone fstab install_fs_tools hostname \
      initrd grub_install passwords \
