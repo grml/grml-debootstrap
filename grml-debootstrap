@@ -51,6 +51,8 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
 [ -n "$FS_IDENTIFIER" ] || FS_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
+[ -n "$GPT_IDENTIFIER_PREFIX" ] || GPT_IDENTIFIER_PREFIX='b3170792-c1b6-4b84-b6ac'
+[ -n "$MBR_IDENTIFIER" ] || MBR_IDENTIFIER='0x41414141'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://deb.debian.org/debian'
 [ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
@@ -1443,6 +1445,39 @@ mount_target() {
 }
 # }}}
 
+# adjust disk and partition IDs to be deterministic {{{
+make_disk_ids_deterministic() {
+  einfo "Making disk IDs deterministic"
+  if [ -n "$VMEFI" ]; then
+    local part_number_list part_number gpt_id
+
+    # All of the partition numbers will probably be contiguous, but in theory
+    # there could be holes, so we get the list of partition numbers as
+    # reported by sfdisk instead of simply counting numbers.
+    #
+    # Partition ID lines contain a ' : ' near the beginning of the line. The
+    # space-separated word immediately before this substring has a decimal
+    # partition ID at the end of it.
+
+    readarray -t part_number_list < <(sfdisk -d -- "${TARGET}" \
+      | grep --only-matching '[^ ]\+ : ' | sed -n 's/.*\([0-9]\+\).*/\1/p')
+    sfdisk --disk-id "${TARGET}" "${GPT_IDENTIFIER_PREFIX}-000000000000"
+
+    for part_number in "${part_number_list[@]}"; do
+      printf -v gpt_id "%s-%012d" "${GPT_IDENTIFIER_PREFIX}" "${part_number}"
+      sfdisk --part-uuid "${TARGET}" "${part_number}" "${gpt_id}"
+    done
+
+    # Parted seems to use an MBR disk identifier of 0x00000000 for the
+    # protective MBR, but just in case, change it to match $MBR_IDENTIFIER
+    # anyway.
+    sfdisk --label-nested dos --disk-id "${TARGET}" "${MBR_IDENTIFIER}"
+  else
+    sfdisk --disk-id "${TARGET}" "${MBR_IDENTIFIER}"
+  fi
+}
+# }}}
+
 # prepare VM image for usage with debootstrap {{{
 prepare_image() {
   if [ -z "$VIRTUAL" ] && [ -z "$RPI" ]; then
@@ -1517,15 +1552,12 @@ prepare_image() {
     parted -s "${TARGET}" 'mkpart primary ext4 508MiB 100%'
   else
     parted -s "${TARGET}" 'mklabel msdos'
-    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-      einfo "Adjusting disk signature to a fixed (non-random) value"
-      MBRTMPFILE=$(mktemp)
-      dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-      echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
-      dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-    fi
     parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
     parted -s "${TARGET}" 'set 1 boot on'
+  fi
+
+  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+    make_disk_ids_deterministic
   fi
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3' - will be multi-line for EFI VMs

@@ -223,6 +223,18 @@
 # Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
 # FS_IDENTIFIER="$(uuidgen)"
 
+# Disk identifier for MBR partition tables when using
+# FIXED_DISK_IDENTIFIERS='yes'. Note that this is used even if a GPT partition
+# table is in use, as it is used as the ID for the GPT's protective MBR.
+# Default: '0x41414141'
+# MBR_IDENTIFIER="0x12345678"
+
+# The first three portions of the GUID identifier for individual partitions
+# when using FIXED_DISK_IDENTIFIERS='yes'. The final portion of the identifier
+# is derived from the partition number for each partition.
+# Default: 'b3170792-c1b6-4b84-b6ac'
+# GPT_IDENTIFIER_PREFIX="12345678-9012-3456-7890"
+
 # Delete grml-debootstrap configuration files from installed system.
 # Useful for reproducible builds or if you don't want to leak information.
 # Default: 'no'
