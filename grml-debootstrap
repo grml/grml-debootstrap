@@ -791,10 +791,8 @@ Do you want to continue installing Debian using this frontend?" 0 0 || bailout 0
 # ask for target {{{
 prompt_for_target()
 {
-  AVAILABLE_PARTITIONS=$(LC_ALL=C fdisk -l 2>/dev/null | \
-               sed 's/*//' | \
-               grep -v 'Extended$' | \
-               gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}'; ls /dev/md[0-9]* 2>/dev/null || true);
+  AVAILABLE_PARTITIONS=$(lsblk -pPno name,type | \
+    awk -F '"' '($4=="part" || $4~/raid/) {print $2}' | sort -u);
 
   if [ -z "$AVAILABLE_PARTITIONS" ] ; then
      dialog --title "$PN" --trim \
@@ -967,10 +965,8 @@ TARGET=$(dialog --stdout --title "$PN" --default-item /dev/md0 \
 Notice: activated devices will not be listed for security reasons. Anyway, please make sure the selected device is not in use already!" 0 0 0 \
 $MD_LIST) || bailout 20
 
-AVAILABLE_PARTITIONS=$(LC_ALL=C fdisk -l 2>/dev/null | \
-             sed 's/*//' | \
-             grep -v 'Extended$' | \
-             gawk -v num=0 -v ORS=' ' '/^\/dev\// {print $1}')
+AVAILABLE_PARTITIONS=$(lsblk -pPno name,type | \
+  awk -F '"' '$4=="part" {print $2}' | sort -u)
 [ -n "$AVAILABLE_PARTITIONS" ] || echo "Fatal error: no partitions available?"
 PARTITION_LIST=$(for i in $AVAILABLE_PARTITIONS ; do
                      echo "$i $(blkid -s TYPE -o value "$i" 2>/dev/null || echo '[no_filesystem_yet]') off"
