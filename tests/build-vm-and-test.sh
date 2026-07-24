@@ -4,6 +4,7 @@
 # Install an already built grml-debootstrap.deb in docker and use it to
 # build a test VM image. Then run this VM image in qemu and check if it
 # boots.
+GOSS_VER="0.4.9"
 
 set -eu -o pipefail
 
@@ -42,7 +43,10 @@ if [ "$1" == "setup" ]; then
   fi
   # vncsnapshot might not be available, though we don't want to abort execution then
   sudo apt-get -qq -y install vncsnapshot || true
-  [ -x ./tests/goss ] || curl -fsSL https://goss.rocks/install | GOSS_DST="$(pwd)/tests" sh
+  if ! [ -e ./tests/goss ] ; then
+    curl -fsSL --output "tests/goss" "https://github.com/goss-org/goss/releases/download/v${GOSS_VER}/goss-linux-${DPKG_ARCHITECTURE}"
+    chmod a+rx tests/goss
+  fi
   # TODO: docker.io
   exit 0
 fi
