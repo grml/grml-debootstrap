@@ -50,9 +50,9 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
 [ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
-[ -n "$FS_IDENTIFIER" ] || FS_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
-[ -n "$GPT_IDENTIFIER_PREFIX" ] || GPT_IDENTIFIER_PREFIX='b3170792-c1b6-4b84-b6ac'
-[ -n "$MBR_IDENTIFIER" ] || MBR_IDENTIFIER='0x41414141'
+[ -n "$FS_IDENTIFIER" ] || FS_IDENTIFIER='00000000-0000-0000-0000-000000000000'
+[ -n "$GPT_IDENTIFIER_PREFIX" ] || GPT_IDENTIFIER_PREFIX='00000000-0000-0000-0000'
+[ -n "$MBR_IDENTIFIER" ] || MBR_IDENTIFIER='0x00000000'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://deb.debian.org/debian'
 [ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
@@ -375,6 +375,94 @@ stage() {
      ewarn "  To reexecute it clean up the according directory inside $STAGES"
      return 1
   fi
+}
+
+# generates a single random byte, mostly to work around the fact that $RANDOM
+# returns 15 bits of output rather than 16
+get_random_hex_byte() {
+  if [ -z "${1:-}" ]; then
+    eerror 'No target var name provided to get_random_hex_byte!'
+    bailout 1
+  fi
+  printf -v "${1:-}" '%02x' "$(( RANDOM >> 7 ))"
+}
+
+mbr_id_from_seed() {
+  local seed target_var_name mbr_id_str rand_byte idx_a
+
+  seed="${1:-}"
+  target_var_name="${2:-}"
+
+  if [ -z "${seed}" ] || ! [[ "${seed}" =~ ^[0-9]+$ ]]; then
+    eerror 'No seed provided to mbr_id_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${target_var_name}" ]; then
+    eerror 'No target var name provided to mbr_id_from_seed!'
+    bailout 1
+  fi
+
+  RANDOM="${seed}"
+  mbr_id_str='0x'
+
+  for idx_a in {1..4}; do
+    get_random_hex_byte rand_byte
+    mbr_id_str+="${rand_byte}"
+  done
+
+  printf -v "${target_var_name}" '%s' "${mbr_id_str}"
+}
+
+# given a seed number and component count, creates a UUID or UUID prefix
+uuid_from_seed() {
+  local seed component_count target_var_name uuid_str rand_byte idx_a idx_b
+
+  seed="${1:-}"
+  component_count="${2:-}"
+  target_var_name="${3:-}"
+
+  if [ -z "${seed}" ] || ! [[ "${seed}" =~ ^[0-9]+$ ]]; then
+    eerror 'No seed provided to uuid_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${component_count}" ] \
+    || ! [[ "${component_count}" =~ ^[0-9]+$ ]] \
+    || [ "${component_count}" -gt 5 ] \
+    || [ "${component_count}" -lt 1 ]; then
+    eerror 'No (or invalid) component count provided to uuid_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${target_var_name}" ]; then
+    eerror 'No target var name provided to uuid_from_seed!'
+    bailout 1
+  fi
+
+  RANDOM="${seed}"
+  uuid_str=''
+
+  for idx_a in {1..4}; do
+    get_random_hex_byte rand_byte
+    uuid_str+="${rand_byte}"
+  done
+
+  for (( idx_a = 1; idx_a < component_count; idx_a++ )); do
+    uuid_str+='-'
+    for idx_b in {1..2}; do
+      get_random_hex_byte rand_byte
+      uuid_str+="${rand_byte}"
+    done
+    [ "${idx_a}" -ge 3 ] && break;
+  done
+
+  if [ "${component_count}" -ge 5 ]; then
+    uuid_str+='-'
+    for idx_a in {1..6}; do
+      get_random_hex_byte rand_byte
+      uuid_str+="${rand_byte}"
+    done
+  fi
+
+  printf -v "${target_var_name}" '%s' "${uuid_str}"
 }
 # }}}
 
@@ -739,6 +827,22 @@ fi
   einfo "Report bugs via https://github.com/grml/grml-debootstrap/ or https://grml.org/bugs/"
   exit 0
 }
+
+if [ "${FIXED_DISK_IDENTIFIERS}" = 'yes' ]; then
+  if [ -z "${SOURCE_DATE_EPOCH}" ] \
+    || ! [[ "${SOURCE_DATE_EPOCH}" =~ ^[0-9]+$ ]]; then
+    SOURCE_DATE_EPOCH="$(date +%s)"
+    ewarn "FIXED_DISK_IDENTIFIERS is set to 'yes', but the SOURCE_DATE_EPOCH setting is not set. Defaulting to the current time (${SOURCE_DATE_EPOCH})."
+  fi
+
+  mbr_id_from_seed "${SOURCE_DATE_EPOCH}" MBR_IDENTIFIER
+  uuid_from_seed "${SOURCE_DATE_EPOCH}" 5 FS_IDENTIFIER
+  # The GPT partition identifer shouldn't be the similar to the FS identifier.
+  # To avoid confusion if multiple builds are kicked off in quick succession,
+  # it shouldn't be based on SOURCE_DATE_EPOCH + 1 either.
+  uuid_from_seed "$(( SOURCE_DATE_EPOCH ^ 0x0fffffffffffffff ))" 4 \
+    GPT_IDENTIFIER_PREFIX
+fi
 # }}}
 
 # check for root permissions {{{
