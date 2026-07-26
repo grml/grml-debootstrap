@@ -387,7 +387,7 @@ rpi_cmdline() {
 reconfigure() {
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
-         if dpkg --list "$package" >/dev/null 2>&1 | grep -q '^ii' ; then
+         if dpkg --list "$package" 2>/dev/null | grep -q '^ii' ; then
            DEBIAN_FRONTEND=$DEBIAN_FRONTEND dpkg-reconfigure "$package" || \
            echo "Warning: $package does not exist, can not reconfigure it."
          fi
