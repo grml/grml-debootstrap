@@ -405,14 +405,9 @@ passwords()
     return 0
   fi
 
-  CHPASSWD_OPTION=
-  if chpasswd --help 2>&1 | grep -q -- '-m,' ; then
-     CHPASSWD_OPTION='-m'
-  fi
-
   if [ -n "$ROOTPASSWORD" ] ; then
      # shellcheck disable=SC2086
-     echo root:"$ROOTPASSWORD" | chpasswd $CHPASSWD_OPTION
+     echo root:"$ROOTPASSWORD" | chpasswd
      export ROOTPASSWORD=''
   else
     a='1'
@@ -435,7 +430,7 @@ passwords()
          b='2'
        else
          # shellcheck disable=SC2086
-         echo root:"$a" | chpasswd $CHPASSWD_OPTION
+         echo root:"$a" | chpasswd
          unset a
          unset b
        fi
