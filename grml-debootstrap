@@ -1251,7 +1251,7 @@ else # if not running automatic installation display configuration and prompt fo
      echo
      einfon "Is this ok for you? [y/N] "
      read -r a
-     if ! [ "$a" = 'y' ] || [ "$a" = 'Y' ] ; then
+     if [ "$a" != 'y' ] && [ "$a" != 'Y' ] ; then
         eerror "Exiting as requested."
         bailout 1
      fi
