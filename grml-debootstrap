@@ -634,7 +634,7 @@ while :; do
   # == Other options
   --verbose|-v)        # Increase verbosity
     if [ "$_opt_verbose" ]; then
-      _opt_verbose=$( _opt_verbose + 1 )
+      _opt_verbose=$(( _opt_verbose + 1 ))
     else
       _opt_verbose=1
     fi
