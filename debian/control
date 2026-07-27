@@ -36,6 +36,8 @@ Recommends:
  kpartx,
  parted,
  qemu-utils,
+ mtools,
+ python3,
 Description: installer for pure Debian
  Installation program for Debian, for bare-metal and virtual
  machines.
