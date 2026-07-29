@@ -1809,6 +1809,7 @@ preparechroot() {
   [ -n "$CHROOT_SCRIPTS" ]            && echo "CHROOT_SCRIPTS='${CHROOT_SCRIPTS//\'/\'\\\'\'}'"                     >> "$CHROOT_VARIABLES"
   [ -n "$COMPONENTS" ]                && echo "COMPONENTS='${COMPONENTS//\'/\'\\\'\'}'"                             >> "$CHROOT_VARIABLES"
   [ -n "$CONFFILES" ]                 && echo "CONFFILES='${CONFFILES//\'/\'\\\'\'}'"                               >> "$CHROOT_VARIABLES"
+  [ -n "$DPKG_OPTIONS" ]              && echo "DPKG_OPTIONS='${DPKG_OPTIONS//\'/\'\\\'\'}'"                         >> "$CHROOT_VARIABLES"
   [ -n "$DEBCONF" ]                   && echo "DEBCONF='${DEBCONF//\'/\'\\\'\'}'"                                   >> "$CHROOT_VARIABLES"
   [ -n "$DEBIAN_FRONTEND" ]           && echo "DEBIAN_FRONTEND='${DEBIAN_FRONTEND//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
   [ -n "$DEFAULT_LOCALES" ]           && echo "DEFAULT_LOCALES='${DEFAULT_LOCALES//\'/\'\\\'\'}'"                   >> "$CHROOT_VARIABLES"
