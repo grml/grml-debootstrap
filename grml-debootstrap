@@ -50,7 +50,9 @@ MNTPOINT="/mnt/debootstrap.$$"
 [ -n "$DEBIAN_FRONTEND" ] || DEBIAN_FRONTEND='noninteractive'
 [ -n "$DEFAULT_LANGUAGE" ] || DEFAULT_LANGUAGE='en_US:en'
 [ -n "$DEFAULT_LOCALES" ] || DEFAULT_LOCALES='en_US.UTF-8'
-[ -n "$DISK_IDENTIFIER" ] || DISK_IDENTIFIER='26ada0c0-1165-4098-884d-aafd2220c2c6'
+[ -n "$FS_IDENTIFIER" ] || FS_IDENTIFIER='00000000-0000-0000-0000-000000000000'
+[ -n "$GPT_IDENTIFIER_PREFIX" ] || GPT_IDENTIFIER_PREFIX='00000000-0000-0000-0000'
+[ -n "$MBR_IDENTIFIER" ] || MBR_IDENTIFIER='0x00000000'
 [ -n "$EXTRAPACKAGES" ] || EXTRAPACKAGES='yes'
 [ -n "$FALLBACK_MIRROR" ] || FALLBACK_MIRROR='http://deb.debian.org/debian'
 [ -n "$FIXED_DISK_IDENTIFIERS" ] || FIXED_DISK_IDENTIFIERS="no"
@@ -373,6 +375,94 @@ stage() {
      ewarn "  To reexecute it clean up the according directory inside $STAGES"
      return 1
   fi
+}
+
+# generates a single random byte, mostly to work around the fact that $RANDOM
+# returns 15 bits of output rather than 16
+get_random_hex_byte() {
+  if [ -z "${1:-}" ]; then
+    eerror 'No target var name provided to get_random_hex_byte!'
+    bailout 1
+  fi
+  printf -v "${1:-}" '%02x' "$(( RANDOM >> 7 ))"
+}
+
+mbr_id_from_seed() {
+  local seed target_var_name mbr_id_str rand_byte idx_a
+
+  seed="${1:-}"
+  target_var_name="${2:-}"
+
+  if [ -z "${seed}" ] || ! [[ "${seed}" =~ ^[0-9]+$ ]]; then
+    eerror 'No seed provided to mbr_id_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${target_var_name}" ]; then
+    eerror 'No target var name provided to mbr_id_from_seed!'
+    bailout 1
+  fi
+
+  RANDOM="${seed}"
+  mbr_id_str='0x'
+
+  for idx_a in {1..4}; do
+    get_random_hex_byte rand_byte
+    mbr_id_str+="${rand_byte}"
+  done
+
+  printf -v "${target_var_name}" '%s' "${mbr_id_str}"
+}
+
+# given a seed number and component count, creates a UUID or UUID prefix
+uuid_from_seed() {
+  local seed component_count target_var_name uuid_str rand_byte idx_a idx_b
+
+  seed="${1:-}"
+  component_count="${2:-}"
+  target_var_name="${3:-}"
+
+  if [ -z "${seed}" ] || ! [[ "${seed}" =~ ^[0-9]+$ ]]; then
+    eerror 'No seed provided to uuid_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${component_count}" ] \
+    || ! [[ "${component_count}" =~ ^[0-9]+$ ]] \
+    || [ "${component_count}" -gt 5 ] \
+    || [ "${component_count}" -lt 1 ]; then
+    eerror 'No (or invalid) component count provided to uuid_from_seed!'
+    bailout 1
+  fi
+  if [ -z "${target_var_name}" ]; then
+    eerror 'No target var name provided to uuid_from_seed!'
+    bailout 1
+  fi
+
+  RANDOM="${seed}"
+  uuid_str=''
+
+  for idx_a in {1..4}; do
+    get_random_hex_byte rand_byte
+    uuid_str+="${rand_byte}"
+  done
+
+  for (( idx_a = 1; idx_a < component_count; idx_a++ )); do
+    uuid_str+='-'
+    for idx_b in {1..2}; do
+      get_random_hex_byte rand_byte
+      uuid_str+="${rand_byte}"
+    done
+    [ "${idx_a}" -ge 3 ] && break;
+  done
+
+  if [ "${component_count}" -ge 5 ]; then
+    uuid_str+='-'
+    for idx_a in {1..6}; do
+      get_random_hex_byte rand_byte
+      uuid_str+="${rand_byte}"
+    done
+  fi
+
+  printf -v "${target_var_name}" '%s' "${uuid_str}"
 }
 # }}}
 
@@ -737,6 +827,22 @@ fi
   einfo "Report bugs via https://github.com/grml/grml-debootstrap/ or https://grml.org/bugs/"
   exit 0
 }
+
+if [ "${FIXED_DISK_IDENTIFIERS}" = 'yes' ]; then
+  if [ -z "${SOURCE_DATE_EPOCH}" ] \
+    || ! [[ "${SOURCE_DATE_EPOCH}" =~ ^[0-9]+$ ]]; then
+    SOURCE_DATE_EPOCH="$(date +%s)"
+    ewarn "FIXED_DISK_IDENTIFIERS is set to 'yes', but the SOURCE_DATE_EPOCH setting is not set. Defaulting to the current time (${SOURCE_DATE_EPOCH})."
+  fi
+
+  mbr_id_from_seed "${SOURCE_DATE_EPOCH}" MBR_IDENTIFIER
+  uuid_from_seed "${SOURCE_DATE_EPOCH}" 5 FS_IDENTIFIER
+  # The GPT partition identifer shouldn't be the similar to the FS identifier.
+  # To avoid confusion if multiple builds are kicked off in quick succession,
+  # it shouldn't be based on SOURCE_DATE_EPOCH + 1 either.
+  uuid_from_seed "$(( SOURCE_DATE_EPOCH ^ 0x0fffffffffffffff ))" 4 \
+    GPT_IDENTIFIER_PREFIX
+fi
 # }}}
 
 # check for root permissions {{{
@@ -1311,8 +1417,8 @@ mkfs() {
         eerror "Not changing disk uuid for $TARGET because $MKFS doesn't seem to match for ext{2,3,4} file system"
         bailout 1
       else
-        einfo "Changing disk uuid for $TARGET to fixed (non-random) value $DISK_IDENTIFIER using tune2fs"
-        tune2fs "$TARGET" -U "$DISK_IDENTIFIER" </dev/null
+        einfo "Changing disk uuid for $TARGET to fixed (non-random) value $FS_IDENTIFIER using tune2fs"
+        tune2fs "$TARGET" -U "$FS_IDENTIFIER" </dev/null
       fi
     fi
 
@@ -1443,6 +1549,39 @@ mount_target() {
 }
 # }}}
 
+# adjust disk and partition IDs to be deterministic {{{
+make_disk_ids_deterministic() {
+  einfo "Making disk IDs deterministic"
+  if [ -n "$VMEFI" ]; then
+    local part_number_list part_number gpt_id
+
+    # All of the partition numbers will probably be contiguous, but in theory
+    # there could be holes, so we get the list of partition numbers as
+    # reported by sfdisk instead of simply counting numbers.
+    #
+    # Partition ID lines contain a ' : ' near the beginning of the line. The
+    # space-separated word immediately before this substring has a decimal
+    # partition ID at the end of it.
+
+    readarray -t part_number_list < <(sfdisk -d -- "${TARGET}" \
+      | grep --only-matching '[^ ]\+ : ' | sed -n 's/.*\([0-9]\+\).*/\1/p')
+    sfdisk --disk-id "${TARGET}" "${GPT_IDENTIFIER_PREFIX}-000000000000"
+
+    for part_number in "${part_number_list[@]}"; do
+      printf -v gpt_id "%s-%012d" "${GPT_IDENTIFIER_PREFIX}" "${part_number}"
+      sfdisk --part-uuid "${TARGET}" "${part_number}" "${gpt_id}"
+    done
+
+    # Parted seems to use an MBR disk identifier of 0x00000000 for the
+    # protective MBR, but just in case, change it to match $MBR_IDENTIFIER
+    # anyway.
+    sfdisk --label-nested dos --disk-id "${TARGET}" "${MBR_IDENTIFIER}"
+  else
+    sfdisk --disk-id "${TARGET}" "${MBR_IDENTIFIER}"
+  fi
+}
+# }}}
+
 # prepare VM image for usage with debootstrap {{{
 prepare_image() {
   if [ -z "$VIRTUAL" ] && [ -z "$RPI" ]; then
@@ -1517,15 +1656,12 @@ prepare_image() {
     parted -s "${TARGET}" 'mkpart primary ext4 508MiB 100%'
   else
     parted -s "${TARGET}" 'mklabel msdos'
-    if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
-      einfo "Adjusting disk signature to a fixed (non-random) value"
-      MBRTMPFILE=$(mktemp)
-      dd if="${TARGET}" of="${MBRTMPFILE}" bs=512 count=1
-      echo -en "\\x41\\x41\\x41\\x41" | dd of="${MBRTMPFILE}" conv=notrunc seek=440 bs=1
-      dd if="${MBRTMPFILE}" of="${TARGET}" conv=notrunc
-    fi
     parted -s "${TARGET}" 'mkpart primary ext4 4MiB 100%'
     parted -s "${TARGET}" 'set 1 boot on'
+  fi
+
+  if [ "$FIXED_DISK_IDENTIFIERS" = "yes" ] ; then
+    make_disk_ids_deterministic
   fi
 
   DEVINFO=$(kpartx -asv "$TARGET") # e.g. 'add map loop0p1 (254:5): 0 20477 linear 7:0 3' - will be multi-line for EFI VMs
