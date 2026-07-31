@@ -26,7 +26,6 @@ Depends:
  dosfstools,
  e2fsprogs,
  fdisk,
- gawk,
  kmod,
  mmdebstrap,
  ${misc:Depends},
