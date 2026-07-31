@@ -1,3 +1,20 @@
+grml-debootstrap (0.129) unstable; urgency=medium
+
+  [ Chris Hofstaedtler ]
+  * [4b26ecc] kernel-img.conf: stop setting do_initrd
+  * [571c510] kernel-img.conf: stop creating it
+  * [df419a1] tests: use manual install method for goss
+
+  [ Christopher Bock ]
+  * [abc445d] use lsblk instead of fdisk to lookup partitions
+
+  [ Aaron Rainbolt ]
+  * [46fd4ff] Rename DISK_IDENTIFIER to FS_IDENTIFIER
+  * [6437a6b] Make FIXED_DISK_IDENTIFIERS="yes" work for GPT and Raspberry Pi images
+  * [1f40d9a] Derive fixed disk identifiers from SOURCE_DATE_EPOCH or the system time
+
+ -- Chris Hofstaedtler <ch@grml.org>  Fri, 31 Jul 2026 10:20:52 +0200
+
 grml-debootstrap (0.128) unstable; urgency=medium
 
   * [db0fdeb] Increase size of release selection dialog
