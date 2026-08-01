@@ -47,6 +47,18 @@
 # Usage example:
 # MIRROR='ftp://ftp.de.debian.org/debian'
 
+# Set mirror where security updates will be downloaded from.
+# Default: http://security.debian.org/debian-security
+# SECURITY_MIRROR='http://security.debian.org/debian-security'
+
+# Set Debian snapshot instance where initial packages will be downloaded from
+# when reproducible builds are enabled. The normal mirror and security mirror
+# will be derived from this during a reproducible build, but the originally
+# set mirror and security mirror will be set up so the image uses the desired
+# mirrors in actual operation.
+# Default: https://snapshot.debian.org/archive
+# SNAPSHOT_ARCHIVE='https://snapshot.debian.org/archive'
+
 # If /etc/apt/sources.list.d/debian.sources should NOT be built on the fly,
 # this option allows providing a separate apt sources.list file via
 # /etc/debootstrap/etc/apt/sources.list, or providing a deb822-format sources
@@ -93,6 +105,15 @@
 # Please change this password after installation for security reasons.
 # Default: no default.
 # ROOTPASSWORD=''
+
+# Root password salt for reproducible builds. This is a base64-encoded value,
+# where the characters used are '.', '/', 'A-Z', 'a-z', and '0-9'.
+# If unset, and SOURCE_DATE_EPOCH is set, this is pseudorandomly generated
+# from a seed derived from SOURCE_DATE_EPOCH. Anyone who knows approximately
+# when the image was built can build a rainbow table to attack the root
+# password without needing the password hashes first. If this risk is
+# unacceptable, generate a salt securely and place it here.
+# ROOTPASSWORD_SALT=''
 
 # Pass extra options to mmdebstrap.
 # Default: no default.
@@ -213,27 +234,31 @@
 # Default: '/etc/debootstrap/install_notes' (empty file).
 # INSTALL_NOTES='/etc/debootstrap/install_notes'
 
-# Use fixed disk identifiers for Virtual Machine builds.
-# Useful for reproducible builds.
-# Default: 'no'
-# FIXED_DISK_IDENTIFIERS='yes'
+# The date at which the installed system should be "frozen". Set this to
+# enable reproducible builds.
+# Default: unset
+# SOURCE_DATE_EPOCH=''
 
-# Filesystem identifier when using FIXED_DISK_IDENTIFIERS='yes'.
+# Filesystem identifier when SOURCE_DATE_EPOCH is set.
 # Use uuid-runtime's uuidgen tool to generate random UUIDs on demand.
-# Default: '26ada0c0-1165-4098-884d-aafd2220c2c6'
+# Default: Pseudorandomly generated from a seed derived from SOURCE_DATE_EPOCH
 # FS_IDENTIFIER="$(uuidgen)"
 
-# Disk identifier for MBR partition tables when using
-# FIXED_DISK_IDENTIFIERS='yes'. Note that this is used even if a GPT partition
-# table is in use, as it is used as the ID for the GPT's protective MBR.
-# Default: '0x41414141'
-# MBR_IDENTIFIER="0x12345678"
+# Filesystem hash seed when SOURCE_DATE_EPOCH is set.
+# Default: Pseudorandomly generated from a seed derived from SOURCE_DATE_EPOCH
+# FS_HASH_SEED="12345678-9012-3456-7890-123456789012"
 
-# The first three portions of the GUID identifier for individual partitions
-# when using FIXED_DISK_IDENTIFIERS='yes'. The final portion of the identifier
-# is derived from the partition number for each partition.
-# Default: 'b3170792-c1b6-4b84-b6ac'
+# The first four portions of the UUID identifier for individual partitions
+# when SOURCE_DATE_EPOCH is set. The final portion of the identifier is
+# derived from the partition number for each partition.
+# Default: Pseudorandomly generated from a seed derived from SOURCE_DATE_EPOCH
 # GPT_IDENTIFIER_PREFIX="12345678-9012-3456-7890"
+
+# Disk identifier for MBR partition tables when SOURCE_DATE_EPOCH is set.
+# Note that this is used even if a GPT partition table is in use, as it is
+# used as the ID for the GPT's protective MBR.
+# Default: Pseudorandomly generated from a seed derived from SOURCE_DATE_EPOCH
+# MBR_IDENTIFIER="0x12345678"
 
 # Delete grml-debootstrap configuration files from installed system.
 # Useful for reproducible builds or if you don't want to leak information.
