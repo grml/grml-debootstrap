@@ -1,3 +1,16 @@
+grml-debootstrap (0.130) unstable; urgency=medium
+
+  [ Christopher Bock ]
+  * [ba1c12b] debian/control: drop gawk dependency
+
+  [ Michael Prokop ]
+  * [7de57d5] tests: bump goss version to 0.4.10
+
+  [ Chris Hofstaedtler ]
+  * [d7280f0] GHA: add workflows for merge queue
+
+ -- Michael Prokop <mika@grml.org>  Wed, 02 Sep 2026 18:46:05 +0200
+
 grml-debootstrap (0.129) unstable; urgency=medium
 
   [ Chris Hofstaedtler ]
