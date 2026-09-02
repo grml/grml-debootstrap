@@ -1,6 +1,7 @@
 name: package-build
 on:
   pull_request:
+  merge_group:
   push:
     tags:
       - 'v*'
