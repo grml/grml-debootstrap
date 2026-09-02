@@ -4,7 +4,7 @@
 # Install an already built grml-debootstrap.deb in docker and use it to
 # build a test VM image. Then run this VM image in qemu and check if it
 # boots.
-GOSS_VER="0.4.9"
+GOSS_VER="0.4.10"
 
 set -eu -o pipefail
 
@@ -38,13 +38,15 @@ if [ "$1" == "setup" ]; then
   DPKG_ARCHITECTURE=$(dpkg --print-architecture)
   if [ "${DPKG_ARCHITECTURE}" = "amd64" ]; then
     sudo apt-get -qq -y install qemu-system qemu-system-gui ovmf seabios
+    goss_arch="x86_64"
   elif [ "${DPKG_ARCHITECTURE}" = "arm64" ]; then
     sudo apt-get -qq -y install qemu-system qemu-system-gui qemu-efi-aarch64
+    goss_arch="arm64"
   fi
   # vncsnapshot might not be available, though we don't want to abort execution then
   sudo apt-get -qq -y install vncsnapshot || true
   if ! [ -e ./tests/goss ] ; then
-    curl -fsSL --output "tests/goss" "https://github.com/goss-org/goss/releases/download/v${GOSS_VER}/goss-linux-${DPKG_ARCHITECTURE}"
+    curl -fsSL "https://github.com/goss-org/goss/releases/download/v${GOSS_VER}/goss_${GOSS_VER}_linux_${goss_arch}.tar.gz" | tar xz -C tests goss
     chmod a+rx tests/goss
   fi
   # TODO: docker.io
