@@ -33,6 +33,9 @@ bash -n /etc/debootstrap/variables
 # shellcheck source=tests/shellcheck-stub-debootstrap-variables
 . /etc/debootstrap/variables || exit 1
 
+# Make sure all tools see SOURCE_DATE_EPOCH if it's available
+[ -v SOURCE_DATE_EPOCH ] && export SOURCE_DATE_EPOCH
+
 [ -r /proc/1 ] || mount -t proc none /proc
 [ -r /sys/kernel ] || mount -t sysfs none /sys
 
@@ -95,7 +98,7 @@ markauto() {
 
 # write a deb822 sources stanza to a file {{{
 writesource() {
-  local file types uris suites components signed_by
+  local file types uris suites components signed_by check_valid_until
 
   file="${1:-}"
   types="${2:-}"
@@ -103,6 +106,7 @@ writesource() {
   suites="${4:-}"
   components="${5:-}"
   signed_by="${6:-}"
+  check_valid_until="${7:-}"
 
   mkdir -p "$(dirname "${file}")"
 
@@ -118,12 +122,19 @@ writesource() {
   if [ -n "$signed_by" ]; then
     echo "Signed-By: $signed_by" >> "$file"
   fi
+  if [ -n "$check_valid_until" ]; then
+    echo "Check-Valid-Until: $check_valid_until" >> "$file"
+  fi
 }
 # }}}
 
 # define chroot mirror {{{
 # shellcheck disable=SC2329
 chrootmirror() {
+  local omit_check_valid_until check_valid_until
+  omit_check_valid_until="${1:-}"
+  check_valid_until=''
+
   if [ "$KEEP_SRC_LIST" = "yes" ] ; then
     echo "KEEP_SRC_LIST has been enabled, skipping chrootmirror stage."
     return
@@ -134,26 +145,34 @@ chrootmirror() {
   fi
   echo "Using repository components $COMPONENTS"
 
+  [ -v SOURCE_DATE_EPOCH ] && [ -z "${omit_check_valid_until}" ] \
+    && check_valid_until='no'
+
   if [ -n "$MIRROR" ] ; then
     echo "Deleting obsolete sources.list"
     rm -f /etc/apt/sources.list
 
     if grep -q 'file:' <<< "$MIRROR" ; then
       echo "Adjusting sources.list.d/local.sources for mirror (${MIRROR})."
-      writesource '/etc/apt/sources.list.d/local.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      writesource '/etc/apt/sources.list.d/local.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg' "${check_valid_until}"
     else
       echo "Adjusting sources.list.d/debian.sources for mirror (${MIRROR})."
-      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg' "${check_valid_until}"
     fi
   fi
 
-  # add security.debian.org:
+  # add security mirror:
   case "$RELEASE" in
     unstable|sid) ;;  # no security pool available
     *)
       # https://lists.debian.org/debian-devel-announce/2019/07/msg00004.html
-      echo "Adding security.debian.org/debian-security to sources.list.d/debian.sources."
-      writesource '/etc/apt/sources.list.d/debian.sources' 'deb' 'http://security.debian.org/debian-security' "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+      if grep -q 'file:' <<< "$SECURITY_MIRROR" ; then
+        echo "Adding security mirror to sources.list.d/local.sources."
+        writesource '/etc/apt/sources.list.d/local.sources' 'deb' "$SECURITY_MIRROR" "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg' "${check_valid_until}"
+      else
+        echo "Adding security mirror to sources.list.d/debian.sources."
+        writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$SECURITY_MIRROR" "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg' "${check_valid_until}"
+      fi
       ;;
   esac
 }
@@ -169,9 +188,16 @@ remove_chrootmirror() {
 
   if [ -n "$MIRROR" ] && echo "$MIRROR" | grep -q 'file:' ; then
     echo "Removing local.sources."
-    rm /etc/apt/sources.list.d/local.sources
+    rm -f /etc/apt/sources.list.d/local.sources
     echo "Adding fallback mirror entry (${FALLBACK_MIRROR}) to sources.list.d/debian.sources instead."
     writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$FALLBACK_MIRROR" "$RELEASE" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
+  fi
+
+  if [ -n "$SECURITY_MIRROR" ] && echo "$SECURITY_MIRROR" | grep -q 'file:' ; then
+    echo "Removing local.sources if necessary."
+    rm -rf /etc/apt/sources.list.d/local.sources
+    echo "Adding fallback security mirror entry (${FALLBACK_SECURITY_MIRROR}) to sources.list.d/debian.sources instead."
+    writesource '/etc/apt/sources.list.d/debian.sources' 'deb' "$FALLBACK_SECURITY_MIRROR" "${RELEASE}-security" "$COMPONENTS" '/usr/share/keyrings/debian-archive-keyring.gpg'
   fi
 }
 # }}}
@@ -223,8 +249,13 @@ EOF
 # shellcheck disable=SC2329
 backportrepos() {
   if [ -n "$BACKPORTREPOS" ] ; then
+    local omit_check_valid_until check_valid_until
+    omit_check_valid_until="${1:-}"
+    check_valid_until=''
+    [ -v SOURCE_DATE_EPOCH ] && [ -z "${omit_check_valid_until}" ] \
+      && check_valid_until='no'
     echo "# debian backports: ${RELEASE}-backports repository:" >> /etc/apt/sources.list.d/backports.sources
-    writesource '/etc/apt/sources.list.d/backports.sources' 'deb deb-src' "$MIRROR" "${RELEASE}-backports" 'main' '/usr/share/keyrings/debian-archive-keyring.gpg'
+    writesource '/etc/apt/sources.list.d/backports.sources' 'deb deb-src' "$MIRROR" "${RELEASE}-backports" 'main' '/usr/share/keyrings/debian-archive-keyring.gpg' "${check_valid_until}"
   fi
 }
 # }}}
@@ -387,7 +418,7 @@ rpi_cmdline() {
 reconfigure() {
   if [ -n "$RECONFIGURE" ] ; then
      for package in $RECONFIGURE ; do
-         if dpkg --list "$package" >/dev/null 2>&1 | grep -q '^ii' ; then
+         if dpkg --list "$package" 2>/dev/null | grep -q '^ii' ; then
            DEBIAN_FRONTEND=$DEBIAN_FRONTEND dpkg-reconfigure "$package" || \
            echo "Warning: $package does not exist, can not reconfigure it."
          fi
@@ -405,15 +436,23 @@ passwords()
     return 0
   fi
 
-  CHPASSWD_OPTION=
-  if chpasswd --help 2>&1 | grep -q -- '-m,' ; then
-     CHPASSWD_OPTION='-m'
-  fi
-
   if [ -n "$ROOTPASSWORD" ] ; then
-     # shellcheck disable=SC2086
-     echo root:"$ROOTPASSWORD" | chpasswd $CHPASSWD_OPTION
-     export ROOTPASSWORD=''
+    if [ -v SOURCE_DATE_EPOCH ]; then
+      local pass_hash
+      pass_hash="$(perl -e \
+        'print crypt($ARGV[0], "\$y\$j9T\$".$ARGV[1]."\$")' \
+        "$ROOTPASSWORD" "$ROOTPASSWORD_SALT")"
+      # Regex taken from the 'yescrypt' section of 'man 5 crypt'
+      if ! [[ "${pass_hash}" =~ \$y\$[./A-Za-z0-9]+\$[./A-Za-z0-9]{,86}\$[./A-Za-z0-9]{43} ]]; then
+        echo "Error: failed to generate a reproducible password hash."
+        exit 1
+      fi
+      echo "root:${pass_hash}" | chpasswd -e
+    else
+      # shellcheck disable=SC2086
+      echo root:"$ROOTPASSWORD" | chpasswd
+    fi
+    export ROOTPASSWORD=''
   else
     a='1'
     b='2'
@@ -435,7 +474,7 @@ passwords()
          b='2'
        else
          # shellcheck disable=SC2086
-         echo root:"$a" | chpasswd $CHPASSWD_OPTION
+         echo root:"$a" | chpasswd
          unset a
          unset b
        fi
@@ -494,8 +533,14 @@ timezone() {
 # shellcheck disable=SC2329
 createfstab(){
   echo "Setting up /etc/fstab"
+  local fstab_created_on
+  if [ -v SOURCE_DATE_EPOCH ]; then
+    fstab_created_on="$(LC_ALL=C date -u -d "@${SOURCE_DATE_EPOCH}")"
+  else
+    fstab_created_on="$(date)"
+  fi
   cat > /etc/fstab <<EOF
-# /etc/fstab - created by grml-debootstrap on $(date)
+# /etc/fstab - created by grml-debootstrap on ${fstab_created_on}
 # Accessible filesystems, by reference, are maintained under '/dev/disk/'.
 # See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
 #
@@ -716,19 +761,14 @@ is_grub_bios_compatible() {
     return 0
   # Look for a BIOS boot partition otherwise
   else
-    SEARCH_STR="$GRUB"
-    if [[ "$SEARCH_STR" =~ ^/dev/loop ]]; then
-      SEARCH_STR="${SEARCH_STR//\/dev\//}" # loopX
-      SEARCH_STR="/dev/mapper/${SEARCH_STR}" # /dev/mapper/loopX
-      # Note that /dev/mapper/loopX won't actually exist, but
-      # /dev/mapper/loopXpY will, so this works for the regex check in the
-      # while loop below.
+    # Scanning the output of lsblk is unreliable in some environments. partx
+    # seems to work better.
+    local partx_types
+    partx_types="$(partx --show --noheadings --output TYPE "$GRUB")" || true
+    if [[ "${partx_types}" \
+      =~ (^|$'\n')21686148-6449-6e6f-744e-656564454649($'\n'|$) ]]; then
+      return 0
     fi
-    while read -r line; do
-      if [[ "$line" =~ ^${SEARCH_STR}.*21686148-6449-6e6f-744e-656564454649$ ]]; then
-        return 0
-      fi
-    done < <(lsblk -pnlo NAME,PARTTYPE)
   fi
   return 1
 }
@@ -890,6 +930,68 @@ finalize() {
 }
 # }}}
 
+# reproducible-build finalization {{{
+reproducible_finalize() {
+  [ -v SOURCE_DATE_EPOCH ] || return 0
+  echo "Applying reproducible-build finalization."
+
+  # Regenerate apt sources with their final values.
+  if [ -n "${FINAL_MIRROR}" ]; then
+    MIRROR="${FINAL_MIRROR}"
+  fi
+  if [ -n "${FINAL_SECURITY_MIRROR}" ]; then
+    SECURITY_MIRROR="${FINAL_SECURITY_MIRROR}"
+  fi
+  rm -f '/etc/apt/sources.list.d/debian.sources'
+  rm -f '/etc/apt/sources.list.d/backports.sources'
+  chrootmirror 'omit-check-valid-until'
+  backportrepos 'omit-check-valid-until'
+  remove_chrootmirror
+
+  # stale apt repository information
+  find /var/lib/apt/lists -mindepth 1 -maxdepth 1 -type f -delete
+  find /var/lib/apt/lists/auxfiles -mindepth 1 -maxdepth 1 -type f -delete
+  find /var/lib/apt/lists/partial -mindepth 1 -maxdepth 1 -type f -delete
+
+  # SSH host keys
+  rm -f /etc/ssh/ssh_host_*
+
+  # Postfix aliases.db
+  # TODO: Simply deleting this file may cause problems for the system
+  # admnistrator later. Modifying it requires adding db-util to the image.
+  # Regenerating it with a fixed timestamp seems to be impossible (newaliases
+  # does not support it, and running newaliases under 'faketime -f' causes it
+  # to freeze indefinitely).
+  rm -f /etc/aliases.db
+
+  # machine-id
+  printf 'uninitialized\n' > /etc/machine-id
+  rm -f /var/lib/dbus/machine-id # copied from /etc/machine-id on boot
+
+  # logs
+  rm -f /var/log/alternatives.log /var/log/dpkg.log /var/log/apt/history.log \
+    /var/log/apt/term.log
+
+  # ldconfig auxiliary cache (this seems to be undocumented, ldconfig
+  # regenerates it)
+  rm -f /var/cache/ldconfig/aux-cache
+
+  # files that shouldn't have gotten stuck in /run but did anyway
+  local rm_run_obj
+  for rm_run_obj in /run/*; do
+    if [ -e "${rm_run_obj}" ] && [ "${rm_run_obj}" != '/run/udev' ]; then
+      rm -rf "${rm_run_obj}"
+    fi
+  done
+
+  # locale configuration, lines may be in a nondeterministic order
+  [ -f /etc/locale.conf ] && LC_ALL=C sort -o /etc/locale.conf /etc/locale.conf
+
+  # our own grml-debootstrap configuration
+  rm -f /etc/debootstrap/config
+}
+# }}}
+
 # signal handler {{{
 # shellcheck disable=SC2329
 signal_handler() {
@@ -913,7 +1015,7 @@ trap signal_handler HUP INT QUIT TERM
      default_locales timezone fstab install_fs_tools hostname \
      initrd grub_install passwords \
      custom_scripts upgrade_system rpi_cmdline remove_apt_cache services \
-     remove_chrootmirror; do
+     remove_chrootmirror reproducible_finalize; do
      if stage "$i" ; then
        "$i"
        stage "$i" 'done'
